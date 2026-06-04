@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /backend
+Disallow: /frontend
+Disallow: /*.json$
+Disallow: /node_modules/
+Disallow: /dist/
+
+Sitemap: https://fmlider.co.ao/sitemap.xml
+
+# Allow search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Crawl delay
+Crawl-delay: 1
