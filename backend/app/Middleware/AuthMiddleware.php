@@ -9,18 +9,18 @@ class AuthMiddleware
         $token = $this->getToken($request);
 
         if (!$token) {
-            header('Content-Type: application/json');
+            header('Content-Type: application/json; charset=utf-8');
             http_response_code(401);
-            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            echo json_encode(['success' => false, 'message' => 'Unauthorized'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
         $user = $this->verifyToken($token);
 
         if (!$user) {
-            header('Content-Type: application/json');
+            header('Content-Type: application/json; charset=utf-8');
             http_response_code(401);
-            echo json_encode(['success' => false, 'message' => 'Invalid or expired token']);
+            echo json_encode(['success' => false, 'message' => 'Invalid or expired token'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 

@@ -9,7 +9,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 import './assets/styles.css'
 import { useAuthStore } from './stores/authStore'
 
-axios.defaults.baseURL = import.meta.env.DEV ? '' : '/fmlider.co.ao'
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || ''
 axios.defaults.headers.common['Content-Type'] = 'application/json'
 axios.defaults.headers.common['Accept'] = 'application/json'
 

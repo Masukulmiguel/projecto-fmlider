@@ -2,41 +2,54 @@
   <div class="home">
     <!-- Hero Slider -->
     <section class="hero-slider">
-      <div class="hero-slide" v-for="(s, i) in slides" :key="i" :class="{ active: i === currentSlide }" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,58,138,0.75) 50%, rgba(15,23,42,0.85) 100%), url(/assets/img/${s.image})` }">
+      <div v-if="loadingBanners" class="hero-slide active" :style="defaultSlideStyle">
         <div class="container">
           <div class="hero-content">
-            <span class="hero-eyebrow" data-aos="fade-up">{{ s.eyebrow }}</span>
-            <h1 class="hero-title" data-aos="fade-up" data-aos-delay="100">{{ s.title }}</h1>
-            <p class="hero-subtitle" data-aos="fade-up" data-aos-delay="200">{{ s.subtitle }}</p>
-            <div class="hero-ctas" data-aos="fade-up" data-aos-delay="300">
+            <span class="hero-eyebrow">FMLider</span>
+            <h1 class="hero-title">A sua carga, o nosso compromisso</h1>
+            <p class="hero-subtitle">Especialistas em logística, transporte e desembaraço aduaneiro em Angola e mais de 30 países.</p>
+            <div class="hero-ctas">
               <router-link to="/servicos" class="btn btn-gold btn-lg">
-                <i class="bi bi-arrow-right-circle me-2"></i> {{ s.cta }}
+                <i class="bi bi-arrow-right-circle me-2"></i> Conhecer Serviços
               </router-link>
               <router-link to="/contacto" class="btn btn-outline-light btn-lg">
                 <i class="bi bi-telephone me-2"></i> Falar Connosco
               </router-link>
             </div>
-            <div class="hero-stats" data-aos="fade-up" data-aos-delay="400">
-              <div class="hero-stat">
-                <strong>+8</strong>
-                <span>anos</span>
-              </div>
-              <div class="hero-stat">
-                <strong>+60</strong>
-                <span>colaboradores</span>
-              </div>
-              <div class="hero-stat">
-                <strong>+32</strong>
-                <span>países</span>
-              </div>
-              <div class="hero-stat">
-                <strong>+1000</strong>
-                <span>clientes</span>
-              </div>
+            <div class="hero-stats">
+              <div class="hero-stat"><strong>+8</strong><span>anos</span></div>
+              <div class="hero-stat"><strong>+60</strong><span>colaboradores</span></div>
+              <div class="hero-stat"><strong>+32</strong><span>países</span></div>
+              <div class="hero-stat"><strong>+1000</strong><span>clientes</span></div>
             </div>
           </div>
         </div>
       </div>
+      <template v-else>
+        <div class="hero-slide" v-for="(s, i) in slides" :key="s.id || i" :class="{ active: i === currentSlide }" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,58,138,0.75) 50%, rgba(15,23,42,0.85) 100%), url(${s.image})` }">
+          <div class="container">
+            <div class="hero-content">
+              <span class="hero-eyebrow" data-aos="fade-up">{{ s.title }}</span>
+              <h1 class="hero-title" data-aos="fade-up" data-aos-delay="100">{{ s.title }}</h1>
+              <p class="hero-subtitle" data-aos="fade-up" data-aos-delay="200">{{ s.description }}</p>
+              <div class="hero-ctas" data-aos="fade-up" data-aos-delay="300">
+                <router-link :to="s.link || '/servicos'" class="btn btn-gold btn-lg">
+                  <i class="bi bi-arrow-right-circle me-2"></i> Saber mais
+                </router-link>
+                <router-link to="/contacto" class="btn btn-outline-light btn-lg">
+                  <i class="bi bi-telephone me-2"></i> Falar Connosco
+                </router-link>
+              </div>
+              <div class="hero-stats" data-aos="fade-up" data-aos-delay="400">
+                <div class="hero-stat"><strong>+8</strong><span>anos</span></div>
+                <div class="hero-stat"><strong>+60</strong><span>colaboradores</span></div>
+                <div class="hero-stat"><strong>+32</strong><span>países</span></div>
+                <div class="hero-stat"><strong>+1000</strong><span>clientes</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
 
       <button class="hero-nav prev" @click="prevSlide" aria-label="Slide anterior">
         <i class="bi bi-chevron-left"></i>
@@ -108,12 +121,21 @@
           <h2 class="section-title text-white">Serviços Integrados</h2>
           <p class="section-subtitle text-white-50">Soluções completas de logística, transporte e transitário adaptadas ao seu negócio.</p>
         </div>
-        <div class="row g-4">
-          <div class="col-lg-3 col-md-6" v-for="(s, i) in services" :key="i">
-            <router-link :to="s.link" class="service-card">
-              <div class="service-icon"><i :class="s.icon"></i></div>
+        <div v-if="loadingServices" class="row g-4">
+          <div class="col-lg-3 col-md-6" v-for="n in 4" :key="n">
+            <div class="service-card">
+              <div class="service-icon skeleton-icon"></div>
+              <div class="skeleton-text mb-2"></div>
+              <div class="skeleton-text short"></div>
+            </div>
+          </div>
+        </div>
+        <div v-else class="row g-4">
+          <div class="col-lg-3 col-md-6" v-for="(s, i) in services" :key="s.id || i">
+            <router-link :to="`/servicos/${s.slug || ''}`" class="service-card">
+              <div class="service-icon"><i :class="getServiceIcon(s.title)"></i></div>
               <h5>{{ s.title }}</h5>
-              <p>{{ s.desc }}</p>
+              <p>{{ s.description }}</p>
               <span class="service-link">Saber mais <i class="bi bi-arrow-right"></i></span>
             </router-link>
           </div>
@@ -205,14 +227,15 @@
           <h2 class="section-title text-white">O Que Dizem os Nossos Clientes</h2>
         </div>
         <div class="row g-4">
-          <div class="col-md-4" v-for="(t, i) in testimonials.slice(0, 3)" :key="i">
+          <div class="col-md-4" v-for="(t, i) in testimonials.slice(0, 3)" :key="t.id || i">
             <div class="testimonial-card">
               <div class="stars mb-2">
-                <i v-for="n in t.rating" :key="n" class="bi bi-star-fill"></i>
+                <i v-for="n in Number(t.rating) || 5" :key="n" class="bi bi-star-fill"></i>
               </div>
               <p class="testimonial-text">"{{ t.message }}"</p>
               <div class="testimonial-author">
-                <div class="avatar">{{ t.name.charAt(0) }}</div>
+                <img v-if="t.photo" :src="t.photo" :alt="t.name" class="avatar-img">
+                <div v-else class="avatar">{{ t.name.charAt(0) }}</div>
                 <div>
                   <strong>{{ t.name }}</strong>
                   <small v-if="t.company" class="d-block text-white-50">{{ t.position }} · {{ t.company }}</small>
@@ -315,7 +338,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import NewsCard from '@/components/NewsCard.vue'
 import PartnersCarousel from '@/components/PartnersCarousel.vue'
 import axios from 'axios'
@@ -323,66 +346,104 @@ import axios from 'axios'
 const currentSlide = ref(0)
 let interval = null
 
-const slides = [
-  {
-    image: 'construcao2020/image1.jpeg',
-    eyebrow: 'Desembaraço Aduaneiro',
-    title: 'A sua carga, o nosso compromisso',
-    subtitle: 'Especialistas em importação, exportação e processos aduaneiros em Angola. Agilizamos o seu negócio.',
-    cta: 'Conhecer Serviços',
-  },
-  {
-    image: 'construcao2020/image2.jpeg',
-    eyebrow: 'Frota Própria',
-    title: 'Transportes que chegam a todo o lado',
-    subtitle: 'Frota moderna de camiões e contentores 20"/40". Rastreamento GPS em tempo real, cobertura nacional e SADC.',
-    cta: 'Ver Frota',
-  },
-  {
-    image: 'construcao2020/image3.jpeg',
-    eyebrow: 'Armazenagem',
-    title: 'Espaço seguro para a sua mercadoria',
-    subtitle: '5.000m² de armazém em Luanda, Viana e Benguela. Picking, packing, cross-docking e CCTV 24h.',
-    cta: 'Ver Armazéns',
-  },
-]
-
-const services = [
-  { icon: 'bi bi-shield-check', title: 'Despachante', desc: 'Desalfandegamento, DU, licenças de importação e exportação.', link: '/servicos/despachante' },
-  { icon: 'bi bi-truck', title: 'Transportes', desc: 'Rodoviário, marítimo e aéreo com cobertura global.', link: '/servicos' },
-  { icon: 'bi bi-box-seam', title: 'Armazenagem', desc: '5.000m² de armazéns próprios com CCTV 24h.', link: '/servicos' },
-  { icon: 'bi bi-house-door', title: 'Door to Door', desc: 'Soluções completas desde a origem ao destino final.', link: '/servicos' },
-]
-
-const process = [
-  { title: 'Pedido', desc: 'Solicite orçamento online ou por telefone em minutos.' },
-  { title: 'Planeamento', desc: 'A nossa equipa define a melhor rota e modo de transporte.' },
-  { title: 'Transporte', desc: 'Carga segue com rastreamento GPS em tempo real.' },
-  { title: 'Entrega', desc: 'Desalfandegamento e entrega na morada indicada.' },
-]
-
+const slides = ref([])
+const services = ref([])
 const latestNews = ref([])
 const testimonials = ref([])
 
-const fetchContent = async () => {
-  try {
-    const [news, tests] = await Promise.all([
-      axios.get('/api/news'),
-      axios.get('/api/testimonials'),
-    ])
-    if (news.data.success) latestNews.value = (news.data.news || []).slice(0, 3)
-    if (tests.data.success) testimonials.value = tests.data.testimonials || []
-  } catch (e) { /* silent */ }
+const loadingBanners = ref(true)
+const loadingServices = ref(true)
+const loadingNews = ref(true)
+const loadingTestimonials = ref(true)
+
+const defaultSlideStyle = computed(() => ({
+  backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,58,138,0.75) 50%, rgba(15,23,42,0.85) 100%), url(/assets/img/construcao2020/image1.jpeg)`
+}))
+
+const serviceIconMap = {
+  'despacho': 'bi bi-shield-check',
+  'despachante': 'bi bi-shield-check',
+  'desembaraço': 'bi bi-shield-check',
+  'transporte': 'bi bi-truck',
+  'transportes': 'bi bi-truck',
+  'armazém': 'bi bi-box-seam',
+  'armazenagem': 'bi bi-box-seam',
+  'door': 'bi bi-house-door',
+  'logística': 'bi bi-gear',
+  'logistica': 'bi bi-gear',
+  'consultoria': 'bi bi-lightbulb',
+  'compliance': 'bi bi-clipboard-check',
+  'aduaneiro': 'bi bi-sticky',
+  'importação': 'bi bi-arrow-down-left-circle',
+  'exportação': 'bi bi-arrow-up-right-circle',
 }
 
-const nextSlide = () => { currentSlide.value = (currentSlide.value + 1) % slides.length }
-const prevSlide = () => { currentSlide.value = (currentSlide.value - 1 + slides.length) % slides.length }
+function getServiceIcon(title) {
+  if (!title) return 'bi bi-gear'
+  const lower = title.toLowerCase()
+  for (const [key, icon] of Object.entries(serviceIconMap)) {
+    if (lower.includes(key)) return icon
+  }
+  return 'bi bi-gear'
+}
+
+const fetchContent = async () => {
+  const fetchBanners = axios.get('/api/banners').catch(() => null)
+  const fetchServices = axios.get('/api/services').catch(() => null)
+  const fetchNews = axios.get('/api/news').catch(() => null)
+  const fetchTestimonials = axios.get('/api/testimonials').catch(() => null)
+
+  const [bannersRes, servicesRes, newsRes, testsRes] = await Promise.all([
+    fetchBanners, fetchServices, fetchNews, fetchTestimonials
+  ])
+
+  if (bannersRes?.data?.success) {
+    const raw = bannersRes.data.banners || []
+    slides.value = raw.map(b => ({
+      ...b,
+      image: b.image?.startsWith('/') || b.image?.startsWith('http') ? b.image : `/assets/img/${b.image}`,
+      link: b.link || '/servicos',
+    }))
+  }
+  loadingBanners.value = false
+
+  if (servicesRes?.data?.success) {
+    services.value = servicesRes.data.services || []
+  }
+  loadingServices.value = false
+
+  if (newsRes?.data?.success) {
+    latestNews.value = (newsRes.data.news || []).slice(0, 3)
+  }
+  loadingNews.value = false
+
+  if (testsRes?.data?.success) {
+    testimonials.value = testsRes.data.testimonials || []
+  }
+  loadingTestimonials.value = false
+
+  if (slides.value.length && interval === null) {
+    interval = setInterval(nextSlide, 6000)
+  }
+}
+
+const nextSlide = () => {
+  const total = slides.value.length
+  if (!total) return
+  currentSlide.value = (currentSlide.value + 1) % total
+}
+const prevSlide = () => {
+  const total = slides.value.length
+  if (!total) return
+  currentSlide.value = (currentSlide.value - 1 + total) % total
+}
 
 onMounted(() => {
   fetchContent()
-  interval = setInterval(nextSlide, 6000)
 })
-onUnmounted(() => { if (interval) clearInterval(interval) })
+onUnmounted(() => {
+  if (interval) clearInterval(interval)
+})
 </script>
 
 <style scoped>
@@ -572,6 +633,24 @@ onUnmounted(() => { if (interval) clearInterval(interval) })
 }
 .service-card:hover .service-link { gap: 0.75rem; }
 
+/* SKELETON LOADING */
+.skeleton-icon {
+  background: rgba(255,255,255,0.1);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+.skeleton-text {
+  height: 16px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.1);
+  margin-bottom: 0.5rem;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+.skeleton-text.short { width: 60%; }
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
 /* PROCESS */
 .process-step {
   text-align: center;
@@ -628,6 +707,12 @@ onUnmounted(() => { if (interval) clearInterval(interval) })
   color: var(--fml-900);
   display: flex; align-items: center; justify-content: center;
   font-weight: 800; font-size: 1.05rem;
+  flex-shrink: 0;
+}
+.avatar-img {
+  width: 44px; height: 44px; border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 .testimonial-author strong { color: #fff; }
 .testimonial-author small { color: var(--fml-400); }

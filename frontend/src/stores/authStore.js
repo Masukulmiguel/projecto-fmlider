@@ -201,7 +201,8 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const fd = new FormData()
       fd.append('photo', file)
-      const res = await fetch('/api/auth/upload-photo', {
+      const apiBase = import.meta.env.VITE_API_URL || ''
+      const res = await fetch(`${apiBase}/api/auth/upload-photo`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token.value}` },
         body: fd,
@@ -234,13 +235,28 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const initSession = async () => {
-    const savedUser = localStorage.getItem('user')
-    if (savedUser) {
-      try {
-        user.value = JSON.parse(savedUser)
-      } catch (e) {
+    try {
+      const { data: { session: supaSession }, error } = await supabase.auth.getSession()
+      if (error || !supaSession) {
+        user.value = null
+        token.value = null
+        session.value = null
+        localStorage.removeItem('supabase_access_token')
+        localStorage.removeItem('supabase_refresh_token')
         localStorage.removeItem('user')
+        return
       }
+      session.value = supaSession
+      persistSession(supaSession)
+      user.value = buildUserFromMetadata(supaSession.user)
+      persistUser()
+    } catch (err) {
+      user.value = null
+      token.value = null
+      session.value = null
+      localStorage.removeItem('supabase_access_token')
+      localStorage.removeItem('supabase_refresh_token')
+      localStorage.removeItem('user')
     }
   }
 

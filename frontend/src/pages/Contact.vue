@@ -88,7 +88,8 @@ const form = ref({
 
 const submitForm = async () => {
   try {
-    const response = await fetch('/api/contacts', {
+    const apiBase = import.meta.env.VITE_API_URL || ''
+    const response = await fetch(`${apiBase}/api/contacts`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form.value)

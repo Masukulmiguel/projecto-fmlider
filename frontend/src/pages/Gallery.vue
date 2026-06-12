@@ -31,7 +31,7 @@
     <section class="gal-content fml-section">
       <div class="container">
         <!-- Filters -->
-        <div class="gal-filters">
+        <div class="gal-filters" v-if="categories.length > 1">
           <button
             v-for="cat in categories"
             :key="cat.key"
@@ -43,8 +43,21 @@
           </button>
         </div>
 
+        <!-- Loading -->
+        <div v-if="loading" class="text-center py-5">
+          <div class="spinner-border text-warning" role="status">
+            <span class="visually-hidden">A carregar...</span>
+          </div>
+        </div>
+
+        <!-- Empty State (no data at all) -->
+        <div v-else-if="allImages.length === 0 && !loading" class="gal-empty">
+          <i class="bi bi-images"></i>
+          <p>Nenhuma imagem disponível de momento.</p>
+        </div>
+
         <!-- Grid -->
-        <div class="gal-grid" ref="gridRef">
+        <div v-else class="gal-grid" ref="gridRef">
           <div
             class="gal-item"
             v-for="(item, index) in filteredImages"
@@ -53,7 +66,7 @@
             @click="openLightbox(index)"
             :style="{ animationDelay: `${index * 0.08}s` }"
           >
-            <img :src="item.src" :alt="item.caption" loading="lazy">
+            <img :src="item.src" :alt="item.alt_text || item.caption" loading="lazy">
             <div class="gal-item-overlay">
               <div class="gal-item-icon"><i class="bi bi-arrows-fullscreen"></i></div>
               <div class="gal-item-info">
@@ -64,8 +77,8 @@
           </div>
         </div>
 
-        <!-- Empty State -->
-        <div v-if="filteredImages.length === 0" class="gal-empty">
+        <!-- Empty State (filtered) -->
+        <div v-if="!loading && allImages.length > 0 && filteredImages.length === 0" class="gal-empty">
           <i class="bi bi-images"></i>
           <p>Nenhuma imagem encontrada nesta categoria.</p>
         </div>
@@ -93,67 +106,69 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import axios from 'axios'
 
 const activeFilter = ref('all')
 const lightboxOpen = ref(false)
 const lightboxIndex = ref(0)
 const gridRef = ref(null)
+const allImages = ref([])
+const loading = ref(true)
 
-const categories = [
-  { key: 'all', label: 'Todas', icon: 'bi bi-grid' },
-  { key: 'Construção', label: 'Construção', icon: 'bi bi-building' },
-  { key: 'Pessoal', label: 'Equipa', icon: 'bi bi-people' },
-  { key: 'Reachstacker', label: 'Reachstacker', icon: 'bi bi-tools' },
-  { key: 'Serviços', label: 'Serviços', icon: 'bi bi-box-seam' },
-]
+const categoryIcons = {
+  'Construção': 'bi bi-building',
+  'Pessoal': 'bi bi-people',
+  'Reachstacker': 'bi bi-tools',
+  'Serviços': 'bi bi-box-seam',
+}
 
-const allImages = [
-  // Construção
-  { id: 1, src: '/assets/img/construcao2020/image1.jpeg', caption: 'Base FMLider — Vista panorâmica', category: 'Construção', size: 'large' },
-  { id: 2, src: '/assets/img/construcao2020/image2.jpeg', caption: 'Armazéns e Infraestrutura', category: 'Construção', size: 'normal' },
-  { id: 3, src: '/assets/img/construcao2020/image3.jpeg', caption: 'Zona de Operações', category: 'Construção', size: 'normal' },
-  { id: 4, src: '/assets/img/construcao2020/image4.jpeg', caption: 'Instalações FMLider', category: 'Construção', size: 'normal' },
-  { id: 5, src: '/assets/img/construcao2020/image5.jpeg', caption: 'Escritórios e Operações', category: 'Construção', size: 'normal' },
+const defaultIcon = 'bi bi-folder2'
 
-  // Pessoal
-  { id: 6, src: '/assets/img/pessoal/service3.jpg', caption: 'A Nossa Equipa', category: 'Pessoal', size: 'large' },
-  { id: 7, src: '/assets/img/pessoal/partner1.webp', caption: 'Colaboradores em Acção', category: 'Pessoal', size: 'normal' },
-  { id: 8, src: '/assets/img/pessoal/partner2.png', caption: 'Reunião de Equipa', category: 'Pessoal', size: 'normal' },
-
-  // Reachstacker
-  { id: 9, src: '/assets/img/resachstacker/resachstacker1.jpeg', caption: 'Reachstacker Kalmar — Visão Geral', category: 'Reachstacker', size: 'large' },
-  { id: 10, src: '/assets/img/resachstacker/resachstacker2.jpeg', caption: 'Manuseamento de Contentores', category: 'Reachstacker', size: 'normal' },
-  { id: 11, src: '/assets/img/resachstacker/resachstacker3.jpeg', caption: 'Operação de Carga', category: 'Reachstacker', size: 'normal' },
-  { id: 12, src: '/assets/img/resachstacker/resachstacker4.jpeg', caption: 'Contentores Empilhados', category: 'Reachstacker', size: 'normal' },
-  { id: 13, src: '/assets/img/resachstacker/resachstacker5.jpeg', caption: 'Reachstacker em Acção', category: 'Reachstacker', size: 'normal' },
-  { id: 14, src: '/assets/img/resachstacker/resachstacker6.jpeg', caption: 'Vista Lateral', category: 'Reachstacker', size: 'normal' },
-  { id: 15, src: '/assets/img/resachstacker/resachstacker7.jpeg', caption: 'Operação Portuária', category: 'Reachstacker', size: 'normal' },
-  { id: 16, src: '/assets/img/resachstacker/resachstacker8.jpeg', caption: 'Manobras de Carga', category: 'Reachstacker', size: 'normal' },
-  { id: 17, src: '/assets/img/resachstacker/resachstacker9.jpeg', caption: 'Reachstacker Kalmar 45t', category: 'Reachstacker', size: 'normal' },
-  { id: 18, src: '/assets/img/resachstacker/resachstacker10.jpeg', caption: 'Contentores 20" e 40"', category: 'Reachstacker', size: 'normal' },
-  { id: 19, src: '/assets/img/resachstacker/resachstacker11.jpeg', caption: 'Zona de Armazenagem', category: 'Reachstacker', size: 'normal' },
-  { id: 20, src: '/assets/img/resachstacker/resachstacker12.jpeg', caption: 'Frota de Equipamentos', category: 'Reachstacker', size: 'normal' },
-
-  // Serviços
-  { id: 21, src: '/assets/img/servico/service1.jpg', caption: 'Consultoria Logística', category: 'Serviços', size: 'normal' },
-  { id: 22, src: '/assets/img/servico/Logística Marítima-1.jpg', caption: 'Logística Marítima', category: 'Serviços', size: 'normal' },
-  { id: 23, src: '/assets/img/servico/service-storage.jpg', caption: 'Armazenagem Segura', category: 'Serviços', size: 'normal' },
-  { id: 24, src: '/assets/img/servico/service-door.jpg', caption: 'Door To Door', category: 'Serviços', size: 'normal' },
-  { id: 25, src: '/assets/img/servico/Desembaraço Aduaneiro.jpeg', caption: 'Desembaraço Aduaneiro', category: 'Serviços', size: 'normal' },
-  { id: 26, src: '/assets/img/servico/Transportes.jpg', caption: 'Transportes', category: 'Serviços', size: 'normal' },
-]
-
-const filteredImages = computed(() => {
-  if (activeFilter.value === 'all') return allImages
-  return allImages.filter(img => img.category === activeFilter.value)
+const categories = computed(() => {
+  const keys = [...new Set(allImages.value.map(img => img.category))]
+  const cats = [
+    { key: 'all', label: 'Todas', icon: 'bi bi-grid' },
+  ]
+  keys.forEach(key => {
+    cats.push({ key, label: key, icon: categoryIcons[key] || defaultIcon })
+  })
+  return cats
 })
 
-const stats = [
-  { value: '24', label: 'Imagens', icon: 'bi bi-images' },
-  { value: '4', label: 'Categorias', icon: 'bi bi-folder2' },
+const stats = computed(() => [
+  { value: String(allImages.value.length), label: 'Imagens', icon: 'bi bi-images' },
+  { value: String(categories.value.length - 1), label: 'Categorias', icon: 'bi bi-folder2' },
   { value: '+60', label: 'Colaboradores', icon: 'bi bi-people' },
   { value: '8+', label: 'Anos', icon: 'bi bi-calendar-check' },
-]
+])
+
+const fetchGallery = async () => {
+  loading.value = true
+  try {
+    const { data } = await axios.get('/api/gallery')
+    const items = (data.data?.gallery || data.gallery || data || [])
+      .filter(img => img.status === 1 || img.status === true || img.status === undefined)
+      .sort((a, b) => (a.order_by ?? 0) - (b.order_by ?? 0))
+
+    allImages.value = items.map((img, idx) => ({
+      id: img.id,
+      src: img.image?.startsWith('/') ? img.image : `/backend/storage/uploads/gallery/${img.image}`,
+      caption: img.title || img.alt_text || '',
+      alt_text: img.alt_text || img.title || '',
+      category: img.category || 'Geral',
+      size: idx % 5 === 0 ? 'large' : 'normal',
+    }))
+  } catch (e) {
+    console.error('Erro ao carregar galeria', e)
+  } finally {
+    loading.value = false
+  }
+}
+
+const filteredImages = computed(() => {
+  if (activeFilter.value === 'all') return allImages.value
+  return allImages.value.filter(img => img.category === activeFilter.value)
+})
 
 const openLightbox = (index) => {
   lightboxIndex.value = index
@@ -183,6 +198,7 @@ const handleKeydown = (e) => {
 
 onMounted(() => {
   document.addEventListener('keydown', handleKeydown)
+  fetchGallery()
 })
 
 onBeforeUnmount(() => {

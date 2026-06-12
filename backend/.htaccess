@@ -24,6 +24,7 @@ RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 # Set proper MIME types
 AddType application/json .json
 AddType text/javascript .js
+DefaultCharset utf-8
 
 # Disable directory listing
 Options -Indexes

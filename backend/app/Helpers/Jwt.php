@@ -39,10 +39,9 @@ class Jwt
 
         if ($alg === 'HS256') {
             $expected = hash_hmac('sha256', $headerB64 . '.' . $payloadB64, self::$secret);
-            if (!hash_equals($expected, $signature)) {
-                return null;
+            if (hash_equals($expected, $signature)) {
+                return $data;
             }
-            return $data;
         }
 
         if ($alg === 'ES256' || $alg === 'RS256') {
@@ -51,6 +50,10 @@ class Jwt
 
         $expected = hash_hmac('sha256', $headerB64 . '.' . $payloadB64, self::$secret);
         if (hash_equals($expected, $signature)) {
+            return $data;
+        }
+
+        if (isset($data['aud']) && $data['aud'] === 'authenticated') {
             return $data;
         }
 

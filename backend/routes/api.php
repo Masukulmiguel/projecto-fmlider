@@ -55,9 +55,9 @@ class Router
             }
         }
 
-        header('Content-Type: application/json');
+        header('Content-Type: application/json; charset=utf-8');
         http_response_code(404);
-        echo json_encode(['success' => false, 'message' => 'Route not found']);
+        echo json_encode(['success' => false, 'message' => 'Route not found'], JSON_UNESCAPED_UNICODE);
     }
 }
 
@@ -148,6 +148,7 @@ $router->put('/admin/services/{id}', 'App\Controllers\ServiceController', 'updat
 $router->delete('/admin/services/{id}', 'App\Controllers\ServiceController', 'destroy');
 
 // News CRUD
+$router->get('/admin/news', 'App\Controllers\NewsController', 'adminIndex');
 $router->post('/admin/news', 'App\Controllers\NewsController', 'store');
 $router->put('/admin/news/{id}', 'App\Controllers\NewsController', 'update');
 $router->delete('/admin/news/{id}', 'App\Controllers\NewsController', 'destroy');
@@ -206,6 +207,15 @@ $router->post('/admin/secret-reset', 'App\Controllers\SecretResetController', 'r
 
 // Admin dashboard
 $router->get('/admin/dashboard/stats', 'App\Controllers\DashboardController', 'stats');
+
+// Settings
+$router->get('/settings', 'App\Controllers\SettingsController', 'index');
+$router->get('/settings/{key}', 'App\Controllers\SettingsController', 'get');
+$router->put('/admin/settings', 'App\Controllers\SettingsController', 'update');
+$router->delete('/admin/settings/{key}', 'App\Controllers\SettingsController', 'destroy');
+
+// Public banners
+$router->get('/banners', 'App\Controllers\BannerController', 'publicIndex');
 
 // Dispatch the request
 $router->dispatch();

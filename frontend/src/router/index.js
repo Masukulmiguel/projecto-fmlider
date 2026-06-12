@@ -31,6 +31,7 @@ const AdminTestimonials = () => import('@/admin/pages/Testimonials.vue')
 const AdminFAQs = () => import('@/admin/pages/FAQs.vue')
 const AdminBanners = () => import('@/admin/pages/Banners.vue')
 const AdminProfile = () => import('@/admin/pages/Profile.vue')
+const AdminSettings = () => import('@/admin/pages/Settings.vue')
 
 const ClienteDashboard = () => import('@/pages/cliente/Dashboard.vue')
 const ClienteProfile = () => import('@/pages/cliente/Profile.vue')
@@ -99,6 +100,7 @@ const routes = [
   { path: '/admin/mensagens', name: 'AdminMessages', component: AdminMessages, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
   { path: '/admin/visitantes', name: 'AdminVisitors', component: AdminVisitors, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
   { path: '/admin/funcionarios', name: 'AdminFuncionarios', component: AdminFuncionarios, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
+  { path: '/admin/configuracoes', name: 'AdminSettings', component: AdminSettings, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
 
   { path: '/funcionario', name: 'FuncionarioDashboard', component: FuncionarioDashboard, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
   { path: '/funcionario/mensagens', name: 'FuncionarioMessages', component: FuncionarioMessages, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },

@@ -6,17 +6,22 @@
           <div class="col-lg-4 col-md-6">
             <div class="footer-brand">
               <img src="/assets/img/logo.png" alt="FMLider" class="footer-logo">
-              <h4 class="footer-title">FMLider</h4>
+              <h4 class="footer-title">{{ settings.company_name || 'FMLider' }}</h4>
             </div>
             <p class="footer-desc">
-              Soluções integradas de logística, transporte e serviços de transitário em Angola.
-              Ligamos o seu negócio ao mundo desde 2017.
+              {{ settings.company_description || 'Soluções integradas de logística, transporte e serviços de transitário em Angola. Ligamos o seu negócio ao mundo desde 2017.' }}
             </p>
             <div class="social-links">
-              <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-              <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-              <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
-              <a href="https://wa.me/244935141747" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+              <a v-if="settings.facebook" :href="settings.facebook" target="_blank" rel="noopener" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+              <a v-if="settings.instagram" :href="settings.instagram" target="_blank" rel="noopener" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+              <a v-if="settings.linkedin" :href="settings.linkedin" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+              <a v-if="settings.whatsapp" :href="whatsappUrl" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+              <template v-if="!settings.facebook && !settings.instagram && !settings.linkedin && !settings.whatsapp">
+                <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+                <a href="https://wa.me/244935141747" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+              </template>
             </div>
           </div>
 
@@ -45,10 +50,10 @@
           <div class="col-lg-3 col-md-6">
             <h6 class="footer-heading">Contacto</h6>
             <ul class="footer-contact">
-              <li><i class="bi bi-geo-alt-fill"></i> FMLider Base, Estrada da Pedreira, Bairro da Vidrul, Cacuaco, Luanda</li>
-              <li><i class="bi bi-telephone-fill"></i> <a href="tel:+244935141747">+244 935 141 747</a></li>
-              <li><i class="bi bi-envelope-fill"></i> <a href="mailto:geral@fmlider.co.ao">geral@fmlider.co.ao</a></li>
-              <li><i class="bi bi-clock-fill"></i> Seg–Sex 08:00–18:00 · Sáb 08:00–13:00</li>
+              <li><i class="bi bi-geo-alt-fill"></i> {{ settings.address || 'FMLider Base, Estrada da Pedreira, Bairro da Vidrul, Cacuaco, Luanda' }}</li>
+              <li><i class="bi bi-telephone-fill"></i> <a :href="phoneUrl">{{ settings.phone || '+244 935 141 747' }}</a></li>
+              <li><i class="bi bi-envelope-fill"></i> <a :href="emailUrl">{{ settings.email || 'geral@fmlider.co.ao' }}</a></li>
+              <li><i class="bi bi-clock-fill"></i> {{ settings.working_hours || 'Seg–Sex 08:00–18:00 · Sáb 08:00–13:00' }}</li>
             </ul>
           </div>
         </div>
@@ -58,7 +63,7 @@
     <div class="footer-bottom">
       <div class="container">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-          <p class="mb-0">© {{ year }} FMLider — Logística, Transporte e Serviços, Lda. Todos os direitos reservados.</p>
+          <p class="mb-0">© {{ year }} {{ settings.company_name || 'FMLider' }} — Logística, Transporte e Serviços, Lda. Todos os direitos reservados.</p>
           <ul class="legal-links">
             <li><router-link to="/termos">Termos e Condições</router-link></li>
             <li><router-link to="/politicas">Política de Privacidade</router-link></li>
@@ -70,7 +75,44 @@
 </template>
 
 <script setup>
+import { ref, computed, onMounted } from 'vue'
+import axios from 'axios'
+
 const year = new Date().getFullYear()
+
+const defaults = {
+  company_name: 'FMLider',
+  company_description: 'Soluções integradas de logística, transporte e serviços de transitário em Angola. Ligamos o seu negócio ao mundo desde 2017.',
+  phone: '+244 935 141 747',
+  email: 'geral@fmlider.co.ao',
+  address: 'FMLider Base, Estrada da Pedreira, Bairro da Vidrul, Cacuaco, Luanda',
+  working_hours: 'Seg–Sex 08:00–18:00 · Sáb 08:00–13:00',
+  facebook: '',
+  instagram: '',
+  linkedin: '',
+  whatsapp: ''
+}
+
+const settings = ref({ ...defaults })
+
+const whatsappUrl = computed(() => {
+  const num = (settings.value.whatsapp || '').replace(/[^0-9]/g, '')
+  return num ? `https://wa.me/${num}` : '#'
+})
+
+const phoneUrl = computed(() => `tel:${(settings.value.phone || '').replace(/\s/g, '')}`)
+const emailUrl = computed(() => `mailto:${settings.value.email || 'geral@fmlider.co.ao'}`)
+
+onMounted(async () => {
+  try {
+    const { data } = await axios.get('/api/settings')
+    if (data.success && data.settings) {
+      settings.value = { ...defaults, ...data.settings }
+    }
+  } catch (e) {
+    // keep defaults
+  }
+})
 </script>
 
 <style scoped>

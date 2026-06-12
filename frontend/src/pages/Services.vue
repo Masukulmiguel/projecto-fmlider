@@ -24,26 +24,43 @@
           <p class="section-subtitle text-muted">Oferecemos uma gama completa de serviços logísticos para empresas de todos os portes.</p>
         </div>
 
-        <div class="srv-cards">
-          <div class="srv-card" v-for="service in services" :key="service.id" :id="service.slug">
+        <div v-if="loading" class="text-center py-5">
+          <div class="spinner-border text-warning" role="status">
+            <span class="visually-hidden">A carregar...</span>
+          </div>
+        </div>
+
+        <div v-else-if="services.length === 0" class="text-center py-5 text-muted">
+          <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+          <p class="mt-3">Nenhum serviço disponível de momento.</p>
+        </div>
+
+        <div v-else class="srv-cards">
+          <router-link
+            v-for="service in services"
+            :key="service.id"
+            :to="`/servicos/${service.slug}`"
+            class="srv-card"
+            :id="service.slug"
+          >
             <div class="srv-card-image">
-              <img :src="service.image" :alt="service.title">
+              <img
+                :src="service.image || '/assets/img/servico/default-service.jpg'"
+                :alt="service.title"
+                @error="onImageError"
+              >
               <div class="srv-card-overlay">
-                <span class="srv-card-num">{{ String(service.id).padStart(2, '0') }}</span>
+                <span class="srv-card-num">{{ String(service.order_by || service.id).padStart(2, '0') }}</span>
               </div>
             </div>
             <div class="srv-card-body">
-              <div class="srv-card-icon"><i :class="service.icon"></i></div>
               <h3>{{ service.title }}</h3>
               <p class="srv-card-desc">{{ service.description }}</p>
-              <ul class="srv-card-features">
-                <li v-for="feat in service.features" :key="feat"><i class="bi bi-check2-circle"></i> {{ feat }}</li>
-              </ul>
-              <router-link :to="`/contacto`" class="btn btn-outline-primary btn-sm mt-3">
-                Solicitar Info <i class="bi bi-arrow-right ms-1"></i>
-              </router-link>
+              <span class="srv-card-link">
+                Saber Mais <i class="bi bi-arrow-right ms-1"></i>
+              </span>
             </div>
-          </div>
+          </router-link>
         </div>
       </div>
     </section>
@@ -120,104 +137,33 @@
 </template>
 
 <script setup>
-const services = [
-  {
-    id: 1,
-    title: 'Desembaraço Aduaneiro',
-    slug: 'desembaraco-aduaneiro',
-    icon: 'bi bi-stamp',
-    image: '/assets/img/servico/Desembaraço Aduaneiro.jpeg',
-    description: 'Especialistas em processos de importação e exportação. Agilizamos o desalfandegamento da sua carga junto à Alfândega de Angola, garantindo cumprimento total da legislação aduaneira.',
-    features: [
-      'Desalfandegamento de importação e exportação',
-      'Elaboração de Declaração Única (DU)',
-      'Licenças e autorizações especiais',
-      'Classificação fiscal e tributária',
-      'Acompanhamento junto à Alfândega',
-      'Consultoria aduaneira personalizada',
-    ]
-  },
-  {
-    id: 2,
-    title: 'Transportes',
-    slug: 'transportes',
-    icon: 'bi bi-truck',
-    image: '/assets/img/servico/Transportes.jpg',
-    description: 'Frota própria de camiões e equipamentos para transporte rodoviário, marítimo e aéreo. Rastreamento GPS em tempo real e cobertura nacional e internacional.',
-    features: [
-      'Transporte rodoviário em todo o país',
-      'Transporte marítimo e aéreo',
-      'Contentores 20" e 40"',
-      'Rastreamento GPS em tempo real',
-      'Carga geral e especial',
-      'Cobertura SADC e internacional',
-    ]
-  },
-  {
-    id: 3,
-    title: 'Armazenagem',
-    slug: 'armazenagem',
-    icon: 'bi bi-box-seam',
-    image: '/assets/img/servico/service-storage.jpg',
-    description: '5.000m² de armazéns próprios em Luanda, Viana e Benguela. Espaços seguros com CCTV 24h, sistema de inventário e condições ideais para todos os tipos de mercadoria.',
-    features: [
-      '5.000m² de armazéns próprios',
-      'CCTV e segurança 24/7',
-      'Sistema de inventário digital',
-      'Cross-docking e picking',
-      'Armazenagem de contentores',
-      'Controlo de temperatura e humidade',
-    ]
-  },
-  {
-    id: 4,
-    title: 'Door To Door',
-    slug: 'door-to-door',
-    icon: 'bi bi-house-door',
-    image: '/assets/img/servico/service-door.jpg',
-    description: 'Solução completa desde a origem até ao destino final. Cuidamos de todo o processo logístico para que o cliente não se preocupe com nada.',
-    features: [
-      'Recolha na origem internacional',
-      'Desembaraço aduaneiro',
-      'Transporte até ao destino final',
-      'Gestão documental completa',
-      'Seguro da carga',
-      'Entrega com prova de entrega',
-    ]
-  },
-  {
-    id: 5,
-    title: 'Consultoria Logística',
-    slug: 'consultoria',
-    icon: 'bi bi-people',
-    image: '/assets/img/servico/service1.jpg',
-    description: 'Apoio especializado para optimizar a sua cadeia logística. Analisamos processos, identificamos melhorias e implementamos soluções que reduzem custos e aumentam eficiência.',
-    features: [
-      'Análise da cadeia logística',
-      'Optimização de rotas e custos',
-      'Gestão de stock e inventário',
-      'Planeamento de rotas',
-      'Relatórios e indicadores KPI',
-      'Apoio na expansão internacional',
-    ]
-  },
-  {
-    id: 6,
-    title: 'Logística Marítima',
-    slug: 'logistica-maritima',
-    icon: 'bi bi-water',
-    image: '/assets/img/servico/Logística Marítima-1.jpg',
-    description: 'Gestão completa de operações marítimas no Porto de Luanda e outros portos de Angola. Carga contentorizada e project cargo com as melhores condições.',
-    features: [
-      'Operações no Porto de Luanda',
-      'Carga contentorizada 20" e 40"',
-      'Project cargo e cargas pesadas',
-      'LCL (Less than Container Load)',
-      'FCL (Full Container Load)',
-      'Liação com linhas marítimas internacionais',
-    ]
-  },
-]
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+
+const services = ref([])
+const loading = ref(true)
+
+const fetchServices = async () => {
+  loading.value = true
+  try {
+    const { data } = await axios.get('/api/services')
+    services.value = (data.data?.services || data.services || data || [])
+      .filter(s => s.status === 1 || s.status === true)
+      .sort((a, b) => (a.order_by ?? 0) - (b.order_by ?? 0))
+  } catch (e) {
+    console.error('Erro ao carregar serviços', e)
+  } finally {
+    loading.value = false
+  }
+}
+
+const onImageError = (e) => {
+  e.target.src = '/assets/img/servico/default-service.jpg'
+}
+
+onMounted(() => {
+  fetchServices()
+})
 
 const processSteps = [
   { title: 'Contacto', desc: 'Solicite orçamento online, por telefone ou email.' },
@@ -286,6 +232,8 @@ const whyFeatures = [
   transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   display: flex;
   flex-direction: column;
+  text-decoration: none;
+  color: inherit;
 }
 .srv-card:hover {
   transform: translateY(-8px);
@@ -331,19 +279,6 @@ const whyFeatures = [
   flex-direction: column;
 }
 
-.srv-card-icon {
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, var(--fml-gold, #f59e0b), #d97706);
-  color: var(--fml-900, #1e293b);
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  margin-bottom: 1.25rem;
-}
-
 .srv-card-body h3 {
   font-size: 1.25rem;
   font-weight: 700;
@@ -356,26 +291,21 @@ const whyFeatures = [
   font-size: 0.92rem;
   line-height: 1.65;
   margin-bottom: 1rem;
-}
-
-.srv-card-features {
-  list-style: none;
-  padding: 0;
-  margin: 0;
   flex: 1;
 }
-.srv-card-features li {
-  padding: 0.35rem 0;
-  font-size: 0.85rem;
-  color: #334155;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
+
+.srv-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--fml-gold, #d97706);
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-top: auto;
+  transition: gap 0.25s ease;
 }
-.srv-card-features i {
-  color: var(--fml-gold, #f59e0b);
-  margin-top: 0.2rem;
-  flex-shrink: 0;
+.srv-card:hover .srv-card-link {
+  gap: 0.5rem;
 }
 
 /* PROCESS */

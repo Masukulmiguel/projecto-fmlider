@@ -80,6 +80,12 @@
         <i class="bi bi-megaphone-fill menu-icon"></i>
         <span class="menu-text">Banners</span>
       </router-link>
+
+      <div class="menu-section">Sistema</div>
+      <router-link to="/admin/configuracoes" class="menu-item" active-class="active">
+        <i class="bi bi-gear-fill menu-icon"></i>
+        <span class="menu-text">Configurações</span>
+      </router-link>
     </nav>
 
     <div v-if="authStore.user" class="sidebar-user">
