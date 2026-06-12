@@ -25,7 +25,7 @@
           </div>
         </div>
       </div>
-      <template v-else>
+      <template v-else-if="slides.length > 0">
         <div class="hero-slide" v-for="(s, i) in slides" :key="s.id || i" :class="{ active: i === currentSlide }" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,58,138,0.75) 50%, rgba(15,23,42,0.85) 100%), url(${s.image})` }">
           <div class="container">
             <div class="hero-content">
@@ -50,6 +50,29 @@
           </div>
         </div>
       </template>
+      <div v-else class="hero-slide active" :style="defaultSlideStyle">
+        <div class="container">
+          <div class="hero-content">
+            <span class="hero-eyebrow">FMLider</span>
+            <h1 class="hero-title">A sua carga, o nosso compromisso</h1>
+            <p class="hero-subtitle">Especialistas em logística, transporte e desembaraço aduaneiro em Angola e mais de 30 países.</p>
+            <div class="hero-ctas">
+              <router-link to="/servicos" class="btn btn-gold btn-lg">
+                <i class="bi bi-arrow-right-circle me-2"></i> Conhecer Serviços
+              </router-link>
+              <router-link to="/contacto" class="btn btn-outline-light btn-lg">
+                <i class="bi bi-telephone me-2"></i> Falar Connosco
+              </router-link>
+            </div>
+            <div class="hero-stats">
+              <div class="hero-stat"><strong>+8</strong><span>anos</span></div>
+              <div class="hero-stat"><strong>+60</strong><span>colaboradores</span></div>
+              <div class="hero-stat"><strong>+32</strong><span>países</span></div>
+              <div class="hero-stat"><strong>+1000</strong><span>clientes</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <button class="hero-nav prev" @click="prevSlide" aria-label="Slide anterior">
         <i class="bi bi-chevron-left"></i>
