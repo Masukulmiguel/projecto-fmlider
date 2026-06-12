@@ -1,0 +1,32 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. Se for ficheiro real, deixa o Apache servir diretamente
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # 2. API routes -> backend/index.php (pass full URI so backend router can parse it)
+    RewriteRule ^api/(.*)$ backend/index.php [L]
+
+    # 3. Backend storage/static: serve directly (let backend .htaccess handle routing)
+    RewriteRule ^backend/ - [L]
+
+    # 4. Frontend: serve os assets diretamente
+    RewriteRule ^frontend/ - [L]
+
+    # 5. Built assets: /assets/* -> frontend/dist/assets/*
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^assets/(.*)$ frontend/dist/assets/$1 [L]
+
+    # 6. SPA fallback: tudo o resto vai para o index.html do dist
+    RewriteRule ^ frontend/dist/index.html [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+    <Files "frontend/dist/index.html">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+    </Files>
+</IfModule>
+
+Options -Indexes
