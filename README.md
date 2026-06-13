@@ -1,6 +1,10 @@
 # FMLider Transitário & Logística - Website
 
-Um website corporativo premium para FMLider Transitário & Logística desenvolvido com Laravel 12, Vue.js 3, e MySQL 8.
+Um website corporativo premium para FMLider Transitário & Logística desenvolvido com Vue.js 3, PHP puro, e MySQL.
+
+## 🌐 Site ao Vivo
+
+**https://fmlider-66.vercel.app/**
 
 ## 🚀 Características
 
