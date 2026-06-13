@@ -123,7 +123,7 @@ npm run dev
 # Teste de login
 curl -X POST http://localhost:8000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@fmlider.co.ao","password":"Admin@2026"}'
+  -d '{"email":"admin@fmlider.co.ao","password":"YOUR_ADMIN_PASSWORD"}'
 
 # Teste de serviços
 curl -X GET http://localhost:8000/api/services
@@ -290,7 +290,7 @@ npm run dev
 # Teste de login
 curl -X POST http://localhost:8000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@fmlider.co.ao","password":"Admin@2026"}'
+  -d '{"email":"admin@fmlider.co.ao","password":"YOUR_ADMIN_PASSWORD"}'
 
 # Teste de serviços
 curl http://localhost:8000/api/services

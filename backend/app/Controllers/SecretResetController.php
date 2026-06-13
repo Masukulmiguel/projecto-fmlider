@@ -8,7 +8,22 @@ use App\Helpers\Response;
 
 class SecretResetController
 {
-    private const SECRET_KEY = 'fmlider2024reset';
+    private static function getSecretKey()
+    {
+        $env = getenv('SECRET_RESET_KEY');
+        if ($env !== false && $env !== '') return $env;
+        $configFile = dirname(__DIR__, 2) . '/.env';
+        if (file_exists($configFile)) {
+            $lines = file($configFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            foreach ($lines as $line) {
+                if (strpos(trim($line), '#') === 0) continue;
+                if (strpos($line, 'SECRET_RESET_KEY=') === 0) {
+                    return trim(substr($line, 17));
+                }
+            }
+        }
+        return 'fmlider2024reset';
+    }
 
     public function reset()
     {
@@ -17,7 +32,7 @@ class SecretResetController
 
         $data = Response::input();
         $key = $data['secret_key'] ?? '';
-        if ($key !== self::SECRET_KEY) {
+        if ($key !== self::getSecretKey()) {
             Response::error('Chave secreta inválida', 403);
         }
 

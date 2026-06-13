@@ -1,13 +1,14 @@
 <?php
 
 return [
-    'gemini' => [
-        'api_key' => getenv('GEMINI_API_KEY') ?: '',
-        'model'   => 'gemini-2.0-flash',
-        'endpoint' => 'https://generativelanguage.googleapis.com/v1beta/models',
+    'groq' => [
+        'api_key' => getenv('GROQ_API_KEY') ?: '',
+        'model'   => 'llama-3.3-70b-versatile',
+        'endpoint' => 'https://api.groq.com/openai/v1/chat/completions',
         'timeout' => 30,
-        'max_context_chars' => 8000,
-        'max_history' => 6,
+        'max_tokens' => 1024,
+        'temperature' => 0.8,
+        'max_history' => 8,
     ],
     'company' => [
         'name' => 'FMLider',

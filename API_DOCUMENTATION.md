@@ -49,7 +49,7 @@ Content-Type: application/json
 
 {
     "email": "admin@fmlider.co.ao",
-    "password": "Admin@2026"
+    "password": "YOUR_ADMIN_PASSWORD"
 }
 
 Response:
@@ -677,7 +677,7 @@ axios.get('http://localhost:8000/api/services')
 // POST request with token
 axios.post('http://localhost:8000/api/auth/login', {
     email: 'admin@fmlider.co.ao',
-    password: 'Admin@2026'
+    password: 'YOUR_ADMIN_PASSWORD'
 }, {
     headers: { 'Content-Type': 'application/json' }
 })

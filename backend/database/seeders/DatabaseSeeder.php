@@ -7,15 +7,32 @@
  * Run: php backend/database/seeders/DatabaseSeeder.php
  */
 
+function env($key, $default = '')
+{
+    $v = getenv($key);
+    if ($v !== false) return $v;
+    $envFile = dirname(__DIR__, 2) . '/.env';
+    if (file_exists($envFile)) {
+        $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            if (strpos(trim($line), '#') === 0) continue;
+            if (strpos($line, $key . '=') === 0) {
+                return trim(substr($line, strlen($key) + 1));
+            }
+        }
+    }
+    return $default;
+}
+
 class DatabaseSeeder {
     private $db;
 
     public function __construct() {
         $this->db = new mysqli(
-            'localhost',
-            'root',
-            '',
-            'fmlider'
+            env('DB_HOST', 'localhost'),
+            env('DB_USERNAME', 'root'),
+            env('DB_PASSWORD', ''),
+            env('DB_DATABASE', 'fmlider')
         );
 
         if ($this->db->connect_error) {
@@ -24,16 +41,25 @@ class DatabaseSeeder {
     }
 
     public function seedUsers() {
-        $check = $this->db->query("SELECT id FROM users WHERE email = 'admin@fmlider.co.ao' LIMIT 1");
+        $adminEmail = env('ADMIN_EMAIL', 'admin@fmlider.co.ao');
+        $adminPassword = env('ADMIN_PASSWORD', '');
+
+        $check = $this->db->query("SELECT id FROM users WHERE email = '" . $this->db->real_escape_string($adminEmail) . "' LIMIT 1");
         if ($check && $check->num_rows > 0) {
             echo "✓ Admin user já existe\n";
             return;
         }
 
-        $adminPassword = password_hash('Admin@2026', PASSWORD_BCRYPT);
+        if ($adminPassword === '') {
+            echo "✗ ADMIN_PASSWORD não definido. Adicione ADMIN_PASSWORD ao ficheiro backend/.env\n";
+            return;
+        }
+
+        $hashedPassword = password_hash($adminPassword, PASSWORD_BCRYPT);
+        $adminPhone = env('ADMIN_PHONE', '+244 935141747');
 
         $sql = "INSERT INTO users (username, name, email, phone, role, password, status, approval_status) VALUES
-                ('admin', 'Admin User', 'admin@fmlider.co.ao', '+244 935141747', 'admin', '$adminPassword', 1, 'approved')";
+                ('admin', 'Admin User', '" . $this->db->real_escape_string($adminEmail) . "', '" . $this->db->real_escape_string($adminPhone) . "', 'admin', '" . $this->db->real_escape_string($hashedPassword) . "', 1, 'approved')";
 
         if ($this->db->query($sql) === TRUE) {
             echo "✓ Users seeded\n";

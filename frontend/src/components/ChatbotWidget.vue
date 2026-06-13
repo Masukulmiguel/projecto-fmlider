@@ -87,8 +87,8 @@ const suggestions = [
   'Têm FAQ?',
 ]
 
-const GEMINI_KEY = import.meta.env.VITE_GEMINI_API_KEY || ''
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
+const API_URL = import.meta.env.VITE_API_URL || ''
+const CHATBOT_URL = API_URL ? `${API_URL}/chatbot/chat` : '/api/chatbot/chat'
 
 const COMPANY = {
   name: 'FMLider',
@@ -166,36 +166,16 @@ const formatText = (t) => {
     .replace(/\n/g, '<br>')
 }
 
-const callGemini = async (message, history) => {
-  const contents = []
-  const hist = history.slice(-8)
-  for (const h of hist) {
-    const role = h.role === 'bot' ? 'model' : 'user'
-    contents.push({ role, parts: [{ text: h.text }] })
-  }
-  contents.push({ role: 'user', parts: [{ text: message }] })
-
-  const res = await fetch(`${GEMINI_URL}?key=${GEMINI_KEY}`, {
+const callAI = async (message, history) => {
+  const res = await fetch(CHATBOT_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-      contents,
-      generationConfig: { temperature: 0.8, topP: 0.95, topK: 50, maxOutputTokens: 1024 },
-      safetySettings: [
-        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
-        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
-        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
-        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
-      ],
-    }),
+    body: JSON.stringify({ message, history }),
   })
 
-  if (!res.ok) throw new Error(`Gemini ${res.status}`)
   const data = await res.json()
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text
-  if (!text) throw new Error('No text in response')
-  return text.trim()
+  if (!data.success) throw new Error(data.message || 'Chatbot error')
+  return data.data.reply
 }
 
 const send = async (text) => {
@@ -207,7 +187,7 @@ const send = async (text) => {
   loading.value = true
   try {
     const history = messages.value.slice(0, -1).map(m => ({ role: m.role, text: m.text }))
-    const reply = await callGemini(content, history)
+    const reply = await callAI(content, history)
     messages.value.push({ role: 'bot', text: reply, time: now() })
   } catch (e) {
     console.error('Chatbot error:', e)
