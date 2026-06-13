@@ -115,7 +115,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 
 const authStore = useAuthStore()
@@ -140,21 +140,28 @@ const permissionLabels = computed(() => {
 
 const can = (perm) => authStore.can(perm)
 
-const authHeader = () => ({ headers: { Authorization: `Bearer ${authStore.token}` } })
-
-const safeGet = async (url) => {
-  try {
-    const r = await axios.get(url, authHeader())
-    return r.data?.data || null
-  } catch (e) { return null }
-}
-
 const load = async () => {
   const tasks = []
-  if (can('embarques.view')) tasks.push(safeGet('/api/embarques').then(d => { if (d?.embarques) { counts.embarques = d.embarques.length; counts.embarques_pendente = d.embarques.filter(e => e.status === 'pendente').length } }))
-  if (can('cotacoes.view')) tasks.push(safeGet('/api/cotacoes').then(d => { if (d?.cotacoes) { counts.cotacoes = d.cotacoes.length; counts.cotacoes_pendente = d.cotacoes.filter(c => c.status === 'pendente').length } }))
-  if (can('documentos.view')) tasks.push(safeGet('/api/documentos').then(d => { if (d?.documentos) counts.documentos = d.documentos.length }))
-  if (can('clients.view')) tasks.push(safeGet('/api/admin/users?role=cliente').then(d => { if (d?.users) { counts.clientes = d.users.length; counts.clientes_pendente = d.users.filter(u => u.approval_status === 'pending').length } }))
+  if (can('embarques.view')) tasks.push(
+    supabase.from('embarques').select('*').then(({ data, error }) => {
+      if (!error && data) { counts.embarques = data.length; counts.embarques_pendente = data.filter(e => e.status === 'pendente').length }
+    })
+  )
+  if (can('cotacoes.view')) tasks.push(
+    supabase.from('cotacoes').select('*').then(({ data, error }) => {
+      if (!error && data) { counts.cotacoes = data.length; counts.cotacoes_pendente = data.filter(c => c.status === 'pendente').length }
+    })
+  )
+  if (can('documentos.view')) tasks.push(
+    supabase.from('documentos').select('*').then(({ data, error }) => {
+      if (!error && data) counts.documentos = data.length
+    })
+  )
+  if (can('clients.view')) tasks.push(
+    supabase.from('users').select('*').eq('role', 'cliente').then(({ data, error }) => {
+      if (!error && data) { counts.clientes = data.length; counts.clientes_pendente = data.filter(u => u.approval_status === 'pending').length }
+    })
+  )
 
   await Promise.all(tasks)
 

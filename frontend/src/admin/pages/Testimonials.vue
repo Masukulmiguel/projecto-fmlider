@@ -100,15 +100,8 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
-
-const api = axios.create({ baseURL: '' })
-api.interceptors.request.use(config => {
-  const token = localStorage.getItem('supabase_access_token')
-  if (token) config.headers.Authorization = `Bearer ${token}`
-  return config
-})
 
 const testimonials = ref([])
 const loading = ref(true)
@@ -128,8 +121,8 @@ onMounted(async () => {
 async function fetchAll() {
   loading.value = true
   try {
-    const { data } = await api.get('/api/testimonials')
-    testimonials.value = data.testimonials || data.data || []
+    const { data, error } = await supabase.from('testimonials').select('*').order('order_by', { ascending: true })
+    if (!error) testimonials.value = data
   } catch (e) { console.error(e) }
   loading.value = false
 }
@@ -153,28 +146,45 @@ async function save() {
   if (!form.name || !form.message) return alert('Name and message are required.')
   saving.value = true
   try {
-    const fd = new FormData()
-    Object.entries(form).forEach(([k, v]) => {
-      if (k === 'photo_url' || k === 'id') return
-      fd.append(k, v ?? '')
-    })
-    if (photoFile.value) fd.append('photo', photoFile.value)
+    let photoUrl = form.photo_url
+    if (photoFile.value) {
+      const fileExt = photoFile.value.name.split('.').pop()
+      const fileName = `testimonials/${Date.now()}.${fileExt}`
+      const { data, error: uploadError } = await supabase.storage.from('uploads').upload(fileName, photoFile.value)
+      if (uploadError) throw uploadError
+      const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(fileName)
+      photoUrl = urlData.publicUrl
+    }
+
+    const payload = {
+      name: form.name,
+      position: form.position,
+      company: form.company,
+      message: form.message,
+      rating: form.rating,
+      status: form.status,
+      order_by: form.order_by,
+      photo_url: photoUrl
+    }
 
     if (form.id) {
-      await api.post(`/api/admin/testimonials/${form.id}?_method=PUT`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const { error } = await supabase.from('testimonials').update(payload).eq('id', form.id)
+      if (error) throw error
     } else {
-      await api.post('/api/admin/testimonials', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const { error } = await supabase.from('testimonials').insert(payload)
+      if (error) throw error
     }
     bsModal.hide()
     await fetchAll()
-  } catch (e) { alert('Error saving: ' + (e.response?.data?.message || e.message)) }
+  } catch (e) { alert('Error saving: ' + (e.message || e)) }
   saving.value = false
 }
 
 async function deleteItem(id) {
   if (!confirm('Delete this testimonial?')) return
   try {
-    await api.delete(`/api/admin/testimonials/${id}`)
+    const { error } = await supabase.from('testimonials').delete().eq('id', id)
+    if (error) throw error
     await fetchAll()
   } catch (e) { alert('Error deleting.') }
 }

@@ -219,10 +219,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
-import { useAuthStore } from '@/stores/authStore'
+import { supabase } from '@/lib/supabase'
 
-const authStore = useAuthStore()
 const users = ref([])
 const loading = ref(false)
 const filter = ref('pending')
@@ -247,15 +245,11 @@ const filteredUsers = computed(() => {
   return users.value.filter(u => u.approval_status === filter.value)
 })
 
-const authHeader = () => ({ headers: { Authorization: `Bearer ${authStore.token}` } })
-
 const loadUsers = async () => {
   loading.value = true
   try {
-    const response = await axios.get('/api/admin/users', authHeader())
-    if (response.data.success) {
-      users.value = response.data.data.users
-    }
+    const { data, error } = await supabase.from('users').select('*').order('created_at', { ascending: false })
+    if (!error) users.value = data
   } catch (error) {
     console.error(error)
   } finally {
@@ -265,10 +259,8 @@ const loadUsers = async () => {
 
 const loadPendingCount = async () => {
   try {
-    const response = await axios.get('/api/admin/users/pending/count', authHeader())
-    if (response.data.success) {
-      pendingCount.value = response.data.data.count
-    }
+    const { count, error } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('approval_status', 'pending')
+    if (!error) pendingCount.value = count || 0
   } catch (error) {
     pendingCount.value = 0
   }
@@ -277,12 +269,10 @@ const loadPendingCount = async () => {
 const openDetail = async (user) => {
   detailLoading.value = true
   try {
-    const response = await axios.get(`/api/admin/users/${user.id}`, authHeader())
-    if (response.data.success) {
-      detailUser.value = response.data.data.user
-      detailCompany.value = response.data.data.company
-      showDetailModal.value = true
-    }
+    detailUser.value = user
+    const { data: company, error } = await supabase.from('companies').select('*').eq('user_id', user.id).single()
+    if (!error) detailCompany.value = company
+    showDetailModal.value = true
   } catch (error) {
     alert('Erro ao carregar detalhes')
   } finally {
@@ -315,13 +305,13 @@ const getLockStatus = (user) => {
 const approve = async (user) => {
   if (!confirm(`Aprovar a conta de ${user.name}?`)) return
   try {
-    const response = await axios.post(`/api/admin/users/${user.id}/approve`, {}, authHeader())
-    if (response.data.success) {
+    const { error } = await supabase.from('users').update({ approval_status: 'approved', approved_at: new Date() }).eq('id', user.id)
+    if (!error) {
       await loadUsers()
       await loadPendingCount()
     }
   } catch (error) {
-    alert(error.response?.data?.message || 'Erro ao aprovar')
+    alert(error.message || 'Erro ao aprovar')
   }
 }
 
@@ -334,28 +324,26 @@ const reject = (user) => {
 const confirmReject = async () => {
   if (!rejectingUser.value) return
   try {
-    const response = await axios.post(`/api/admin/users/${rejectingUser.value.id}/reject`, {
-      reason: rejectReason.value
-    }, authHeader())
-    if (response.data.success) {
+    const { error } = await supabase.from('users').update({ approval_status: 'rejected', rejection_reason: rejectReason.value }).eq('id', rejectingUser.value.id)
+    if (!error) {
       showRejectModal.value = false
       await loadUsers()
       await loadPendingCount()
     }
   } catch (error) {
-    alert(error.response?.data?.message || 'Erro ao rejeitar')
+    alert(error.message || 'Erro ao rejeitar')
   }
 }
 
 const destroy = async (user) => {
   if (!confirm(`Eliminar definitivamente ${user.name}?`)) return
   try {
-    const response = await axios.delete(`/api/admin/users/${user.id}`, authHeader())
-    if (response.data.success) {
+    const { error } = await supabase.from('users').delete().eq('id', user.id)
+    if (!error) {
       await loadUsers()
     }
   } catch (error) {
-    alert(error.response?.data?.message || 'Erro ao eliminar')
+    alert(error.message || 'Erro ao eliminar')
   }
 }
 
@@ -380,18 +368,18 @@ const saveEdit = async () => {
   editSaving.value = true
   editError.value = ''
   try {
-    const response = await axios.put(`/api/admin/users/${editingUser.value.id}`, {
+    const { error } = await supabase.from('users').update({
       name: editForm.value.name,
       phone: editForm.value.phone,
       approval_status: editForm.value.approval_status,
       status: editForm.value.status
-    }, authHeader())
-    if (response.data.success) {
+    }).eq('id', editingUser.value.id)
+    if (!error) {
       showEditModal.value = false
       await loadUsers()
     }
   } catch (error) {
-    editError.value = error.response?.data?.message || 'Erro ao guardar'
+    editError.value = error.message || 'Erro ao guardar'
   } finally {
     editSaving.value = false
   }
@@ -402,21 +390,21 @@ const onEditPhotoChange = async (e) => {
   if (!file || !editingUser.value) return
   editPhotoMsg.value = ''
   editPhotoError.value = false
-  const formData = new FormData()
-  formData.append('photo', file)
-  try {
-    const response = await axios.post('/api/auth/upload-photo', formData, {
-      headers: { Authorization: `Bearer ${authStore.token}`, 'Content-Type': 'multipart/form-data' }
-    })
-    if (response.data.success) {
-      editForm.value.photo = response.data.data.photo
+  const fileExt = file.name.split('.').pop()
+  const fileName = `${editingUser.value.id}.${fileExt}`
+  const { data, error: uploadError } = await supabase.storage.from('photos').upload(fileName, file, { upsert: true })
+  if (!uploadError && data) {
+    const { data: urlData } = supabase.storage.from('photos').getPublicUrl(fileName)
+    editForm.value.photo = urlData.publicUrl
+    const { error: updateError } = await supabase.from('users').update({ photo: urlData.publicUrl }).eq('id', editingUser.value.id)
+    if (!updateError) {
       editPhotoError.value = false
       editPhotoMsg.value = 'Foto atualizada.'
       await loadUsers()
     }
-  } catch (error) {
+  } else {
     editPhotoError.value = true
-    editPhotoMsg.value = error.response?.data?.message || 'Erro ao carregar foto'
+    editPhotoMsg.value = uploadError?.message || 'Erro ao carregar foto'
   }
   e.target.value = ''
 }

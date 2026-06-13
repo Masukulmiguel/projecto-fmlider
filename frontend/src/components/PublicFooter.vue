@@ -76,7 +76,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 
 const year = new Date().getFullYear()
 
@@ -105,9 +105,11 @@ const emailUrl = computed(() => `mailto:${settings.value.email || 'geral@fmlider
 
 onMounted(async () => {
   try {
-    const { data } = await axios.get('/api/settings')
-    if (data.success && data.settings) {
-      settings.value = { ...defaults, ...data.settings }
+    const { data, error } = await supabase.from('settings').select('key, value')
+    if (!error && data) {
+      const settingsMap = {}
+      data.forEach(s => { settingsMap[s.key] = s.value })
+      settings.value = { ...defaults, ...settingsMap }
     }
   } catch (e) {
     // keep defaults

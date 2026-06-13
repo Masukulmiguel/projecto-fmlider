@@ -259,10 +259,8 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
-
-const API_URL = '/api/admin/news'
 
 const news = ref([])
 const loading = ref(false)
@@ -296,11 +294,6 @@ const isPublished = computed({
   set: (val) => { form.status = val ? 'published' : 'draft' },
 })
 
-function getHeaders() {
-  const token = localStorage.getItem('supabase_access_token')
-  return { Authorization: `Bearer ${token}` }
-}
-
 function formatDate(dateStr) {
   if (!dateStr) return '-'
   const d = new Date(dateStr)
@@ -317,8 +310,8 @@ function toDatetimeLocal(dateStr) {
 async function fetchNews() {
   loading.value = true
   try {
-    const { data } = await axios.get(API_URL, { headers: getHeaders() })
-    news.value = data.news || []
+    const { data, error } = await supabase.from('news').select('*').order('published_at', { ascending: false })
+    if (!error) news.value = data
   } catch (err) {
     console.error('Erro ao buscar notícias:', err)
     alert('Erro ao carregar notícias.')
@@ -370,15 +363,12 @@ function handleImageChange(event) {
 
 async function uploadImage() {
   if (!imageFile.value) return form.image
-  const formData = new FormData()
-  formData.append('image', imageFile.value)
-  const { data } = await axios.post('/api/admin/gallery/upload', formData, {
-    headers: {
-      ...getHeaders(),
-      'Content-Type': 'multipart/form-data',
-    },
-  })
-  return data.path || data.url || data.image
+  const fileExt = imageFile.value.name.split('.').pop()
+  const fileName = `news/${Date.now()}.${fileExt}`
+  const { data, error } = await supabase.storage.from('uploads').upload(fileName, imageFile.value)
+  if (error) throw error
+  const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(fileName)
+  return urlData.publicUrl
 }
 
 async function submitForm() {
@@ -402,11 +392,11 @@ async function submitForm() {
       published_at: form.published_at || null,
     }
     if (editing.value) {
-      await axios.put(`${API_URL}/${editingId.value}`, payload, {
-        headers: getHeaders(),
-      })
+      const { error } = await supabase.from('news').update(payload).eq('id', editingId.value)
+      if (error) throw error
     } else {
-      await axios.post(API_URL, payload, { headers: getHeaders() })
+      const { error } = await supabase.from('news').insert(payload)
+      if (error) throw error
     }
     newsModalInstance.hide()
     await fetchNews()
@@ -427,9 +417,8 @@ async function deleteNews() {
   if (!newsToDelete.value) return
   deleting.value = true
   try {
-    await axios.delete(`${API_URL}/${newsToDelete.value.id}`, {
-      headers: getHeaders(),
-    })
+    const { error } = await supabase.from('news').delete().eq('id', newsToDelete.value.id)
+    if (error) throw error
     deleteModalInstance.hide()
     await fetchNews()
   } catch (err) {

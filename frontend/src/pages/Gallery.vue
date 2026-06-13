@@ -106,7 +106,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 
 const activeFilter = ref('all')
 const lightboxOpen = ref(false)
@@ -145,19 +145,21 @@ const stats = computed(() => [
 const fetchGallery = async () => {
   loading.value = true
   try {
-    const { data } = await axios.get('/api/gallery')
-    const items = (data.data?.gallery || data.gallery || data || [])
-      .filter(img => img.status === 1 || img.status === true || img.status === undefined)
-      .sort((a, b) => (a.order_by ?? 0) - (b.order_by ?? 0))
+    const { data, error } = await supabase.from('gallery').select('*').order('order_by')
+    if (!error) {
+      const items = (data || [])
+        .filter(img => img.status === 1 || img.status === true || img.status === undefined)
+        .sort((a, b) => (a.order_by ?? 0) - (b.order_by ?? 0))
 
-    allImages.value = items.map((img, idx) => ({
-      id: img.id,
-      src: img.image?.startsWith('/') ? img.image : `/backend/storage/uploads/gallery/${img.image}`,
-      caption: img.title || img.alt_text || '',
-      alt_text: img.alt_text || img.title || '',
-      category: img.category || 'Geral',
-      size: idx % 5 === 0 ? 'large' : 'normal',
-    }))
+      allImages.value = items.map((img, idx) => ({
+        id: img.id,
+        src: img.image?.startsWith('/') ? img.image : `/backend/storage/uploads/gallery/${img.image}`,
+        caption: img.title || img.alt_text || '',
+        alt_text: img.alt_text || img.title || '',
+        category: img.category || 'Geral',
+        size: idx % 5 === 0 ? 'large' : 'normal',
+      }))
+    }
   } catch (e) {
     console.error('Erro ao carregar galeria', e)
   } finally {

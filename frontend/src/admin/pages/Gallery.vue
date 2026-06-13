@@ -153,10 +153,9 @@
 
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
 
-const API_URL = import.meta.env.VITE_API_URL || ''
 const gallery = ref([])
 const loading = ref(true)
 const saving = ref(false)
@@ -192,21 +191,17 @@ const categories = computed(() => {
   return [...cats]
 })
 
-function getAuthHeaders() {
-  return { Authorization: `Bearer ${localStorage.getItem('supabase_access_token')}` }
-}
-
 function getImageUrl(path) {
   if (!path) return ''
   if (path.startsWith('http')) return path
-  return `${API_URL}${path}`
+  return path
 }
 
 async function fetchGallery() {
   loading.value = true
   try {
-    const { data } = await axios.get(`${API_URL}/api/gallery`)
-    if (data.success) gallery.value = data.gallery || []
+    const { data, error } = await supabase.from('gallery').select('*').order('order_by', { ascending: true })
+    if (!error) gallery.value = data
   } catch (err) {
     console.error('Erro ao carregar galeria:', err)
   } finally {
@@ -247,13 +242,12 @@ function processFile(file) {
 }
 
 async function uploadImage() {
-  const fd = new FormData()
-  fd.append('image', selectedFile.value)
-  const { data } = await axios.post(`${API_URL}/api/admin/gallery/upload`, fd, {
-    headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' }
-  })
-  if (!data.success) throw new Error('Falha no upload')
-  return data.path
+  const fileExt = selectedFile.value.name.split('.').pop()
+  const fileName = `gallery/${Date.now()}.${fileExt}`
+  const { data, error } = await supabase.storage.from('uploads').upload(fileName, selectedFile.value)
+  if (error) throw error
+  const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(fileName)
+  return urlData.publicUrl
 }
 
 async function saveItem() {
@@ -273,10 +267,12 @@ async function saveItem() {
     }
     if (editingId.value) {
       if (!imagePath) delete payload.image
-      await axios.put(`${API_URL}/api/admin/gallery/${editingId.value}`, payload, { headers: getAuthHeaders() })
+      const { error } = await supabase.from('gallery').update(payload).eq('id', editingId.value)
+      if (error) throw error
     } else {
       if (!imagePath) throw new Error('Selecione uma imagem')
-      await axios.post(`${API_URL}/api/admin/gallery`, payload, { headers: getAuthHeaders() })
+      const { error } = await supabase.from('gallery').insert(payload)
+      if (error) throw error
     }
     galleryModal.hide()
     await fetchGallery()
@@ -297,7 +293,8 @@ async function deleteItem() {
   if (!deletingItem.value) return
   deleting.value = true
   try {
-    await axios.delete(`${API_URL}/api/admin/gallery/${deletingItem.value.id}`, { headers: getAuthHeaders() })
+    const { error } = await supabase.from('gallery').delete().eq('id', deletingItem.value.id)
+    if (error) throw error
     deleteModal.hide()
     gallery.value = gallery.value.filter(i => i.id !== deletingItem.value.id)
     deletingItem.value = null

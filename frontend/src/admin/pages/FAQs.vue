@@ -81,15 +81,8 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
-
-const api = axios.create({ baseURL: '' })
-api.interceptors.request.use(config => {
-  const token = localStorage.getItem('supabase_access_token')
-  if (token) config.headers.Authorization = `Bearer ${token}`
-  return config
-})
 
 const faqs = ref([])
 const loading = ref(true)
@@ -108,8 +101,8 @@ onMounted(async () => {
 async function fetchAll() {
   loading.value = true
   try {
-    const { data } = await api.get('/api/faqs')
-    faqs.value = data.faqs || data.data || []
+    const { data, error } = await supabase.from('faqs').select('*').order('order_by', { ascending: true })
+    if (!error) faqs.value = data
   } catch (e) { console.error(e) }
   loading.value = false
 }
@@ -128,20 +121,23 @@ async function save() {
   saving.value = true
   try {
     if (form.id) {
-      await api.put(`/api/admin/faqs/${form.id}`, form)
+      const { error } = await supabase.from('faqs').update({ question: form.question, answer: form.answer, category: form.category, status: form.status, order_by: form.order_by }).eq('id', form.id)
+      if (error) throw error
     } else {
-      await api.post('/api/admin/faqs', form)
+      const { error } = await supabase.from('faqs').insert({ question: form.question, answer: form.answer, category: form.category, status: form.status, order_by: form.order_by })
+      if (error) throw error
     }
     bsModal.hide()
     await fetchAll()
-  } catch (e) { alert('Error saving: ' + (e.response?.data?.message || e.message)) }
+  } catch (e) { alert('Error saving: ' + (e.message || e)) }
   saving.value = false
 }
 
 async function deleteItem(id) {
   if (!confirm('Delete this FAQ?')) return
   try {
-    await api.delete(`/api/admin/faqs/${id}`)
+    const { error } = await supabase.from('faqs').delete().eq('id', id)
+    if (error) throw error
     await fetchAll()
   } catch (e) { alert('Error deleting.') }
 }

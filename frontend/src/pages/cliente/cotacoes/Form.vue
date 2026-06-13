@@ -91,7 +91,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 
 const route = useRoute()
@@ -104,13 +104,12 @@ const errors = ref({})
 const errorMessage = ref('')
 const saving = ref(false)
 
-const authHeader = () => ({ headers: { Authorization: `Bearer ${authStore.token}` } })
-
 onMounted(async () => {
   if (isEdit.value) {
     try {
-      const r = await axios.get(`/api/cotacoes/${route.params.id}`, authHeader())
-      if (r.data.success) Object.assign(form, r.data.data.cotacao)
+      const { data, error } = await supabase.from('cotacoes').select('*').eq('id', route.params.id).single()
+      if (error) throw error
+      if (data) Object.assign(form, data)
     } catch (e) { errorMessage.value = 'Erro ao carregar' }
   }
 })
@@ -121,15 +120,16 @@ const handleSubmit = async () => {
   saving.value = true
   try {
     if (isEdit.value) {
-      await axios.put(`/api/cotacoes/${route.params.id}`, form, authHeader())
+      const { error } = await supabase.from('cotacoes').update(form).eq('id', route.params.id)
+      if (error) throw error
     } else {
-      await axios.post('/api/cotacoes', form, authHeader())
+      const userId = authStore.user?.id
+      const { error } = await supabase.from('cotacoes').insert({ ...form, user_id: userId })
+      if (error) throw error
     }
     router.push('/cotacoes')
   } catch (error) {
-    const data = error.response?.data?.data || {}
-    if (Object.keys(data).length) errors.value = data
-    else errorMessage.value = error.response?.data?.message || 'Erro ao guardar'
+    errorMessage.value = error.message || 'Erro ao guardar'
   } finally { saving.value = false }
 }
 </script>

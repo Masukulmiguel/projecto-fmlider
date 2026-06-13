@@ -138,7 +138,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 
 const services = ref([])
 const loading = ref(true)
@@ -146,10 +146,10 @@ const loading = ref(true)
 const fetchServices = async () => {
   loading.value = true
   try {
-    const { data } = await axios.get('/api/services')
-    services.value = (data.data?.services || data.services || data || [])
-      .filter(s => s.status === 1 || s.status === true)
-      .sort((a, b) => (a.order_by ?? 0) - (b.order_by ?? 0))
+    const { data, error } = await supabase.from('services').select('*').eq('status', 1).order('order_by')
+    if (!error) {
+      services.value = data || []
+    }
   } catch (e) {
     console.error('Erro ao carregar serviços', e)
   } finally {

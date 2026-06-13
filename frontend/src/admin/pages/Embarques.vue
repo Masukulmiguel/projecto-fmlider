@@ -150,25 +150,21 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import axios from 'axios'
-import { useAuthStore } from '@/stores/authStore'
+import { supabase } from '@/lib/supabase'
 
-const authStore = useAuthStore()
 const items = ref([])
 const loading = ref(false)
 const filters = reactive({ q: '', status: '' })
 let searchTimer = null
 
-const authHeader = () => ({ headers: { Authorization: 'Bearer ' + authStore.token } })
-
 const fetchData = async () => {
   loading.value = true
   try {
-    const params = {}
-    if (filters.q) params.q = filters.q
-    if (filters.status) params.status = filters.status
-    const r = await axios.get('/api/embarques', { ...authHeader(), params })
-    if (r.data.success) items.value = r.data.data.embarques
+    let query = supabase.from('embarques').select('*')
+    if (filters.status) query = query.eq('status', filters.status)
+    if (filters.q) query = query.or(`tracking_number.ilike.%${filters.q}%,client_name.ilike.%${filters.q}%,company_name.ilike.%${filters.q}%`)
+    const { data, error } = await query.order('created_at', { ascending: false })
+    if (!error) items.value = data
   } finally { loading.value = false }
 }
 
@@ -201,12 +197,13 @@ const closeEdit = () => {
 const submitEdit = async () => {
   saving.value = true
   try {
-    await axios.put('/api/embarques/' + editItem.value.id, {
+    const { error } = await supabase.from('embarques').update({
       status: editForm.status,
       notes: editForm.notes,
       declared_value: editForm.declared_value,
       currency: editForm.currency
-    }, authHeader())
+    }).eq('id', editItem.value.id)
+    if (error) throw error
     showToast('success', 'Embarque atualizado com sucesso.')
     closeEdit()
     fetchData()
@@ -232,7 +229,8 @@ const closeDelete = () => {
 const submitDelete = async () => {
   deleting.value = true
   try {
-    await axios.delete('/api/embarques/' + deleteItem.value.id, authHeader())
+    const { error } = await supabase.from('embarques').delete().eq('id', deleteItem.value.id)
+    if (error) throw error
     showToast('success', 'Embarque eliminado com sucesso.')
     closeDelete()
     fetchData()

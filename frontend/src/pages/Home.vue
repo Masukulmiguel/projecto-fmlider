@@ -364,7 +364,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import NewsCard from '@/components/NewsCard.vue'
 import PartnersCarousel from '@/components/PartnersCarousel.vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 
 const currentSlide = ref(0)
 let interval = null
@@ -411,17 +411,17 @@ function getServiceIcon(title) {
 }
 
 const fetchContent = async () => {
-  const fetchBanners = axios.get('/api/banners').catch(() => null)
-  const fetchServices = axios.get('/api/services').catch(() => null)
-  const fetchNews = axios.get('/api/news').catch(() => null)
-  const fetchTestimonials = axios.get('/api/testimonials').catch(() => null)
+  const fetchBanners = supabase.from('banners').select('*').eq('status', 1).order('order_by')
+  const fetchServices = supabase.from('services').select('*').eq('status', 1).order('order_by')
+  const fetchNews = supabase.from('news').select('*').eq('status', 'published').order('published_at', { ascending: false })
+  const fetchTestimonials = supabase.from('testimonials').select('*').eq('status', 1).order('order_by')
 
   const [bannersRes, servicesRes, newsRes, testsRes] = await Promise.all([
     fetchBanners, fetchServices, fetchNews, fetchTestimonials
   ])
 
-  if (bannersRes?.data?.success) {
-    const raw = bannersRes.data.banners || []
+  if (!bannersRes.error && bannersRes.data) {
+    const raw = bannersRes.data || []
     slides.value = raw.map(b => ({
       ...b,
       image: b.image?.startsWith('/') || b.image?.startsWith('http') ? b.image : `/assets/img/${b.image}`,
@@ -430,18 +430,18 @@ const fetchContent = async () => {
   }
   loadingBanners.value = false
 
-  if (servicesRes?.data?.success) {
-    services.value = servicesRes.data.services || []
+  if (!servicesRes.error && servicesRes.data) {
+    services.value = servicesRes.data || []
   }
   loadingServices.value = false
 
-  if (newsRes?.data?.success) {
-    latestNews.value = (newsRes.data.news || []).slice(0, 3)
+  if (!newsRes.error && newsRes.data) {
+    latestNews.value = (newsRes.data || []).slice(0, 3)
   }
   loadingNews.value = false
 
-  if (testsRes?.data?.success) {
-    testimonials.value = testsRes.data.testimonials || []
+  if (!testsRes.error && testsRes.data) {
+    testimonials.value = testsRes.data || []
   }
   loadingTestimonials.value = false
 

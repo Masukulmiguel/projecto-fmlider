@@ -117,7 +117,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 
 const loading = ref(true)
 const saving = ref(false)
@@ -139,18 +139,14 @@ const form = reactive({
   meta_description: ''
 })
 
-const getAuthHeaders = () => ({
-  headers: { Authorization: `Bearer ${localStorage.getItem('supabase_access_token')}` }
-})
-
 const fetchSettings = async () => {
   loading.value = true
   try {
-    const { data } = await axios.get('/api/settings')
-    if (data.success && data.settings) {
-      Object.keys(form).forEach(key => {
-        if (data.settings[key] !== undefined) {
-          form[key] = data.settings[key] || ''
+    const { data, error } = await supabase.from('settings').select('*')
+    if (!error && data) {
+      data.forEach(row => {
+        if (row.key in form) {
+          form[row.key] = row.value || ''
         }
       })
     }
@@ -165,14 +161,12 @@ const saveSettings = async () => {
   saving.value = true
   message.value = null
   try {
-    const { data } = await axios.put('/api/admin/settings', { settings: { ...form } }, getAuthHeaders())
-    if (data.success) {
-      message.value = { type: 'success', text: 'Configurações guardadas com sucesso!' }
-    } else {
-      message.value = { type: 'danger', text: data.message || 'Erro ao guardar configurações.' }
-    }
+    const rows = Object.entries(form).map(([key, value]) => ({ key, value }))
+    const { error } = await supabase.from('settings').upsert(rows)
+    if (error) throw error
+    message.value = { type: 'success', text: 'Configurações guardadas com sucesso!' }
   } catch (e) {
-    message.value = { type: 'danger', text: e.response?.data?.message || 'Erro ao guardar configurações.' }
+    message.value = { type: 'danger', text: e.message || 'Erro ao guardar configurações.' }
   } finally {
     saving.value = false
   }

@@ -113,7 +113,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 
 const authStore = useAuthStore()
 const form = reactive({ name: '', phone: '' })
@@ -130,20 +130,18 @@ const photoError = ref(false)
 
 const initials = (n) => (n || '?').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' }) : ''
-const authHeader = () => ({ headers: { Authorization: `Bearer ${authStore.token}` } })
 
 const save = async () => {
   errorMessage.value = ''
   successMessage.value = ''
   saving.value = true
   try {
-    const r = await axios.put('/api/auth/profile', form, authHeader())
-    if (r.data.success) {
-      successMessage.value = 'Perfil atualizado.'
-      await authStore.getProfile()
-    }
+    const { error } = await supabase.auth.updateUser({ data: form })
+    if (error) throw error
+    successMessage.value = 'Perfil atualizado.'
+    await authStore.getProfile()
   } catch (e) {
-    errorMessage.value = e.response?.data?.message || 'Erro ao guardar.'
+    errorMessage.value = e.message || 'Erro ao guardar.'
   } finally {
     saving.value = false
   }
@@ -155,18 +153,13 @@ const changePassword = async () => {
   if (pwd.new !== pwd.confirm) { passwordError.value = 'As senhas não coincidem.'; return }
   changingPwd.value = true
   try {
-    const r = await axios.post('/api/auth/change-password', {
-      current_password: pwd.current,
-      new_password: pwd.new,
-      new_password_confirmation: pwd.confirm,
-    }, authHeader())
-    if (r.data.success) {
-      passwordSuccess.value = 'Senha alterada com sucesso.'
-      pwd.current = ''; pwd.new = ''; pwd.confirm = ''
-      await authStore.getProfile()
-    }
+    const { error } = await supabase.auth.updateUser({ password: pwd.new })
+    if (error) throw error
+    passwordSuccess.value = 'Senha alterada com sucesso.'
+    pwd.current = ''; pwd.new = ''; pwd.confirm = ''
+    await authStore.getProfile()
   } catch (e) {
-    passwordError.value = e.response?.data?.message || 'Erro ao alterar senha.'
+    passwordError.value = e.message || 'Erro ao alterar senha.'
   } finally {
     changingPwd.value = false
   }
@@ -198,17 +191,8 @@ const onPhotoChange = async (event) => {
 const restorePhoto = async (p) => {
   if (p.is_current) return
   if (!confirm('Repor esta foto como atual?')) return
-  try {
-    const r = await axios.post('/api/auth/photo/restore', { photo_id: p.id }, authHeader())
-    if (r.data.success) {
-      photoError.value = false
-      photoMessage.value = 'Foto reposta.'
-      await authStore.getProfile()
-    }
-  } catch (e) {
-    photoError.value = true
-    photoMessage.value = e.response?.data?.message || 'Erro ao repor foto.'
-  }
+  photoError.value = true
+  photoMessage.value = 'Funcionalidade de repor foto ainda não disponível.'
 }
 
 onMounted(async () => {

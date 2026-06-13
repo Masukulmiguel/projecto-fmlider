@@ -238,8 +238,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import axios from 'axios'
-import { useAuthStore } from '@/stores/authStore'
+import { supabase } from '@/lib/supabase'
 import { Line, Doughnut } from 'vue-chartjs'
 import {
   Chart, LineElement, PointElement, LineController,
@@ -253,7 +252,6 @@ Chart.register(
   ArcElement, DoughnutController
 )
 
-const authStore = useAuthStore()
 const data = ref(null)
 const loading = ref(false)
 const statsDays = ref(30)
@@ -284,8 +282,6 @@ const totalOperations = computed(() => {
   return data.value.embarques + data.value.cotacoes + data.value.documentos
 })
 
-const authHeader = () => ({ headers: { Authorization: `Bearer ${authStore.token}` } })
-
 const changePeriod = (days) => {
   statsDays.value = days
   loadStats()
@@ -294,8 +290,79 @@ const changePeriod = (days) => {
 const loadStats = async () => {
   loading.value = true
   try {
-    const r = await axios.get('/api/admin/dashboard/stats', { ...authHeader(), params: { days: statsDays.value } })
-    if (r.data.success) data.value = r.data.data
+    const since = new Date()
+    since.setDate(since.getDate() - statsDays.value)
+    const sinceISO = since.toISOString()
+
+    const [clientsRes, visitorsRes, messagesRes, embarquesRes, cotacoesRes, documentosRes] = await Promise.all([
+      supabase.from('users').select('id, created_at, approval_status, name, email, photo').gte('created_at', sinceISO),
+      supabase.from('visitors').select('id, visited_at, country').gte('visited_at', sinceISO),
+      supabase.from('chat_messages').select('id, created_at, sender_name, message, is_read'),
+      supabase.from('embarques').select('id, created_at'),
+      supabase.from('cotacoes').select('id, created_at'),
+      supabase.from('documentos').select('id, created_at'),
+    ])
+
+    const clients = clientsRes.data || []
+    const visitors = visitorsRes.data || []
+    const messages = messagesRes.data || []
+    const embarques = embarquesRes.data || []
+    const cotacoes = cotacoesRes.data || []
+    const documentos = documentosRes.data || []
+
+    const today = new Date().toISOString().split('T')[0]
+    const todayVisitors = visitors.filter(v => v.visited_at && v.visited_at.startsWith(today)).length
+    const unreadMessages = messages.filter(m => !m.is_read).length
+
+    const visitorsByDay = {}
+    visitors.forEach(v => {
+      if (v.visited_at) {
+        const day = v.visited_at.slice(0, 10)
+        visitorsByDay[day] = (visitorsByDay[day] || 0) + 1
+      }
+    })
+
+    const messagesByDay = {}
+    messages.forEach(m => {
+      if (m.created_at) {
+        const day = m.created_at.slice(0, 10)
+        messagesByDay[day] = (messagesByDay[day] || 0) + 1
+      }
+    })
+
+    const clientsByDay = {}
+    clients.forEach(c => {
+      if (c.created_at) {
+        const day = c.created_at.slice(0, 10)
+        clientsByDay[day] = (clientsByDay[day] || 0) + 1
+      }
+    })
+
+    const countryCounts = {}
+    visitors.forEach(v => {
+      if (v.country) {
+        countryCounts[v.country] = (countryCounts[v.country] || 0) + 1
+      }
+    })
+
+    data.value = {
+      clients: { total: clients.length, trend: 0 },
+      visitors: { total: visitors.length, today: todayVisitors },
+      messages: { total: messages.length, unread: unreadMessages },
+      embarques: embarques.length,
+      cotacoes: cotacoes.length,
+      documentos: documentos.length,
+      recent: {
+        clients: clients.slice(0, 5),
+        messages: messages.slice(0, 5)
+      },
+      charts: {
+        visitors_by_day: Object.entries(visitorsByDay).map(([d, n]) => ({ d, n: String(n) })),
+        messages_by_day: Object.entries(messagesByDay).map(([d, n]) => ({ d, n: String(n) })),
+        clients_by_day: Object.entries(clientsByDay).map(([d, n]) => ({ d, n: String(n) })),
+        visitors_by_country: Object.entries(countryCounts).map(([country, n]) => ({ country, n: String(n) }))
+      }
+    }
   } catch (e) { console.error(e) }
   finally { loading.value = false }
 }
@@ -313,13 +380,15 @@ const executeReset = async () => {
   resetError.value = ''
   resetSuccess.value = ''
   try {
-    const r = await axios.post('/api/admin/secret-reset', { secret_key: resetSecretKey.value }, authHeader())
-    if (r.data.success) {
-      resetSuccess.value = 'Reset efetuado com sucesso! A recarregar...'
-      setTimeout(() => { window.location.reload() }, 2000)
+    const tables = ['chat_messages', 'visitors', 'embarques', 'cotacoes', 'documentos', 'contacts']
+    for (const table of tables) {
+      await supabase.from(table).delete().neq('id', '00000000-0000-0000-0000-000000000000')
     }
+    await supabase.from('users').delete().neq('role', 'admin')
+    resetSuccess.value = 'Reset efetuado com sucesso! A recarregar...'
+    setTimeout(() => { window.location.reload() }, 2000)
   } catch (e) {
-    resetError.value = e.response?.data?.message || 'Erro ao efetar reset'
+    resetError.value = e.message || 'Erro ao efetar reset'
   } finally {
     resetLoading.value = false
   }

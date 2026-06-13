@@ -47,7 +47,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 
 const authStore = useAuthStore()
@@ -58,8 +58,8 @@ const initials = (n) => (n || '?').split(' ').map(s => s[0]).slice(0, 2).join(''
 const load = async () => {
   loading.value = true
   try {
-    const r = await axios.get('/api/contactos', { headers: { Authorization: `Bearer ${authStore.token}` } })
-    if (r.data.success) items.value = r.data.data.contactos
+    const { data, error } = await supabase.from('contactos').select('*')
+    if (!error) items.value = data || []
   } finally { loading.value = false }
 }
 

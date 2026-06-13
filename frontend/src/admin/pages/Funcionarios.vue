@@ -213,10 +213,8 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import axios from 'axios'
-import { useAuthStore } from '@/stores/authStore'
+import { supabase } from '@/lib/supabase'
 
-const authStore = useAuthStore()
 const items = ref([])
 const allPermissions = ref([])
 const loading = ref(false)
@@ -287,13 +285,11 @@ const submitLock = async () => {
   }
   locking.value = true
   lockError.value = ''
-  const result = await authStore.lockUser(lockTarget.value.id, {
-    duration_hours: lockForm.duration_hours,
-    reason: lockForm.reason.trim(),
-  })
+  const lockUntil = new Date(Date.now() + lockForm.duration_hours * 3600 * 1000).toISOString()
+  const { error } = await supabase.from('users').update({ locked_at: lockUntil, locked_reason: lockForm.reason.trim() }).eq('id', lockTarget.value.id)
   locking.value = false
-  if (!result.success) {
-    lockError.value = result.error || 'Erro ao bloquear.'
+  if (error) {
+    lockError.value = error.message || 'Erro ao bloquear.'
     return
   }
   closeLockModal()
@@ -301,29 +297,24 @@ const submitLock = async () => {
 }
 const unlockUser = async (u) => {
   if (!confirm(`Desbloquear o funcionário "${u.name}"?`)) return
-  const result = await authStore.unlockUser(u.id)
-  if (!result.success) {
-    alert(result.error || 'Erro ao desbloquear.')
+  const { error } = await supabase.from('users').update({ locked_at: null, locked_reason: null }).eq('id', u.id)
+  if (error) {
+    alert(error.message || 'Erro ao desbloquear.')
     return
   }
   await fetchList()
 }
 
-const authHeader = () => ({ headers: { Authorization: `Bearer ${authStore.token}` } })
-
 const fetchList = async () => {
   loading.value = true
   try {
-    const r = await axios.get('/api/admin/users?role=funcionario', authHeader())
-    if (r.data.success) items.value = r.data.data.users
+    const { data, error } = await supabase.from('users').select('*').eq('role', 'funcionario').order('created_at', { ascending: false })
+    if (!error) items.value = data
   } finally { loading.value = false }
 }
 
 const fetchPerms = async () => {
-  try {
-    const r = await axios.get('/api/admin/users/permissions/list', authHeader())
-    if (r.data.success) allPermissions.value = r.data.data.permissions
-  } catch (e) { allPermissions.value = Object.keys(PERM_LABELS) }
+  allPermissions.value = Object.keys(PERM_LABELS)
 }
 
 const openForm = (item = null) => {
@@ -359,27 +350,40 @@ const handleSubmit = async () => {
   }
   saving.value = true
   try {
-    const payload = { ...form, role: 'funcionario' }
+    const payload = {
+      name: form.name,
+      username: form.username,
+      email: form.email,
+      phone: form.phone,
+      position: form.position,
+      permissions: form.permissions,
+      role: 'funcionario'
+    }
     if (editing.value) {
-      if (!payload.password) delete payload.password
-      await axios.put(`/api/admin/users/${editing.value.id}`, payload, authHeader())
+      if (form.password) payload.password = form.password
+      const { error } = await supabase.from('users').update(payload).eq('id', editing.value.id)
+      if (error) throw error
     } else {
-      await axios.post('/api/admin/users', payload, authHeader())
+      payload.status = 1
+      payload.approval_status = 'approved'
+      const { error } = await supabase.from('users').insert(payload)
+      if (error) throw error
     }
     closeForm()
     await fetchList()
   } catch (e) {
-    errorMessage.value = e.response?.data?.message || 'Erro ao guardar.'
+    errorMessage.value = e.message || 'Erro ao guardar.'
   } finally { saving.value = false }
 }
 
 const confirmDelete = async (item) => {
   if (!confirm(`Eliminar o funcionário "${item.name}"? Esta acção é irreversível.`)) return
   try {
-    await axios.delete(`/api/admin/users/${item.id}`, authHeader())
+    const { error } = await supabase.from('users').delete().eq('id', item.id)
+    if (error) throw error
     await fetchList()
   } catch (e) {
-    alert(e.response?.data?.message || 'Erro ao eliminar')
+    alert(e.message || 'Erro ao eliminar')
   }
 }
 

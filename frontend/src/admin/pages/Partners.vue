@@ -256,10 +256,8 @@
 
 <script setup>
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
-
-const API_URL = '/api/admin/partners'
 
 const partners = ref([])
 const loading = ref(false)
@@ -287,16 +285,11 @@ const form = reactive({
   order_by: 0,
 })
 
-function getHeaders() {
-  const token = localStorage.getItem('supabase_access_token')
-  return { Authorization: `Bearer ${token}` }
-}
-
 async function fetchPartners() {
   loading.value = true
   try {
-    const { data } = await axios.get('/api/partners', { headers: getHeaders() })
-    partners.value = data.partners || []
+    const { data, error } = await supabase.from('partners').select('*').order('order_by', { ascending: true })
+    if (!error) partners.value = data
   } catch (err) {
     console.error('Erro ao buscar parceiros:', err)
     alert('Erro ao carregar parceiros.')
@@ -346,15 +339,12 @@ function handleImageChange(event) {
 
 async function uploadImage() {
   if (!imageFile.value) return form.logo
-  const formData = new FormData()
-  formData.append('image', imageFile.value)
-  const { data } = await axios.post('/api/admin/gallery/upload', formData, {
-    headers: {
-      ...getHeaders(),
-      'Content-Type': 'multipart/form-data',
-    },
-  })
-  return data.path || data.url || data.image
+  const fileExt = imageFile.value.name.split('.').pop()
+  const fileName = `partners/${Date.now()}.${fileExt}`
+  const { data, error } = await supabase.storage.from('uploads').upload(fileName, imageFile.value)
+  if (error) throw error
+  const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(fileName)
+  return urlData.publicUrl
 }
 
 async function submitForm() {
@@ -377,11 +367,11 @@ async function submitForm() {
       order_by: form.order_by,
     }
     if (editing.value) {
-      await axios.put(`${API_URL}/${editingId.value}`, payload, {
-        headers: getHeaders(),
-      })
+      const { error } = await supabase.from('partners').update(payload).eq('id', editingId.value)
+      if (error) throw error
     } else {
-      await axios.post(API_URL, payload, { headers: getHeaders() })
+      const { error } = await supabase.from('partners').insert(payload)
+      if (error) throw error
     }
     partnerModalInstance.hide()
     await fetchPartners()
@@ -402,9 +392,8 @@ async function deletePartner() {
   if (!partnerToDelete.value) return
   deleting.value = true
   try {
-    await axios.delete(`${API_URL}/${partnerToDelete.value.id}`, {
-      headers: getHeaders(),
-    })
+    const { error } = await supabase.from('partners').delete().eq('id', partnerToDelete.value.id)
+    if (error) throw error
     deleteModalInstance.hide()
     await fetchPartners()
   } catch (err) {

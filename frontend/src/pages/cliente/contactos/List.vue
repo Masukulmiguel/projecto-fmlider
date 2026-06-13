@@ -129,7 +129,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 
 const authStore = useAuthStore()
@@ -144,15 +144,18 @@ const errors = ref({})
 const errorMessage = ref('')
 let searchTimer = null
 
-const authHeader = () => ({ headers: { Authorization: `Bearer ${authStore.token}` } })
-
 const fetchData = async () => {
   loading.value = true
   try {
-    const params = {}
-    if (filters.q) params.q = filters.q
-    const response = await axios.get('/api/contactos', { ...authHeader(), params })
-    if (response.data.success) items.value = response.data.data.contactos
+    const userId = authStore.user?.id
+    if (!userId) return
+
+    let query = supabase.from('contactos').select('*').eq('user_id', userId)
+    if (filters.q) {
+      query = query.or(`name.ilike.%${filters.q}%,company.ilike.%${filters.q}%,email.ilike.%${filters.q}%`)
+    }
+    const { data, error } = await query
+    if (!error) items.value = data || []
   } finally {
     loading.value = false
   }
@@ -179,17 +182,18 @@ const handleSubmit = async () => {
   errorMessage.value = ''
   saving.value = true
   try {
+    const userId = authStore.user?.id
     if (editing.value) {
-      await axios.put(`/api/contactos/${editing.value.id}`, form, authHeader())
+      const { error } = await supabase.from('contactos').update(form).eq('id', editing.value.id)
+      if (error) throw error
     } else {
-      await axios.post('/api/contactos', form, authHeader())
+      const { error } = await supabase.from('contactos').insert({ ...form, user_id: userId })
+      if (error) throw error
     }
     closeForm()
     await fetchData()
   } catch (error) {
-    const data = error.response?.data?.data || {}
-    if (Object.keys(data).length) errors.value = data
-    else errorMessage.value = error.response?.data?.message || 'Erro ao guardar'
+    errorMessage.value = error.message || 'Erro ao guardar'
   } finally {
     saving.value = false
   }
@@ -198,7 +202,8 @@ const handleSubmit = async () => {
 const confirmDelete = async (item) => {
   if (!confirm(`Eliminar "${item.name}"?`)) return
   try {
-    await axios.delete(`/api/contactos/${item.id}`, authHeader())
+    const { error } = await supabase.from('contactos').delete().eq('id', item.id)
+    if (error) throw error
     await fetchData()
   } catch (e) { alert('Erro ao eliminar') }
 }

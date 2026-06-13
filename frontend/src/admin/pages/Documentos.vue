@@ -94,22 +94,20 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import axios from 'axios'
-import { useAuthStore } from '@/stores/authStore'
+import { supabase } from '@/lib/supabase'
 
-const authStore = useAuthStore()
 const items = ref([])
 const loading = ref(false)
 const filters = reactive({ q: '' })
 let searchTimer = null
 
-const authHeader = () => ({ headers: { Authorization: 'Bearer ' + authStore.token } })
-
 const fetchData = async () => {
   loading.value = true
   try {
-    const r = await axios.get('/api/documentos', { ...authHeader(), params: { q: filters.q } })
-    if (r.data.success) items.value = r.data.data.documentos
+    let query = supabase.from('documentos').select('*')
+    if (filters.q) query = query.or(`name.ilike.%${filters.q}%,client_name.ilike.%${filters.q}%,company_name.ilike.%${filters.q}%`)
+    const { data, error } = await query.order('created_at', { ascending: false })
+    if (!error) items.value = data
   } finally { loading.value = false }
 }
 
@@ -142,7 +140,8 @@ const closeDelete = () => {
 const submitDelete = async () => {
   deleting.value = true
   try {
-    await axios.delete('/api/documentos/' + deleteItem.value.id, authHeader())
+    const { error } = await supabase.from('documentos').delete().eq('id', deleteItem.value.id)
+    if (error) throw error
     showToast('success', 'Documento eliminado com sucesso.')
     closeDelete()
     fetchData()

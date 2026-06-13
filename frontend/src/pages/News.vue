@@ -117,7 +117,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 
 const router = useRouter()
 const allNews = ref([])
@@ -129,9 +129,9 @@ const perPage = 6
 const fetchNews = async () => {
   loading.value = true
   try {
-    const r = await axios.get('/api/news')
-    if (r.data.success && r.data.news?.length) {
-      allNews.value = r.data.news.map(n => ({
+    const { data, error } = await supabase.from('news').select('*').eq('status', 'published').order('published_at', { ascending: false })
+    if (!error && data?.length) {
+      allNews.value = data.map(n => ({
         id: n.id,
         title: n.title,
         slug: n.slug,

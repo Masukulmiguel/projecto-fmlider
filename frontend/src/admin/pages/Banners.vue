@@ -244,10 +244,8 @@
 
 <script setup>
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
-
-const API_URL = '/api/admin/banners'
 
 const banners = ref([])
 const loading = ref(false)
@@ -275,16 +273,11 @@ const form = reactive({
   order_by: 0,
 })
 
-function getHeaders() {
-  const token = localStorage.getItem('supabase_access_token')
-  return { Authorization: `Bearer ${token}` }
-}
-
 async function fetchBanners() {
   loading.value = true
   try {
-    const { data } = await axios.get(API_URL, { headers: getHeaders() })
-    banners.value = Array.isArray(data) ? data : (data.banners || data.data || [])
+    const { data, error } = await supabase.from('banners').select('*').order('order_by', { ascending: true })
+    if (!error) banners.value = data
   } catch (err) {
     console.error('Erro ao buscar banners:', err)
     alert('Erro ao carregar banners.')
@@ -334,15 +327,12 @@ function handleImageChange(event) {
 
 async function uploadImage() {
   if (!imageFile.value) return form.image
-  const formData = new FormData()
-  formData.append('image', imageFile.value)
-  const { data } = await axios.post('/api/admin/gallery/upload', formData, {
-    headers: {
-      ...getHeaders(),
-      'Content-Type': 'multipart/form-data',
-    },
-  })
-  return data.path || data.url || data.image
+  const fileExt = imageFile.value.name.split('.').pop()
+  const fileName = `banners/${Date.now()}.${fileExt}`
+  const { data, error } = await supabase.storage.from('uploads').upload(fileName, imageFile.value)
+  if (error) throw error
+  const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(fileName)
+  return urlData.publicUrl
 }
 
 async function submitForm() {
@@ -365,11 +355,11 @@ async function submitForm() {
       order_by: form.order_by,
     }
     if (editing.value) {
-      await axios.put(`${API_URL}/${editingId.value}`, payload, {
-        headers: getHeaders(),
-      })
+      const { error } = await supabase.from('banners').update(payload).eq('id', editingId.value)
+      if (error) throw error
     } else {
-      await axios.post(API_URL, payload, { headers: getHeaders() })
+      const { error } = await supabase.from('banners').insert(payload)
+      if (error) throw error
     }
     bannerModalInstance.hide()
     await fetchBanners()
@@ -390,9 +380,8 @@ async function deleteBanner() {
   if (!bannerToDelete.value) return
   deleting.value = true
   try {
-    await axios.delete(`${API_URL}/${bannerToDelete.value.id}`, {
-      headers: getHeaders(),
-    })
+    const { error } = await supabase.from('banners').delete().eq('id', bannerToDelete.value.id)
+    if (error) throw error
     deleteModalInstance.hide()
     await fetchBanners()
   } catch (err) {

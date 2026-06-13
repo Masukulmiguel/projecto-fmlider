@@ -42,7 +42,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 
 const authStore = useAuthStore()
@@ -60,8 +60,8 @@ const formatSize = (b) => {
 const load = async () => {
   loading.value = true
   try {
-    const r = await axios.get('/api/documentos', { headers: { Authorization: `Bearer ${authStore.token}` } })
-    if (r.data.success) items.value = r.data.data.documentos
+    const { data, error } = await supabase.from('documentos').select('*')
+    if (!error) items.value = data || []
   } finally { loading.value = false }
 }
 

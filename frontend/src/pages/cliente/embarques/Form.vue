@@ -100,7 +100,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 
 const route = useRoute()
@@ -114,13 +114,12 @@ const errorMessage = ref('')
 const successMessage = ref('')
 const saving = ref(false)
 
-const authHeader = () => ({ headers: { Authorization: `Bearer ${authStore.token}` } })
-
 onMounted(async () => {
   if (isEdit.value) {
     try {
-      const r = await axios.get(`/api/embarques/${route.params.id}`, authHeader())
-      if (r.data.success) Object.assign(form, r.data.data.embarque)
+      const { data, error } = await supabase.from('embarques').select('*').eq('id', route.params.id).single()
+      if (error) throw error
+      if (data) Object.assign(form, data)
     } catch (e) {
       errorMessage.value = 'Erro ao carregar embarque'
     }
@@ -134,19 +133,18 @@ const handleSubmit = async () => {
   saving.value = true
   try {
     if (isEdit.value) {
-      const r = await axios.put(`/api/embarques/${route.params.id}`, form, authHeader())
-      if (r.data.success) successMessage.value = 'Embarque atualizado.'
+      const { error } = await supabase.from('embarques').update(form).eq('id', route.params.id)
+      if (error) throw error
+      successMessage.value = 'Embarque atualizado.'
     } else {
-      const r = await axios.post('/api/embarques', form, authHeader())
-      if (r.data.success) {
-        successMessage.value = 'Embarque criado com sucesso.'
-        setTimeout(() => router.push('/embarques'), 1000)
-      }
+      const userId = authStore.user?.id
+      const { error } = await supabase.from('embarques').insert({ ...form, user_id: userId })
+      if (error) throw error
+      successMessage.value = 'Embarque criado com sucesso.'
+      setTimeout(() => router.push('/embarques'), 1000)
     }
   } catch (error) {
-    const data = error.response?.data?.data || {}
-    if (Object.keys(data).length) errors.value = data
-    else errorMessage.value = error.response?.data?.message || 'Erro ao guardar'
+    errorMessage.value = error.message || 'Erro ao guardar'
   } finally {
     saving.value = false
   }

@@ -153,10 +153,8 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import axios from 'axios'
-import { useAuthStore } from '@/stores/authStore'
+import { supabase } from '@/lib/supabase'
 
-const authStore = useAuthStore()
 const items = ref([])
 const loading = ref(false)
 const saving = ref(false)
@@ -181,8 +179,6 @@ const sortedItems = computed(() =>
   [...items.value].sort((a, b) => (a.order_by ?? 0) - (b.order_by ?? 0))
 )
 
-const authHeader = () => ({ headers: { Authorization: `Bearer ${authStore.token}` } })
-
 const toSlug = (str) =>
   str.toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -198,8 +194,8 @@ const autoSlug = () => {
 const fetchList = async () => {
   loading.value = true
   try {
-    const r = await axios.get('/api/services')
-    items.value = r.data.data?.services || r.data.services || r.data || []
+    const { data, error } = await supabase.from('services').select('*').order('order_by', { ascending: true })
+    if (!error) items.value = data
   } catch (e) {
     console.error('Erro ao carregar serviços', e)
   } finally {
@@ -246,15 +242,12 @@ const removeImage = () => {
 }
 
 const uploadImage = async (file) => {
-  const fd = new FormData()
-  fd.append('image', file)
-  const r = await axios.post('/api/admin/gallery/upload', fd, {
-    headers: {
-      Authorization: `Bearer ${authStore.token}`,
-      'Content-Type': 'multipart/form-data',
-    },
-  })
-  return r.data.data?.url || r.data.url || r.data.path
+  const fileExt = file.name.split('.').pop()
+  const fileName = `services/${Date.now()}.${fileExt}`
+  const { data, error } = await supabase.storage.from('uploads').upload(fileName, file)
+  if (error) throw error
+  const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(fileName)
+  return urlData.publicUrl
 }
 
 const handleSubmit = async () => {
@@ -279,14 +272,16 @@ const handleSubmit = async () => {
       order_by: form.order_by,
     }
     if (editing.value) {
-      await axios.put(`/api/admin/services/${editing.value.id}`, payload, authHeader())
+      const { error } = await supabase.from('services').update(payload).eq('id', editing.value.id)
+      if (error) throw error
     } else {
-      await axios.post('/api/admin/services', payload, authHeader())
+      const { error } = await supabase.from('services').insert(payload)
+      if (error) throw error
     }
     closeForm()
     await fetchList()
   } catch (e) {
-    errorMessage.value = e.response?.data?.message || 'Erro ao guardar.'
+    errorMessage.value = e.message || 'Erro ao guardar.'
   } finally {
     saving.value = false
   }
@@ -295,10 +290,11 @@ const handleSubmit = async () => {
 const confirmDelete = async (item) => {
   if (!confirm(`Eliminar o serviço "${item.title}"? Esta acção é irreversível.`)) return
   try {
-    await axios.delete(`/api/admin/services/${item.id}`, authHeader())
+    const { error } = await supabase.from('services').delete().eq('id', item.id)
+    if (error) throw error
     await fetchList()
   } catch (e) {
-    alert(e.response?.data?.message || 'Erro ao eliminar')
+    alert(e.message || 'Erro ao eliminar')
   }
 }
 

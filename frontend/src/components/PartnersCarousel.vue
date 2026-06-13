@@ -39,7 +39,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 
 const items = ref([])
 const currentPage = ref(0)
@@ -51,15 +51,14 @@ const resolveLogo = (logo) => {
   if (!logo) return ''
   if (logo.startsWith('http')) return logo
   if (logo.startsWith('/')) return logo
-  const base = axios.defaults.baseURL || ''
-  return base + logo
+  return `/backend/storage/uploads/companies/${logo}`
 }
 
 const fetchItems = async () => {
   try {
-    const r = await axios.get('/api/companies/carousel')
-    if (r.data?.success) {
-      items.value = r.data.data.items || []
+    const { data, error } = await supabase.from('companies').select('id, company_name, logo, service').eq('is_published', true)
+    if (!error && data) {
+      items.value = data.map(c => ({ ...c, name: c.company_name }))
     }
   } catch (e) {
     items.value = []

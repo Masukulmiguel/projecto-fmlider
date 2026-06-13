@@ -60,7 +60,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 
 const authStore = useAuthStore()
@@ -84,8 +84,8 @@ const filtered = computed(() => {
 const load = async () => {
   loading.value = true
   try {
-    const r = await axios.get('/api/admin/users?role=cliente', { headers: { Authorization: `Bearer ${authStore.token}` } })
-    if (r.data.success) items.value = r.data.data.users
+    const { data, error } = await supabase.from('users').select('*').eq('role', 'cliente')
+    if (!error) items.value = data || []
   } catch (e) { console.error(e) }
   finally { loading.value = false }
 }

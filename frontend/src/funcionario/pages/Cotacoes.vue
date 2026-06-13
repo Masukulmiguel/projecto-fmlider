@@ -44,7 +44,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 
 const authStore = useAuthStore()
@@ -57,8 +57,8 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
 const load = async () => {
   loading.value = true
   try {
-    const r = await axios.get('/api/cotacoes', { headers: { Authorization: `Bearer ${authStore.token}` } })
-    if (r.data.success) items.value = r.data.data.cotacoes
+    const { data, error } = await supabase.from('cotacoes').select('*')
+    if (!error) items.value = data || []
   } finally { loading.value = false }
 }
 

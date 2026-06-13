@@ -116,7 +116,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 
 const authStore = useAuthStore()
@@ -126,32 +126,45 @@ const loading = ref(false)
 const filters = reactive({ q: '', status: '' })
 let searchTimer = null
 
-const authHeader = () => ({ headers: { Authorization: `Bearer ${authStore.token}` } })
+const computeStats = () => {
+  const all = items.value
+  stats.value = {
+    total: all.length,
+    pendente: all.filter(c => c.status === 'pendente').length,
+    aprovada: all.filter(c => c.status === 'aprovada').length,
+    rejeitada: all.filter(c => c.status === 'rejeitada').length,
+    expirada: all.filter(c => c.status === 'expirada').length,
+  }
+}
 
 const fetchData = async () => {
   loading.value = true
   try {
-    const params = {}
-    if (filters.q) params.q = filters.q
-    if (filters.status) params.status = filters.status
-    const r = await axios.get('/api/cotacoes', { ...authHeader(), params })
-    if (r.data.success) items.value = r.data.data.cotacoes
-  } finally { loading.value = false }
-}
+    const userId = authStore.user?.id
+    if (!userId) return
 
-const fetchStats = async () => {
-  try {
-    const r = await axios.get('/api/cotacoes/stats', authHeader())
-    if (r.data.success) stats.value = r.data.data.stats
-  } catch (e) { stats.value = {} }
+    let query = supabase.from('cotacoes').select('*').eq('user_id', userId)
+    if (filters.status) query = query.eq('status', filters.status)
+    if (filters.q) {
+      query = query.or(`reference.ilike.%${filters.q}%,origin.ilike.%${filters.q}%,destination.ilike.%${filters.q}%`)
+    }
+    const { data, error } = await query
+    if (!error) {
+      items.value = data || []
+      computeStats()
+    }
+  } finally { loading.value = false }
 }
 
 const debounceSearch = () => { clearTimeout(searchTimer); searchTimer = setTimeout(fetchData, 300) }
 
 const confirmDelete = async (item) => {
   if (!confirm(`Eliminar cotação ${item.reference}?`)) return
-  try { await axios.delete(`/api/cotacoes/${item.id}`, authHeader()); await fetchData(); await fetchStats() }
-  catch (e) { alert('Erro ao eliminar') }
+  try {
+    const { error } = await supabase.from('cotacoes').delete().eq('id', item.id)
+    if (error) throw error
+    await fetchData()
+  } catch (e) { alert('Erro ao eliminar') }
 }
 
 const typeLabel = (t) => ({ maritimo: 'Marítimo', aereo: 'Aéreo', terrestre: 'Terrestre', ferroviario: 'Ferroviário', multimodal: 'Multimodal' }[t] || t)

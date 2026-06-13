@@ -116,22 +116,31 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
-import { useAuthStore } from '@/stores/authStore'
+import { supabase } from '@/lib/supabase'
 
-const authStore = useAuthStore()
 const data = ref(null)
 const loading = ref(false)
 const search = ref('')
 const deviceFilter = ref('')
 
-const authHeader = () => ({ headers: { Authorization: `Bearer ${authStore.token}` } })
-
 const load = async () => {
   loading.value = true
   try {
-    const r = await axios.get('/api/admin/visitors/stats', authHeader())
-    if (r.data.success) data.value = r.data.data
+    const { data: visitors, error } = await supabase.from('visitors').select('*').order('visited_at', { ascending: false })
+    if (!error && visitors) {
+      const today = new Date().toISOString().split('T')[0]
+      const todayCount = visitors.filter(v => v.visited_at && v.visited_at.startsWith(today)).length
+      const uniqueSessions = new Set(visitors.map(v => v.session_id || v.ip_address)).size
+      const loggedUsers = new Set(visitors.filter(v => v.user_id).map(v => v.user_id)).size
+
+      data.value = {
+        total: visitors.length,
+        unique_sessions: uniqueSessions,
+        today: todayCount,
+        logged_users: loggedUsers,
+        recent: visitors.slice(0, 100)
+      }
+    }
   } catch (e) { console.error(e) }
   finally { loading.value = false }
 }

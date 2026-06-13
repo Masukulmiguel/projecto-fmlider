@@ -167,7 +167,7 @@
 <script setup>
 import { onMounted, ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 import { useCompanyStore } from '@/stores/companyStore'
 import { Bar, Doughnut } from 'vue-chartjs'
@@ -187,28 +187,30 @@ const recentEmbarques = ref([])
 const embarques = ref([])
 const cotacoes = ref([])
 
-const authHeader = () => ({ headers: { Authorization: `Bearer ${authStore.token}` } })
-
 const statusLabel = (s) => ({ pendente: 'Pendente', em_transito: 'Em trânsito', entregue: 'Entregue', cancelado: 'Cancelado' }[s] || s)
 
 const goToDocumentos = () => router.push('/documentos')
 
 const loadCounts = async () => {
   try {
-    const [emb, cot, docs, conts] = await Promise.all([
-      axios.get('/api/embarques', authHeader()),
-      axios.get('/api/cotacoes', authHeader()),
-      axios.get('/api/documentos', authHeader()),
-      axios.get('/api/contactos', authHeader())
+    const userId = authStore.user?.id
+    if (!userId) return
+
+    const [embRes, cotRes, docsRes, contsRes] = await Promise.all([
+      supabase.from('embarques').select('*').eq('user_id', userId),
+      supabase.from('cotacoes').select('*').eq('user_id', userId),
+      supabase.from('documentos').select('*').eq('user_id', userId),
+      supabase.from('contactos').select('*').eq('user_id', userId)
     ])
-    embarques.value = emb.data.data.embarques
-    cotacoes.value = cot.data.data.cotacoes
+
+    embarques.value = embRes.data || []
+    cotacoes.value = cotRes.data || []
     counts.embarques = embarques.value.length
     counts.embarques_pendente = embarques.value.filter(e => e.status === 'pendente').length
     counts.cotacoes = cotacoes.value.length
     counts.cotacoes_aprovada = cotacoes.value.filter(c => c.status === 'aprovada').length
-    counts.documentos = docs.data.data.documentos.length
-    counts.contactos = conts.data.data.contactos.length
+    counts.documentos = (docsRes.data || []).length
+    counts.contactos = (contsRes.data || []).length
     recentEmbarques.value = embarques.value.slice(0, 5)
   } catch (e) {
     console.error(e)

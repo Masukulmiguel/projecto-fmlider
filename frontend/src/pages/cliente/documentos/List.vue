@@ -155,7 +155,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 
 const authStore = useAuthStore()
@@ -172,16 +172,19 @@ const errors = ref({})
 const errorMessage = ref('')
 let searchTimer = null
 
-const authHeader = () => ({ headers: { Authorization: `Bearer ${authStore.token}` } })
-
 const fetchData = async () => {
   loading.value = true
   try {
-    const params = {}
-    if (filters.q) params.q = filters.q
-    if (filters.type) params.type = filters.type
-    const response = await axios.get('/api/documentos', { ...authHeader(), params })
-    if (response.data.success) items.value = response.data.data.documentos
+    const userId = authStore.user?.id
+    if (!userId) return
+
+    let query = supabase.from('documentos').select('*').eq('user_id', userId)
+    if (filters.type) query = query.eq('type', filters.type)
+    if (filters.q) {
+      query = query.or(`name.ilike.%${filters.q}%,description.ilike.%${filters.q}%`)
+    }
+    const { data, error } = await query
+    if (!error) items.value = data || []
   } finally {
     loading.value = false
   }
@@ -189,8 +192,10 @@ const fetchData = async () => {
 
 const fetchEmbarques = async () => {
   try {
-    const r = await axios.get('/api/embarques', { ...authHeader(), params: { type: '' } })
-    if (r.data.success) embarques.value = r.data.data.embarques
+    const userId = authStore.user?.id
+    if (!userId) return
+    const { data } = await supabase.from('embarques').select('id, tracking_number, origin, destination').eq('user_id', userId)
+    embarques.value = data || []
   } catch (e) {}
 }
 
@@ -223,36 +228,43 @@ const handleSubmit = async () => {
   saving.value = true
   try {
     if (editing.value) {
-      const r = await axios.put(`/api/documentos/${editing.value.id}`, form, authHeader())
-      if (r.data.success) {
-        closeForm()
-        await fetchData()
-      }
+      const { error } = await supabase.from('documentos').update({ name: form.name, type: form.type, description: form.description }).eq('id', editing.value.id)
+      if (error) throw error
+      closeForm()
+      await fetchData()
     } else {
-      const fd = new FormData()
       if (!fileInput.value?.files[0]) {
         errors.value.file = 'Selecione um ficheiro'
         saving.value = false
         return
       }
-      fd.append('file', fileInput.value.files[0])
-      fd.append('name', form.name)
-      fd.append('type', form.type)
-      if (form.embarque_id) fd.append('embarque_id', form.embarque_id)
-      fd.append('description', form.description || '')
-      const r = await axios.post('/api/documentos', fd, {
-        ...authHeader(),
-        headers: { ...authHeader().headers, 'Content-Type': 'multipart/form-data' }
+      const file = fileInput.value.files[0]
+      const userId = authStore.user?.id
+      const fileExt = file.name.split('.').pop()
+      const filePath = `${userId}/${Date.now()}.${fileExt}`
+
+      const { error: uploadError } = await supabase.storage.from('documents').upload(filePath, file)
+      if (uploadError) throw uploadError
+
+      const { data: urlData } = supabase.storage.from('documents').getPublicUrl(filePath)
+
+      const { error: insertError } = await supabase.from('documentos').insert({
+        name: form.name,
+        type: form.type,
+        description: form.description || '',
+        embarque_id: form.embarque_id || null,
+        file_path: urlData.publicUrl,
+        file_name: file.name,
+        file_size: file.size,
+        mime_type: file.type,
+        user_id: userId,
       })
-      if (r.data.success) {
-        closeForm()
-        await fetchData()
-      }
+      if (insertError) throw insertError
+      closeForm()
+      await fetchData()
     }
   } catch (error) {
-    const data = error.response?.data?.data || {}
-    if (Object.keys(data).length) errors.value = data
-    else errorMessage.value = error.response?.data?.message || 'Erro ao guardar'
+    errorMessage.value = error.message || 'Erro ao guardar'
   } finally {
     saving.value = false
   }
@@ -261,7 +273,8 @@ const handleSubmit = async () => {
 const confirmDelete = async (item) => {
   if (!confirm(`Eliminar "${item.name}"?`)) return
   try {
-    await axios.delete(`/api/documentos/${item.id}`, authHeader())
+    const { error } = await supabase.from('documentos').delete().eq('id', item.id)
+    if (error) throw error
     await fetchData()
   } catch (e) { alert('Erro ao eliminar') }
 }

@@ -70,7 +70,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 
 const route = useRoute()
 const router = useRouter()
@@ -194,9 +194,9 @@ const goToDetail = (slug) => {
 const loadArticle = async () => {
   const slug = route.params.slug
   try {
-    const r = await axios.get('/api/news')
-    if (r.data.success && r.data.news?.length) {
-      allNews.value = r.data.news.map(n => ({
+    const { data, error } = await supabase.from('news').select('*')
+    if (!error && data?.length) {
+      allNews.value = data.map(n => ({
         id: n.id,
         title: n.title,
         slug: n.slug,

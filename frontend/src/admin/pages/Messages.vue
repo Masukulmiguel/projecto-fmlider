@@ -18,33 +18,70 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import ChatPanel from '@/components/ChatPanel.vue'
-import { useChatStore } from '@/stores/chatStore'
+import { supabase } from '@/lib/supabase'
 
-const chatStore = useChatStore()
 const selected = ref(null)
+const conversations = ref([])
+const messages = ref([])
+let pollingInterval = null
+
+const fetchConversations = async () => {
+  const { data, error } = await supabase.from('chat_messages').select('conversation_id, sender_name, message, created_at').order('created_at', { ascending: false })
+  if (!error && data) {
+    const convMap = {}
+    data.forEach(msg => {
+      if (!convMap[msg.conversation_id]) {
+        convMap[msg.conversation_id] = {
+          id: msg.conversation_id,
+          lastMessage: msg.message,
+          lastTime: msg.created_at,
+          sender_name: msg.sender_name
+        }
+      }
+    })
+    conversations.value = Object.values(convMap)
+  }
+}
+
+const fetchMessages = async (conversationId) => {
+  const { data, error } = await supabase.from('chat_messages').select('*').eq('conversation_id', conversationId).order('created_at', { ascending: true })
+  if (!error) messages.value = data
+}
 
 const onSelect = async (conv) => {
   selected.value = conv
-  await chatStore.fetchMessages(conv.id)
+  await fetchMessages(conv.id)
+}
+
+const startPolling = (interval = 5000) => {
+  stopPolling()
+  pollingInterval = setInterval(fetchConversations, interval)
+}
+
+const stopPolling = () => {
+  if (pollingInterval) {
+    clearInterval(pollingInterval)
+    pollingInterval = null
+  }
 }
 
 onMounted(async () => {
-  await chatStore.fetchConversations()
-  if (chatStore.conversations.length > 0 && !selected.value) {
-    selected.value = chatStore.conversations[0]
-    await chatStore.fetchMessages(selected.value.id)
+  await fetchConversations()
+  if (conversations.value.length > 0 && !selected.value) {
+    selected.value = conversations.value[0]
+    await fetchMessages(selected.value.id)
   }
-  chatStore.startPolling(5000)
+  startPolling(5000)
 })
 
 onBeforeUnmount(() => {
-  chatStore.stopPolling()
+  stopPolling()
 })
 
-watch(() => chatStore.conversations.length, (n) => {
+watch(() => conversations.value.length, (n) => {
   if (n > 0 && !selected.value) {
-    selected.value = chatStore.conversations[0]
-    chatStore.fetchMessages(selected.value.id)
+    selected.value = conversations.value[0]
+    fetchMessages(selected.value.id)
   }
 })
 </script>

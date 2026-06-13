@@ -119,7 +119,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 import { useChatStore } from '@/stores/chatStore'
 
@@ -144,21 +144,18 @@ const logout = () => {
 }
 
 const fetchPending = async () => {
-  if (!authStore.token) return
   try {
-    const response = await axios.get('/api/admin/users/pending/count', {
-      headers: { Authorization: `Bearer ${authStore.token}` }
-    })
-    if (response.data.success) {
-      pendingCount.value = response.data.data.count
-    }
+    const { count, error } = await supabase
+      .from('users')
+      .select('*', { count: 'exact', head: true })
+      .eq('approval_status', 'pending')
+    if (!error) pendingCount.value = count || 0
   } catch (error) {
     pendingCount.value = 0
   }
 }
 
 const fetchChatUnread = async () => {
-  if (!authStore.token) return
   try {
     await chatStore.refreshUnread()
     chatUnread.value = chatStore.totalUnread

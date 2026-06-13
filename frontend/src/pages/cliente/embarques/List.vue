@@ -128,7 +128,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 
 const authStore = useAuthStore()
@@ -138,29 +138,39 @@ const loading = ref(false)
 const filters = reactive({ q: '', status: '', type: '' })
 let searchTimer = null
 
-const authHeader = () => ({ headers: { Authorization: `Bearer ${authStore.token}` } })
+const computeStats = () => {
+  const all = items.value
+  stats.value = {
+    total: all.length,
+    pendente: all.filter(e => e.status === 'pendente').length,
+    em_transito: all.filter(e => e.status === 'em_transito').length,
+    entregue: all.filter(e => e.status === 'entregue').length,
+    cancelado: all.filter(e => e.status === 'cancelado').length,
+  }
+}
 
 const fetchData = async () => {
   loading.value = true
   try {
-    const params = {}
-    if (filters.q) params.q = filters.q
-    if (filters.status) params.status = filters.status
-    if (filters.type) params.type = filters.type
-    const response = await axios.get('/api/embarques', { ...authHeader(), params })
-    if (response.data.success) items.value = response.data.data.embarques
+    const userId = authStore.user?.id
+    if (!userId) return
+
+    let query = supabase.from('embarques').select('*').eq('user_id', userId)
+    if (filters.status) query = query.eq('status', filters.status)
+    if (filters.type) query = query.eq('type', filters.type)
+    if (filters.q) {
+      query = query.or(`tracking_number.ilike.%${filters.q}%,origin.ilike.%${filters.q}%,destination.ilike.%${filters.q}%`)
+    }
+    const { data, error } = await query
+    if (!error) {
+      items.value = data || []
+      computeStats()
+    }
   } catch (error) {
     console.error(error)
   } finally {
     loading.value = false
   }
-}
-
-const fetchStats = async () => {
-  try {
-    const response = await axios.get('/api/embarques/stats', authHeader())
-    if (response.data.success) stats.value = response.data.data.stats
-  } catch (e) { stats.value = {} }
 }
 
 const debounceSearch = () => {
@@ -171,11 +181,11 @@ const debounceSearch = () => {
 const confirmDelete = async (item) => {
   if (!confirm(`Eliminar embarque ${item.tracking_number}?`)) return
   try {
-    await axios.delete(`/api/embarques/${item.id}`, authHeader())
+    const { error } = await supabase.from('embarques').delete().eq('id', item.id)
+    if (error) throw error
     await fetchData()
-    await fetchStats()
   } catch (error) {
-    alert(error.response?.data?.message || 'Erro ao eliminar')
+    alert(error.message || 'Erro ao eliminar')
   }
 }
 
