@@ -9,9 +9,9 @@ class PermissionMiddleware
         $userRole = $this->getUserRole();
 
         if (!in_array($userRole, $roles)) {
-            header('Content-Type: application/json');
+            header('Content-Type: application/json; charset=utf-8');
             http_response_code(403);
-            echo json_encode(['success' => false, 'message' => 'Forbidden']);
+            echo json_encode(['success' => false, 'message' => 'Forbidden'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 

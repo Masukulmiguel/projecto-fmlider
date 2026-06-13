@@ -5,19 +5,47 @@ USE fmlider;
 -- 2024_01_01_000001_create_users_table.sql
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(80) NOT NULL UNIQUE,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     phone VARCHAR(20),
-    role ENUM('admin', 'editor', 'operator') DEFAULT 'operator',
+    role ENUM('admin', 'cliente') DEFAULT 'cliente',
     password VARCHAR(255) NOT NULL,
     photo VARCHAR(255),
     status TINYINT DEFAULT 1,
+    approval_status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    approved_at TIMESTAMP NULL,
+    approved_by BIGINT UNSIGNED,
+    rejection_reason VARCHAR(255),
     last_login TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_email (email),
+    INDEX idx_username (username),
     INDEX idx_status (status),
-    INDEX idx_role (role)
+    INDEX idx_role (role),
+    INDEX idx_approval_status (approval_status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 2024_01_01_000001b_create_companies_table.sql
+CREATE TABLE IF NOT EXISTS companies (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL UNIQUE,
+    company_name VARCHAR(255) NOT NULL,
+    nif VARCHAR(50),
+    logo VARCHAR(255),
+    address VARCHAR(255),
+    phone VARCHAR(20),
+    email VARCHAR(255),
+    service VARCHAR(150),
+    case_description LONGTEXT,
+    is_completed TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
+    INDEX idx_is_completed (is_completed)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 2024_01_01_000002_create_services_table.sql
@@ -168,4 +196,91 @@ CREATE TABLE IF NOT EXISTS settings (
     value LONGTEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 2024_01_03_000001_create_embarques_table.sql
+CREATE TABLE IF NOT EXISTS embarques (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    tracking_number VARCHAR(50) NOT NULL UNIQUE,
+    origin VARCHAR(150) NOT NULL,
+    destination VARCHAR(150) NOT NULL,
+    type ENUM('maritimo', 'aereo', 'terrestre', 'ferroviario', 'multimodal') DEFAULT 'maritimo',
+    status ENUM('pendente', 'em_transito', 'entregue', 'cancelado') DEFAULT 'pendente',
+    weight DECIMAL(12,2) DEFAULT 0,
+    volume DECIMAL(12,4) DEFAULT 0,
+    declared_value DECIMAL(14,2) DEFAULT 0,
+    currency VARCHAR(10) DEFAULT 'AOA',
+    ship_date DATE,
+    delivery_date DATE,
+    description TEXT,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
+    INDEX idx_tracking (tracking_number),
+    INDEX idx_status (status),
+    INDEX idx_type (type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 2024_01_03_000002_create_documentos_table.sql
+CREATE TABLE IF NOT EXISTS documentos (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    embarque_id BIGINT UNSIGNED,
+    name VARCHAR(255) NOT NULL,
+    type ENUM('fatura', 'conhecimento_carga', 'certificado', 'contrato', 'outro') DEFAULT 'outro',
+    file_path VARCHAR(255) NOT NULL,
+    file_size INT UNSIGNED DEFAULT 0,
+    mime_type VARCHAR(100),
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (embarque_id) REFERENCES embarques(id) ON DELETE SET NULL,
+    INDEX idx_user_id (user_id),
+    INDEX idx_embarque (embarque_id),
+    INDEX idx_type (type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 2024_01_03_000003_create_contactos_table.sql
+CREATE TABLE IF NOT EXISTS contactos (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    name VARCHAR(150) NOT NULL,
+    company VARCHAR(150),
+    email VARCHAR(150),
+    phone VARCHAR(30),
+    position VARCHAR(100),
+    address VARCHAR(255),
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
+    INDEX idx_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 2024_01_03_000004_create_cotacoes_table.sql
+CREATE TABLE IF NOT EXISTS cotacoes (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    reference VARCHAR(50) NOT NULL,
+    origin VARCHAR(150) NOT NULL,
+    destination VARCHAR(150) NOT NULL,
+    type ENUM('maritimo', 'aereo', 'terrestre', 'ferroviario', 'multimodal') DEFAULT 'maritimo',
+    weight DECIMAL(12,2) DEFAULT 0,
+    description TEXT,
+    status ENUM('pendente', 'aprovada', 'rejeitada', 'expirada') DEFAULT 'pendente',
+    estimated_value DECIMAL(14,2) DEFAULT 0,
+    currency VARCHAR(10) DEFAULT 'AOA',
+    valid_until DATE,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
+    INDEX idx_reference (reference),
+    INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

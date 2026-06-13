@@ -20,7 +20,24 @@
           </div>
           <div class="mt-4">
             <h5>Localização</h5>
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3939.0908405305397!2d13.2345!3d-8.8383!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zOMA1MC0xNSDCsDUwJzEwLjQi!5e0!3m2!1spt!2sao!4v1234567890" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+            <div class="map-wrapper">
+              <iframe
+                src="https://maps.google.com/maps?q=FMLider+Base+Cacuaco+Luanda+Angola&hl=pt&z=15&output=embed"
+                width="100%"
+                height="320"
+                style="border:0; border-radius: 12px;"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                title="Localização FMLider"
+              ></iframe>
+            </div>
+            <a href="https://www.google.com/maps/place/FMLider+-+Base/@-8.7693538,13.3973228,359m/data=!3m1!1e3!4m6!3m5!1s0x1a51e5684ed42f1b:0x5630ab6f53efd403!8m2!3d-8.769266!4d13.3984122"
+               target="_blank"
+               rel="noopener"
+               class="btn btn-outline-primary btn-sm mt-2 w-100">
+              <i class="bi bi-geo-alt-fill me-1"></i> Abrir no Google Maps
+            </a>
           </div>
         </div>
         <div class="col-lg-6">
@@ -71,7 +88,8 @@ const form = ref({
 
 const submitForm = async () => {
   try {
-    const response = await fetch('http://localhost:8000/api/contacts', {
+    const apiBase = import.meta.env.VITE_API_URL || ''
+    const response = await fetch(`${apiBase}/api/contacts`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form.value)

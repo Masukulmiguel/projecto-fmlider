@@ -24,11 +24,17 @@ class DatabaseSeeder {
     }
 
     public function seedUsers() {
+        $check = $this->db->query("SELECT id FROM users WHERE email = 'admin@fmlider.co.ao' LIMIT 1");
+        if ($check && $check->num_rows > 0) {
+            echo "✓ Admin user já existe\n";
+            return;
+        }
+
         $adminPassword = password_hash('Admin@2026', PASSWORD_BCRYPT);
-        
-        $sql = "INSERT INTO users (name, email, phone, role, password, status) VALUES 
-                ('Admin User', 'admin@fmlider.co.ao', '+244 935141747', 'admin', '$adminPassword', 1)";
-        
+
+        $sql = "INSERT INTO users (username, name, email, phone, role, password, status, approval_status) VALUES
+                ('admin', 'Admin User', 'admin@fmlider.co.ao', '+244 935141747', 'admin', '$adminPassword', 1, 'approved')";
+
         if ($this->db->query($sql) === TRUE) {
             echo "✓ Users seeded\n";
         } else {
@@ -90,8 +96,8 @@ class DatabaseSeeder {
 
         foreach ($settings as $setting) {
             $value = $this->db->real_escape_string($setting[1]);
-            $sql = "INSERT INTO settings (key, value) VALUES ('{$setting[0]}', '{$value}')";
-            
+            $sql = "INSERT INTO settings (`key`, `value`) VALUES ('{$setting[0]}', '{$value}')";
+
             if ($this->db->query($sql)) {
                 echo "✓ Setting '{$setting[0]}' seeded\n";
             } else {

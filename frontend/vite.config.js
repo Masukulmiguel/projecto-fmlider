@@ -11,11 +11,16 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    strictPort: false,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost/fmlider.co.ao/backend',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '/api')
+        rewrite: (path) => path
+      },
+      '/backend': {
+        target: 'http://localhost/fmlider.co.ao',
+        changeOrigin: true
       }
     }
   },
