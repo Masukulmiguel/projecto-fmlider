@@ -103,7 +103,7 @@ import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { Modal } from 'bootstrap'
 
-const api = axios.create({ baseURL: 'http://localhost:8000' })
+const api = axios.create({ baseURL: '' })
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('supabase_access_token')
   if (token) config.headers.Authorization = `Bearer ${token}`

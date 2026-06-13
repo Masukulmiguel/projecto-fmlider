@@ -155,6 +155,7 @@ $router->delete('/admin/news/{id}', 'App\Controllers\NewsController', 'destroy')
 
 // Gallery CRUD
 $router->post('/admin/gallery', 'App\Controllers\GalleryController', 'store');
+$router->put('/admin/gallery/{id}', 'App\Controllers\GalleryController', 'update');
 $router->delete('/admin/gallery/{id}', 'App\Controllers\GalleryController', 'destroy');
 $router->post('/admin/gallery/upload', 'App\Controllers\GalleryController', 'upload');
 

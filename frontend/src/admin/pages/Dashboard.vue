@@ -1,156 +1,198 @@
 <template>
-  <div class="admin-dashboard p-4 p-md-5">
-    <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
-      <div>
-        <h1 class="page-title">Dashboard</h1>
-        <p class="text-muted mb-0">Visão geral do sistema nos últimos {{ statsDays }} dias.</p>
+  <div class="admin-dashboard">
+    <div class="dashboard-header">
+      <div class="header-left">
+        <h1 class="welcome-title">Bem-vindo, Admin</h1>
+        <p class="welcome-subtitle">{{ currentDate }}</p>
       </div>
-      <div class="d-flex gap-2 align-items-center">
-        <label class="text-muted small mb-0">Período:</label>
-        <select v-model.number="statsDays" class="form-select form-select-sm" style="width: 130px;" @change="loadStats">
-          <option :value="7">7 dias</option>
-          <option :value="30">30 dias</option>
-          <option :value="90">90 dias</option>
-        </select>
-        <button class="btn btn-sm btn-outline-secondary" @click="loadStats" :disabled="loading">
-          <i class="bi bi-arrow-clockwise"></i>
+      <div class="header-right">
+        <div class="period-selector">
+          <button
+            v-for="period in periods"
+            :key="period.value"
+            class="period-btn"
+            :class="{ active: statsDays === period.value }"
+            @click="changePeriod(period.value)"
+          >
+            {{ period.label }}
+          </button>
+        </div>
+        <button class="refresh-btn" @click="loadStats" :disabled="loading">
+          <i class="bi bi-arrow-clockwise" :class="{ 'spin': loading }"></i>
         </button>
       </div>
     </div>
 
-    <div v-if="loading && !data" class="text-center py-5">
-      <div class="spinner-border text-primary"></div>
-    </div>
+    <template v-if="loading && !data">
+      <div class="row g-4 mb-4">
+        <div v-for="n in 4" :key="n" class="col-lg-3 col-md-6">
+          <div class="stat-card skeleton">
+            <div class="skeleton-icon"></div>
+            <div class="skeleton-content">
+              <div class="skeleton-line short"></div>
+              <div class="skeleton-line tall"></div>
+              <div class="skeleton-line medium"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
     <template v-else-if="data">
-      <div class="row g-3 mb-4">
-        <div class="col-md-6 col-xl-3">
-          <div class="stat-card stat-primary">
-            <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
-            <div class="stat-body">
+      <div class="row g-4 mb-4">
+        <div class="col-lg-3 col-md-6">
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-clients">
+              <i class="bi bi-people-fill"></i>
+            </div>
+            <div class="stat-content">
               <div class="stat-label">Clientes</div>
               <div class="stat-value">{{ data.clients.total }}</div>
-              <div class="stat-meta">
-                <span class="text-success">{{ data.clients.active }} ativos</span>
-                <span v-if="data.clients.pending > 0" class="badge bg-warning text-dark ms-1">{{ data.clients.pending }} pendentes</span>
+              <div class="stat-trend" :class="trendClass(data.clients.trend)">
+                <i class="bi" :class="trendIcon(data.clients.trend)"></i>
+                <span>{{ Math.abs(data.clients.trend || 0) }}%</span>
+                <span class="trend-period">vs anterior</span>
               </div>
             </div>
           </div>
         </div>
-        <div class="col-md-6 col-xl-3">
-          <div class="stat-card stat-info">
-            <div class="stat-icon"><i class="bi bi-globe"></i></div>
-            <div class="stat-body">
+        <div class="col-lg-3 col-md-6">
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-visitors">
+              <i class="bi bi-globe"></i>
+            </div>
+            <div class="stat-content">
               <div class="stat-label">Visitantes</div>
               <div class="stat-value">{{ data.visitors.total }}</div>
-              <div class="stat-meta">
-                <span class="text-info">{{ data.visitors.today }} hoje</span>
-                <span class="text-muted ms-1">· {{ data.visitors.unique_sessions }} sessões</span>
+              <div class="stat-trend">
+                <span class="trend-info">{{ data.visitors.today }} hoje</span>
               </div>
             </div>
           </div>
         </div>
-        <div class="col-md-6 col-xl-3">
-          <div class="stat-card stat-success">
-            <div class="stat-icon"><i class="bi bi-chat-dots-fill"></i></div>
-            <div class="stat-body">
+        <div class="col-lg-3 col-md-6">
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-messages">
+              <i class="bi bi-chat-dots-fill"></i>
+            </div>
+            <div class="stat-content">
               <div class="stat-label">Mensagens</div>
               <div class="stat-value">{{ data.messages.total }}</div>
-              <div class="stat-meta">
-                <span class="text-muted">{{ data.messages.today }} hoje</span>
-                <span v-if="data.messages.unread > 0" class="badge bg-danger ms-1">{{ data.messages.unread }} por ler</span>
+              <div class="stat-trend" v-if="data.messages.unread > 0">
+                <span class="trend-badge badge-warning">{{ data.messages.unread }} por ler</span>
+              </div>
+              <div class="stat-trend" v-else>
+                <span class="trend-info">Todas lidas</span>
               </div>
             </div>
           </div>
         </div>
-        <div class="col-md-6 col-xl-3">
-          <div class="stat-card stat-warning">
-            <div class="stat-icon"><i class="bi bi-box-seam-fill"></i></div>
-            <div class="stat-body">
+        <div class="col-lg-3 col-md-6">
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-operations">
+              <i class="bi bi-box-seam-fill"></i>
+            </div>
+            <div class="stat-content">
               <div class="stat-label">Operações</div>
-              <div class="stat-value">{{ data.embarques + data.cotacoes + data.documentos }}</div>
-              <div class="stat-meta">
-                <span>{{ data.embarques }} embarques</span>
-                <span class="mx-1">·</span>
-                <span>{{ data.cotacoes }} cotações</span>
-                <span class="mx-1">·</span>
-                <span>{{ data.documentos }} docs</span>
+              <div class="stat-value">{{ totalOperations }}</div>
+              <div class="stat-trend">
+                <span class="trend-info">{{ data.embarques }} embarques · {{ data.cotacoes }} cotações</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="row g-3 mb-4">
+      <div class="row g-4 mb-4">
         <div class="col-lg-8">
-          <div class="card chart-card">
-            <div class="card-header">
-              <h6 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Atividade nos últimos {{ statsDays }} dias</h6>
+          <div class="chart-card">
+            <div class="chart-header">
+              <h6 class="chart-title">
+                <i class="bi bi-graph-up-arrow"></i>
+                Atividade nos últimos {{ statsDays }} dias
+              </h6>
             </div>
-            <div class="card-body">
+            <div class="chart-body">
               <Line :data="trendData" :options="trendOptions" style="height: 320px" />
             </div>
           </div>
         </div>
         <div class="col-lg-4">
-          <div class="card chart-card h-100">
-            <div class="card-header">
-              <h6 class="mb-0"><i class="bi bi-pie-chart-fill me-2"></i>Top países</h6>
+          <div class="chart-card h-100">
+            <div class="chart-header">
+              <h6 class="chart-title">
+                <i class="bi bi-pie-chart-fill"></i>
+                Top países
+              </h6>
             </div>
-            <div class="card-body">
+            <div class="chart-body">
               <Doughnut v-if="countryData.datasets[0].data.length" :data="countryData" :options="countryOptions" style="height: 320px" />
-              <div v-else class="text-center text-muted py-5">
+              <div v-else class="chart-empty">
                 <i class="bi bi-globe2"></i>
-                <p class="mb-0 mt-2 small">Sem dados de países.</p>
+                <p>Sem dados de países</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="row g-3">
+      <div class="row g-4">
         <div class="col-lg-6">
-          <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <h6 class="mb-0"><i class="bi bi-person-plus-fill me-2"></i>Clientes recentes</h6>
-              <router-link to="/admin/utilizadores" class="btn btn-sm btn-outline-primary">Ver todos</router-link>
+          <div class="list-card">
+            <div class="list-header">
+              <h6 class="list-title">
+                <i class="bi bi-person-plus-fill"></i>
+                Clientes recentes
+              </h6>
+              <router-link to="/admin/utilizadores" class="list-action">
+                Ver todos <i class="bi bi-arrow-right"></i>
+              </router-link>
             </div>
-            <div class="card-body p-0">
-              <ul class="recent-list">
-                <li v-for="c in data.recent.clients" :key="c.id">
-                  <div class="avatar-sm">{{ initials(c.name) }}</div>
-                  <div class="flex-grow-1">
-                    <div class="fw-medium">{{ c.name }}</div>
-                    <small class="text-muted">{{ c.email }} · {{ c.company_name || '—' }}</small>
-                  </div>
-                  <span class="status-pill" :class="`status-${c.approval_status}`">{{ statusLabel(c.approval_status) }}</span>
-                </li>
-                <li v-if="data.recent.clients.length === 0" class="text-center text-muted py-4">
-                  Sem clientes.
-                </li>
-              </ul>
+            <div class="list-body">
+              <div v-for="c in data.recent.clients" :key="c.id" class="list-item">
+                <div class="list-item-avatar">
+                  <img v-if="c.photo" :src="c.photo" :alt="c.name">
+                  <span v-else>{{ initials(c.name) }}</span>
+                </div>
+                <div class="list-item-content">
+                  <div class="list-item-name">{{ c.name }}</div>
+                  <div class="list-item-meta">{{ c.email }}</div>
+                </div>
+                <span class="status-badge" :class="`status-${c.approval_status}`">
+                  {{ statusLabel(c.approval_status) }}
+                </span>
+              </div>
+              <div v-if="data.recent.clients.length === 0" class="list-empty">
+                Sem clientes recentes
+              </div>
             </div>
           </div>
         </div>
         <div class="col-lg-6">
-          <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <h6 class="mb-0"><i class="bi bi-chat-dots-fill me-2"></i>Mensagens recentes</h6>
-              <router-link to="/admin/mensagens" class="btn btn-sm btn-outline-primary">Ver chat</router-link>
+          <div class="list-card">
+            <div class="list-header">
+              <h6 class="list-title">
+                <i class="bi bi-chat-dots-fill"></i>
+                Mensagens recentes
+              </h6>
+              <router-link to="/admin/mensagens" class="list-action">
+                Ver chat <i class="bi bi-arrow-right"></i>
+              </router-link>
             </div>
-            <div class="card-body p-0">
-              <ul class="recent-list">
-                <li v-for="m in data.recent.messages" :key="m.id">
-                  <div class="avatar-sm bg-info text-white"><i class="bi bi-chat-left-text"></i></div>
-                  <div class="flex-grow-1">
-                    <div class="fw-medium">{{ m.sender_name || 'Cliente' }}</div>
-                    <small class="text-muted d-block text-truncate" style="max-width: 320px;">{{ m.message }}</small>
-                  </div>
-                  <small class="text-muted">{{ formatTime(m.created_at) }}</small>
-                </li>
-                <li v-if="data.recent.messages.length === 0" class="text-center text-muted py-4">
-                  Sem mensagens.
-                </li>
-              </ul>
+            <div class="list-body">
+              <div v-for="m in data.recent.messages" :key="m.id" class="list-item">
+                <div class="list-item-avatar avatar-chat">
+                  <i class="bi bi-chat-left-text"></i>
+                </div>
+                <div class="list-item-content">
+                  <div class="list-item-name">{{ m.sender_name || 'Cliente' }}</div>
+                  <div class="list-item-meta text-truncate">{{ m.message }}</div>
+                </div>
+                <div class="list-item-time">{{ formatTime(m.created_at) }}</div>
+              </div>
+              <div v-if="data.recent.messages.length === 0" class="list-empty">
+                Sem mensagens recentes
+              </div>
             </div>
           </div>
         </div>
@@ -222,7 +264,32 @@ const resetLoading = ref(false)
 const resetError = ref('')
 const resetSuccess = ref('')
 
+const periods = [
+  { label: '7 dias', value: 7 },
+  { label: '30 dias', value: 30 },
+  { label: '90 dias', value: 90 }
+]
+
+const currentDate = computed(() => {
+  return new Date().toLocaleDateString('pt-PT', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+})
+
+const totalOperations = computed(() => {
+  if (!data.value) return 0
+  return data.value.embarques + data.value.cotacoes + data.value.documentos
+})
+
 const authHeader = () => ({ headers: { Authorization: `Bearer ${authStore.token}` } })
+
+const changePeriod = (days) => {
+  statsDays.value = days
+  loadStats()
+}
 
 const loadStats = async () => {
   loading.value = true
@@ -269,6 +336,16 @@ const initials = (n) => (n || '?').split(' ').map(s => s[0]).slice(0, 2).join(''
 
 const statusLabel = (s) => ({ pending: 'Pendente', approved: 'Aprovado', rejected: 'Rejeitado' }[s] || s)
 
+const trendClass = (trend) => {
+  if (!trend || trend === 0) return 'trend-neutral'
+  return trend > 0 ? 'trend-up' : 'trend-down'
+}
+
+const trendIcon = (trend) => {
+  if (!trend || trend === 0) return 'bi-dash'
+  return trend > 0 ? 'bi-arrow-up' : 'bi-arrow-down'
+}
+
 const formatTime = (iso) => {
   if (!iso) return ''
   const d = new Date(iso)
@@ -306,37 +383,84 @@ const trendData = computed(() => {
       {
         label: 'Visitantes',
         data: v.data,
-        borderColor: '#2563eb',
-        backgroundColor: 'rgba(37, 99, 235, 0.12)',
-        tension: 0.35, fill: true, pointRadius: 3, pointHoverRadius: 5,
+        borderColor: '#1877f2',
+        backgroundColor: 'rgba(24, 119, 242, 0.1)',
+        tension: 0.4,
+        fill: true,
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        pointBackgroundColor: '#1877f2',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        borderWidth: 2,
       },
       {
         label: 'Mensagens',
         data: m.data,
-        borderColor: '#10b981',
-        backgroundColor: 'rgba(16, 185, 129, 0.12)',
-        tension: 0.35, fill: true, pointRadius: 3, pointHoverRadius: 5,
+        borderColor: '#31a24c',
+        backgroundColor: 'rgba(49, 162, 76, 0.1)',
+        tension: 0.4,
+        fill: true,
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        pointBackgroundColor: '#31a24c',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        borderWidth: 2,
       },
       {
         label: 'Novos clientes',
         data: c.data,
-        borderColor: '#f59e0b',
-        backgroundColor: 'rgba(245, 158, 11, 0.12)',
-        tension: 0.35, fill: true, pointRadius: 3, pointHoverRadius: 5,
+        borderColor: '#f7b928',
+        backgroundColor: 'rgba(247, 185, 40, 0.1)',
+        tension: 0.4,
+        fill: true,
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        pointBackgroundColor: '#f7b928',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        borderWidth: 2,
       },
     ],
   }
 })
 
 const trendOptions = {
-  responsive: true, maintainAspectRatio: false,
+  responsive: true,
+  maintainAspectRatio: false,
   plugins: {
-    legend: { position: 'top' },
-    tooltip: { mode: 'index', intersect: false },
+    legend: {
+      position: 'top',
+      labels: {
+        usePointStyle: true,
+        pointStyle: 'circle',
+        padding: 20,
+        font: { size: 12, weight: '500' }
+      }
+    },
+    tooltip: {
+      mode: 'index',
+      intersect: false,
+      backgroundColor: '#1c1e21',
+      titleFont: { size: 13, weight: '600' },
+      bodyFont: { size: 12 },
+      padding: 12,
+      cornerRadius: 8,
+      displayColors: true,
+      boxPadding: 4
+    },
   },
   scales: {
-    y: { beginAtZero: true, ticks: { precision: 0 } },
-    x: { grid: { display: false } },
+    y: {
+      beginAtZero: true,
+      ticks: { precision: 0, font: { size: 11 } },
+      grid: { color: '#f0f2f5' }
+    },
+    x: {
+      grid: { display: false },
+      ticks: { font: { size: 11 } }
+    },
   },
   interaction: { mode: 'nearest', intersect: false },
 }
@@ -347,16 +471,34 @@ const countryData = computed(() => {
     labels: rows.map(r => r.country),
     datasets: [{
       data: rows.map(r => parseInt(r.n)),
-      backgroundColor: ['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#84cc16','#f97316','#ec4899','#14b8a6'],
+      backgroundColor: ['#1877f2', '#31a24c', '#f7b928', '#dc3545', '#8b5cf6', '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#14b8a6'],
       borderWidth: 0,
+      hoverOffset: 4,
     }],
   }
 })
 
 const countryOptions = {
-  responsive: true, maintainAspectRatio: false,
-  plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } } },
-  cutout: '60%',
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'right',
+      labels: {
+        boxWidth: 12,
+        padding: 12,
+        font: { size: 11 }
+      }
+    },
+    tooltip: {
+      backgroundColor: '#1c1e21',
+      padding: 12,
+      cornerRadius: 8,
+      titleFont: { size: 13, weight: '600' },
+      bodyFont: { size: 12 }
+    }
+  },
+  cutout: '65%',
 }
 
 onMounted(() => {
@@ -370,101 +512,530 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.admin-dashboard { background: #f5f7fa; min-height: 100vh; }
-.page-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.25rem; color: #0f172a; }
+.admin-dashboard {
+  background: #f0f2f5;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.welcome-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1c1e21;
+  margin: 0;
+}
+
+.welcome-subtitle {
+  font-size: 0.9rem;
+  color: #65676b;
+  margin: 4px 0 0;
+  text-transform: capitalize;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.period-selector {
+  display: flex;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.period-btn {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #65676b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.period-btn:hover {
+  background: #f0f2f5;
+  color: #1c1e21;
+}
+
+.period-btn.active {
+  background: #1877f2;
+  color: #ffffff;
+}
+
+.refresh-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: #ffffff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #65676b;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.refresh-btn:hover {
+  background: #f0f2f5;
+  color: #1c1e21;
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 
 .stat-card {
-  background: #fff;
-  padding: 1.25rem;
-  border-radius: 14px;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
   display: flex;
-  gap: 1rem;
   align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
   height: 100%;
-  border-left: 4px solid #e2e8f0;
 }
-.stat-primary { border-left-color: #2563eb; }
-.stat-info { border-left-color: #06b6d4; }
-.stat-success { border-left-color: #10b981; }
-.stat-warning { border-left-color: #f59e0b; }
+
+.stat-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
 
 .stat-icon {
-  width: 52px; height: 52px;
+  width: 52px;
+  height: 52px;
   border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1.4rem;
   flex-shrink: 0;
 }
-.stat-primary .stat-icon { background: #dbeafe; color: #1d4ed8; }
-.stat-info .stat-icon { background: #cffafe; color: #0e7490; }
-.stat-success .stat-icon { background: #d1fae5; color: #047857; }
-.stat-warning .stat-icon { background: #fef3c7; color: #b45309; }
 
-.stat-body { flex: 1; min-width: 0; }
-.stat-label { color: #64748b; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-.stat-value { font-size: 1.85rem; font-weight: 700; color: #0f172a; line-height: 1.1; }
-.stat-meta { font-size: 0.78rem; color: #64748b; }
-
-.chart-card { border: none; border-radius: 14px; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05); }
-.chart-card .card-header { background: #fff; border-bottom: 1px solid #eef0f3; padding: 0.85rem 1.25rem; }
-.chart-card .card-header h6 { font-weight: 700; color: #0f172a; }
-
-.card { border: none; border-radius: 14px; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05); }
-.card-header { background: #fff; border-bottom: 1px solid #eef0f3; padding: 0.85rem 1.25rem; }
-.card-header h6 { font-weight: 700; color: #0f172a; }
-
-.recent-list { list-style: none; padding: 0; margin: 0; }
-.recent-list li {
-  display: flex; align-items: center; gap: 0.75rem;
-  padding: 0.85rem 1.25rem;
-  border-bottom: 1px solid #f1f5f9;
+.stat-icon-clients {
+  background: #e7f3ff;
+  color: #1877f2;
 }
-.recent-list li:last-child { border-bottom: none; }
 
-.avatar-sm {
-  width: 38px; height: 38px;
+.stat-icon-visitors {
+  background: #e7f6e9;
+  color: #31a24c;
+}
+
+.stat-icon-messages {
+  background: #fff3cd;
+  color: #f7b928;
+}
+
+.stat-icon-operations {
+  background: #fde8e8;
+  color: #dc3545;
+}
+
+.stat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #65676b;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1c1e21;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.stat-trend {
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.trend-up {
+  color: #31a24c;
+}
+
+.trend-down {
+  color: #dc3545;
+}
+
+.trend-neutral {
+  color: #65676b;
+}
+
+.trend-period {
+  color: #65676b;
+}
+
+.trend-info {
+  color: #65676b;
+  font-size: 0.8rem;
+}
+
+.trend-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.badge-warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.chart-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.chart-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.chart-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1c1e21;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-title i {
+  color: #1877f2;
+}
+
+.chart-body {
+  padding: 20px;
+}
+
+.chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 280px;
+  color: #65676b;
+}
+
+.chart-empty i {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.chart-empty p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.list-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.list-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1c1e21;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.list-title i {
+  color: #1877f2;
+}
+
+.list-action {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #1877f2;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s ease;
+}
+
+.list-action:hover {
+  color: #0d5bbd;
+}
+
+.list-body {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #f0f2f5;
+  transition: background 0.2s ease;
+}
+
+.list-item:last-child {
+  border-bottom: none;
+}
+
+.list-item:hover {
+  background: #fafbfc;
+}
+
+.list-item-avatar {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
-  color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.8rem; font-weight: 600;
+  background: linear-gradient(135deg, #1877f2, #0d5bbd);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.list-item-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.list-item-avatar.avatar-chat {
+  background: linear-gradient(135deg, #31a24c, #218838);
+}
+
+.list-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.list-item-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1c1e21;
+  margin-bottom: 2px;
+}
+
+.list-item-meta {
+  font-size: 0.8rem;
+  color: #65676b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.list-item-time {
+  font-size: 0.8rem;
+  color: #65676b;
   flex-shrink: 0;
 }
 
-.status-pill {
-  font-size: 0.7rem; font-weight: 600;
-  padding: 3px 10px;
+.list-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #65676b;
+  font-size: 0.9rem;
+}
+
+.status-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 12px;
   border-radius: 12px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
-.status-pending { background: #fef3c7; color: #92400e; }
-.status-approved { background: #d1fae5; color: #065f46; }
-.status-rejected { background: #fee2e2; color: #991b1b; }
+
+.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-approved {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.skeleton {
+  pointer-events: none;
+}
+
+.skeleton-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #f0f2f5 25%, #e4e6e9 50%, #f0f2f5 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-content {
+  flex: 1;
+}
+
+.skeleton-line {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f0f2f5 25%, #e4e6e9 50%, #f0f2f5 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  margin-bottom: 8px;
+}
+
+.skeleton-line.short { width: 60px; }
+.skeleton-line.tall { width: 80px; height: 24px; }
+.skeleton-line.medium { width: 100px; }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
 
 .reset-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 9999; backdrop-filter: blur(4px);
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
 }
+
 .reset-modal {
-  background: #fff; border-radius: 16px; width: 90%; max-width: 480px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden;
+  background: #ffffff;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
 }
+
 .reset-modal-header {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f2f5;
 }
-.reset-modal-header h5 { margin: 0; font-size: 1.1rem; font-weight: 700; }
-.reset-modal-body { padding: 1.5rem; }
+
+.reset-modal-header h5 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.reset-modal-body {
+  padding: 20px;
+}
+
 .reset-modal-footer {
-  display: flex; justify-content: flex-end; gap: 0.5rem;
-  padding: 1rem 1.5rem; border-top: 1px solid #e2e8f0; background: #f8fafc;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 20px;
+  border-top: 1px solid #f0f2f5;
+  background: #fafbfc;
 }
-.reset-list { list-style: none; padding: 0; margin: 0; }
+
+.reset-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
 .reset-list li {
-  padding: 0.4rem 0; display: flex; align-items: center; gap: 0.5rem;
-  font-size: 0.9rem; color: #334155;
+  padding: 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #1c1e21;
 }
-.reset-list li i { color: #dc2626; width: 20px; text-align: center; }
+
+.reset-list li i {
+  color: #dc3545;
+  width: 20px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .admin-dashboard {
+    padding: 16px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .welcome-title {
+    font-size: 1.25rem;
+  }
+}
 </style>

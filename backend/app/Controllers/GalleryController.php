@@ -52,6 +52,43 @@ class GalleryController
         return json_encode(['success' => true, 'message' => 'Imagem adicionada', 'id' => $id], JSON_UNESCAPED_UNICODE);
     }
 
+    public function update($id)
+    {
+        $data = Response::input();
+        $db = Database::connection();
+
+        $fields = [];
+        $types = '';
+        $values = [];
+
+        foreach (['title', 'category', 'description', 'alt_text'] as $f) {
+            if (array_key_exists($f, $data)) {
+                $fields[] = "$f = ?";
+                $types .= 's';
+                $values[] = $data[$f];
+            }
+        }
+        if (isset($data['order_by'])) {
+            $fields[] = "order_by = ?";
+            $types .= 'i';
+            $values[] = (int) $data['order_by'];
+        }
+
+        if (empty($fields)) {
+            Response::error('Nenhum campo para atualizar', 422);
+        }
+
+        $values[] = $id;
+        $sql = "UPDATE gallery SET " . implode(', ', $fields) . " WHERE id = ?";
+        $stmt = $db->prepare($sql);
+        $stmt->bind_param($types . 'i', ...$values);
+        $stmt->execute();
+        $stmt->close();
+
+        header('Content-Type: application/json; charset=utf-8');
+        return json_encode(['success' => true, 'message' => 'Imagem atualizada'], JSON_UNESCAPED_UNICODE);
+    }
+
     public function destroy($id)
     {
         $db = Database::connection();
