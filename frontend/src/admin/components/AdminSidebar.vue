@@ -164,6 +164,8 @@ const fetchChatUnread = async () => {
   }
 }
 
+let channel = null
+
 onMounted(() => {
   fetchPending()
   fetchChatUnread()
@@ -171,10 +173,21 @@ onMounted(() => {
     fetchPending()
     fetchChatUnread()
   }, 30000)
+
+  channel = supabase
+    .channel('admin-users-changes')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'users' }, () => {
+      fetchPending()
+    })
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users' }, () => {
+      fetchPending()
+    })
+    .subscribe()
 })
 
 onBeforeUnmount(() => {
   if (pollInterval) clearInterval(pollInterval)
+  if (channel) supabase.removeChannel(channel)
 })
 </script>
 

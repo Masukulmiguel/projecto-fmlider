@@ -218,7 +218,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { supabase } from '@/lib/supabase'
 
 const users = ref([])
@@ -412,6 +412,20 @@ const onEditPhotoChange = async (e) => {
 onMounted(async () => {
   await loadUsers()
   await loadPendingCount()
+
+  channel = supabase
+    .channel('admin-users-list')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, () => {
+      loadUsers()
+      loadPendingCount()
+    })
+    .subscribe()
+})
+
+let channel = null
+
+onBeforeUnmount(() => {
+  if (channel) supabase.removeChannel(channel)
 })
 </script>
 

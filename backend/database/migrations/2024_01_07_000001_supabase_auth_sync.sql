@@ -89,6 +89,37 @@ CREATE TRIGGER on_users_profile_changed
     FOR EACH ROW
     EXECUTE FUNCTION sync_profile_to_auth_metadata();
 
+-- 5. Auto-create notification for admins when a new client registers
+DROP TRIGGER IF EXISTS on_new_client_notify_admins ON users;
+DROP FUNCTION IF EXISTS notify_admins_new_client();
+
+CREATE OR REPLACE FUNCTION notify_admins_new_client()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.role = 'cliente' AND NEW.approval_status = 'pending' THEN
+        INSERT INTO notifications (user_id, type, title, body, link, icon, is_read, created_at)
+        SELECT
+            admin_user.id,
+            'new_client',
+            'Novo cliente registado: ' || NEW.name,
+            'Email: ' || COALESCE(NEW.email, '') || ' | Telefone: ' || COALESCE(NEW.phone, '—'),
+            '/admin/utilizadores',
+            'bi-person-plus-fill',
+            false,
+            now()
+        FROM users admin_user
+        WHERE admin_user.role = 'admin'
+        AND admin_user.auth_id IS NOT NULL;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_new_client_notify_admins
+    AFTER INSERT ON users
+    FOR EACH ROW
+    EXECUTE FUNCTION notify_admins_new_client();
+
 -- ============================================================
 -- END
 -- ============================================================
