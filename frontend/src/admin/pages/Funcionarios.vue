@@ -348,26 +348,72 @@ const handleSubmit = async () => {
     errorMessage.value = 'Selecione pelo menos uma permissão.'
     return
   }
+  if (!editing.value && !form.password) {
+    errorMessage.value = 'A senha é obrigatória.'
+    return
+  }
   saving.value = true
   try {
-    const payload = {
-      name: form.name,
-      username: form.username,
-      email: form.email,
-      phone: form.phone,
-      position: form.position,
-      permissions: form.permissions,
-      role: 'funcionario'
-    }
     if (editing.value) {
-      if (form.password) payload.password = form.password
+      const payload = {
+        name: form.name,
+        username: form.username,
+        phone: form.phone,
+        position: form.position,
+        permissions: form.permissions,
+      }
       const { error } = await supabase.from('users').update(payload).eq('id', editing.value.id)
       if (error) throw error
+
+      if (form.password && editing.value.auth_id) {
+        try {
+          const { error: authError } = await supabase.auth.admin.updateUserById(
+            editing.value.auth_id,
+            { password: form.password }
+          )
+          if (authError) {
+            console.warn('Senha atualizada apenas em public.users. Use "Redefinir senha" no Auth se necessário.')
+          }
+        } catch (e) {
+          console.warn('Admin API indisponível para atualizar senha no Auth.')
+        }
+      }
     } else {
-      payload.status = 1
-      payload.approval_status = 'approved'
-      const { error } = await supabase.from('users').insert(payload)
-      if (error) throw error
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: {
+          data: {
+            username: form.username,
+            name: form.name,
+            phone: form.phone || '',
+            position: form.position || '',
+            role: 'funcionario',
+            approval_status: 'approved',
+            permissions: form.permissions,
+            company_completed: true,
+            must_change_password: true,
+          },
+        },
+      })
+      if (authError) throw authError
+
+      if (authData.user?.id) {
+        await supabase.from('users').upsert({
+          auth_id: authData.user.id,
+          username: form.username,
+          name: form.name,
+          email: form.email,
+          phone: form.phone || '',
+          position: form.position || '',
+          role: 'funcionario',
+          approval_status: 'approved',
+          status: 1,
+          permissions: JSON.stringify(form.permissions),
+          password_must_change: true,
+          password: 'supabase_auth_managed',
+        }, { onConflict: 'auth_id', ignoreDuplicates: true })
+      }
     }
     closeForm()
     await fetchList()
