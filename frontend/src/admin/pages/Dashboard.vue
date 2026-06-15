@@ -185,7 +185,7 @@
                   <i class="bi bi-chat-left-text"></i>
                 </div>
                 <div class="list-item-content">
-                  <div class="list-item-name">{{ m.sender_name || 'Cliente' }}</div>
+                  <div class="list-item-name">{{ m.users?.name || 'Cliente' }}</div>
                   <div class="list-item-meta text-truncate">{{ m.message }}</div>
                 </div>
                 <div class="list-item-time">{{ formatTime(m.created_at) }}</div>
@@ -297,7 +297,7 @@ const loadStats = async () => {
     const [clientsRes, visitorsRes, messagesRes, embarquesRes, cotacoesRes, documentosRes] = await Promise.all([
       supabase.from('users').select('id, created_at, approval_status, name, email, photo').gte('created_at', sinceISO),
       supabase.from('visitors').select('id, visited_at, country').gte('visited_at', sinceISO),
-      supabase.from('chat_messages').select('id, created_at, sender_name, message, is_read'),
+      supabase.from('chat_messages').select('id, created_at, message, is_read, sender_id, users:sender_id(name)'),
       supabase.from('embarques').select('id, created_at'),
       supabase.from('cotacoes').select('id, created_at'),
       supabase.from('documentos').select('id, created_at'),
