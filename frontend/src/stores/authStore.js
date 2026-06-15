@@ -83,7 +83,37 @@ export const useAuthStore = defineStore('auth', () => {
       session.value = data.session
       persistSession(data.session)
 
-      user.value = buildUserFromMetadata(data.user)
+      const metaUser = buildUserFromMetadata(data.user)
+
+      const { data: dbUser } = await supabase
+        .from('users')
+        .select('*')
+        .eq('auth_id', data.user.id)
+        .single()
+
+      if (dbUser) {
+        user.value = {
+          id: dbUser.id,
+          auth_id: data.user.id,
+          email: dbUser.email || data.user.email,
+          username: dbUser.username || metaUser.username,
+          name: dbUser.name || metaUser.name,
+          phone: dbUser.phone || metaUser.phone,
+          role: dbUser.role || metaUser.role,
+          position: dbUser.position || metaUser.position,
+          permissions: dbUser.permissions || metaUser.permissions,
+          approval_status: dbUser.approval_status || metaUser.approval_status,
+          company_completed: metaUser.company_completed,
+          photo: dbUser.photo || metaUser.photo,
+          must_change_password: dbUser.password_must_change || metaUser.must_change_password,
+          password_changed_at: dbUser.password_changed_at || metaUser.password_changed_at,
+          locked_at: dbUser.locked_at || metaUser.locked_at,
+          locked_reason: dbUser.locked_reason || metaUser.locked_reason,
+          created_at: dbUser.created_at || data.user.created_at,
+        }
+      } else {
+        user.value = metaUser
+      }
       persistUser()
 
       return {
@@ -131,6 +161,19 @@ export const useAuthStore = defineStore('auth', () => {
         return { success: false, error: msg }
       }
 
+      if (data.user?.id) {
+        await supabase.from('users').upsert({
+          auth_id: data.user.id,
+          username: payload.username,
+          name: payload.name,
+          email: payload.email,
+          phone: payload.phone || '',
+          role: 'cliente',
+          approval_status: 'pending',
+          password: 'supabase_auth_managed',
+        }, { onConflict: 'auth_id', ignoreDuplicates: true })
+      }
+
       return {
         success: true,
         data: { user_id: data.user?.id, email: payload.email },
@@ -161,7 +204,37 @@ export const useAuthStore = defineStore('auth', () => {
         return { success: false, error: error?.message || 'Sessão expirada' }
       }
 
-      user.value = buildUserFromMetadata(supaUser)
+      const metaUser = buildUserFromMetadata(supaUser)
+
+      const { data: dbUser } = await supabase
+        .from('users')
+        .select('*')
+        .eq('auth_id', supaUser.id)
+        .single()
+
+      if (dbUser) {
+        user.value = {
+          id: dbUser.id,
+          auth_id: supaUser.id,
+          email: dbUser.email || supaUser.email,
+          username: dbUser.username || metaUser.username,
+          name: dbUser.name || metaUser.name,
+          phone: dbUser.phone || metaUser.phone,
+          role: dbUser.role || metaUser.role,
+          position: dbUser.position || metaUser.position,
+          permissions: dbUser.permissions || metaUser.permissions,
+          approval_status: dbUser.approval_status || metaUser.approval_status,
+          company_completed: metaUser.company_completed,
+          photo: dbUser.photo || metaUser.photo,
+          must_change_password: dbUser.password_must_change || metaUser.must_change_password,
+          password_changed_at: dbUser.password_changed_at || metaUser.password_changed_at,
+          locked_at: dbUser.locked_at || metaUser.locked_at,
+          locked_reason: dbUser.locked_reason || metaUser.locked_reason,
+          created_at: dbUser.created_at || supaUser.created_at,
+        }
+      } else {
+        user.value = metaUser
+      }
       persistUser()
 
       return { success: true, user: user.value, company: null }
@@ -176,6 +249,14 @@ export const useAuthStore = defineStore('auth', () => {
         data: { name: payload.name, phone: payload.phone },
       })
       if (error) return { success: false, error: error.message }
+
+      if (user.value?.auth_id) {
+        await supabase.from('users').update({
+          name: payload.name,
+          phone: payload.phone,
+        }).eq('auth_id', user.value.auth_id)
+      }
+
       await getProfile()
       return { success: true, message: 'Perfil atualizado' }
     } catch (err) {
@@ -190,6 +271,12 @@ export const useAuthStore = defineStore('auth', () => {
       if (user.value) {
         user.value = { ...user.value, must_change_password: false, password_changed_at: new Date().toISOString() }
         persistUser()
+        if (user.value.auth_id) {
+          await supabase.from('users').update({
+            password_must_change: false,
+            password_changed_at: new Date().toISOString(),
+          }).eq('auth_id', user.value.auth_id)
+        }
       }
       return { success: true, message: 'Senha alterada com sucesso' }
     } catch (err) {
@@ -248,7 +335,38 @@ export const useAuthStore = defineStore('auth', () => {
       }
       session.value = supaSession
       persistSession(supaSession)
-      user.value = buildUserFromMetadata(supaSession.user)
+
+      const metaUser = buildUserFromMetadata(supaSession.user)
+
+      const { data: dbUser } = await supabase
+        .from('users')
+        .select('*')
+        .eq('auth_id', supaSession.user.id)
+        .single()
+
+      if (dbUser) {
+        user.value = {
+          id: dbUser.id,
+          auth_id: supaSession.user.id,
+          email: dbUser.email || supaSession.user.email,
+          username: dbUser.username || metaUser.username,
+          name: dbUser.name || metaUser.name,
+          phone: dbUser.phone || metaUser.phone,
+          role: dbUser.role || metaUser.role,
+          position: dbUser.position || metaUser.position,
+          permissions: dbUser.permissions || metaUser.permissions,
+          approval_status: dbUser.approval_status || metaUser.approval_status,
+          company_completed: metaUser.company_completed,
+          photo: dbUser.photo || metaUser.photo,
+          must_change_password: dbUser.password_must_change || metaUser.must_change_password,
+          password_changed_at: dbUser.password_changed_at || metaUser.password_changed_at,
+          locked_at: dbUser.locked_at || metaUser.locked_at,
+          locked_reason: dbUser.locked_reason || metaUser.locked_reason,
+          created_at: dbUser.created_at || supaSession.user.created_at,
+        }
+      } else {
+        user.value = metaUser
+      }
       persistUser()
     } catch (err) {
       user.value = null
