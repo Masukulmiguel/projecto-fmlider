@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 
 export const useChatStore = defineStore('chat', () => {
@@ -13,15 +13,73 @@ export const useChatStore = defineStore('chat', () => {
   let pollHandle = null
 
   const authStore = useAuthStore()
-  const headers = () => ({ headers: { Authorization: `Bearer ${authStore.token}` } })
 
   const fetchConversations = async () => {
     try {
-      const r = await axios.get('/api/chat/conversations', headers())
-      if (r.data.success) {
-        conversations.value = r.data.data.conversations || []
-        totalUnread.value = conversations.value.reduce((s, c) => s + (parseInt(c.unread) || 0), 0)
+      const userId = authStore.user?.id
+      if (!userId) return
+
+      const { data: sentMsgs, error: e1 } = await supabase
+        .from('chat_messages')
+        .select('id, sender_id, receiver_id, message, is_read, created_at')
+        .eq('sender_id', userId)
+        .order('created_at', { ascending: false })
+
+      const { data: receivedMsgs, error: e2 } = await supabase
+        .from('chat_messages')
+        .select('id, sender_id, receiver_id, message, is_read, created_at')
+        .eq('receiver_id', userId)
+        .order('created_at', { ascending: false })
+
+      if (e1 && e2) return
+
+      const allMsgs = [...(sentMsgs || []), ...(receivedMsgs || [])]
+      allMsgs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+
+      const convMap = {}
+      const otherUserIds = new Set()
+
+      for (const msg of allMsgs) {
+        const otherId = msg.sender_id === userId ? msg.receiver_id : msg.sender_id
+        if (!otherId) continue
+        if (!convMap[otherId]) {
+          otherUserIds.add(otherId)
+          convMap[otherId] = {
+            id: otherId,
+            last_message: msg.message,
+            last_at: msg.created_at,
+            unread: 0,
+            name: '',
+            email: '',
+            photo: null,
+            role: 'cliente'
+          }
+        }
+        if (msg.receiver_id === userId && !msg.is_read) {
+          convMap[otherId].unread++
+        }
       }
+
+      if (otherUserIds.size > 0) {
+        const { data: users } = await supabase
+          .from('users')
+          .select('id, name, email, photo, role')
+          .in('id', Array.from(otherUserIds))
+
+        if (users) {
+          for (const u of users) {
+            if (convMap[u.id]) {
+              convMap[u.id].name = u.name
+              convMap[u.id].email = u.email
+              convMap[u.id].photo = u.photo
+              convMap[u.id].role = u.role
+            }
+          }
+        }
+      }
+
+      conversations.value = Object.values(convMap)
+      totalUnread.value = conversations.value.reduce((s, c) => s + (parseInt(c.unread) || 0), 0)
     } catch (e) {
       // silent
     }
@@ -31,12 +89,19 @@ export const useChatStore = defineStore('chat', () => {
     activeUserId.value = userId
     loading.value = true
     try {
-      const r = await axios.get('/api/chat/messages', {
-        ...headers(),
-        params: userId ? { user_id: userId } : {}
-      })
-      if (r.data.success) {
-        messages.value = r.data.data.messages || []
+      const myId = authStore.user?.id
+      if (!myId || !userId) { messages.value = []; return }
+
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .or(`and(sender_id.eq.${myId},receiver_id.eq.${userId}),and(sender_id.eq.${userId},receiver_id.eq.${myId})`)
+        .order('created_at', { ascending: true })
+
+      if (!error) {
+        messages.value = data || []
+      } else {
+        messages.value = []
       }
     } catch (e) {
       messages.value = []
@@ -50,17 +115,24 @@ export const useChatStore = defineStore('chat', () => {
     if (!text) return { success: false, error: 'Mensagem vazia' }
     sending.value = true
     try {
-      const payload = { message: text }
-      if (receiverId) payload.receiver_id = receiverId
-      const r = await axios.post('/api/chat/send', payload, headers())
-      if (r.data.success) {
-        await fetchMessages(receiverId || activeUserId.value)
-        await fetchConversations()
-        return { success: true }
+      const myId = authStore.user?.id
+      if (!myId) return { success: false, error: 'Sessao invalida' }
+
+      const payload = {
+        sender_id: myId,
+        message: text,
+        is_read: false
       }
-      return { success: false, error: r.data.message }
+      if (receiverId) payload.receiver_id = receiverId
+
+      const { error } = await supabase.from('chat_messages').insert(payload)
+      if (error) throw error
+
+      await fetchMessages(receiverId || activeUserId.value)
+      await fetchConversations()
+      return { success: true }
     } catch (e) {
-      return { success: false, error: e.response?.data?.message || e.message }
+      return { success: false, error: e.message }
     } finally {
       sending.value = false
     }
