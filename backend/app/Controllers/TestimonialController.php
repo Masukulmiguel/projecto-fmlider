@@ -21,6 +21,9 @@ class TestimonialController
 
     public function store()
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $data = json_decode(file_get_contents('php://input'), true);
         if (empty($data['name']) || empty($data['message'])) {
             Response::error('Nome e mensagem são obrigatórios', 422);
@@ -45,6 +48,9 @@ class TestimonialController
 
     public function update($id)
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $data = json_decode(file_get_contents('php://input'), true);
         $db = Database::connection();
 
@@ -67,6 +73,9 @@ class TestimonialController
 
     public function destroy($id)
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $db = Database::connection();
         $stmt = $db->prepare("DELETE FROM testimonials WHERE id = ?");
         $stmt->bind_param('i', $id);

@@ -30,6 +30,9 @@ class GalleryController
 
     public function store()
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $data = json_decode(file_get_contents('php://input'), true);
         if (empty($data['image'])) {
             Response::error('Imagem é obrigatória', 422);
@@ -54,6 +57,9 @@ class GalleryController
 
     public function update($id)
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $data = Response::input();
         $db = Database::connection();
 
@@ -91,6 +97,9 @@ class GalleryController
 
     public function destroy($id)
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $db = Database::connection();
         $stmt = $db->prepare("DELETE FROM gallery WHERE id = ?");
         $stmt->bind_param('i', $id);
@@ -103,6 +112,9 @@ class GalleryController
 
     public function upload()
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         if (!isset($_FILES['image'])) {
             Response::error('Nenhum ficheiro enviado', 422);
         }
@@ -112,15 +124,30 @@ class GalleryController
             Response::error('Erro no upload', 422);
         }
 
-        $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
-        if (!isset($allowed[$file['type']])) {
-            Response::error('Formato inválido', 422);
+        $allowedMime = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        $allowedExt = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowedExt, true)) {
+            Response::error('Extensão inválida', 422);
         }
+
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $detected = $finfo->file($file['tmp_name']);
+        if (!in_array($detected, $allowedMime, true)) {
+            Response::error('Tipo de ficheiro inválido', 422);
+        }
+
+        $imgInfo = @getimagesize($file['tmp_name']);
+        if ($imgInfo === false) {
+            Response::error('Ficheiro não é uma imagem válida', 422);
+        }
+
         if ($file['size'] > 10 * 1024 * 1024) {
             Response::error('Ficheiro demasiado grande (máx 10MB)', 422);
         }
 
-        $ext = $allowed[$file['type']];
+        $extMap = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
+        $ext = $extMap[$detected];
         $name = 'gallery_' . time() . '_' . mt_rand(1000, 9999) . '.' . $ext;
         $dir = BASE_PATH . '/storage/uploads/gallery';
         if (!is_dir($dir)) {

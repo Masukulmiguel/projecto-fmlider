@@ -83,7 +83,8 @@ class CompanyController
         );
 
         if (!$stmt->execute()) {
-            Response::error('Erro a guardar: ' . $stmt->error, 500);
+            error_log('Database error (CompanyController save): ' . $stmt->error);
+            Response::error('Erro interno do servidor', 500);
         }
         $newId = $stmt->insert_id;
         $stmt->close();
@@ -156,10 +157,24 @@ class CompanyController
         }
 
         $file = $_FILES['logo'];
-        $allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
-        if (!in_array($file['type'], $allowed, true)) {
-            Response::error('Formato inválido. Use JPG, PNG, WEBP, GIF ou SVG.', 422);
+        $allowedMime = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        $allowedExt = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowedExt, true)) {
+            Response::error('Extensão inválida. Use JPG, PNG, WEBP ou GIF.', 422);
         }
+
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $detected = $finfo->file($file['tmp_name']);
+        if (!in_array($detected, $allowedMime, true)) {
+            Response::error('Tipo de ficheiro inválido', 422);
+        }
+
+        $imgInfo = @getimagesize($file['tmp_name']);
+        if ($imgInfo === false) {
+            Response::error('Ficheiro não é uma imagem válida', 422);
+        }
+
         if ($file['size'] > 3 * 1024 * 1024) {
             Response::error('Ficheiro demasiado grande (máx 3MB)', 422);
         }

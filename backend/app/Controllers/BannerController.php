@@ -9,6 +9,9 @@ class BannerController
 {
     public function index()
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $db = Database::connection();
         $result = $db->query("SELECT * FROM banners ORDER BY order_by ASC, id DESC");
         $items = [];
@@ -21,6 +24,9 @@ class BannerController
 
     public function store()
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $data = json_decode(file_get_contents('php://input'), true);
         if (empty($data['title'])) {
             Response::error('Título é obrigatório', 422);
@@ -44,6 +50,9 @@ class BannerController
 
     public function update($id)
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $data = json_decode(file_get_contents('php://input'), true);
         $db = Database::connection();
 
@@ -64,6 +73,9 @@ class BannerController
 
     public function destroy($id)
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $db = Database::connection();
         $stmt = $db->prepare("DELETE FROM banners WHERE id = ?");
         $stmt->bind_param('i', $id);

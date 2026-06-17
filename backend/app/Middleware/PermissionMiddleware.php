@@ -2,6 +2,8 @@
 
 namespace App\Middleware;
 
+use App\Helpers\Jwt;
+
 class PermissionMiddleware
 {
     public function handle($request, $next, $roles)
@@ -20,7 +22,16 @@ class PermissionMiddleware
 
     private function getUserRole()
     {
-        // Get user role from token or session
-        return 'admin'; // Mock
+        $header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+        if (!preg_match('/Bearer\s+(.+)/i', $header, $m)) {
+            return null;
+        }
+
+        $payload = Jwt::decode($m[1]);
+        if (!$payload || !isset($payload['role'])) {
+            return null;
+        }
+
+        return $payload['role'];
     }
 }

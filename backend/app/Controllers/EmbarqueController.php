@@ -106,7 +106,10 @@ class EmbarqueController
             $data['notes'] ?? null
         );
 
-        if (!$stmt->execute()) Response::error('Erro ao criar: ' . $stmt->error, 500);
+        if (!$stmt->execute()) {
+            error_log('Database error (EmbarqueController create): ' . $stmt->error);
+            Response::error('Erro interno do servidor', 500);
+        }
         $newId = $stmt->insert_id;
         $stmt->close();
 

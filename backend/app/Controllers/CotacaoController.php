@@ -90,7 +90,10 @@ class CotacaoController
             $data['notes'] ?? null
         );
 
-        if (!$stmt->execute()) Response::error('Erro: ' . $stmt->error, 500);
+        if (!$stmt->execute()) {
+            error_log('Database error (CotacaoController create): ' . $stmt->error);
+            Response::error('Erro interno do servidor', 500);
+        }
         $newId = $stmt->insert_id;
         $stmt->close();
         Response::success(['cotacao_id' => $newId, 'reference' => $reference], 'Cotação criada');

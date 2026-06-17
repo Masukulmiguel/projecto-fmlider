@@ -140,7 +140,8 @@ class AuthController
         $stmt->bind_param('ssssssss', $username, $name, $email, $phone, $role, $hash, $status, $approval);
 
         if (!$stmt->execute()) {
-            Response::error('Não foi possível criar a conta: ' . $stmt->error, 500);
+            error_log('Database error (AuthController create user): ' . $stmt->error);
+            Response::error('Erro interno do servidor', 500);
         }
         $newId = $stmt->insert_id;
         $stmt->close();
@@ -307,15 +308,30 @@ class AuthController
         }
 
         $file = $_FILES['photo'];
-        $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
-        if (!isset($allowed[$file['type']])) {
-            Response::error('Formato inválido. Use JPG, PNG, WEBP ou GIF.', 422);
+        $allowedMime = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        $allowedExt = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowedExt, true)) {
+            Response::error('Extensão inválida. Use JPG, PNG, WEBP ou GIF.', 422);
         }
+
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $detected = $finfo->file($file['tmp_name']);
+        if (!in_array($detected, $allowedMime, true)) {
+            Response::error('Tipo de ficheiro inválido', 422);
+        }
+
+        $imgInfo = @getimagesize($file['tmp_name']);
+        if ($imgInfo === false) {
+            Response::error('Ficheiro não é uma imagem válida', 422);
+        }
+
         if ($file['size'] > 3 * 1024 * 1024) {
             Response::error('Ficheiro demasiado grande (máx 3MB)', 422);
         }
 
-        $ext = $allowed[$file['type']];
+        $extMap = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
+        $ext = $extMap[$detected];
         $name = 'photo_' . $auth['user_id'] . '_' . time() . '.' . $ext;
         $dir = BASE_PATH . '/storage/uploads/photos';
         if (!is_dir($dir)) {
@@ -415,10 +431,6 @@ class AuthController
 
     private function userFromToken()
     {
-        if (isset($_REQUEST['_supabase_user'])) {
-            return $_REQUEST['_supabase_user'];
-        }
-
         $header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
         if (!preg_match('/Bearer\s+(.+)/i', $header, $m)) {
             Response::error('Token em falta', 401);

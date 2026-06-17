@@ -113,7 +113,8 @@ class DocumentoController
         $stmt->bind_param('iisssiss', $auth['user_id'], $embarqueId, $name, $type, $publicPath, $file['size'], $mime, $description);
         if (!$stmt->execute()) {
             @unlink($dest);
-            Response::error('Erro ao guardar: ' . $stmt->error, 500);
+            error_log('Database error (DocumentoController save): ' . $stmt->error);
+            Response::error('Erro interno do servidor', 500);
         }
         $newId = $stmt->insert_id;
         $stmt->close();

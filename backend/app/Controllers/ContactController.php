@@ -9,6 +9,9 @@ class ContactController
 {
     public function index()
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $db = Database::connection();
         $result = $db->query("SELECT * FROM contacts ORDER BY created_at DESC");
         $items = [];
@@ -41,6 +44,9 @@ class ContactController
 
     public function show($id)
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $db = Database::connection();
         $stmt = $db->prepare("SELECT * FROM contacts WHERE id = ?");
         $stmt->bind_param('i', $id);
@@ -58,6 +64,9 @@ class ContactController
 
     public function markAsRead($id)
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $db = Database::connection();
         $stmt = $db->prepare("UPDATE contacts SET is_read = 1 WHERE id = ?");
         $stmt->bind_param('i', $id);
@@ -70,6 +79,9 @@ class ContactController
 
     public function reply($id)
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $data = json_decode(file_get_contents('php://input'), true);
         if (empty($data['reply_message'])) {
             Response::error('Mensagem de resposta é obrigatória', 422);
@@ -88,6 +100,9 @@ class ContactController
 
     public function destroy($id)
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $db = Database::connection();
         $stmt = $db->prepare("DELETE FROM contacts WHERE id = ?");
         $stmt->bind_param('i', $id);

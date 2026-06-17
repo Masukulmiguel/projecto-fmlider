@@ -18,11 +18,13 @@ class SecretResetController
             foreach ($lines as $line) {
                 if (strpos(trim($line), '#') === 0) continue;
                 if (strpos($line, 'SECRET_RESET_KEY=') === 0) {
-                    return trim(substr($line, 17));
+                    $val = trim(substr($line, 17));
+                    if ($val !== '') return $val;
                 }
             }
         }
-        return 'fmlider2024reset';
+        error_log('CRITICAL: SECRET_RESET_KEY not configured. Set a strong SECRET_RESET_KEY in backend/.env');
+        return null;
     }
 
     public function reset()
@@ -32,7 +34,8 @@ class SecretResetController
 
         $data = Response::input();
         $key = $data['secret_key'] ?? '';
-        if ($key !== self::getSecretKey()) {
+        $secretKey = self::getSecretKey();
+        if ($secretKey === null || $key !== $secretKey) {
             Response::error('Chave secreta inválida', 403);
         }
 
@@ -55,11 +58,17 @@ class SecretResetController
             $db->query("TRUNCATE TABLE contacts");
             $db->query("TRUNCATE TABLE user_photos");
 
-            $db->query("DELETE FROM users WHERE id != {$adminId}");
+            $stmt = $db->prepare("DELETE FROM users WHERE id != ?");
+            $stmt->bind_param('i', $adminId);
+            $stmt->execute();
+            $stmt->close();
 
             $db->query("SET FOREIGN_KEY_CHECKS = 1");
 
-            $db->query("UPDATE users SET status = 1, approval_status = 'approved', approved_at = NOW() WHERE id = {$adminId}");
+            $stmt2 = $db->prepare("UPDATE users SET status = 1, approval_status = 'approved', approved_at = NOW() WHERE id = ?");
+            $stmt2->bind_param('i', $adminId);
+            $stmt2->execute();
+            $stmt2->close();
 
             $db->commit();
 
@@ -69,7 +78,8 @@ class SecretResetController
             ], 'Reset efetuado com sucesso');
         } catch (\Throwable $e) {
             $db->rollback();
-            Response::error('Erro ao efetar reset: ' . $e->getMessage(), 500);
+            error_log('Secret reset error: ' . $e->getMessage());
+            Response::error('Erro ao efetar reset', 500);
         }
     }
 }

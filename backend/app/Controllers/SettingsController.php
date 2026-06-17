@@ -38,6 +38,9 @@ class SettingsController
 
     public function update()
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $data = json_decode(file_get_contents('php://input'), true);
         if (empty($data) || !is_array($data)) {
             Response::error('Dados inválidos', 422);
@@ -59,6 +62,9 @@ class SettingsController
 
     public function destroy($key)
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $db = Database::connection();
         $stmt = $db->prepare("DELETE FROM settings WHERE `key` = ?");
         $stmt->bind_param('s', $key);

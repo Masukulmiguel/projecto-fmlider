@@ -78,7 +78,10 @@ class ContactoController
             $data['address'] ?? null,
             $data['notes'] ?? null
         );
-        if (!$stmt->execute()) Response::error('Erro: ' . $stmt->error, 500);
+        if (!$stmt->execute()) {
+            error_log('Database error (ContactoController create): ' . $stmt->error);
+            Response::error('Erro interno do servidor', 500);
+        }
         $newId = $stmt->insert_id;
         $stmt->close();
         Response::success(['contacto_id' => $newId], 'Contacto criado');

@@ -137,7 +137,8 @@ class UserController
         $stmt = $db->prepare('INSERT INTO users (username, name, email, phone, role, password, status, approval_status, position, permissions, password_must_change) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?)');
         $stmt->bind_param('sssssssssi', $username, $name, $email, $phone, $role, $hash, $approval, $position, $permsJson, $mustChange);
         if (!$stmt->execute()) {
-            Response::error('Não foi possível criar: ' . $stmt->error, 500);
+            error_log('Database error (UserController create): ' . $stmt->error);
+            Response::error('Erro interno do servidor', 500);
         }
         $newId = $stmt->insert_id;
         $stmt->close();

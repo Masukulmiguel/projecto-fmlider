@@ -38,6 +38,9 @@ class ServiceController
 
     public function store()
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $data = json_decode(file_get_contents('php://input'), true);
         if (empty($data['title'])) {
             Response::error('Título é obrigatório', 422);
@@ -63,6 +66,9 @@ class ServiceController
 
     public function update($id)
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $data = json_decode(file_get_contents('php://input'), true);
         $db = Database::connection();
 
@@ -85,6 +91,9 @@ class ServiceController
 
     public function destroy($id)
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $db = Database::connection();
         $stmt = $db->prepare("DELETE FROM services WHERE id = ?");
         $stmt->bind_param('i', $id);

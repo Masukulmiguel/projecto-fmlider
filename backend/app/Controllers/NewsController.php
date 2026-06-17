@@ -9,6 +9,9 @@ class NewsController
 {
     public function adminIndex()
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $db = Database::connection();
         $result = $db->query("SELECT * FROM news ORDER BY published_at DESC, id DESC");
         $news = [];
@@ -59,6 +62,9 @@ class NewsController
 
     public function store()
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $data = json_decode(file_get_contents('php://input'), true);
         if (empty($data['title'])) {
             Response::error('Título é obrigatório', 422);
@@ -86,6 +92,9 @@ class NewsController
 
     public function update($id)
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $data = json_decode(file_get_contents('php://input'), true);
         $db = Database::connection();
 
@@ -108,6 +117,9 @@ class NewsController
 
     public function destroy($id)
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $db = Database::connection();
         $stmt = $db->prepare("DELETE FROM news WHERE id = ?");
         $stmt->bind_param('i', $id);
