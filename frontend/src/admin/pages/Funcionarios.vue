@@ -213,6 +213,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { supabase } from '@/lib/supabase'
 
 const items = ref([])
 const allPermissions = ref([])
@@ -284,48 +285,31 @@ const submitLock = async () => {
   }
   locking.value = true
   lockError.value = ''
-  try {
-    const t = localStorage.getItem('supabase_access_token')
-    const res = await fetch(`/api/admin/users/${lockTarget.value.id}/lock`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` },
-      body: JSON.stringify({ duration_hours: lockForm.duration_hours, reason: lockForm.reason.trim() }),
-    })
-    const json = await res.json()
-    if (!json.success) throw new Error(json.message)
-    closeLockModal()
-    await fetchList()
-  } catch (e) {
-    lockError.value = e.message || 'Erro ao bloquear.'
-  } finally { locking.value = false }
+  const lockUntil = new Date(Date.now() + lockForm.duration_hours * 3600 * 1000).toISOString()
+  const { error } = await supabase.from('users').update({ locked_at: lockUntil, locked_reason: lockForm.reason.trim() }).eq('id', lockTarget.value.id)
+  locking.value = false
+  if (error) {
+    lockError.value = error.message || 'Erro ao bloquear.'
+    return
+  }
+  closeLockModal()
+  await fetchList()
 }
 const unlockUser = async (u) => {
   if (!confirm(`Desbloquear o funcionário "${u.name}"?`)) return
-  try {
-    const t = localStorage.getItem('supabase_access_token')
-    const res = await fetch(`/api/admin/users/${u.id}/unlock`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` },
-    })
-    const json = await res.json()
-    if (!json.success) throw new Error(json.message)
-    await fetchList()
-  } catch (e) {
-    alert(e.message || 'Erro ao desbloquear.')
+  const { error } = await supabase.from('users').update({ locked_at: null, locked_reason: null }).eq('id', u.id)
+  if (error) {
+    alert(error.message || 'Erro ao desbloquear.')
+    return
   }
+  await fetchList()
 }
 
 const fetchList = async () => {
   loading.value = true
   try {
-    const t = localStorage.getItem('supabase_access_token')
-    const res = await fetch('/api/admin/users?role=funcionario', {
-      headers: { Authorization: `Bearer ${t}` },
-    })
-    const json = await res.json()
-    if (json.success && json.data?.users) {
-      items.value = json.data.users
-    }
+    const { data, error } = await supabase.from('users').select('id, auth_id, created_at, updated_at, name, email, username, phone, role, position, permissions, approval_status, status, photo, password_must_change, password_changed_at, locked_at, locked_reason').eq('role', 'funcionario').order('created_at', { ascending: false })
+    if (!error) items.value = data
   } finally { loading.value = false }
 }
 
@@ -371,39 +355,65 @@ const handleSubmit = async () => {
   saving.value = true
   try {
     if (editing.value) {
-      const token = localStorage.getItem('supabase_access_token')
-      const res = await fetch(`/api/admin/users/${editing.value.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
-          username: form.username,
-          name: form.name,
-          phone: form.phone,
-          position: form.position,
-          permissions: form.permissions,
-          password: form.password || undefined,
-        }),
-      })
-      const json = await res.json()
-      if (!json.success) throw new Error(json.message || 'Erro ao guardar')
+      const payload = {
+        name: form.name,
+        username: form.username,
+        phone: form.phone,
+        position: form.position,
+        permissions: form.permissions,
+      }
+      const { error } = await supabase.from('users').update(payload).eq('id', editing.value.id)
+      if (error) throw error
+
+      if (form.password && editing.value.auth_id) {
+        try {
+          const { error: authError } = await supabase.auth.admin.updateUserById(
+            editing.value.auth_id,
+            { password: form.password }
+          )
+          if (authError) {
+            console.warn('Senha atualizada apenas em public.users. Use "Redefinir senha" no Auth se necessário.')
+          }
+        } catch (e) {
+          console.warn('Admin API indisponível para atualizar senha no Auth.')
+        }
+      }
     } else {
-      const token = localStorage.getItem('supabase_access_token')
-      const res = await fetch('/api/admin/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: {
+          data: {
+            username: form.username,
+            name: form.name,
+            phone: form.phone || '',
+            position: form.position || '',
+            role: 'funcionario',
+            approval_status: 'approved',
+            permissions: form.permissions,
+            company_completed: true,
+            must_change_password: true,
+          },
+        },
+      })
+      if (authError) throw authError
+
+      if (authData.user?.id) {
+        await supabase.from('users').upsert({
+          auth_id: authData.user.id,
           username: form.username,
           name: form.name,
           email: form.email,
           phone: form.phone || '',
-          password: form.password,
-          role: 'funcionario',
           position: form.position || '',
-          permissions: form.permissions,
-        }),
-      })
-      const json = await res.json()
-      if (!json.success) throw new Error(json.message || 'Erro ao criar funcionário')
+          role: 'funcionario',
+          approval_status: 'approved',
+          status: 1,
+          permissions: JSON.stringify(form.permissions),
+          password_must_change: true,
+          password: 'supabase_auth_managed',
+        }, { onConflict: 'auth_id', ignoreDuplicates: true })
+      }
     }
     closeForm()
     await fetchList()
@@ -415,13 +425,8 @@ const handleSubmit = async () => {
 const confirmDelete = async (item) => {
   if (!confirm(`Eliminar o funcionário "${item.name}"? Esta acção é irreversível.`)) return
   try {
-    const t = localStorage.getItem('supabase_access_token')
-    const res = await fetch(`/api/admin/users/${item.id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${t}` },
-    })
-    const json = await res.json()
-    if (!json.success) throw new Error(json.message)
+    const { error } = await supabase.from('users').delete().eq('id', item.id)
+    if (error) throw error
     await fetchList()
   } catch (e) {
     alert(e.message || 'Erro ao eliminar')

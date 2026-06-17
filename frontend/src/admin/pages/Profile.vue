@@ -112,6 +112,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 
 const authStore = useAuthStore()
@@ -135,14 +136,8 @@ const save = async () => {
   successMessage.value = ''
   saving.value = true
   try {
-    const token = localStorage.getItem('supabase_access_token')
-    const res = await fetch('/api/auth/profile', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ name: form.name, phone: form.phone }),
-    })
-    const json = await res.json()
-    if (!json.success) throw new Error(json.message)
+    const { error } = await supabase.auth.updateUser({ data: form })
+    if (error) throw error
     successMessage.value = 'Perfil atualizado.'
     await authStore.getProfile()
   } catch (e) {
@@ -158,18 +153,8 @@ const changePassword = async () => {
   if (pwd.new !== pwd.confirm) { passwordError.value = 'As senhas não coincidem.'; return }
   changingPwd.value = true
   try {
-    const token = localStorage.getItem('supabase_access_token')
-    const res = await fetch('/api/auth/change-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({
-        current_password: pwd.current,
-        new_password: pwd.new,
-        new_password_confirmation: pwd.new,
-      }),
-    })
-    const json = await res.json()
-    if (!json.success) throw new Error(json.message)
+    const { error } = await supabase.auth.updateUser({ password: pwd.new })
+    if (error) throw error
     passwordSuccess.value = 'Senha alterada com sucesso.'
     pwd.current = ''; pwd.new = ''; pwd.confirm = ''
     await authStore.getProfile()

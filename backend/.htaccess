@@ -1,6 +1,6 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /fmlider.co.ao/backend/
+    RewriteBase /
 
     # Block access to .env files
     RewriteRule ^\.env$ - [F,L]
