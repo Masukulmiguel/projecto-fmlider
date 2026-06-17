@@ -14,25 +14,14 @@
                 {{ successMessage }}
               </div>
 
-              <div v-if="!sessionReady && !errorMessage">
-                <p class="text-center">A processar...</p>
-                <div class="text-center">
-                  <div class="spinner-border" role="status"></div>
-                </div>
-              </div>
-
-              <form v-if="sessionReady" @submit.prevent="handleResetPassword">
+              <form v-if="!successMessage" @submit.prevent="handleRequestReset">
                 <div class="mb-3">
-                  <label for="password" class="form-label">Nova Senha</label>
-                  <input type="password" class="form-control" id="password" v-model="form.password" required minlength="6">
-                </div>
-                <div class="mb-3">
-                  <label for="password_confirm" class="form-label">Confirmar Senha</label>
-                  <input type="password" class="form-control" id="password_confirm" v-model="form.password_confirm" required>
+                  <label for="email" class="form-label">Email</label>
+                  <input type="email" class="form-control" id="email" v-model="email" required placeholder="Introduza o seu email">
                 </div>
                 <button type="submit" class="btn btn-primary w-100 mb-3" :disabled="loading">
                   <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
-                  Redefinir
+                  Enviar pedido de redefinição
                 </button>
               </form>
 
@@ -48,62 +37,38 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { supabase } from '@/lib/supabase'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const route = useRoute()
 
-const form = ref({
-  password: '',
-  password_confirm: ''
-})
-
-const sessionReady = ref(false)
+const email = ref('')
 const loading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
 
-onMounted(async () => {
-  const code = route.query.code
-  if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (error) {
-      errorMessage.value = 'Link de redefinição inválido ou expirado.'
-    } else {
-      sessionReady.value = true
-    }
-  } else {
-    errorMessage.value = 'Link de redefinição inválido.'
-  }
-})
-
-const handleResetPassword = async () => {
+const handleRequestReset = async () => {
   errorMessage.value = ''
-  successMessage.value = ''
-
-  if (form.value.password !== form.value.password_confirm) {
-    errorMessage.value = 'As senhas não coincidem.'
-    return
-  }
-
-  if (form.value.password.length < 6) {
-    errorMessage.value = 'A senha deve ter pelo menos 6 caracteres.'
-    return
-  }
-
   loading.value = true
-  const { error } = await supabase.auth.updateUser({
-    password: form.value.password
-  })
-  loading.value = false
 
-  if (error) {
-    errorMessage.value = error.message
-  } else {
-    successMessage.value = 'Senha redefinida com sucesso!'
-    setTimeout(() => router.push('/login'), 2000)
+  try {
+    const apiBase = import.meta.env.VITE_API_URL || ''
+    const res = await fetch(`${apiBase}/api/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.value }),
+    })
+    const json = await res.json()
+    loading.value = false
+
+    if (json.success) {
+      successMessage.value = json.message || 'Se o email existir, receberá instruções para redefinir a senha.'
+    } else {
+      errorMessage.value = json.message || 'Erro ao enviar pedido.'
+    }
+  } catch (err) {
+    loading.value = false
+    errorMessage.value = 'Erro de conexão.'
   }
 }
 </script>

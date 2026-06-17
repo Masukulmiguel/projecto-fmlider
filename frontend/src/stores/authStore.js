@@ -1,12 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { supabase } from '@/lib/supabase'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
-  const token = ref(localStorage.getItem('supabase_access_token'))
+  const token = ref(localStorage.getItem('fmlider_token'))
   const photoHistory = ref([])
-  const session = ref(null)
 
   const isAuthenticated = computed(() => !!token.value && !!user.value)
   const isAdmin = computed(() => user.value?.role === 'admin')
@@ -22,18 +20,12 @@ export const useAuthStore = defineStore('auth', () => {
     return permissions.value.includes(perm)
   }
 
-  const authHeader = () => ({ headers: { Authorization: `Bearer ${token.value}` } })
-
-  const persistSession = (supabaseSession) => {
-    if (supabaseSession) {
-      token.value = supabaseSession.access_token
-      localStorage.setItem('supabase_access_token', supabaseSession.access_token)
-      localStorage.setItem('supabase_refresh_token', supabaseSession.refresh_token)
-    } else {
-      token.value = null
-      localStorage.removeItem('supabase_access_token')
-      localStorage.removeItem('supabase_refresh_token')
-    }
+  const apiBase = import.meta.env.VITE_API_URL || ''
+  const authFetch = async (path, opts = {}) => {
+    const headers = { 'Content-Type': 'application/json', ...opts.headers }
+    if (token.value) headers['Authorization'] = `Bearer ${token.value}`
+    const res = await fetch(`${apiBase}/api${path}`, { ...opts, headers })
+    return res.json()
   }
 
   const persistUser = () => {
@@ -44,141 +36,78 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const buildUserFromMetadata = (supaUser) => {
-    const metadata = supaUser.user_metadata || {}
-    return {
-      id: supaUser.id,
-      email: supaUser.email,
-      username: metadata.username || null,
-      name: metadata.name || supaUser.email,
-      phone: metadata.phone || null,
-      role: metadata.role || 'cliente',
-      position: metadata.position || null,
-      permissions: metadata.permissions || [],
-      approval_status: metadata.approval_status || 'pending',
-      company_completed: metadata.company_completed ?? false,
-      photo: metadata.photo || null,
-      must_change_password: metadata.must_change_password ?? false,
-      password_changed_at: metadata.password_changed_at || null,
-      locked_at: metadata.locked_at || null,
-      locked_reason: metadata.locked_reason || null,
-      created_at: supaUser.created_at,
+  const setUserFromDB = (dbUser) => {
+    user.value = {
+      id: dbUser.id,
+      username: dbUser.username,
+      name: dbUser.name,
+      email: dbUser.email,
+      phone: dbUser.phone,
+      role: dbUser.role,
+      position: dbUser.position || null,
+      permissions: dbUser.permissions || [],
+      approval_status: dbUser.approval_status || 'pending',
+      company_completed: dbUser.company_completed ?? true,
+      photo: dbUser.photo || null,
+      must_change_password: dbUser.password_must_change ?? false,
+      password_changed_at: dbUser.password_changed_at || null,
+      locked_at: dbUser.locked_at || null,
+      locked_reason: dbUser.locked_reason || null,
+      created_at: dbUser.created_at,
     }
+    persistUser()
   }
 
   const login = async (email, password) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const json = await authFetch('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
       })
-
-      if (error) {
-        const msg = error.message === 'Invalid login credentials'
-          ? 'Credenciais inválidas'
-          : error.message
-        return { success: false, error: msg }
+      if (!json.success) {
+        return { success: false, error: json.message || 'Credenciais inválidas' }
       }
-
-      session.value = data.session
-      persistSession(data.session)
-
-      const metaUser = buildUserFromMetadata(data.user)
-
-      const { data: dbUser, error: dbError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('auth_id', data.user.id)
-        .single()
-
-      if (dbError || !dbUser) {
-        console.error('authStore: DB query failed on login:', dbError?.message)
-        user.value = metaUser
-      } else {
-        user.value = {
-          id: dbUser.id,
-          auth_id: data.user.id,
-          email: dbUser.email || data.user.email,
-          username: dbUser.username || metaUser.username,
-          name: dbUser.name || metaUser.name,
-          phone: dbUser.phone || metaUser.phone,
-          role: dbUser.role || metaUser.role,
-          position: dbUser.position || metaUser.position,
-          permissions: dbUser.permissions || metaUser.permissions,
-          approval_status: dbUser.approval_status || metaUser.approval_status,
-          company_completed: metaUser.company_completed,
-          photo: dbUser.photo || metaUser.photo,
-          must_change_password: dbUser.password_must_change || metaUser.must_change_password,
-          password_changed_at: dbUser.password_changed_at || metaUser.password_changed_at,
-          locked_at: dbUser.locked_at || metaUser.locked_at,
-          locked_reason: dbUser.locked_reason || metaUser.locked_reason,
-          created_at: dbUser.created_at || data.user.created_at,
-        }
-      }
-      persistUser()
-
-      return {
-        success: true,
-        user: user.value,
-        mustChangePassword: !!user.value.must_change_password,
-      }
+      const u = json.data.user
+      token.value = json.data.token
+      localStorage.setItem('fmlider_token', json.data.token)
+      setUserFromDB(u)
+      return { success: true }
     } catch (err) {
       return { success: false, error: err.message }
     }
   }
 
   const logout = async () => {
+    try { await authFetch('/auth/logout', { method: 'POST' }) } catch (e) {}
     user.value = null
     token.value = null
-    session.value = null
     photoHistory.value = []
+    localStorage.removeItem('fmlider_token')
     localStorage.removeItem('supabase_access_token')
     localStorage.removeItem('supabase_refresh_token')
     localStorage.removeItem('user')
-    try { await supabase.auth.signOut({ scope: 'local' }) } catch (e) {}
   }
 
   const register = async (payload) => {
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email: payload.email,
-        password: payload.password,
-        options: {
-          data: {
-            username: payload.username,
-            name: payload.name,
-            phone: payload.phone || '',
-            role: 'cliente',
-            approval_status: 'pending',
-            company_completed: false,
-          },
-        },
-      })
-
-      if (error) {
-        const msg = error.message.includes('already registered')
-          ? 'Já existe uma conta com este email'
-          : error.message
-        return { success: false, error: msg }
-      }
-
-      if (data.user?.id) {
-        await supabase.from('users').upsert({
-          auth_id: data.user.id,
+      const json = await authFetch('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({
           username: payload.username,
           name: payload.name,
           email: payload.email,
           phone: payload.phone || '',
-          role: 'cliente',
-          approval_status: 'pending',
-          password: 'supabase_auth_managed',
-        }, { onConflict: 'auth_id', ignoreDuplicates: true })
+          password: payload.password,
+          password_confirm: payload.password,
+        }),
+      })
+      if (!json.success) {
+        return { success: false, error: json.message || 'Erro ao criar conta' }
       }
-
       return {
         success: true,
-        data: { user_id: data.user?.id, email: payload.email },
-        message: 'Conta criada. Aguarde aprovação do administrador para aceder ao dashboard.',
+        data: { user_id: json.data?.user_id, email: payload.email },
+        message: json.message || 'Conta criada. Aguarde aprovação do administrador para aceder ao dashboard.',
       }
     } catch (err) {
       return { success: false, error: err.message }
@@ -187,11 +116,12 @@ export const useAuthStore = defineStore('auth', () => {
 
   const resetPassword = async (email) => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/redefinir-senha`,
+      const json = await authFetch('/auth/forgot-password', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
       })
-      if (error) return { success: false, error: error.message }
-      return { success: true, message: 'Se o email existir, receberá instruções para redefinir a senha.' }
+      if (!json.success) return { success: false, error: json.message }
+      return { success: true, message: json.message || 'Se o email existir, receberá instruções para redefinir a senha.' }
     } catch (err) {
       return { success: false, error: err.message }
     }
@@ -199,47 +129,17 @@ export const useAuthStore = defineStore('auth', () => {
 
   const getProfile = async () => {
     try {
-      const { data: { user: supaUser }, error } = await supabase.auth.getUser()
-
-      if (error || !supaUser) {
-        return { success: false, error: error?.message || 'Sessão expirada' }
+      const json = await authFetch('/auth/profile')
+      if (!json.success || !json.data?.user) {
+        return { success: false, error: json.message || 'Sessão expirada' }
       }
-
-      const metaUser = buildUserFromMetadata(supaUser)
-
-      const { data: dbUser, error: dbError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('auth_id', supaUser.id)
-        .single()
-
-      if (dbError || !dbUser) {
-        console.error('authStore: DB query failed on getProfile:', dbError?.message)
-        user.value = metaUser
-      } else {
-        user.value = {
-          id: dbUser.id,
-          auth_id: supaUser.id,
-          email: dbUser.email || supaUser.email,
-          username: dbUser.username || metaUser.username,
-          name: dbUser.name || metaUser.name,
-          phone: dbUser.phone || metaUser.phone,
-          role: dbUser.role || metaUser.role,
-          position: dbUser.position || metaUser.position,
-          permissions: dbUser.permissions || metaUser.permissions,
-          approval_status: dbUser.approval_status || metaUser.approval_status,
-          company_completed: metaUser.company_completed,
-          photo: dbUser.photo || metaUser.photo,
-          must_change_password: dbUser.password_must_change || metaUser.must_change_password,
-          password_changed_at: dbUser.password_changed_at || metaUser.password_changed_at,
-          locked_at: dbUser.locked_at || metaUser.locked_at,
-          locked_reason: dbUser.locked_reason || metaUser.locked_reason,
-          created_at: dbUser.created_at || supaUser.created_at,
-        }
+      const dbUser = json.data.user
+      setUserFromDB(dbUser)
+      if (json.data.company) {
+        user.value.company_completed = true
       }
-      persistUser()
-
-      return { success: true, user: user.value, company: null }
+      photoHistory.value = json.data.photo_history || []
+      return { success: true, user: user.value, company: json.data.company }
     } catch (err) {
       return { success: false, error: err.message }
     }
@@ -247,18 +147,11 @@ export const useAuthStore = defineStore('auth', () => {
 
   const updateProfile = async (payload) => {
     try {
-      const { error } = await supabase.auth.updateUser({
-        data: { name: payload.name, phone: payload.phone },
+      const json = await authFetch('/auth/profile', {
+        method: 'PUT',
+        body: JSON.stringify({ name: payload.name, phone: payload.phone }),
       })
-      if (error) return { success: false, error: error.message }
-
-      if (user.value?.auth_id) {
-        await supabase.from('users').update({
-          name: payload.name,
-          phone: payload.phone,
-        }).eq('auth_id', user.value.auth_id)
-      }
-
+      if (!json.success) return { success: false, error: json.message }
       await getProfile()
       return { success: true, message: 'Perfil atualizado' }
     } catch (err) {
@@ -268,17 +161,18 @@ export const useAuthStore = defineStore('auth', () => {
 
   const changePassword = async (payload) => {
     try {
-      const { error } = await supabase.auth.updateUser({ password: payload.new_password })
-      if (error) return { success: false, error: error.message }
+      const json = await authFetch('/auth/change-password', {
+        method: 'POST',
+        body: JSON.stringify({
+          current_password: payload.current_password || '',
+          new_password: payload.new_password,
+          new_password_confirmation: payload.new_password,
+        }),
+      })
+      if (!json.success) return { success: false, error: json.message }
       if (user.value) {
         user.value = { ...user.value, must_change_password: false, password_changed_at: new Date().toISOString() }
         persistUser()
-        if (user.value.auth_id) {
-          await supabase.from('users').update({
-            password_must_change: false,
-            password_changed_at: new Date().toISOString(),
-          }).eq('auth_id', user.value.auth_id)
-        }
       }
       return { success: true, message: 'Senha alterada com sucesso' }
     } catch (err) {
@@ -290,7 +184,6 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const fd = new FormData()
       fd.append('photo', file)
-      const apiBase = import.meta.env.VITE_API_URL || ''
       const res = await fetch(`${apiBase}/api/auth/upload-photo`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token.value}` },
@@ -325,58 +218,27 @@ export const useAuthStore = defineStore('auth', () => {
 
   const initSession = async () => {
     try {
-      const { data: { session: supaSession }, error } = await supabase.auth.getSession()
-      if (error || !supaSession) {
+      if (!token.value) {
+        user.value = null
+        return
+      }
+      const json = await authFetch('/auth/profile')
+      if (!json.success || !json.data?.user) {
         user.value = null
         token.value = null
-        session.value = null
-        localStorage.removeItem('supabase_access_token')
-        localStorage.removeItem('supabase_refresh_token')
+        localStorage.removeItem('fmlider_token')
         localStorage.removeItem('user')
         return
       }
-      session.value = supaSession
-      persistSession(supaSession)
-
-      const metaUser = buildUserFromMetadata(supaSession.user)
-
-      const { data: dbUser, error: dbError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('auth_id', supaSession.user.id)
-        .single()
-
-      if (dbError || !dbUser) {
-        console.error('authStore: DB query failed on initSession:', dbError?.message)
-        user.value = metaUser
-      } else {
-        user.value = {
-          id: dbUser.id,
-          auth_id: supaSession.user.id,
-          email: dbUser.email || supaSession.user.email,
-          username: dbUser.username || metaUser.username,
-          name: dbUser.name || metaUser.name,
-          phone: dbUser.phone || metaUser.phone,
-          role: dbUser.role || metaUser.role,
-          position: dbUser.position || metaUser.position,
-          permissions: dbUser.permissions || metaUser.permissions,
-          approval_status: dbUser.approval_status || metaUser.approval_status,
-          company_completed: metaUser.company_completed,
-          photo: dbUser.photo || metaUser.photo,
-          must_change_password: dbUser.password_must_change || metaUser.must_change_password,
-          password_changed_at: dbUser.password_changed_at || metaUser.password_changed_at,
-          locked_at: dbUser.locked_at || metaUser.locked_at,
-          locked_reason: dbUser.locked_reason || metaUser.locked_reason,
-          created_at: dbUser.created_at || supaSession.user.created_at,
-        }
+      setUserFromDB(json.data.user)
+      if (json.data.company) {
+        user.value.company_completed = true
       }
-      persistUser()
+      photoHistory.value = json.data.photo_history || []
     } catch (err) {
       user.value = null
       token.value = null
-      session.value = null
-      localStorage.removeItem('supabase_access_token')
-      localStorage.removeItem('supabase_refresh_token')
+      localStorage.removeItem('fmlider_token')
       localStorage.removeItem('user')
     }
   }
@@ -384,7 +246,6 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     user,
     token,
-    session,
     photoHistory,
     isAuthenticated,
     isAdmin,
