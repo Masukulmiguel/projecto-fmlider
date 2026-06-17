@@ -234,11 +234,11 @@ a:hover { color: var(--accent-hover); }
   margin-bottom: 0.75rem;
 }
 
-/* Improve text contrast on dark backgrounds */
-.text-white-50 { color: rgba(255, 255, 255, 0.75) !important; }
+/* Text on dark backgrounds - solid white */
+.text-white-50 { color: rgba(255, 255, 255, 1) !important; }
 .bg-fml-navy .text-muted,
-.bg-fml-navy.text-white { color: rgba(255, 255, 255, 0.8) !important; }
-.text-white-70 { color: rgba(255, 255, 255, 0.7) !important; }
+.bg-fml-navy.text-white { color: rgba(255, 255, 255, 1) !important; }
+.text-white-70 { color: rgba(255, 255, 255, 1) !important; }
 
 /* ============================================
    Buttons

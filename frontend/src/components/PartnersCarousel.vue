@@ -142,9 +142,9 @@ onBeforeUnmount(() => {
 
 .logo-frame:hover {
   transform: translateY(-6px) scale(1.03);
-  border-color: #0f766e;
-  box-shadow: 0 12px 28px rgba(15, 118, 110, 0.18),
-              0 4px 10px rgba(15, 118, 110, 0.08);
+  border-color: var(--fml-gold);
+  box-shadow: 0 12px 28px rgba(245, 158, 11, 0.18),
+              0 4px 10px rgba(245, 158, 11, 0.08);
 }
 
 .partner-logo {
@@ -201,7 +201,7 @@ onBeforeUnmount(() => {
   border-radius: 50%;
   border: 2px solid #e2e8f0;
   background: #ffffff;
-  color: #0f766e;
+  color: var(--fml-gold);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -212,10 +212,10 @@ onBeforeUnmount(() => {
 }
 
 .carousel-arrow:hover:not(:disabled) {
-  background: #0f766e;
-  border-color: #0f766e;
+  background: var(--fml-gold);
+  border-color: var(--fml-gold);
   color: #ffffff;
-  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.3);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
   transform: scale(1.08);
 }
 
@@ -243,9 +243,9 @@ onBeforeUnmount(() => {
 }
 
 .carousel-dot.active {
-  background: #0f766e;
+  background: var(--fml-gold);
   transform: scale(1.25);
-  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.2);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
 }
 
 .carousel-dot:hover:not(.active) {

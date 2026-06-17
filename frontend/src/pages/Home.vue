@@ -142,7 +142,7 @@
         <div class="text-center mb-5" v-reveal="'up'">
           <span class="fml-eyebrow">O Que Fazemos</span>
           <h2 class="section-title text-white">Serviços Integrados</h2>
-          <p class="section-subtitle" style="color: rgba(255,255,255,0.85);">Soluções completas de logística, transporte e transitário adaptadas ao seu negócio.</p>
+          <p class="section-subtitle text-white">Soluções completas de logística, transporte e transitário adaptadas ao seu negócio.</p>
         </div>
         <div v-if="loadingServices" class="row g-4">
           <div class="col-lg-3 col-md-6" v-for="n in 4" :key="n">
@@ -261,7 +261,7 @@
                 <div v-else class="avatar">{{ t.name.charAt(0) }}</div>
                 <div>
                   <strong>{{ t.name }}</strong>
-                  <small v-if="t.company" class="d-block" style="color: rgba(255,255,255,0.75);">{{ t.position }} · {{ t.company }}</small>
+                  <small v-if="t.company" class="d-block text-white">{{ t.position }} · {{ t.company }}</small>
                 </div>
               </div>
             </div>
@@ -274,8 +274,8 @@
     <section class="partners-section fml-section-sm" v-reveal="'fade'">
       <div class="container">
         <div class="text-center mb-4">
-          <p class="text-uppercase small fw-bold mb-1" style="letter-spacing: 2px; color: #0f766e;">Confiam em nós</p>
-          <h2 class="fw-bold mb-2">Nossos Clientes</h2>
+          <p class="text-uppercase small fw-bold mb-1" style="letter-spacing: 2px; color: var(--fml-gold);">Confiam em nós</p>
+          <h2 class="fw-bold mb-5">Nossos Clientes</h2>
           <p class="text-muted mb-0">Empresas que confiam na FMLider para o seu dia a dia logístico.</p>
         </div>
         <PartnersCarousel />
@@ -286,7 +286,7 @@
     <section class="cta-section fml-section-gold" v-reveal="'scale'">
       <div class="container text-center">
         <h2 class="display-5 fw-bold mb-3">Pronto para Enviar?</h2>
-        <p class="lead mb-4 opacity-90">Solicite um orçamento gratuito em menos de 24 horas.</p>
+        <p class="lead mb-4">Solicite um orçamento gratuito em menos de 24 horas.</p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
           <router-link to="/cotacoes/novo" class="btn btn-dark btn-lg">
             <i class="bi bi-receipt me-2"></i> Pedir Cotação

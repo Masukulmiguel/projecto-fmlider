@@ -190,7 +190,7 @@
           <div class="col-lg-6" v-reveal="'right'">
             <span class="fml-eyebrow">Frota Própria</span>
             <h2 class="section-title text-white">Reachstacker Kalmar de 45t</h2>
-            <p class="mb-4" style="color: rgba(255,255,255,0.8);">
+            <p class="mb-4 text-white">
               Em 2022 investimos num <strong>Reachstacker Kalmar</strong> de 45 toneladas,
               reforçando a nossa capacidade de manuseamento de contentores e cargas especiais.
               Esta máquina representa uma mais-valia significativa para a nossa operação.
@@ -218,7 +218,7 @@
     <section class="cta-about fml-section-gold">
       <div class="container text-center">
         <h2 class="display-5 fw-bold mb-3">Pronto para Trabalhar Connosco?</h2>
-        <p class="lead mb-4 opacity-90">Solicite um orçamento ou fale com a nossa equipa.</p>
+        <p class="lead mb-4">Solicite um orçamento ou fale com a nossa equipa.</p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
           <router-link to="/contacto" class="btn btn-dark btn-lg">
             <i class="bi bi-envelope me-2"></i> Contactar
@@ -349,7 +349,7 @@ onMounted(async () => {
 }
 .stat-label {
   font-size: 0.78rem;
-  color: rgba(255,255,255,0.6);
+  color: rgba(255,255,255,1);
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-top: 0.35rem;
@@ -446,7 +446,7 @@ onMounted(async () => {
   margin-bottom: 0.5rem;
 }
 .timeline-card p {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 1);
   font-size: 0.9rem;
   margin: 0;
   line-height: 1.6;

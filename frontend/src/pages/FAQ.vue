@@ -101,7 +101,7 @@ onMounted(async () => {
 
 <style scoped>
 .faq-hero {
-  background: linear-gradient(135deg, #1877f2, #0d5bbd);
+  background: linear-gradient(135deg, var(--fml-navy), var(--fml-navy-2));
   color: #fff;
   padding: 3rem 0;
   text-align: center;
@@ -127,7 +127,7 @@ onMounted(async () => {
   outline: none;
   transition: border-color 0.2s;
 }
-.faq-search input:focus { border-color: #1877f2; }
+.faq-search input:focus { border-color: var(--fml-gold); }
 
 .faq-categories {
   display: flex;
@@ -146,8 +146,8 @@ onMounted(async () => {
   transition: all 0.2s;
   color: #64748b;
 }
-.cat-btn.active { background: #1877f2; color: #fff; border-color: #1877f2; }
-.cat-btn:hover:not(.active) { border-color: #1877f2; color: #1877f2; }
+.cat-btn.active { background: var(--fml-gold); color: #fff; border-color: var(--fml-gold); }
+.cat-btn:hover:not(.active) { border-color: var(--fml-gold); color: var(--fml-gold); }
 
 .faq-list { max-width: 800px; margin: 0 auto; }
 
@@ -160,7 +160,7 @@ onMounted(async () => {
   transition: box-shadow 0.2s;
 }
 .faq-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-.faq-item.open { border-color: #1877f2; }
+.faq-item.open { border-color: var(--fml-gold); }
 
 .faq-question {
   width: 100%;
@@ -176,7 +176,7 @@ onMounted(async () => {
   color: #1e293b;
   text-align: left;
 }
-.faq-question i { color: #1877f2; font-size: 0.9rem; flex-shrink: 0; }
+.faq-question i { color: var(--fml-gold); font-size: 0.9rem; flex-shrink: 0; }
 
 .faq-answer {
   padding: 0 1.25rem 1rem;

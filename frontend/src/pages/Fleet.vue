@@ -79,7 +79,7 @@
           <div class="col-lg-6" v-reveal="'right'">
             <span class="fml-eyebrow">Destaque</span>
             <h2 class="section-title text-white">Reachstacker Kalmar</h2>
-            <p class="mb-4" style="color: rgba(255,255,255,0.8);">
+            <p class="mb-4 text-white">
               O nosso <strong>Reachstacker Kalmar de 45 toneladas</strong> é a peça central da nossa
               operação de manuseamento de contentores. Adquirido em 2022, este equipamento de última
               geração permite-nos oferecer serviços de carga e descarga mais rápidos, seguros e eficientes.
@@ -136,7 +136,7 @@
     <section class="fleet-cta fml-section-gold">
       <div class="container text-center">
         <h2 class="display-5 fw-bold mb-3">Precisa de Transporte ou Armazenagem?</h2>
-        <p class="lead mb-4 opacity-90">A nossa frota está pronta para servir o seu negócio.</p>
+        <p class="lead mb-4">A nossa frota está pronta para servir o seu negócio.</p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
           <router-link to="/contacto" class="btn btn-dark btn-lg">
             <i class="bi bi-envelope me-2"></i> Contactar
@@ -358,7 +358,7 @@ onMounted(async () => {
 }
 .fleet-stat-label {
   font-size: 0.78rem;
-  color: rgba(255,255,255,0.6);
+  color: rgba(255,255,255,1);
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-top: 0.35rem;
@@ -512,7 +512,7 @@ onMounted(async () => {
 .highlight-spec-label {
   display: block;
   font-size: 0.72rem;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255,255,255,1);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }

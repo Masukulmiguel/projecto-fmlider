@@ -275,7 +275,7 @@ onBeforeUnmount(() => {
 }
 .gal-stat-label {
   font-size: 0.78rem;
-  color: rgba(255,255,255,0.6);
+  color: rgba(255,255,255,1);
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-top: 0.35rem;

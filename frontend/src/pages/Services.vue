@@ -71,7 +71,7 @@
         <div class="text-center mb-5" v-reveal="'up'">
           <span class="fml-eyebrow">Como Trabalhamos</span>
           <h2 class="section-title text-white">Do Pedido à Entrega</h2>
-          <p style="color: rgba(255,255,255,0.8);">Processo simples, rápido e transparente.</p>
+          <p class="text-white">Processo simples, rápido e transparente.</p>
         </div>
         <div class="process-steps">
           <div class="process-step" v-for="(step, i) in processSteps" :key="i">
@@ -122,7 +122,7 @@
     <section class="srv-cta fml-section-gold">
       <div class="container text-center">
         <h2 class="display-5 fw-bold mb-3">Precisa de uma Solução Logística?</h2>
-        <p class="lead mb-4 opacity-90">Fale com a nossa equipa e receba uma proposta personalizada em 24h.</p>
+        <p class="lead mb-4">Fale com a nossa equipa e receba uma proposta personalizada em 24h.</p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
           <router-link to="/contacto" class="btn btn-dark btn-lg">
             <i class="bi bi-envelope me-2"></i> Contactar Agora
