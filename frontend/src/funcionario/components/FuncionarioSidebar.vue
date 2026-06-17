@@ -17,7 +17,7 @@
         </div>
       </div>
     </div>
-    <nav class="sidebar-menu">
+    <nav class="sidebar-menu" @click="$emit('close')">
       <div class="menu-section">{{ t('sidebar.general') }}</div>
       <router-link to="/funcionario" class="menu-item" active-class="active">
         <i class="bi bi-grid-1x2-fill menu-icon"></i>

@@ -7,7 +7,7 @@
         <span class="logo-text">FMLider</span>
       </div>
 
-      <nav class="sidebar-menu">
+      <nav class="sidebar-menu" @click="$emit('close')">
         <div class="menu-section">
           <span class="section-label">Principal</span>
         </div>
