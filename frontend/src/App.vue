@@ -1,10 +1,11 @@
 <template>
   <div id="app" class="app">
-    <AdminSidebar v-if="isAdminRoute" />
-    <FuncionarioSidebar v-else-if="isFuncionarioRoute" :isOpen="sidebarOpen" />
-    <ClienteSidebar v-else-if="isClienteRoute" :isOpen="sidebarOpen" />
+    <InactivityClock :timeout="600000" />
+    <AdminSidebar v-if="isAdminRoute" :isOpen="sidebarOpen" @close="sidebarOpen = false" />
+    <FuncionarioSidebar v-else-if="isFuncionarioRoute" :isOpen="sidebarOpen" @close="sidebarOpen = false" />
+    <ClienteSidebar v-else-if="isClienteRoute" :isOpen="sidebarOpen" @close="sidebarOpen = false" />
     <div :class="layoutClass">
-      <AdminNavbar v-if="isAdminRoute" />
+      <AdminNavbar v-if="isAdminRoute" @toggle-sidebar="sidebarOpen = !sidebarOpen" />
       <FuncionarioNavbar v-else-if="isFuncionarioRoute" @toggle-sidebar="sidebarOpen = !sidebarOpen" />
       <ClienteNavbar v-else-if="isClienteRoute" @toggle-sidebar="sidebarOpen = !sidebarOpen" />
       <PublicHeader v-else />
@@ -24,6 +25,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import { useThemeStore } from '@/stores/themeStore'
 import PublicHeader from '@/components/PublicHeader.vue'
 import PublicFooter from '@/components/PublicFooter.vue'
 import AdminSidebar from '@/admin/components/AdminSidebar.vue'
@@ -33,11 +35,13 @@ import ClienteNavbar from '@/cliente/components/ClienteNavbar.vue'
 import FuncionarioSidebar from '@/funcionario/components/FuncionarioSidebar.vue'
 import FuncionarioNavbar from '@/funcionario/components/FuncionarioNavbar.vue'
 import ChatbotWidget from '@/components/ChatbotWidget.vue'
+import InactivityClock from '@/components/InactivityClock.vue'
 import { RouterView } from 'vue-router'
 import { trackVisitor } from '@/utils/visitor'
 
 const route = useRoute()
 const authStore = useAuthStore()
+const themeStore = useThemeStore()
 const sidebarOpen = ref(false)
 
 const isAdminRoute = computed(() => route.meta?.layout === 'admin')
@@ -52,6 +56,7 @@ const layoutClass = computed(() => {
 })
 
 onMounted(() => {
+  themeStore.applyTheme()
   if (!isAdminRoute.value && !isClienteRoute.value && !isFuncionarioRoute.value) {
     trackVisitor()
   }

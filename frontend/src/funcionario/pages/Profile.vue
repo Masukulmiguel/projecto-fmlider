@@ -134,10 +134,9 @@ const save = async () => {
   successMessage.value = ''
   saving.value = true
   try {
-    const { error } = await supabase.auth.updateUser({ data: form })
-    if (error) throw error
+    const result = await authStore.updateProfile({ name: form.name, phone: form.phone })
+    if (!result.success) throw new Error(result.error)
     successMessage.value = 'Perfil atualizado.'
-    await authStore.getProfile()
   } catch (e) {
     errorMessage.value = e.message || 'Erro ao guardar.'
   } finally {
@@ -151,11 +150,10 @@ const changePassword = async () => {
   if (pwd.new !== pwd.confirm) { passwordError.value = 'As senhas não coincidem.'; return }
   changingPwd.value = true
   try {
-    const { error } = await supabase.auth.updateUser({ password: pwd.new })
-    if (error) throw error
+    const result = await authStore.changePassword({ new_password: pwd.new })
+    if (!result.success) throw new Error(result.error)
     passwordSuccess.value = 'Senha alterada com sucesso.'
     pwd.current = ''; pwd.new = ''; pwd.confirm = ''
-    await authStore.getProfile()
   } catch (e) {
     passwordError.value = e.message || 'Erro ao alterar senha.'
   } finally {

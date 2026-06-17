@@ -47,6 +47,7 @@ const stopPolling = () => {
 }
 
 onMounted(async () => {
+  await chatStore.fetchAvailableUsers()
   await chatStore.fetchConversations()
   if (chatStore.conversations.length > 0 && !selected.value) {
     selected.value = chatStore.conversations[0]

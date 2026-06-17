@@ -308,7 +308,7 @@ const unlockUser = async (u) => {
 const fetchList = async () => {
   loading.value = true
   try {
-    const { data, error } = await supabase.from('users').select('*').eq('role', 'funcionario').order('created_at', { ascending: false })
+    const { data, error } = await supabase.from('users').select('id, auth_id, created_at, updated_at, name, email, username, phone, role, position, permissions, approval_status, status, photo, password_must_change, password_changed_at, locked_at, locked_reason').eq('role', 'funcionario').order('created_at', { ascending: false })
     if (!error) items.value = data
   } finally { loading.value = false }
 }
@@ -413,6 +413,16 @@ const handleSubmit = async () => {
           password_must_change: true,
           password: 'supabase_auth_managed',
         }, { onConflict: 'auth_id', ignoreDuplicates: true })
+
+        try {
+          await fetch('/api/admin/confirm-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: authData.user.id }),
+          })
+        } catch (e) {
+          console.warn('Auto-confirm email failed, user may need manual confirmation:', e)
+        }
       }
     }
     closeForm()

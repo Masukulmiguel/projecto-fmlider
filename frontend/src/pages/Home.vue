@@ -26,7 +26,7 @@
         </div>
       </div>
       <template v-else-if="slides.length > 0">
-        <div class="hero-slide" v-for="(s, i) in slides" :key="s.id || i" :class="{ active: i === currentSlide }" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,58,138,0.75) 50%, rgba(15,23,42,0.85) 100%), url(${s.image})` }">
+        <div class="hero-slide" v-for="(s, i) in slides" :key="s.id || i" :class="{ active: i === currentSlide }" :style="{ backgroundImage: slideBg(s) }">
           <div class="container">
             <div class="hero-content">
               <span class="hero-eyebrow" data-aos="fade-up">{{ s.title }}</span>
@@ -90,7 +90,7 @@
     <section class="about-strip">
       <div class="container">
         <div class="row align-items-center g-4">
-          <div class="col-lg-7">
+          <div class="col-lg-7" v-reveal="'right'">
             <span class="fml-eyebrow">Quem Somos</span>
             <h2 class="section-title mb-3">Logística que move o seu negócio</h2>
             <p class="text-muted mb-0">
@@ -100,7 +100,7 @@
               de transporte, transitário, armazenagem e logística.
             </p>
           </div>
-          <div class="col-lg-5">
+          <div class="col-lg-5" v-reveal="'left'">
             <div class="cert-card">
               <div class="cert-item">
                 <i class="bi bi-shield-check"></i>
@@ -139,10 +139,10 @@
     <!-- Services -->
     <section class="services-section fml-section bg-fml-navy text-white">
       <div class="container">
-        <div class="text-center mb-5">
+        <div class="text-center mb-5" v-reveal="'up'">
           <span class="fml-eyebrow">O Que Fazemos</span>
           <h2 class="section-title text-white">Serviços Integrados</h2>
-          <p class="section-subtitle text-white-50">Soluções completas de logística, transporte e transitário adaptadas ao seu negócio.</p>
+          <p class="section-subtitle" style="color: rgba(255,255,255,0.85);">Soluções completas de logística, transporte e transitário adaptadas ao seu negócio.</p>
         </div>
         <div v-if="loadingServices" class="row g-4">
           <div class="col-lg-3 col-md-6" v-for="n in 4" :key="n">
@@ -154,7 +154,7 @@
           </div>
         </div>
         <div v-else class="row g-4">
-          <div class="col-lg-3 col-md-6" v-for="(s, i) in services" :key="s.id || i">
+          <div class="col-lg-3 col-md-6" v-for="(s, i) in services" :key="s.id || i" v-reveal="'up'" :data-reveal-delay="i * 100">
             <router-link :to="`/servicos/${s.slug || ''}`" class="service-card">
               <div class="service-icon"><i :class="getServiceIcon(s.title)"></i></div>
               <h5>{{ s.title }}</h5>
@@ -174,12 +174,12 @@
     <!-- Process -->
     <section class="process-section fml-section">
       <div class="container">
-        <div class="text-center mb-5">
+        <div class="text-center mb-5" v-reveal="'up'">
           <span class="fml-eyebrow">Como Trabalhamos</span>
           <h2 class="section-title">Do Pedido à Entrega em 4 Passos</h2>
         </div>
         <div class="row g-4 process-steps">
-          <div class="col-md-6 col-lg-3" v-for="(step, i) in process" :key="i">
+          <div class="col-md-6 col-lg-3" v-for="(step, i) in processSteps" :key="i" v-reveal="'up'" :data-reveal-delay="i * 120">
             <div class="process-step">
               <div class="process-num">{{ i+1 }}</div>
               <h5>{{ step.title }}</h5>
@@ -194,7 +194,7 @@
     <section class="fleet-section fml-section bg-fml-50">
       <div class="container">
         <div class="row align-items-center g-5">
-          <div class="col-lg-6">
+          <div class="col-lg-6" v-reveal="'right'">
             <span class="fml-eyebrow">Frota & Equipamentos</span>
             <h2 class="section-title">Reachstacker Kalmar de 45 toneladas</h2>
             <p class="text-muted mb-4">
@@ -213,9 +213,9 @@
               Ver a Nossa Frota <i class="bi bi-arrow-right ms-2"></i>
             </router-link>
           </div>
-          <div class="col-lg-6">
+          <div class="col-lg-6" v-reveal="'scale'">
             <div class="fleet-image">
-              <img src="/assets/img/resachstacker/resachstacker1.jpeg" alt="Reachstacker FMLider" class="img-fluid rounded">
+              <img :src="fleetImage" alt="Reachstacker FMLider" class="img-fluid rounded">
             </div>
           </div>
         </div>
@@ -225,7 +225,7 @@
     <!-- News -->
     <section class="news-section fml-section">
       <div class="container">
-        <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-2">
+        <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-2" v-reveal="'up'">
           <div>
             <span class="fml-eyebrow">Novidades</span>
             <h2 class="section-title mb-0">Últimas Notícias</h2>
@@ -235,7 +235,7 @@
           </router-link>
         </div>
         <div class="row g-4">
-          <div class="col-lg-4" v-for="newsItem in latestNews" :key="newsItem.id">
+          <div class="col-lg-4" v-for="newsItem in latestNews" :key="newsItem.id" v-reveal="'up'">
             <NewsCard :news="newsItem" />
           </div>
         </div>
@@ -245,12 +245,12 @@
     <!-- Testimonials -->
     <section v-if="testimonials.length" class="testimonials-section fml-section bg-fml-navy text-white">
       <div class="container">
-        <div class="text-center mb-5">
+        <div class="text-center mb-5" v-reveal="'up'">
           <span class="fml-eyebrow">Confiança</span>
           <h2 class="section-title text-white">O Que Dizem os Nossos Clientes</h2>
         </div>
         <div class="row g-4">
-          <div class="col-md-4" v-for="(t, i) in testimonials.slice(0, 3)" :key="t.id || i">
+          <div class="col-md-4" v-for="(t, i) in testimonials.slice(0, 3)" :key="t.id || i" v-reveal="'up'" :data-reveal-delay="i * 120">
             <div class="testimonial-card">
               <div class="stars mb-2">
                 <i v-for="n in Number(t.rating) || 5" :key="n" class="bi bi-star-fill"></i>
@@ -261,7 +261,7 @@
                 <div v-else class="avatar">{{ t.name.charAt(0) }}</div>
                 <div>
                   <strong>{{ t.name }}</strong>
-                  <small v-if="t.company" class="d-block text-white-50">{{ t.position }} · {{ t.company }}</small>
+                  <small v-if="t.company" class="d-block" style="color: rgba(255,255,255,0.75);">{{ t.position }} · {{ t.company }}</small>
                 </div>
               </div>
             </div>
@@ -271,7 +271,7 @@
     </section>
 
     <!-- Nossos Clientes -->
-    <section class="partners-section fml-section-sm">
+    <section class="partners-section fml-section-sm" v-reveal="'fade'">
       <div class="container">
         <div class="text-center mb-4">
           <p class="text-uppercase small fw-bold mb-1" style="letter-spacing: 2px; color: #0f766e;">Confiam em nós</p>
@@ -283,7 +283,7 @@
     </section>
 
     <!-- CTA -->
-    <section class="cta-section fml-section-gold">
+    <section class="cta-section fml-section-gold" v-reveal="'scale'">
       <div class="container text-center">
         <h2 class="display-5 fw-bold mb-3">Pronto para Enviar?</h2>
         <p class="lead mb-4 opacity-90">Solicite um orçamento gratuito em menos de 24 horas.</p>
@@ -302,7 +302,7 @@
     <section class="location-section fml-section">
       <div class="container">
         <div class="row align-items-center g-5">
-          <div class="col-lg-5">
+          <div class="col-lg-5" v-reveal="'right'">
             <span class="fml-eyebrow">Onde Estamos</span>
             <h2 class="section-title">Visite-nos</h2>
             <p class="text-muted mb-4">Estamos localizados em Cacuaco, com acesso facilitado às principais vias e ao Porto de Luanda.</p>
@@ -339,7 +339,7 @@
               </li>
             </ul>
           </div>
-          <div class="col-lg-7">
+          <div class="col-lg-7" v-reveal="'left'">
             <div class="map-container shadow">
               <iframe
                 src="https://maps.google.com/maps?q=FMLider+Base+Cacuaco+Luanda+Angola&hl=pt&z=15&output=embed"
@@ -365,6 +365,11 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import NewsCard from '@/components/NewsCard.vue'
 import PartnersCarousel from '@/components/PartnersCarousel.vue'
 import { supabase } from '@/lib/supabase'
+import { useSiteImages } from '@/composables/useSiteImages'
+
+const { getImage, fetchAll } = useSiteImages()
+const heroBg = ref('/assets/img/construcao2020/image1.jpeg')
+const fleetImage = ref('/assets/img/resachstacker/resachstacker1.jpeg')
 
 const currentSlide = ref(0)
 let interval = null
@@ -380,8 +385,24 @@ const loadingNews = ref(true)
 const loadingTestimonials = ref(true)
 
 const defaultSlideStyle = computed(() => ({
-  backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,58,138,0.75) 50%, rgba(15,23,42,0.85) 100%), url(/assets/img/construcao2020/image1.jpeg)`
+  backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,58,138,0.75) 50%, rgba(15,23,42,0.85) 100%), url(${heroBg.value})`
 }))
+
+const FALLBACK_BG = computed(() => `linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,58,138,0.75) 50%, rgba(15,23,42,0.85) 100%), url(${heroBg.value})`)
+
+function slideBg(s) {
+  if (s.image && (s.image.startsWith('http') || s.image.startsWith('/'))) {
+    return `linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,58,138,0.75) 50%, rgba(15,23,42,0.85) 100%), url(${s.image})`
+  }
+  return FALLBACK_BG.value
+}
+
+const processSteps = [
+  { title: 'Contacto', desc: 'O cliente entra em contacto connosco com a sua necessidade logística.' },
+  { title: 'Cotação', desc: 'Preparamos uma cotação personalizada com as melhores opções.' },
+  { title: 'Execução', desc: 'A equipa executa o serviço com rigor e transparência total.' },
+  { title: 'Entrega', desc: 'A carga é entregue no destino com segurança e pontualidade.' },
+]
 
 const serviceIconMap = {
   'despacho': 'bi bi-shield-check',
@@ -410,18 +431,22 @@ function getServiceIcon(title) {
   return 'bi bi-gear'
 }
 
-const fetchContent = async () => {
-  const fetchBanners = supabase.from('banners').select('*').eq('status', 1).order('order_by')
-  const fetchServices = supabase.from('services').select('*').eq('status', 1).order('order_by')
+  const fetchContent = async () => {
+  await fetchAll()
+  heroBg.value = getImage('home', 'hero_bg', '/assets/img/construcao2020/image1.jpeg')
+  fleetImage.value = getImage('home', 'fleet_image', '/assets/img/resachstacker/resachstacker1.jpeg')
+
+  const fetchBanners = supabase.from('banners').select('*').order('order_by')
+  const fetchServices = supabase.from('services').select('*').order('order_by')
   const fetchNews = supabase.from('news').select('*').eq('status', 'published').order('published_at', { ascending: false })
-  const fetchTestimonials = supabase.from('testimonials').select('*').eq('status', 1).order('order_by')
+  const fetchTestimonials = supabase.from('testimonials').select('*').order('order_by')
 
   const [bannersRes, servicesRes, newsRes, testsRes] = await Promise.all([
     fetchBanners, fetchServices, fetchNews, fetchTestimonials
   ])
 
   if (!bannersRes.error && bannersRes.data) {
-    const raw = bannersRes.data || []
+    const raw = (bannersRes.data || []).filter(b => b.status === true || b.status === 1 || b.status === 'published')
     slides.value = raw.map(b => ({
       ...b,
       image: b.image?.startsWith('/') || b.image?.startsWith('http') ? b.image : `/assets/img/${b.image}`,
@@ -431,7 +456,7 @@ const fetchContent = async () => {
   loadingBanners.value = false
 
   if (!servicesRes.error && servicesRes.data) {
-    services.value = servicesRes.data || []
+    services.value = (servicesRes.data || []).filter(s => s.status === true || s.status === 1 || s.status === 'published')
   }
   loadingServices.value = false
 
@@ -441,7 +466,7 @@ const fetchContent = async () => {
   loadingNews.value = false
 
   if (!testsRes.error && testsRes.data) {
-    testimonials.value = testsRes.data || []
+    testimonials.value = (testsRes.data || []).filter(t => t.status === true || t.status === 1 || t.status === 'published')
   }
   loadingTestimonials.value = false
 
@@ -519,7 +544,7 @@ onUnmounted(() => {
 .hero-subtitle {
   font-size: 1.25rem;
   line-height: 1.6;
-  opacity: 0.92;
+  opacity: 0.95;
   margin-bottom: 2.5rem;
   max-width: 620px;
 }
@@ -533,7 +558,7 @@ onUnmounted(() => {
 }
 .hero-stat { display: flex; flex-direction: column; }
 .hero-stat strong { font-size: 2.2rem; font-weight: 800; color: var(--fml-gold); line-height: 1; }
-.hero-stat span { font-size: 0.85rem; opacity: 0.8; margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 1.5px; }
+.hero-stat span { font-size: 0.85rem; opacity: 0.85; margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 1.5px; }
 
 .hero-nav {
   position: absolute;

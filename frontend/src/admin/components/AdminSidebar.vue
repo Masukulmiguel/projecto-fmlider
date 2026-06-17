@@ -3,7 +3,7 @@
     <div class="sidebar-overlay" @click="$emit('close')"></div>
     <div class="sidebar-inner">
       <div class="sidebar-logo">
-        <img src="/assets/img/logo.png" alt="FMLider" height="36">
+        <img :src="logoUrl" alt="FMLider" height="36">
         <span class="logo-text">FMLider</span>
       </div>
 
@@ -93,6 +93,10 @@
           <i class="bi bi-envelope-fill menu-icon"></i>
           <span class="menu-text">Contactos Form</span>
         </router-link>
+        <router-link to="/admin/imagens" class="menu-item" active-class="active">
+          <i class="bi bi-image menu-icon"></i>
+          <span class="menu-text">Imagens</span>
+        </router-link>
         <router-link to="/admin/configuracoes" class="menu-item" active-class="active">
           <i class="bi bi-gear-fill menu-icon"></i>
           <span class="menu-text">Definições</span>
@@ -122,6 +126,10 @@ import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 import { useChatStore } from '@/stores/chatStore'
+import { useSiteImages } from '@/composables/useSiteImages'
+
+const { getImage, fetchAll } = useSiteImages()
+const logoUrl = ref('/assets/img/logo.png')
 
 defineProps({
   isOpen: { type: Boolean, default: false }
@@ -166,7 +174,9 @@ const fetchChatUnread = async () => {
 
 let channel = null
 
-onMounted(() => {
+onMounted(async () => {
+  await fetchAll()
+  logoUrl.value = getImage('sidebar', 'admin_logo', '/assets/img/logo.png')
   fetchPending()
   fetchChatUnread()
   pollInterval = setInterval(() => {

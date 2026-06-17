@@ -1,7 +1,8 @@
 <template>
   <div class="cliente-sidebar" :class="{ show: isOpen }">
+    <div class="sidebar-overlay" @click="$emit('close')"></div>
     <div class="sidebar-logo">
-      <img src="/assets/img/logo.png" alt="FMLider" height="42">
+      <img :src="logoUrl" alt="FMLider" height="42">
       <small class="d-block sidebar-subtitle">Área do Cliente</small>
     </div>
     <nav class="sidebar-menu">
@@ -62,12 +63,19 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
+import { useSiteImages } from '@/composables/useSiteImages'
+
+const { getImage, fetchAll } = useSiteImages()
+const logoUrl = ref('/assets/img/logo.png')
 import { useChatStore } from '@/stores/chatStore'
 
 defineProps({
   isOpen: { type: Boolean, default: false }
 })
+
+defineEmits(['close'])
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -92,7 +100,9 @@ const logout = () => {
 
 const initials = (name) => (name || '?').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()
 
-onMounted(() => {
+onMounted(async () => {
+  await fetchAll()
+  logoUrl.value = getImage('sidebar', 'cliente_logo', '/assets/img/logo.png')
   fetchChatUnread()
   pollInterval = setInterval(fetchChatUnread, 30000)
 })
@@ -304,12 +314,23 @@ onBeforeUnmount(() => {
   color: #fca5a5;
 }
 
+.sidebar-overlay {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .cliente-sidebar {
     transform: translateX(-100%);
   }
   .cliente-sidebar.show {
     transform: translateX(0);
+  }
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: -1;
   }
 }
 </style>

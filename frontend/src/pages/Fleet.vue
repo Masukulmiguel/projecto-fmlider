@@ -2,7 +2,7 @@
   <div class="fleet-page">
     <!-- Hero -->
     <section class="fleet-hero">
-      <div class="fleet-hero-bg" style="background-image: linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(/assets/img/resachstacker/resachstacker1.jpeg);"></div>
+      <div class="fleet-hero-bg" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(${heroBg})` }"></div>
       <div class="container position-relative">
         <div class="fleet-hero-content">
           <span class="fml-eyebrow">Frota & Equipamentos</span>
@@ -76,10 +76,10 @@
     <section class="fleet-highlight fml-section bg-fml-navy text-white">
       <div class="container">
         <div class="row align-items-center g-5">
-          <div class="col-lg-6">
+          <div class="col-lg-6" v-reveal="'right'">
             <span class="fml-eyebrow">Destaque</span>
             <h2 class="section-title text-white">Reachstacker Kalmar</h2>
-            <p class="text-white-50 mb-4">
+            <p class="mb-4" style="color: rgba(255,255,255,0.8);">
               O nosso <strong>Reachstacker Kalmar de 45 toneladas</strong> é a peça central da nossa
               operação de manuseamento de contentores. Adquirido em 2022, este equipamento de última
               geração permite-nos oferecer serviços de carga e descarga mais rápidos, seguros e eficientes.
@@ -94,9 +94,9 @@
               </div>
             </div>
           </div>
-          <div class="col-lg-6">
+          <div class="col-lg-6" v-reveal="'scale'">
             <div class="highlight-image">
-              <img src="/assets/img/resachstacker/resachstacker1.jpeg" alt="Reachstacker Kalmar" class="img-fluid rounded shadow-lg">
+              <img :src="highlightImage" alt="Reachstacker Kalmar" class="img-fluid rounded shadow-lg">
             </div>
           </div>
         </div>
@@ -106,12 +106,12 @@
     <!-- Fleet Gallery -->
     <section class="fleet-gallery fml-section">
       <div class="container">
-        <div class="text-center mb-5">
+        <div class="text-center mb-5" v-reveal="'up'">
           <span class="fml-eyebrow">Galeria</span>
           <h2 class="section-title">A Nossa Frota em Acção</h2>
         </div>
         <div class="gallery-grid">
-          <div class="gallery-item" v-for="(img, i) in galleryImages" :key="i" @click="openLightbox(i)">
+          <div class="gallery-item" v-for="(img, i) in galleryImages" :key="i" @click="openLightbox(i)" v-reveal="'scale'">
             <img :src="img.src" :alt="img.caption">
             <div class="gallery-caption">
               <span>{{ img.caption }}</span>
@@ -151,7 +151,12 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useSiteImages } from '@/composables/useSiteImages'
+
+const { getImage, fetchAll } = useSiteImages()
+const heroBg = ref('/assets/img/resachstacker/resachstacker1.jpeg')
+const highlightImage = ref('/assets/img/resachstacker/resachstacker1.jpeg')
 
 const selectedCategory = ref('all')
 const lightboxOpen = ref(false)
@@ -283,6 +288,12 @@ const prevImage = () => {
 const nextImage = () => {
   lightboxIndex.value = (lightboxIndex.value + 1) % galleryImages.length
 }
+
+onMounted(async () => {
+  await fetchAll()
+  heroBg.value = getImage('fleet', 'hero_bg', '/assets/img/resachstacker/resachstacker1.jpeg')
+  highlightImage.value = getImage('fleet', 'highlight_image', '/assets/img/resachstacker/resachstacker1.jpeg')
+})
 </script>
 
 <style scoped>

@@ -36,12 +36,12 @@ const chatStore = useChatStore()
 const adminConv = ref(null)
 
 const startChat = async () => {
-  await chatStore.fetchConversations()
-  adminConv.value = chatStore.conversations[0] || null
-  if (adminConv.value) {
-    await chatStore.fetchMessages(adminConv.value.id)
+  const admin = await chatStore.findAdmin()
+  if (admin) {
+    adminConv.value = admin
+    await chatStore.fetchMessages(admin.id)
+    chatStore.startPolling(5000)
   }
-  chatStore.startPolling(5000)
 }
 
 const onSent = () => { /* handled in store */ }
@@ -52,6 +52,13 @@ onMounted(async () => {
     adminConv.value = chatStore.conversations[0]
     await chatStore.fetchMessages(adminConv.value.id)
     chatStore.startPolling(5000)
+  } else {
+    const admin = await chatStore.findAdmin()
+    if (admin) {
+      adminConv.value = admin
+      await chatStore.fetchMessages(admin.id)
+      chatStore.startPolling(5000)
+    }
   }
 })
 

@@ -13,6 +13,7 @@ const Gallery = () => import('@/pages/Gallery.vue')
 const Contact = () => import('@/pages/Contact.vue')
 const Termos = () => import('@/pages/Termos.vue')
 const Politicas = () => import('@/pages/Politicas.vue')
+const FAQ = () => import('@/pages/FAQ.vue')
 
 const Login = () => import('@/pages/auth/Login.vue')
 const Register = () => import('@/pages/auth/Register.vue')
@@ -51,6 +52,7 @@ const AdminCotacoes = () => import('@/admin/pages/Cotacoes.vue')
 const AdminMessages = () => import('@/admin/pages/Messages.vue')
 const AdminVisitors = () => import('@/admin/pages/Visitors.vue')
 const AdminFuncionarios = () => import('@/admin/pages/Funcionarios.vue')
+const AdminSiteImages = () => import('@/admin/pages/SiteImages.vue')
 
 const FuncionarioDashboard = () => import('@/funcionario/pages/Dashboard.vue')
 const FuncionarioMessages = () => import('@/funcionario/pages/Messages.vue')
@@ -73,6 +75,7 @@ const routes = [
   { path: '/noticias/:slug', name: 'NewsDetail', component: NewsDetail, meta: { layout: 'public' } },
   { path: '/galeria', name: 'Gallery', component: Gallery, meta: { layout: 'public' } },
   { path: '/contacto', name: 'Contact', component: Contact, meta: { layout: 'public' } },
+  { path: '/faq', name: 'FAQ', component: FAQ, meta: { layout: 'public' } },
   { path: '/termos', name: 'Termos', component: Termos, meta: { layout: 'public' } },
   { path: '/politicas', name: 'Politicas', component: Politicas, meta: { layout: 'public' } },
 
@@ -101,6 +104,7 @@ const routes = [
   { path: '/admin/visitantes', name: 'AdminVisitors', component: AdminVisitors, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
   { path: '/admin/funcionarios', name: 'AdminFuncionarios', component: AdminFuncionarios, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
   { path: '/admin/configuracoes', name: 'AdminSettings', component: AdminSettings, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
+  { path: '/admin/imagens', name: 'AdminSiteImages', component: AdminSiteImages, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
 
   { path: '/funcionario', name: 'FuncionarioDashboard', component: FuncionarioDashboard, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
   { path: '/funcionario/mensagens', name: 'FuncionarioMessages', component: FuncionarioMessages, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },

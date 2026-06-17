@@ -2,7 +2,7 @@
   <div class="about-page">
     <!-- Hero -->
     <section class="about-hero">
-      <div class="about-hero-bg" style="background-image: linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(/assets/img/construcao2020/image1.jpeg);"></div>
+      <div class="about-hero-bg" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(${heroBg})` }"></div>
       <div class="container position-relative">
         <div class="about-hero-content">
           <span class="fml-eyebrow">Quem Somos</span>
@@ -32,7 +32,7 @@
     <section class="history-section fml-section">
       <div class="container">
         <div class="row align-items-center g-5">
-          <div class="col-lg-6">
+          <div class="col-lg-6" v-reveal="'right'">
             <span class="fml-eyebrow">A Nossa História</span>
             <h2 class="section-title">De Luanda para o Mundo</h2>
             <p class="text-muted mb-3">
@@ -53,9 +53,9 @@
               e mais preparados.
             </p>
           </div>
-          <div class="col-lg-6">
+          <div class="col-lg-6" v-reveal="'left'">
             <div class="history-image">
-              <img src="/assets/img/construcao2020/image2.jpeg" alt="FMLider Base" class="img-fluid rounded shadow-lg">
+              <img :src="historyImage" alt="FMLider Base" class="img-fluid rounded shadow-lg">
               <div class="history-badge">
                 <span class="badge-year">2017</span>
                 <span class="badge-text">Fundação</span>
@@ -69,12 +69,12 @@
     <!-- Timeline -->
     <section class="timeline-section fml-section bg-fml-navy text-white">
       <div class="container">
-        <div class="text-center mb-5">
+        <div class="text-center mb-5" v-reveal="'up'">
           <span class="fml-eyebrow">Trajetória</span>
           <h2 class="section-title text-white">Marcos Importantes</h2>
         </div>
         <div class="timeline">
-          <div class="timeline-item" v-for="(milestone, i) in milestones" :key="i" :class="{ reverse: i % 2 !== 0 }">
+          <div class="timeline-item" v-for="(milestone, i) in milestones" :key="i" :class="{ reverse: i % 2 !== 0 }" v-reveal="'up'" :data-reveal-delay="i * 100">
             <div class="timeline-dot"></div>
             <div class="timeline-card">
               <span class="timeline-year">{{ milestone.year }}</span>
@@ -89,12 +89,12 @@
     <!-- Mission Vision Values -->
     <section class="mvv-section fml-section">
       <div class="container">
-        <div class="text-center mb-5">
+        <div class="text-center mb-5" v-reveal="'up'">
           <span class="fml-eyebrow">Os Nossos Pilares</span>
           <h2 class="section-title">Missão, Visão e Valores</h2>
         </div>
         <div class="row g-4">
-          <div class="col-lg-4">
+          <div class="col-lg-4" v-reveal="'up'">
             <div class="mvv-card">
               <div class="mvv-icon"><i class="bi bi-bullseye"></i></div>
               <h4>Missão</h4>
@@ -105,7 +105,7 @@
               </p>
             </div>
           </div>
-          <div class="col-lg-4">
+          <div class="col-lg-4" v-reveal="'up'" data-reveal-delay="120">
             <div class="mvv-card">
               <div class="mvv-icon"><i class="bi bi-eye"></i></div>
               <h4>Visão</h4>
@@ -115,7 +115,7 @@
               </p>
             </div>
           </div>
-          <div class="col-lg-4">
+          <div class="col-lg-4" v-reveal="'up'" data-reveal-delay="240">
             <div class="mvv-card">
               <div class="mvv-icon"><i class="bi bi-gem"></i></div>
               <h4>Valores</h4>
@@ -137,7 +137,7 @@
     <section class="infra-section fml-section bg-fml-50">
       <div class="container">
         <div class="row align-items-center g-5">
-          <div class="col-lg-6 order-lg-2">
+          <div class="col-lg-6 order-lg-2" v-reveal="'left'">
             <span class="fml-eyebrow">Infraestrutura</span>
             <h2 class="section-title">Instalações & Equipamentos</h2>
             <p class="text-muted mb-4">
@@ -154,9 +154,9 @@
               </div>
             </div>
           </div>
-          <div class="col-lg-6 order-lg-1">
+          <div class="col-lg-6 order-lg-1" v-reveal="'scale'">
             <div class="infra-image">
-              <img src="/assets/img/construcao2020/image3.jpeg" alt="Armazém FMLider" class="img-fluid rounded shadow-lg">
+              <img :src="infraImage" alt="Armazém FMLider" class="img-fluid rounded shadow-lg">
             </div>
           </div>
         </div>
@@ -166,13 +166,13 @@
     <!-- Certifications -->
     <section class="certs-section fml-section">
       <div class="container">
-        <div class="text-center mb-5">
+        <div class="text-center mb-5" v-reveal="'up'">
           <span class="fml-eyebrow">Qualidade</span>
           <h2 class="section-title">Certificações & Credenciais</h2>
           <p class="section-subtitle text-muted">O nosso compromisso com a excelência é certificado.</p>
         </div>
         <div class="row g-4 justify-content-center">
-          <div class="col-md-6 col-lg-3" v-for="cert in certifications" :key="cert.title">
+          <div class="col-md-6 col-lg-3" v-for="cert in certifications" :key="cert.title" v-reveal="'up'">
             <div class="cert-card-about">
               <div class="cert-icon"><i :class="cert.icon"></i></div>
               <h5>{{ cert.title }}</h5>
@@ -187,10 +187,10 @@
     <section class="fleet-about fml-section bg-fml-navy text-white">
       <div class="container">
         <div class="row align-items-center g-5">
-          <div class="col-lg-6">
+          <div class="col-lg-6" v-reveal="'right'">
             <span class="fml-eyebrow">Frota Própria</span>
             <h2 class="section-title text-white">Reachstacker Kalmar de 45t</h2>
-            <p class="text-white-50 mb-4">
+            <p class="mb-4" style="color: rgba(255,255,255,0.8);">
               Em 2022 investimos num <strong>Reachstacker Kalmar</strong> de 45 toneladas,
               reforçando a nossa capacidade de manuseamento de contentores e cargas especiais.
               Esta máquina representa uma mais-valia significativa para a nossa operação.
@@ -205,9 +205,9 @@
               Ver Frota Completa <i class="bi bi-arrow-right ms-2"></i>
             </router-link>
           </div>
-          <div class="col-lg-6">
+          <div class="col-lg-6" v-reveal="'scale'">
             <div class="fleet-about-image">
-              <img src="/assets/img/resachstacker/resachstacker2.jpeg" alt="Frota FMLider" class="img-fluid rounded shadow-lg">
+              <img :src="fleetImage" alt="Frota FMLider" class="img-fluid rounded shadow-lg">
             </div>
           </div>
         </div>
@@ -233,6 +233,15 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
+import { useSiteImages } from '@/composables/useSiteImages'
+
+const { getImage, fetchAll } = useSiteImages()
+const heroBg = ref('/assets/img/construcao2020/image1.jpeg')
+const historyImage = ref('/assets/img/construcao2020/image2.jpeg')
+const infraImage = ref('/assets/img/construcao2020/image3.jpeg')
+const fleetImage = ref('/assets/img/resachstacker/resachstacker2.jpeg')
+
 const stats = [
   { value: '+8', label: 'Anos de Actividade', icon: 'bi bi-calendar-check' },
   { value: '+60', label: 'Colaboradores', icon: 'bi bi-people-fill' },
@@ -264,6 +273,14 @@ const certifications = [
   { icon: 'bi bi-people', title: 'Equipas Certificadas', desc: 'Colaboradores formados e certificados nas suas áreas.' },
   { icon: 'bi bi-truck', title: 'Frota Rastreada', desc: 'GPS em tempo real em todos os veículos da frota.' },
 ]
+
+onMounted(async () => {
+  await fetchAll()
+  heroBg.value = getImage('about', 'hero_bg', '/assets/img/construcao2020/image1.jpeg')
+  historyImage.value = getImage('about', 'history_image', '/assets/img/construcao2020/image2.jpeg')
+  infraImage.value = getImage('about', 'infra_image', '/assets/img/construcao2020/image3.jpeg')
+  fleetImage.value = getImage('about', 'fleet_image', '/assets/img/resachstacker/resachstacker2.jpeg')
+})
 </script>
 
 <style scoped>

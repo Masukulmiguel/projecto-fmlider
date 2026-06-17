@@ -3,37 +3,74 @@
     <div v-if="showSidebar" class="chat-sidebar">
       <div class="chat-sidebar-header">
         <h6 class="mb-0"><i class="bi bi-chat-dots-fill me-2"></i>Conversas</h6>
-        <span v-if="chatStore.totalUnread > 0" class="badge bg-primary ms-2">{{ chatStore.totalUnread }}</span>
+        <button class="new-chat-btn" @click="showNewChat = !showNewChat" title="Nova conversa">
+          <i class="bi bi-plus-lg"></i>
+        </button>
       </div>
-      <div class="chat-search">
-        <i class="bi bi-search"></i>
-        <input v-model="search" type="text" placeholder="Pesquisar..." />
-      </div>
-      <div class="chat-conversations">
-        <div v-if="filtered.length === 0" class="empty-conversations">
-          <i class="bi bi-inbox"></i>
-          <p class="mb-0">Sem conversas.</p>
+
+      <div v-if="showNewChat" class="new-chat-panel">
+        <div class="new-chat-search">
+          <i class="bi bi-search"></i>
+          <input v-model="newChatSearch" type="text" placeholder="Pesquisar utilizador..." autofocus />
         </div>
-        <div
-          v-for="c in filtered"
-          :key="c.id"
-          class="conv-item"
-          :class="{ active: chatStore.activeUserId === c.id, unread: (parseInt(c.unread) || 0) > 0 }"
-          @click="$emit('select', c)"
-        >
-          <div class="conv-avatar">
-            <img v-if="c.photo" :src="c.photo" :alt="c.name" />
-            <span v-else>{{ initials(c.name) }}</span>
+        <div class="new-chat-list">
+          <div v-if="filteredAvailable.length === 0" class="empty-conversations">
+            <p class="mb-0">Nenhum utilizador encontrado</p>
           </div>
-          <div class="conv-body">
-              <div class="conv-top">
-              <strong class="conv-name">{{ c.name }}</strong>
-              <span v-if="c.role === 'funcionario'" class="role-tag">Funcionário</span>
-              <small class="conv-time">{{ formatTime(c.last_at) }}</small>
+          <div
+            v-for="u in filteredAvailable"
+            :key="u.id"
+            class="conv-item"
+            @click="startNewChat(u)"
+          >
+            <div class="conv-avatar">
+              <img v-if="u.photo" :src="u.photo" :alt="u.name" />
+              <span v-else>{{ initials(u.name) }}</span>
             </div>
-            <div class="conv-preview">
-              <span class="conv-last">{{ c.last_message || 'Sem mensagens...' }}</span>
-              <span v-if="(parseInt(c.unread) || 0) > 0" class="conv-badge">{{ c.unread }}</span>
+            <div class="conv-body">
+              <div class="conv-top">
+                <strong class="conv-name">{{ u.name }}</strong>
+                <span class="role-tag" :class="u.role === 'funcionario' ? 'role-func' : 'role-client'">{{ u.role === 'funcionario' ? 'Func.' : 'Cliente' }}</span>
+              </div>
+              <div class="conv-preview">
+                <span class="conv-last">{{ u.email }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="!showNewChat">
+        <div class="chat-search">
+          <i class="bi bi-search"></i>
+          <input v-model="search" type="text" placeholder="Pesquisar..." />
+        </div>
+        <div class="chat-conversations">
+          <div v-if="filtered.length === 0" class="empty-conversations">
+            <i class="bi bi-inbox"></i>
+            <p class="mb-0">Sem conversas.</p>
+          </div>
+          <div
+            v-for="c in filtered"
+            :key="c.id"
+            class="conv-item"
+            :class="{ active: chatStore.activeUserId === c.id, unread: (parseInt(c.unread) || 0) > 0 }"
+            @click="$emit('select', c)"
+          >
+            <div class="conv-avatar">
+              <img v-if="c.photo" :src="c.photo" :alt="c.name" />
+              <span v-else>{{ initials(c.name) }}</span>
+            </div>
+            <div class="conv-body">
+                <div class="conv-top">
+                <strong class="conv-name">{{ c.name }}</strong>
+                <span v-if="c.role === 'funcionario'" class="role-tag">Funcionário</span>
+                <small class="conv-time">{{ formatTime(c.last_at) }}</small>
+              </div>
+              <div class="conv-preview">
+                <span class="conv-last">{{ c.last_message || 'Sem mensagens...' }}</span>
+                <span v-if="(parseInt(c.unread) || 0) > 0" class="conv-badge">{{ c.unread }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -77,7 +114,7 @@
               <div class="msg-text">{{ m.message }}</div>
               <div class="msg-time">
                 {{ formatTime(m.created_at) }}
-                <i v-if="isMine(m)" class="bi" :class="m.is_read ? 'bi-check2-all' : 'bi-check2'"></i>
+                <i v-if="isMine(m)" class="bi check-icon" :class="m.is_read ? 'bi-check2-all read' : 'bi-check2'"></i>
               </div>
             </div>
           </div>
@@ -109,13 +146,34 @@ const props = defineProps({
   selected: { type: Object, default: null },
   showSidebar: { type: Boolean, default: true },
 })
-defineEmits(['select', 'back', 'sent'])
+const emit = defineEmits(['select', 'back', 'sent'])
 
 const chatStore = useChatStore()
 const authStore = useAuthStore()
 const input = ref('')
 const search = ref('')
 const messagesRef = ref(null)
+const showNewChat = ref(false)
+const newChatSearch = ref('')
+
+const filteredAvailable = computed(() => {
+  const q = newChatSearch.value.trim().toLowerCase()
+  let users = chatStore.availableUsers || []
+  if (q) {
+    users = users.filter(u =>
+      (u.name || '').toLowerCase().includes(q) ||
+      (u.email || '').toLowerCase().includes(q)
+    )
+  }
+  return users
+})
+
+const startNewChat = async (user) => {
+  showNewChat.value = false
+  newChatSearch.value = ''
+  emit('select', user)
+  await chatStore.fetchMessages(user.id)
+}
 
 const filtered = computed(() => {
   const q = search.value.trim().toLowerCase()
@@ -164,6 +222,8 @@ const onSend = async () => {
   const res = await chatStore.sendMessage(text, props.selected.id)
   if (!res.success) {
     input.value = text
+  } else {
+    emit('sent')
   }
   await scrollDown()
 }
@@ -196,8 +256,47 @@ watch(() => chatStore.messages.length, scrollDown)
   border-bottom: 1px solid #eef0f3;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   background: #fff;
 }
+
+.new-chat-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: #2563eb;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.new-chat-btn:hover { background: #1d4ed8; }
+
+.new-chat-panel { display: flex; flex-direction: column; height: 100%; }
+.new-chat-search {
+  position: relative;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eef0f3;
+  background: #fff;
+}
+.new-chat-search i { position: absolute; left: 1.75rem; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.9rem; }
+.new-chat-search input {
+  width: 100%;
+  padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+  border: 1.5px solid #2563eb;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  outline: none;
+  background: #fff;
+}
+.new-chat-list { flex: 1; overflow-y: auto; }
+.role-func { background: #0f766e; color: #ccfbf1; }
+.role-client { background: #7c3aed; color: #ede9fe; }
 .chat-search {
   position: relative;
   padding: 0.75rem 1rem;
@@ -333,6 +432,9 @@ watch(() => chatStore.messages.length, scrollDown)
   justify-content: flex-end;
 }
 .msg.mine .msg-time { color: rgba(255,255,255,0.85); }
+
+.check-icon { font-size: 0.8rem; margin-left: 3px; }
+.check-icon.read { color: #53bdeb; }
 
 .chat-input {
   display: flex;

@@ -49,12 +49,7 @@ class AuthMiddleware
             return $this->decodeJwt($token);
         }
 
-        return [
-            'user_id' => $token,
-            'email' => '',
-            'role' => 'admin',
-            'permissions' => [],
-        ];
+        return null;
     }
 
     private function decodeJwt($token)
@@ -80,8 +75,8 @@ class AuthMiddleware
             'role' => $meta['role'] ?? 'cliente',
             'position' => $meta['position'] ?? null,
             'permissions' => $meta['permissions'] ?? [],
-            'approval_status' => $meta['approval_status'] ?? 'approved',
-            'company_completed' => $meta['company_completed'] ?? true,
+            'approval_status' => $meta['approval_status'] ?? 'pending',
+            'company_completed' => $meta['company_completed'] ?? false,
             'photo' => $meta['photo'] ?? null,
             'must_change_password' => $meta['must_change_password'] ?? false,
             'password_changed_at' => $meta['password_changed_at'] ?? null,

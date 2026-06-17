@@ -329,9 +329,14 @@ async function uploadImage() {
   if (!imageFile.value) return form.image
   const fileExt = imageFile.value.name.split('.').pop()
   const fileName = `banners/${Date.now()}.${fileExt}`
+  console.log('Uploading to bucket: uploads, file:', fileName)
   const { data, error } = await supabase.storage.from('uploads').upload(fileName, imageFile.value)
-  if (error) throw error
+  if (error) {
+    console.error('Storage upload error:', error)
+    throw error
+  }
   const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(fileName)
+  console.log('Uploaded URL:', urlData.publicUrl)
   return urlData.publicUrl
 }
 
@@ -351,7 +356,7 @@ async function submitForm() {
       description: form.description,
       image: imagePath,
       link: form.link,
-      status: form.status,
+      status: form.status ? 1 : 0,
       order_by: form.order_by,
     }
     if (editing.value) {
@@ -365,7 +370,7 @@ async function submitForm() {
     await fetchBanners()
   } catch (err) {
     console.error('Erro ao salvar banner:', err)
-    alert('Erro ao salvar banner. Tente novamente.')
+    alert('Erro ao salvar banner:\n' + (err?.message || err?.error?.message || JSON.stringify(err)))
   } finally {
     submitting.value = false
   }

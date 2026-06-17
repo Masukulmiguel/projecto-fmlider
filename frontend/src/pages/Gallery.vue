@@ -2,7 +2,7 @@
   <div class="gallery-page">
     <!-- Hero -->
     <section class="gal-hero">
-      <div class="gal-hero-bg" style="background-image: linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(/assets/img/construcao2020/image1.jpeg);"></div>
+      <div class="gal-hero-bg" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(${heroBg})` }"></div>
       <div class="container position-relative">
         <div class="gal-hero-content">
           <span class="fml-eyebrow">Galeria</span>
@@ -107,6 +107,10 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { supabase } from '@/lib/supabase'
+import { useSiteImages } from '@/composables/useSiteImages'
+
+const { getImage, fetchAll } = useSiteImages()
+const heroBg = ref('/assets/img/construcao2020/image1.jpeg')
 
 const activeFilter = ref('all')
 const lightboxOpen = ref(false)
@@ -198,8 +202,10 @@ const handleKeydown = (e) => {
   if (e.key === 'ArrowRight') nextImage()
 }
 
-onMounted(() => {
+onMounted(async () => {
   document.addEventListener('keydown', handleKeydown)
+  await fetchAll()
+  heroBg.value = getImage('gallery', 'hero_bg', '/assets/img/construcao2020/image1.jpeg')
   fetchGallery()
 })
 

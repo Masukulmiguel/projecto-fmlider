@@ -5,6 +5,18 @@
         <button class="btn btn-sm btn-outline-secondary d-md-none" @click="$emit('toggle-sidebar')">☰</button>
         <h2 class="page-title">{{ pageTitle }}</h2>
       </div>
+      <div class="navbar-center d-none d-md-block">
+        <div class="search-bar">
+          <i class="bi bi-search search-icon"></i>
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Pesquisar..."
+            v-model="searchQuery"
+            @keyup.enter="handleSearch"
+          />
+        </div>
+      </div>
       <div class="navbar-actions">
         <NotificationBell />
         <div class="user-info d-none d-sm-block">
@@ -40,6 +52,29 @@ defineEmits(['toggle-sidebar'])
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+
+const searchQuery = ref('')
+
+const searchPages = [
+  { keyword: 'embarque', route: '/embarques', label: 'Embarques' },
+  { keyword: 'documento', route: '/documentos', label: 'Documentos' },
+  { keyword: 'contacto', route: '/contactos', label: 'Contactos' },
+  { keyword: 'cotação', route: '/cotacoes', label: 'Cotações' },
+  { keyword: 'cotacao', route: '/cotacoes', label: 'Cotações' },
+  { keyword: 'mensagem', route: '/mensagens', label: 'Mensagens' },
+  { keyword: 'chat', route: '/mensagens', label: 'Mensagens' },
+  { keyword: 'perfil', route: '/perfil', label: 'Perfil' },
+]
+
+const handleSearch = () => {
+  const q = searchQuery.value.trim().toLowerCase()
+  if (!q) return
+  const match = searchPages.find(p => q.includes(p.keyword))
+  if (match) {
+    router.push(match.route)
+    searchQuery.value = ''
+  }
+}
 
 const pageTitle = computed(() => {
   const titles = {
@@ -89,6 +124,22 @@ const initials = (name) => (name || '?').split(' ').map(s => s[0]).slice(0, 2).j
   margin: 0;
   color: #1f2937;
 }
+
+.navbar-center { flex: 1; max-width: 400px; margin: 0 1.5rem; }
+.search-bar { position: relative; }
+.search-icon { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.85rem; }
+.search-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  outline: none;
+  background: #fff;
+  color: #1e293b;
+  transition: border-color 0.2s;
+}
+.search-input:focus { border-color: #1877f2; }
 
 .navbar-actions {
   display: flex;

@@ -27,7 +27,7 @@
             <tbody>
               <tr v-for="d in items" :key="d.id">
                 <td><i class="bi bi-file-earmark-text-fill text-primary me-2"></i>{{ d.name }}</td>
-                <td><span class="text-capitalize">{{ d.type.replace('_', ' ') }}</span></td>
+                <td><span class="text-capitalize">{{ (d.type || '—').replace(/_/g, ' ') }}</span></td>
                 <td>{{ d.client_name || '—' }}</td>
                 <td>{{ formatSize(d.file_size) }}</td>
                 <td><small class="text-muted">{{ formatDate(d.created_at) }}</small></td>

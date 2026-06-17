@@ -341,9 +341,14 @@ async function uploadImage() {
   if (!imageFile.value) return form.logo
   const fileExt = imageFile.value.name.split('.').pop()
   const fileName = `partners/${Date.now()}.${fileExt}`
+  console.log('Uploading partner logo to bucket: uploads, file:', fileName)
   const { data, error } = await supabase.storage.from('uploads').upload(fileName, imageFile.value)
-  if (error) throw error
+  if (error) {
+    console.error('Storage upload error:', error)
+    throw new Error('Erro no upload: ' + (error.message || 'Verifique se o bucket "uploads" existe no Supabase Storage'))
+  }
   const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(fileName)
+  console.log('Uploaded URL:', urlData.publicUrl)
   return urlData.publicUrl
 }
 
@@ -377,7 +382,7 @@ async function submitForm() {
     await fetchPartners()
   } catch (err) {
     console.error('Erro ao salvar parceiro:', err)
-    alert('Erro ao salvar parceiro. Tente novamente.')
+    alert('Erro ao salvar parceiro:\n' + (err?.message || err?.error?.message || JSON.stringify(err)))
   } finally {
     submitting.value = false
   }

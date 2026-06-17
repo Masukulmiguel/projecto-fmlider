@@ -55,8 +55,8 @@ export const useAuthStore = defineStore('auth', () => {
       role: metadata.role || 'cliente',
       position: metadata.position || null,
       permissions: metadata.permissions || [],
-      approval_status: metadata.approval_status || 'approved',
-      company_completed: metadata.company_completed ?? true,
+      approval_status: metadata.approval_status || 'pending',
+      company_completed: metadata.company_completed ?? false,
       photo: metadata.photo || null,
       must_change_password: metadata.must_change_password ?? false,
       password_changed_at: metadata.password_changed_at || null,
@@ -85,13 +85,16 @@ export const useAuthStore = defineStore('auth', () => {
 
       const metaUser = buildUserFromMetadata(data.user)
 
-      const { data: dbUser } = await supabase
+      const { data: dbUser, error: dbError } = await supabase
         .from('users')
         .select('*')
         .eq('auth_id', data.user.id)
         .single()
 
-      if (dbUser) {
+      if (dbError || !dbUser) {
+        console.error('authStore: DB query failed on login:', dbError?.message)
+        user.value = metaUser
+      } else {
         user.value = {
           id: dbUser.id,
           auth_id: data.user.id,
@@ -111,8 +114,6 @@ export const useAuthStore = defineStore('auth', () => {
           locked_reason: dbUser.locked_reason || metaUser.locked_reason,
           created_at: dbUser.created_at || data.user.created_at,
         }
-      } else {
-        user.value = metaUser
       }
       persistUser()
 
@@ -134,7 +135,7 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('supabase_access_token')
     localStorage.removeItem('supabase_refresh_token')
     localStorage.removeItem('user')
-    try { supabase.auth.signOut({ scope: 'local' }) } catch (e) {}
+    try { await supabase.auth.signOut({ scope: 'local' }) } catch (e) {}
   }
 
   const register = async (payload) => {
@@ -206,13 +207,16 @@ export const useAuthStore = defineStore('auth', () => {
 
       const metaUser = buildUserFromMetadata(supaUser)
 
-      const { data: dbUser } = await supabase
+      const { data: dbUser, error: dbError } = await supabase
         .from('users')
         .select('*')
         .eq('auth_id', supaUser.id)
         .single()
 
-      if (dbUser) {
+      if (dbError || !dbUser) {
+        console.error('authStore: DB query failed on getProfile:', dbError?.message)
+        user.value = metaUser
+      } else {
         user.value = {
           id: dbUser.id,
           auth_id: supaUser.id,
@@ -232,8 +236,6 @@ export const useAuthStore = defineStore('auth', () => {
           locked_reason: dbUser.locked_reason || metaUser.locked_reason,
           created_at: dbUser.created_at || supaUser.created_at,
         }
-      } else {
-        user.value = metaUser
       }
       persistUser()
 
@@ -338,13 +340,16 @@ export const useAuthStore = defineStore('auth', () => {
 
       const metaUser = buildUserFromMetadata(supaSession.user)
 
-      const { data: dbUser } = await supabase
+      const { data: dbUser, error: dbError } = await supabase
         .from('users')
         .select('*')
         .eq('auth_id', supaSession.user.id)
         .single()
 
-      if (dbUser) {
+      if (dbError || !dbUser) {
+        console.error('authStore: DB query failed on initSession:', dbError?.message)
+        user.value = metaUser
+      } else {
         user.value = {
           id: dbUser.id,
           auth_id: supaSession.user.id,
@@ -364,8 +369,6 @@ export const useAuthStore = defineStore('auth', () => {
           locked_reason: dbUser.locked_reason || metaUser.locked_reason,
           created_at: dbUser.created_at || supaSession.user.created_at,
         }
-      } else {
-        user.value = metaUser
       }
       persistUser()
     } catch (err) {

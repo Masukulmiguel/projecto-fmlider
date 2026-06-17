@@ -582,7 +582,7 @@ onUnmounted(() => {
 
 <style scoped>
 .admin-dashboard {
-  background: #f0f2f5;
+  background: #ffffff;
   min-height: 100vh;
   padding: 24px;
 }
@@ -621,7 +621,7 @@ onUnmounted(() => {
   background: #ffffff;
   border-radius: 8px;
   padding: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e4e6eb;
 }
 
 .period-btn {
@@ -649,7 +649,7 @@ onUnmounted(() => {
 .refresh-btn {
   width: 40px;
   height: 40px;
-  border: none;
+  border: 1px solid #e4e6eb;
   background: #ffffff;
   border-radius: 8px;
   display: flex;
@@ -659,11 +659,11 @@ onUnmounted(() => {
   color: #65676b;
   font-size: 1.1rem;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .refresh-btn:hover {
   background: #f0f2f5;
+  border-color: #ccd0d5;
   color: #1c1e21;
 }
 
@@ -688,13 +688,13 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e4e6eb;
   transition: all 0.2s ease;
   height: 100%;
 }
 
 .stat-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  border-color: #ccd0d5;
   transform: translateY(-2px);
 }
 
@@ -794,13 +794,13 @@ onUnmounted(() => {
 .chart-card {
   background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e4e6eb;
   overflow: hidden;
 }
 
 .chart-header {
   padding: 16px 20px;
-  border-bottom: 1px solid #f0f2f5;
+  border-bottom: 1px solid #e4e6eb;
 }
 
 .chart-title {
@@ -845,7 +845,7 @@ onUnmounted(() => {
 .list-card {
   background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e4e6eb;
   overflow: hidden;
 }
 
@@ -854,7 +854,7 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  border-bottom: 1px solid #f0f2f5;
+  border-bottom: 1px solid #e4e6eb;
 }
 
 .list-title {
@@ -896,7 +896,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 12px;
   padding: 12px 20px;
-  border-bottom: 1px solid #f0f2f5;
+  border-bottom: 1px solid #e4e6eb;
   transition: background 0.2s ease;
 }
 
@@ -905,7 +905,7 @@ onUnmounted(() => {
 }
 
 .list-item:hover {
-  background: #fafbfc;
+  background: #f0f2f5;
 }
 
 .list-item-avatar {
@@ -998,7 +998,7 @@ onUnmounted(() => {
   width: 52px;
   height: 52px;
   border-radius: 12px;
-  background: linear-gradient(90deg, #f0f2f5 25%, #e4e6e9 50%, #f0f2f5 75%);
+  background: linear-gradient(90deg, #e4e6eb 25%, #d8dadf 50%, #e4e6eb 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -1010,7 +1010,7 @@ onUnmounted(() => {
 .skeleton-line {
   height: 12px;
   border-radius: 6px;
-  background: linear-gradient(90deg, #f0f2f5 25%, #e4e6e9 50%, #f0f2f5 75%);
+  background: linear-gradient(90deg, #e4e6eb 25%, #d8dadf 50%, #e4e6eb 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   margin-bottom: 8px;
@@ -1050,7 +1050,7 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  border-bottom: 1px solid #f0f2f5;
+  border-bottom: 1px solid #e4e6eb;
 }
 
 .reset-modal-header h5 {
@@ -1068,8 +1068,8 @@ onUnmounted(() => {
   justify-content: flex-end;
   gap: 8px;
   padding: 16px 20px;
-  border-top: 1px solid #f0f2f5;
-  background: #fafbfc;
+  border-top: 1px solid #e4e6eb;
+  background: #f0f2f5;
 }
 
 .reset-list {

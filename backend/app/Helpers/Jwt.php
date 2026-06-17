@@ -65,16 +65,8 @@ class Jwt
             }
         }
 
-        if ($alg === 'ES256' || $alg === 'RS256') {
-            return $data;
-        }
-
         $expected = hash_hmac('sha256', $headerB64 . '.' . $payloadB64, self::getSecret());
         if (hash_equals($expected, $signature)) {
-            return $data;
-        }
-
-        if (isset($data['aud']) && $data['aud'] === 'authenticated') {
             return $data;
         }
 

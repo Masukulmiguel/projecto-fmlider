@@ -1,111 +1,178 @@
 <template>
   <div class="funcionario-dashboard p-4 p-md-5">
-    <div class="welcome-card mb-4">
-      <h2 class="mb-1">Olá, {{ authStore.user?.name }} 👋</h2>
-      <p class="text-muted mb-0">Bem-vindo ao painel do funcionário. Tens acesso às seguintes áreas:</p>
-    </div>
-
-    <div class="permissions-card mb-4">
-      <h6 class="mb-3"><i class="bi bi-shield-check me-2"></i>As suas permissões</h6>
-      <div class="d-flex flex-wrap gap-2">
-        <span v-for="p in permissionLabels" :key="p.code" class="perm-pill">
-          <i class="bi bi-check2"></i> {{ p.label }}
-        </span>
-        <span v-if="permissionLabels.length === 0" class="text-muted small">
-          Sem permissões atribuídas. Contacte o administrador.
-        </span>
+    <!-- Welcome Banner -->
+    <div class="welcome-banner fml-fade-up">
+      <div class="welcome-content">
+        <div class="welcome-text">
+          <h1>{{ greeting }}, {{ authStore.user?.name }} 👋</h1>
+          <p>{{ t('dashboard.subtitle') }}</p>
+        </div>
+        <div class="welcome-avatar">
+          <img v-if="authStore.user?.photo" :src="authStore.user.photo" :alt="authStore.user.name">
+          <span v-else>{{ initials(authStore.user?.name) }}</span>
+        </div>
       </div>
     </div>
 
-    <div class="row g-3">
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
       <div v-if="can('embarques.view')" class="col-md-6 col-xl-3">
-        <router-link to="/funcionario/embarques" class="stat-tile-link">
-          <div class="stat-tile">
-            <div class="stat-tile-icon bg-primary-soft"><i class="bi bi-box-seam-fill"></i></div>
-            <div>
-              <div class="stat-tile-label">Embarques</div>
-              <div class="stat-tile-value">{{ counts.embarques }}</div>
-              <div class="stat-tile-meta">{{ counts.embarques_pendente || 0 }} pendentes</div>
+        <router-link to="/funcionario/embarques" class="stat-card-link">
+          <div class="stat-card fml-fade-up stagger-1 hover-lift">
+            <div class="stat-icon stat-blue">
+              <i class="bi bi-box-seam-fill"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">{{ t('dashboard.shipments') }}</span>
+              <span class="stat-value">{{ counts.embarques }}</span>
+              <span class="stat-meta">{{ counts.embarques_pendente || 0 }} {{ t('dashboard.pending') }}</span>
             </div>
           </div>
         </router-link>
       </div>
       <div v-if="can('cotacoes.view')" class="col-md-6 col-xl-3">
-        <router-link to="/funcionario/cotacoes" class="stat-tile-link">
-          <div class="stat-tile">
-            <div class="stat-tile-icon bg-success-soft"><i class="bi bi-receipt"></i></div>
-            <div>
-              <div class="stat-tile-label">Cotações</div>
-              <div class="stat-tile-value">{{ counts.cotacoes }}</div>
-              <div class="stat-tile-meta">{{ counts.cotacoes_pendente || 0 }} pendentes</div>
+        <router-link to="/funcionario/cotacoes" class="stat-card-link">
+          <div class="stat-card fml-fade-up stagger-2 hover-lift">
+            <div class="stat-icon stat-green">
+              <i class="bi bi-receipt"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">{{ t('dashboard.quotes') }}</span>
+              <span class="stat-value">{{ counts.cotacoes }}</span>
+              <span class="stat-meta">{{ counts.cotacoes_pendente || 0 }} {{ t('dashboard.pending') }}</span>
             </div>
           </div>
         </router-link>
       </div>
       <div v-if="can('clients.view')" class="col-md-6 col-xl-3">
-        <router-link to="/funcionario/clientes" class="stat-tile-link">
-          <div class="stat-tile">
-            <div class="stat-tile-icon bg-info-soft"><i class="bi bi-people-fill"></i></div>
-            <div>
-              <div class="stat-tile-label">Clientes</div>
-              <div class="stat-tile-value">{{ counts.clientes }}</div>
-              <div class="stat-tile-meta">{{ counts.clientes_pendente || 0 }} por aprovar</div>
+        <router-link to="/funcionario/clientes" class="stat-card-link">
+          <div class="stat-card fml-fade-up stagger-3 hover-lift">
+            <div class="stat-icon stat-cyan">
+              <i class="bi bi-people-fill"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">{{ t('dashboard.clients') }}</span>
+              <span class="stat-value">{{ counts.clientes }}</span>
+              <span class="stat-meta">{{ counts.clientes_pendente || 0 }} {{ t('dashboard.pending_approval') }}</span>
             </div>
           </div>
         </router-link>
       </div>
       <div v-if="can('documentos.view')" class="col-md-6 col-xl-3">
-        <router-link to="/funcionario/documentos" class="stat-tile-link">
-          <div class="stat-tile">
-            <div class="stat-tile-icon bg-warning-soft"><i class="bi bi-file-earmark-text-fill"></i></div>
-            <div>
-              <div class="stat-tile-label">Documentos</div>
-              <div class="stat-tile-value">{{ counts.documentos }}</div>
-              <div class="stat-tile-meta">arquivos</div>
+        <router-link to="/funcionario/documentos" class="stat-card-link">
+          <div class="stat-card fml-fade-up stagger-4 hover-lift">
+            <div class="stat-icon stat-amber">
+              <i class="bi bi-file-earmark-text-fill"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">{{ t('dashboard.documents') }}</span>
+              <span class="stat-value">{{ counts.documentos }}</span>
+              <span class="stat-meta">{{ t('dashboard.files') }}</span>
             </div>
           </div>
         </router-link>
       </div>
     </div>
 
-    <div class="row g-3 mt-1">
-      <div class="col-md-6">
-        <div class="card">
-          <div class="card-header">
-            <h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Atividade recente</h6>
+    <!-- Activity + Quick Actions -->
+    <div class="row g-3 mb-4">
+      <div class="col-lg-8">
+        <div class="content-card fml-fade-up stagger-3">
+          <div class="card-header-custom">
+            <h6><i class="bi bi-clock-history me-2"></i>{{ t('dashboard.recent_activity') }}</h6>
           </div>
-          <div class="card-body p-0">
-            <ul class="recent-list">
-              <li v-for="(a, i) in recentActivity" :key="i">
-                <div class="activity-icon" :class="`bg-${a.color}-soft`">
-                  <i :class="`bi ${a.icon}`"></i>
-                </div>
-                <div class="flex-grow-1">
-                  <div class="fw-medium small">{{ a.title }}</div>
-                  <small class="text-muted">{{ a.subtitle }}</small>
-                </div>
-                <small class="text-muted">{{ a.time }}</small>
-              </li>
-              <li v-if="recentActivity.length === 0" class="text-center text-muted py-4">
-                Sem atividade recente.
-              </li>
-            </ul>
+          <div class="activity-list">
+            <div v-for="(a, i) in recentActivity" :key="i" class="activity-item">
+              <div class="activity-icon" :class="`stat-${a.color}`">
+                <i :class="['bi', a.icon]"></i>
+              </div>
+              <div class="activity-content">
+                <span class="activity-title">{{ a.title }}</span>
+                <span class="activity-subtitle">{{ a.subtitle }}</span>
+              </div>
+              <span class="activity-time">{{ a.time }}</span>
+            </div>
+            <div v-if="recentActivity.length === 0" class="empty-state">
+              <i class="bi bi-inbox"></i>
+              <p>{{ t('dashboard.no_activity') }}</p>
+            </div>
           </div>
         </div>
       </div>
-      <div class="col-md-6">
-        <div class="card">
-          <div class="card-header">
-            <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Informação da conta</h6>
+      <div class="col-lg-4">
+        <div class="content-card fml-fade-up stagger-4">
+          <div class="card-header-custom">
+            <h6><i class="bi bi-lightning-charge-fill me-2"></i>{{ t('dashboard.quick_actions') }}</h6>
           </div>
-          <div class="card-body">
-            <dl class="info-list">
-              <div><dt>Nome</dt><dd>{{ authStore.user?.name }}</dd></div>
-              <div><dt>Email</dt><dd>{{ authStore.user?.email }}</dd></div>
-              <div v-if="authStore.user?.position"><dt>Cargo</dt><dd>{{ authStore.user.position }}</dd></div>
-              <div><dt>Username</dt><dd>@{{ authStore.user?.username }}</dd></div>
-              <div><dt>Função</dt><dd><span class="badge bg-success">Funcionário</span></dd></div>
-            </dl>
+          <div class="quick-actions">
+            <router-link v-if="can('embarques.manage')" to="/funcionario/embarques" class="action-btn">
+              <div class="action-icon stat-blue"><i class="bi bi-plus-circle"></i></div>
+              <span>{{ t('dashboard.new_shipment') }}</span>
+            </router-link>
+            <router-link v-if="can('cotacoes.manage')" to="/funcionario/cotacoes" class="action-btn">
+              <div class="action-icon stat-green"><i class="bi bi-plus-square"></i></div>
+              <span>{{ t('dashboard.new_quote') }}</span>
+            </router-link>
+            <router-link v-if="can('clients.view')" to="/funcionario/clientes" class="action-btn">
+              <div class="action-icon stat-cyan"><i class="bi bi-people"></i></div>
+              <span>{{ t('dashboard.view_clients') }}</span>
+            </router-link>
+            <router-link v-if="can('documentos.view')" to="/funcionario/documentos" class="action-btn">
+              <div class="action-icon stat-amber"><i class="bi bi-folder2-open"></i></div>
+              <span>{{ t('dashboard.view_documents') }}</span>
+            </router-link>
+            <router-link v-if="can('chat.view')" to="/funcionario/mensagens" class="action-btn">
+              <div class="action-icon stat-purple"><i class="bi bi-chat-dots"></i></div>
+              <span>{{ t('dashboard.view_messages') }}</span>
+            </router-link>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Permissions + Account Info -->
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <div class="content-card fml-fade-up stagger-5">
+          <div class="card-header-custom">
+            <h6><i class="bi bi-shield-check me-2"></i>{{ t('dashboard.permissions') }}</h6>
+          </div>
+          <div class="permissions-grid">
+            <span v-for="p in permissionLabels" :key="p.code" class="perm-tag">
+              <i class="bi bi-check2"></i> {{ p.label }}
+            </span>
+            <span v-if="permissionLabels.length === 0" class="empty-text">
+              Sem permissões atribuídas.
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="content-card fml-fade-up stagger-6">
+          <div class="card-header-custom">
+            <h6><i class="bi bi-person-circle me-2"></i>{{ t('dashboard.account_info') }}</h6>
+          </div>
+          <div class="info-grid">
+            <div class="info-row">
+              <span class="info-label">{{ t('dashboard.name') }}</span>
+              <span class="info-value">{{ authStore.user?.name }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">{{ t('dashboard.email') }}</span>
+              <span class="info-value">{{ authStore.user?.email }}</span>
+            </div>
+            <div v-if="authStore.user?.position" class="info-row">
+              <span class="info-label">{{ t('dashboard.position') }}</span>
+              <span class="info-value">{{ authStore.user.position }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">{{ t('dashboard.username') }}</span>
+              <span class="info-value">@{{ authStore.user?.username }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">{{ t('dashboard.role') }}</span>
+              <span class="info-value"><span class="role-badge">{{ t('dashboard.employee') }}</span></span>
+            </div>
           </div>
         </div>
       </div>
@@ -117,10 +184,21 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from '@/composables/useI18n.js'
 
 const authStore = useAuthStore()
+const { t } = useI18n()
 const counts = reactive({ embarques: 0, embarques_pendente: 0, cotacoes: 0, cotacoes_pendente: 0, clientes: 0, clientes_pendente: 0, documentos: 0 })
 const recentActivity = ref([])
+
+const greeting = computed(() => {
+  const h = new Date().getHours()
+  if (h < 12) return t('dashboard.welcome')
+  if (h < 18) return t('dashboard.welcome_afternoon')
+  return t('dashboard.welcome_evening')
+})
+
+const initials = (n) => (n || '?').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()
 
 const PERM_LABELS = {
   'dashboard.view': 'Dashboard',
@@ -166,9 +244,9 @@ const load = async () => {
   await Promise.all(tasks)
 
   const acts = []
-  if (counts.embarques_pendente > 0) acts.push({ title: `${counts.embarques_pendente} embarques pendentes`, subtitle: 'Necessitam atenção', icon: 'bi-box-seam-fill', color: 'warning', time: 'agora' })
-  if (counts.cotacoes_pendente > 0) acts.push({ title: `${counts.cotacoes_pendente} cotações pendentes`, subtitle: 'Aguardam resposta', icon: 'bi-receipt', color: 'success', time: 'agora' })
-  if (counts.clientes_pendente > 0) acts.push({ title: `${counts.clientes_pendente} clientes por aprovar`, subtitle: 'Aguardam aprovação do admin', icon: 'bi-person-plus-fill', color: 'info', time: 'hoje' })
+  if (counts.embarques_pendente > 0) acts.push({ title: `${counts.embarques_pendente} ${t('dashboard.shipments').toLowerCase()} ${t('dashboard.pending')}`, subtitle: 'Necessitam atenção', icon: 'bi-box-seam-fill', color: 'blue', time: 'agora' })
+  if (counts.cotacoes_pendente > 0) acts.push({ title: `${counts.cotacoes_pendente} ${t('dashboard.quotes').toLowerCase()} ${t('dashboard.pending')}`, subtitle: 'Aguardam resposta', icon: 'bi-receipt', color: 'green', time: 'agora' })
+  if (counts.clientes_pendente > 0) acts.push({ title: `${counts.clientes_pendente} ${t('dashboard.clients').toLowerCase()} ${t('dashboard.pending_approval')}`, subtitle: 'Aguardam aprovação do admin', icon: 'bi-person-plus-fill', color: 'cyan', time: 'hoje' })
   recentActivity.value = acts
 }
 
@@ -176,92 +254,189 @@ onMounted(load)
 </script>
 
 <style scoped>
-.funcionario-dashboard { background: #f5f7fa; min-height: 100vh; }
+.funcionario-dashboard { background: var(--content-bg); min-height: 100vh; }
 
-.welcome-card {
-  background: white;
+/* Welcome Banner */
+.welcome-banner {
+  background: var(--welcome-gradient);
+  border-radius: 20px;
+  padding: 2rem 2.5rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.welcome-banner::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.welcome-content { display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1; }
+.welcome-text h1 { color: #ffffff; font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
+.welcome-text p { color: rgba(255,255,255,0.8); margin: 0; font-size: 0.95rem; }
+.welcome-avatar {
+  width: 70px; height: 70px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; font-weight: 700; color: #ffffff;
+  border: 3px solid rgba(255,255,255,0.3);
+  overflow: hidden;
+}
+.welcome-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Stat Cards */
+.stat-card-link { text-decoration: none; color: inherit; display: block; }
+.stat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
   padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.permissions-card {
-  background: white;
-  padding: 1.25rem 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-.permissions-card h6 { font-weight: 700; color: #0f766e; }
-
-.perm-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: #ccfbf1;
-  color: #0f766e;
-  font-size: 0.8rem;
-  font-weight: 500;
-  padding: 4px 12px;
-  border-radius: 14px;
-}
-
-.stat-tile-link { text-decoration: none; color: inherit; display: block; }
-.stat-tile {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   display: flex;
   align-items: center;
   gap: 1rem;
-  height: 100%;
-  transition: all 0.2s ease;
+  transition: all 0.25s var(--fml-ease);
 }
-.stat-tile-link:hover .stat-tile { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
-.stat-tile-icon {
+.stat-card-link:hover .stat-card {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
+}
+.stat-icon {
   width: 56px; height: 56px;
-  border-radius: 14px;
+  border-radius: 16px;
   display: flex; align-items: center; justify-content: center;
   font-size: 1.5rem;
   flex-shrink: 0;
 }
-.bg-primary-soft { background: #dbeafe; color: #1d4ed8; }
-.bg-success-soft { background: #d1fae5; color: #047857; }
-.bg-info-soft { background: #cffafe; color: #0e7490; }
-.bg-warning-soft { background: #fef3c7; color: #b45309; }
+.stat-blue { background: var(--stat-blue-bg); color: var(--stat-blue-text); }
+.stat-green { background: var(--stat-green-bg); color: var(--stat-green-text); }
+.stat-cyan { background: var(--stat-cyan-bg); color: var(--stat-cyan-text); }
+.stat-amber { background: var(--stat-amber-bg); color: var(--stat-amber-text); }
+.stat-purple { background: var(--stat-purple-bg); color: var(--stat-purple-text); }
 
-.stat-tile-label { color: #64748b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-.stat-tile-value { font-size: 2rem; font-weight: 700; color: #0f172a; line-height: 1.2; }
-.stat-tile-meta { font-size: 0.8rem; color: #64748b; }
+.stat-info { display: flex; flex-direction: column; }
+.stat-label { color: var(--text-secondary); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+.stat-value { font-size: 2rem; font-weight: 700; color: var(--text-primary); line-height: 1.2; }
+.stat-meta { font-size: 0.8rem; color: var(--text-muted); }
 
-.card { border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
-.card-header { background: white; border-bottom: 1px solid #eef0f3; padding: 1rem 1.25rem; }
-.card-header h6 { font-weight: 700; color: #0f172a; font-size: 0.9rem; }
-
-.recent-list { list-style: none; padding: 0; margin: 0; }
-.recent-list li {
-  display: flex; align-items: center; gap: 0.75rem;
-  padding: 0.85rem 1.25rem;
-  border-bottom: 1px solid #f1f5f9;
+/* Content Cards */
+.content-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
-.recent-list li:last-child { border-bottom: none; }
-.activity-icon {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
+.card-header-custom {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--divider);
+}
+.card-header-custom h6 {
+  margin: 0;
+  font-weight: 700;
+  color: var(--text-primary);
   font-size: 0.95rem;
+}
+
+/* Activity List */
+.activity-list { padding: 0.5rem 0; }
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.5rem;
+  transition: background 0.15s ease;
+  cursor: default;
+}
+.activity-item:hover { background: var(--hover-bg); }
+.activity-icon {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
   flex-shrink: 0;
 }
+.activity-content { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.activity-title { font-weight: 600; font-size: 0.9rem; color: var(--text-primary); }
+.activity-subtitle { font-size: 0.8rem; color: var(--text-muted); }
+.activity-time { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; }
 
-.info-list { margin: 0; }
-.info-list > div {
+.empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--text-muted);
+}
+.empty-state i { font-size: 2.5rem; margin-bottom: 0.5rem; display: block; }
+.empty-state p { margin: 0; }
+
+/* Quick Actions */
+.quick-actions { padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+.action-btn:hover { background: var(--hover-bg); transform: translateX(4px); }
+.action-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+}
+
+/* Permissions */
+.permissions-grid { padding: 1.25rem 1.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.perm-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--accent-light);
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+.perm-tag:hover { transform: translateY(-1px); box-shadow: 0 2px 8px var(--accent-glow); }
+.empty-text { color: var(--text-muted); font-size: 0.88rem; }
+
+/* Info Grid */
+.info-grid { padding: 1rem 1.5rem; }
+.info-row {
   display: flex;
   justify-content: space-between;
-  padding: 0.6rem 0;
-  border-bottom: 1px solid #f1f5f9;
-  font-size: 0.88rem;
+  align-items: center;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--divider);
 }
-.info-list > div:last-child { border-bottom: none; }
-.info-list dt { color: #64748b; margin: 0; font-weight: 500; }
-.info-list dd { margin: 0; color: #0f172a; font-weight: 500; }
+.info-row:last-child { border-bottom: none; }
+.info-label { color: var(--text-muted); font-weight: 500; font-size: 0.88rem; }
+.info-value { color: var(--text-primary); font-weight: 600; font-size: 0.88rem; }
+.role-badge {
+  background: var(--stat-green-bg);
+  color: var(--stat-green-text);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .welcome-banner { padding: 1.5rem; }
+  .welcome-content { flex-direction: column; text-align: center; gap: 1rem; }
+  .welcome-text h1 { font-size: 1.4rem; }
+}
 </style>

@@ -2,7 +2,7 @@
   <div class="services-page">
     <!-- Hero -->
     <section class="srv-hero">
-      <div class="srv-hero-bg" style="background-image: linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(/assets/img/construcao2020/image4.jpeg);"></div>
+      <div class="srv-hero-bg" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(${heroBg})` }"></div>
       <div class="container position-relative">
         <div class="srv-hero-content">
           <span class="fml-eyebrow">O Que Fazemos</span>
@@ -18,7 +18,7 @@
     <!-- Services Grid -->
     <section class="srv-grid-section fml-section">
       <div class="container">
-        <div class="text-center mb-5">
+        <div class="text-center mb-5" v-reveal="'up'">
           <span class="fml-eyebrow">Os Nossos Serviços</span>
           <h2 class="section-title">Soluções para Cada Necessidade</h2>
           <p class="section-subtitle text-muted">Oferecemos uma gama completa de serviços logísticos para empresas de todos os portes.</p>
@@ -68,10 +68,10 @@
     <!-- Process -->
     <section class="srv-process fml-section bg-fml-navy text-white">
       <div class="container">
-        <div class="text-center mb-5">
+        <div class="text-center mb-5" v-reveal="'up'">
           <span class="fml-eyebrow">Como Trabalhamos</span>
           <h2 class="section-title text-white">Do Pedido à Entrega</h2>
-          <p class="text-white-50">Processo simples, rápido e transparente.</p>
+          <p style="color: rgba(255,255,255,0.8);">Processo simples, rápido e transparente.</p>
         </div>
         <div class="process-steps">
           <div class="process-step" v-for="(step, i) in processSteps" :key="i">
@@ -92,7 +92,7 @@
     <section class="srv-why fml-section">
       <div class="container">
         <div class="row align-items-center g-5">
-          <div class="col-lg-6">
+          <div class="col-lg-6" v-reveal="'right'">
             <span class="fml-eyebrow">Porquê a FMLider</span>
             <h2 class="section-title">A Vantagem de Trabalhar Connosco</h2>
             <p class="text-muted mb-4">
@@ -109,9 +109,9 @@
               </div>
             </div>
           </div>
-          <div class="col-lg-6">
+          <div class="col-lg-6" v-reveal="'scale'">
             <div class="why-image">
-              <img src="/assets/img/pessoal/partner1.webp" alt="FMLider Equipa" class="img-fluid rounded shadow-lg">
+              <img :src="whyImage" alt="FMLider Equipa" class="img-fluid rounded shadow-lg">
             </div>
           </div>
         </div>
@@ -139,6 +139,11 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
+import { useSiteImages } from '@/composables/useSiteImages'
+
+const { getImage, fetchAll } = useSiteImages()
+const heroBg = ref('/assets/img/construcao2020/image4.jpeg')
+const whyImage = ref('/assets/img/pessoal/partner1.webp')
 
 const services = ref([])
 const loading = ref(true)
@@ -161,7 +166,10 @@ const onImageError = (e) => {
   e.target.src = '/assets/img/servico/default-service.jpg'
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await fetchAll()
+  heroBg.value = getImage('services', 'hero_bg', '/assets/img/construcao2020/image4.jpeg')
+  whyImage.value = getImage('services', 'why_image', '/assets/img/pessoal/partner1.webp')
   fetchServices()
 })
 

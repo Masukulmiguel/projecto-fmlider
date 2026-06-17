@@ -2,7 +2,7 @@
   <div class="news-page">
     <!-- Hero -->
     <section class="news-hero">
-      <div class="news-hero-bg" style="background-image: linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(/assets/img/construcao2020/image3.jpeg);"></div>
+      <div class="news-hero-bg" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(${heroBg})` }"></div>
       <div class="container position-relative">
         <div class="news-hero-content">
           <span class="fml-eyebrow">Novidades</span>
@@ -118,6 +118,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
+import { useSiteImages } from '@/composables/useSiteImages'
+
+const { getImage, fetchAll } = useSiteImages()
+const heroBg = ref('/assets/img/construcao2020/image3.jpeg')
 
 const router = useRouter()
 const allNews = ref([])
@@ -250,7 +254,11 @@ const goToDetail = (slug) => {
   router.push(`/noticias/${slug}`)
 }
 
-onMounted(fetchNews)
+onMounted(async () => {
+  await fetchAll()
+  heroBg.value = getImage('news', 'hero_bg', '/assets/img/construcao2020/image3.jpeg')
+  fetchNews()
+})
 </script>
 
 <style scoped>

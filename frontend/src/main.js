@@ -8,6 +8,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import './assets/styles.css'
 import { useAuthStore } from './stores/authStore'
+import { vReveal } from './directives/vReveal'
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL || ''
 axios.defaults.headers.common['Content-Type'] = 'application/json'
@@ -29,12 +30,13 @@ axios.interceptors.response.use(
 )
 
 const app = createApp(App)
+app.directive('reveal', vReveal)
 app.config.globalProperties.$axios = axios
 const pinia = createPinia()
 app.use(pinia)
 
 const authStore = useAuthStore()
-authStore.initSession()
-
-app.use(router)
-app.mount('#app')
+authStore.initSession().then(() => {
+  app.use(router)
+  app.mount('#app')
+})

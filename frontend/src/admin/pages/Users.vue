@@ -248,7 +248,7 @@ const filteredUsers = computed(() => {
 const loadUsers = async () => {
   loading.value = true
   try {
-    const { data, error } = await supabase.from('users').select('*').order('created_at', { ascending: false })
+    const { data, error } = await supabase.from('users').select('id, auth_id, created_at, updated_at, name, email, username, phone, role, position, permissions, approval_status, status, photo, password_must_change, password_changed_at, locked_at, locked_reason').order('created_at', { ascending: false })
     if (!error) users.value = data
   } catch (error) {
     console.error(error)

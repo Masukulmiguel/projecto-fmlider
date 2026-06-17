@@ -51,6 +51,7 @@ import { useNotificationStore } from '@/stores/notificationStore'
 
 const notif = useNotificationStore()
 const router = useRouter()
+const close = () => notif.closeDropdown()
 
 const vClickOutside = {
   mounted(el, binding) {

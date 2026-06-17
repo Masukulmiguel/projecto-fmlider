@@ -16,6 +16,7 @@
             class="search-input"
             placeholder="Pesquisar..."
             v-model="searchQuery"
+            @keyup.enter="handleSearch"
           />
         </div>
       </div>
@@ -59,7 +60,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import NotificationBell from '@/components/NotificationBell.vue'
@@ -73,6 +74,43 @@ const authStore = useAuthStore()
 const searchQuery = ref('')
 const showDropdown = ref(false)
 const dropdownRef = ref(null)
+
+const searchPages = [
+  { keyword: 'utilizador', route: '/admin/utilizadores', label: 'Utilizadores' },
+  { keyword: 'funcionario', route: '/admin/funcionarios', label: 'Funcionários' },
+  { keyword: 'cliente', route: '/admin/utilizadores', label: 'Utilizadores' },
+  { keyword: 'embarque', route: '/admin/embarques', label: 'Embarques' },
+  { keyword: 'cotação', route: '/admin/cotacoes', label: 'Cotações' },
+  { keyword: 'cotacao', route: '/admin/cotacoes', label: 'Cotações' },
+  { keyword: 'documento', route: '/admin/documentos', label: 'Documentos' },
+  { keyword: 'contacto', route: '/admin/contactos-cliente', label: 'Contactos' },
+  { keyword: 'serviço', route: '/admin/servicos', label: 'Serviços' },
+  { keyword: 'servico', route: '/admin/servicos', label: 'Serviços' },
+  { keyword: 'notícia', route: '/admin/noticias', label: 'Notícias' },
+  { keyword: 'noticia', route: '/admin/noticias', label: 'Notícias' },
+  { keyword: 'galeria', route: '/admin/galeria', label: 'Galeria' },
+  { keyword: 'parceiro', route: '/admin/parceiros', label: 'Parceiros' },
+  { keyword: 'banner', route: '/admin/banners', label: 'Banners' },
+  { keyword: 'testemunho', route: '/admin/testemunhos', label: 'Testemunhos' },
+  { keyword: 'faq', route: '/admin/faqs', label: 'FAQs' },
+  { keyword: 'mensagem', route: '/admin/mensagens', label: 'Mensagens' },
+  { keyword: 'chat', route: '/admin/mensagens', label: 'Mensagens' },
+  { keyword: 'visitante', route: '/admin/visitantes', label: 'Visitantes' },
+  { keyword: 'definição', route: '/admin/configuracoes', label: 'Definições' },
+  { keyword: 'definicao', route: '/admin/configuracoes', label: 'Definições' },
+  { keyword: 'configuração', route: '/admin/configuracoes', label: 'Definições' },
+  { keyword: 'config', route: '/admin/configuracoes', label: 'Definições' },
+]
+
+const handleSearch = () => {
+  const q = searchQuery.value.trim().toLowerCase()
+  if (!q) return
+  const match = searchPages.find(p => q.includes(p.keyword))
+  if (match) {
+    router.push(match.route)
+    searchQuery.value = ''
+  }
+}
 
 const pageTitle = computed(() => {
   const titles = {

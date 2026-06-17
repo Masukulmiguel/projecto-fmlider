@@ -5,7 +5,7 @@
         <div class="row g-4">
           <div class="col-lg-4 col-md-6">
             <div class="footer-brand">
-              <img src="/assets/img/logo.png" alt="FMLider" class="footer-logo">
+              <img :src="logoUrl" alt="FMLider" class="footer-logo">
               <h4 class="footer-title">{{ settings.company_name || 'FMLider' }}</h4>
             </div>
             <p class="footer-desc">
@@ -77,7 +77,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
+import { useSiteImages } from '@/composables/useSiteImages'
 
+const { getImage, fetchAll } = useSiteImages()
+const logoUrl = ref('/assets/img/logo.png')
 const year = new Date().getFullYear()
 
 const defaults = {
@@ -105,12 +108,16 @@ const emailUrl = computed(() => `mailto:${settings.value.email || 'geral@fmlider
 
 onMounted(async () => {
   try {
-    const { data, error } = await supabase.from('settings').select('key, value')
-    if (!error && data) {
+    const [settingsRes] = await Promise.all([
+      supabase.from('settings').select('key, value'),
+      fetchAll(),
+    ])
+    if (!settingsRes.error && settingsRes.data) {
       const settingsMap = {}
-      data.forEach(s => { settingsMap[s.key] = s.value })
+      settingsRes.data.forEach(s => { settingsMap[s.key] = s.value })
       settings.value = { ...defaults, ...settingsMap }
     }
+    logoUrl.value = getImage('footer', 'logo', '/assets/img/logo.png')
   } catch (e) {
     // keep defaults
   }

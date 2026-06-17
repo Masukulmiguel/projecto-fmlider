@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/authStore'
 
 export const useChatStore = defineStore('chat', () => {
   const conversations = ref([])
+  const availableUsers = ref([])
   const messages = ref([])
   const activeUserId = ref(null)
   const loading = ref(false)
@@ -13,6 +14,37 @@ export const useChatStore = defineStore('chat', () => {
   let pollHandle = null
 
   const authStore = useAuthStore()
+
+  const fetchAvailableUsers = async () => {
+    try {
+      const myId = authStore.user?.id
+      if (!myId) return
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, name, email, photo, role')
+        .neq('id', myId)
+        .in('role', ['funcionario', 'cliente'])
+        .order('name', { ascending: true })
+      if (!error) availableUsers.value = data || []
+    } catch (e) {
+      availableUsers.value = []
+    }
+  }
+
+  const findAdmin = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, name, email, photo, role')
+        .eq('role', 'admin')
+        .limit(1)
+        .single()
+      if (!error && data) return data
+      return null
+    } catch (e) {
+      return null
+    }
+  }
 
   const fetchConversations = async () => {
     try {
@@ -100,6 +132,7 @@ export const useChatStore = defineStore('chat', () => {
 
       if (!error) {
         messages.value = data || []
+        markMessagesAsRead(userId)
       } else {
         messages.value = []
       }
@@ -108,6 +141,26 @@ export const useChatStore = defineStore('chat', () => {
     } finally {
       loading.value = false
     }
+  }
+
+  const markMessagesAsRead = async (senderId) => {
+    try {
+      const myId = authStore.user?.id
+      if (!myId || !senderId) return
+      await supabase
+        .from('chat_messages')
+        .update({ is_read: true })
+        .eq('sender_id', senderId)
+        .eq('receiver_id', myId)
+        .eq('is_read', false)
+      supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('user_id', myId)
+        .eq('type', 'chat')
+        .eq('is_read', false)
+        .then(() => {}).catch(() => {})
+    } catch (e) {}
   }
 
   const sendMessage = async (message, receiverId = null) => {
@@ -127,6 +180,18 @@ export const useChatStore = defineStore('chat', () => {
 
       const { error } = await supabase.from('chat_messages').insert(payload)
       if (error) throw error
+
+      if (receiverId) {
+        const senderName = authStore.user?.name || authStore.user?.email || 'Utilizador'
+        supabase.from('notifications').insert({
+          user_id: receiverId,
+          title: 'Nova mensagem',
+          body: `${senderName}: ${text.substring(0, 100)}`,
+          type: 'chat',
+          is_read: false,
+          link: '/mensagens'
+        }).then(() => {}).catch(() => {})
+      }
 
       await fetchMessages(receiverId || activeUserId.value)
       await fetchConversations()
@@ -169,11 +234,14 @@ export const useChatStore = defineStore('chat', () => {
 
   return {
     conversations,
+    availableUsers,
     messages,
     activeUserId,
     loading,
     sending,
     totalUnread,
+    fetchAvailableUsers,
+    findAdmin,
     fetchConversations,
     fetchMessages,
     sendMessage,

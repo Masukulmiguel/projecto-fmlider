@@ -51,14 +51,14 @@ const resolveLogo = (logo) => {
   if (!logo) return ''
   if (logo.startsWith('http')) return logo
   if (logo.startsWith('/')) return logo
-  return `/backend/storage/uploads/companies/${logo}`
+  return `/backend/storage/uploads/partners/${logo}`
 }
 
 const fetchItems = async () => {
   try {
-    const { data, error } = await supabase.from('companies').select('id, company_name, logo, service').eq('is_published', true)
+    const { data, error } = await supabase.from('partners').select('id, name, logo, description').eq('status', 1).order('order_by')
     if (!error && data) {
-      items.value = data.map(c => ({ ...c, name: c.company_name }))
+      items.value = data.map(p => ({ ...p, name: p.name }))
     }
   } catch (e) {
     items.value = []

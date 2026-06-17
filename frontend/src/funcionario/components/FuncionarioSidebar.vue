@@ -1,8 +1,9 @@
 <template>
   <div class="funcionario-sidebar" :class="{ show: isOpen }">
+    <div class="sidebar-overlay" @click="$emit('close')"></div>
     <div class="sidebar-logo">
-      <img src="/assets/img/logo.png" alt="FMLider" height="42">
-      <small class="d-block sidebar-subtitle">Painel do Funcionário</small>
+      <img :src="logoUrl" alt="FMLider" height="42">
+      <small class="d-block sidebar-subtitle">{{ t('sidebar.panel') }}</small>
       <div class="sidebar-user" v-if="authStore.user">
         <div class="sidebar-user-avatar">
           <img v-if="authStore.user.photo" :src="authStore.user.photo" :alt="authStore.user.name">
@@ -17,59 +18,59 @@
       </div>
     </div>
     <nav class="sidebar-menu">
-      <div class="menu-section">Geral</div>
+      <div class="menu-section">{{ t('sidebar.general') }}</div>
       <router-link to="/funcionario" class="menu-item" active-class="active">
         <i class="bi bi-grid-1x2-fill menu-icon"></i>
-        <span class="menu-text">Dashboard</span>
+        <span class="menu-text">{{ t('sidebar.dashboard') }}</span>
       </router-link>
       <router-link to="/funcionario/mensagens" class="menu-item" active-class="active">
         <i class="bi bi-chat-dots-fill menu-icon"></i>
-        <span class="menu-text">Mensagens</span>
+        <span class="menu-text">{{ t('sidebar.messages') }}</span>
         <span v-if="chatUnread > 0" class="menu-badge">{{ chatUnread }}</span>
       </router-link>
 
       <template v-if="can('clients.view')">
-        <div class="menu-section">Clientes</div>
+        <div class="menu-section">{{ t('sidebar.clients_section') }}</div>
         <router-link to="/funcionario/clientes" class="menu-item" active-class="active">
           <i class="bi bi-people-fill menu-icon"></i>
-          <span class="menu-text">Clientes</span>
+          <span class="menu-text">{{ t('sidebar.clients_section') }}</span>
         </router-link>
       </template>
 
       <template v-if="can('embarques.view') || can('cotacoes.view') || can('documentos.view') || can('contactos.view')">
-        <div class="menu-section">Operações</div>
+        <div class="menu-section">{{ t('sidebar.operations') }}</div>
         <router-link v-if="can('embarques.view')" to="/funcionario/embarques" class="menu-item" active-class="active">
           <i class="bi bi-box-seam-fill menu-icon"></i>
-          <span class="menu-text">Embarques</span>
+          <span class="menu-text">{{ t('dashboard.shipments') }}</span>
         </router-link>
         <router-link v-if="can('cotacoes.view')" to="/funcionario/cotacoes" class="menu-item" active-class="active">
           <i class="bi bi-receipt menu-icon"></i>
-          <span class="menu-text">Cotações</span>
+          <span class="menu-text">{{ t('dashboard.quotes') }}</span>
         </router-link>
         <router-link v-if="can('documentos.view')" to="/funcionario/documentos" class="menu-item" active-class="active">
           <i class="bi bi-file-earmark-text-fill menu-icon"></i>
-          <span class="menu-text">Documentos</span>
+          <span class="menu-text">{{ t('dashboard.documents') }}</span>
         </router-link>
         <router-link v-if="can('contactos.view')" to="/funcionario/contactos" class="menu-item" active-class="active">
           <i class="bi bi-person-rolodex menu-icon"></i>
-          <span class="menu-text">Contactos</span>
+          <span class="menu-text">{{ t('dashboard.contacts') }}</span>
         </router-link>
       </template>
 
-      <div class="menu-section">Conta</div>
+      <div class="menu-section">{{ t('sidebar.account') }}</div>
       <router-link to="/funcionario/perfil" class="menu-item" active-class="active">
         <i class="bi bi-person-fill menu-icon"></i>
-        <span class="menu-text">Perfil</span>
+        <span class="menu-text">{{ t('sidebar.profile') }}</span>
       </router-link>
       <router-link to="/mudar-senha" class="menu-item" active-class="active">
         <i class="bi bi-shield-lock menu-icon"></i>
-        <span class="menu-text">Alterar senha</span>
+        <span class="menu-text">{{ t('sidebar.change_password') }}</span>
       </router-link>
     </nav>
     <div class="sidebar-footer">
       <button class="logout-btn" @click="logout">
         <i class="bi bi-box-arrow-right"></i>
-        <span>Sair</span>
+        <span>{{ t('sidebar.logout') }}</span>
       </button>
     </div>
   </div>
@@ -78,14 +79,23 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
+import { useSiteImages } from '@/composables/useSiteImages'
+
+const { getImage, fetchAll } = useSiteImages()
+const logoUrl = ref('/assets/img/logo.png')
 import { useChatStore } from '@/stores/chatStore'
+import { useI18n } from '@/composables/useI18n.js'
 
 defineProps({ isOpen: { type: Boolean, default: false } })
+
+defineEmits(['close'])
 
 const authStore = useAuthStore()
 const chatStore = useChatStore()
 const router = useRouter()
+const { t } = useI18n()
 const chatUnread = ref(0)
 let pollInterval = null
 
@@ -105,7 +115,9 @@ const logout = () => {
   router.push('/login')
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await fetchAll()
+  logoUrl.value = getImage('sidebar', 'funcionario_logo', '/assets/img/logo.png')
   fetchChatUnread()
   pollInterval = setInterval(fetchChatUnread, 30000)
 })
@@ -118,8 +130,8 @@ onBeforeUnmount(() => {
 <style scoped>
 .funcionario-sidebar {
   width: 260px;
-  background: linear-gradient(180deg, #0f766e 0%, #134e4a 100%);
-  color: white;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
   position: fixed;
   left: 0;
   top: 0;
@@ -127,36 +139,25 @@ onBeforeUnmount(() => {
   overflow-y: auto;
   padding: 1rem 0;
   z-index: 1000;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, background 0.3s ease;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  border-right: 1px solid var(--sidebar-divider);
 }
 
 .sidebar-logo {
   padding: 1.75rem 1.5rem;
   text-align: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--sidebar-divider);
   margin-bottom: 1rem;
 }
 .sidebar-logo img { filter: brightness(0) invert(1); margin-bottom: 0.5rem; }
 .sidebar-subtitle {
-  color: #99f6e4;
+  color: var(--sidebar-text-muted);
   font-size: 0.72rem;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   font-weight: 500;
-}
-.sidebar-position {
-  color: #5eead4;
-  font-size: 0.8rem;
-  margin-top: 0.5rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(94, 234, 212, 0.1);
-  padding: 3px 10px;
-  border-radius: 12px;
 }
 
 .sidebar-user {
@@ -165,15 +166,15 @@ onBeforeUnmount(() => {
   gap: 0.75rem;
   margin-top: 1rem;
   padding: 0.75rem;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--sidebar-user-bg);
   border-radius: 10px;
   text-align: left;
 }
 .sidebar-user-avatar {
   width: 42px; height: 42px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #5eead4, #0f766e);
-  color: #0a1929;
+  background: var(--sidebar-avatar-bg);
+  color: var(--text-inverse);
   display: flex; align-items: center; justify-content: center;
   font-weight: 700;
   font-size: 0.85rem;
@@ -183,7 +184,7 @@ onBeforeUnmount(() => {
 .sidebar-user-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .sidebar-user-info { display: flex; flex-direction: column; min-width: 0; flex: 1; }
 .sidebar-user-info strong {
-  color: white;
+  color: var(--sidebar-text);
   font-size: 0.85rem;
   font-weight: 600;
   white-space: nowrap;
@@ -191,7 +192,7 @@ onBeforeUnmount(() => {
   text-overflow: ellipsis;
 }
 .sidebar-user-info small {
-  color: #99f6e4;
+  color: var(--sidebar-text-muted);
   font-size: 0.72rem;
   white-space: nowrap;
   overflow: hidden;
@@ -207,7 +208,7 @@ onBeforeUnmount(() => {
 }
 
 .menu-section {
-  color: #5eead4;
+  color: var(--sidebar-section);
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 1px;
@@ -219,7 +220,7 @@ onBeforeUnmount(() => {
 
 .menu-item {
   padding: 0.7rem 1rem;
-  color: #ccfbf1;
+  color: var(--sidebar-text);
   text-decoration: none;
   transition: all 0.2s ease;
   border-radius: 8px;
@@ -232,51 +233,47 @@ onBeforeUnmount(() => {
   border-left: 3px solid transparent;
   margin-left: -3px;
 }
-.menu-item:hover { background: rgba(255, 255, 255, 0.05); color: #ffffff; }
+.menu-item:hover { background: var(--sidebar-hover-bg); color: var(--sidebar-active-text); }
 .menu-item.active {
-  background: linear-gradient(90deg, rgba(94, 234, 212, 0.15) 0%, rgba(94, 234, 212, 0.05) 100%);
-  color: #ffffff;
-  border-left-color: #5eead4;
+  background: var(--sidebar-active-bg);
+  color: var(--sidebar-active-text);
+  border-left-color: var(--sidebar-active-border);
 }
-.menu-item.active .menu-icon { color: #5eead4; }
+.menu-item.active .menu-icon { color: var(--sidebar-active-border); }
 .menu-icon {
   font-size: 1.1rem;
   width: 20px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #5eead4;
+  color: var(--sidebar-icon);
   transition: color 0.2s ease;
   flex-shrink: 0;
 }
-.menu-item:hover .menu-icon { color: #ccfbf1; }
+.menu-item:hover .menu-icon { color: var(--sidebar-text); }
 .menu-text { flex: 1; }
 
 .menu-badge {
-  background: #f59e0b;
-  color: #1e293b;
+  background: var(--badge-bg);
+  color: var(--badge-text);
   font-size: 0.7rem;
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 10px;
   min-width: 22px;
   text-align: center;
-  animation: pulse-badge 2s infinite;
-}
-@keyframes pulse-badge {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); }
-  50% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+  animation: badge-pulse 2s infinite;
 }
 
 .sidebar-footer {
   padding: 1rem 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--sidebar-divider);
 }
 .logout-btn {
   width: 100%;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #ccfbf1;
+  border: 1px solid var(--sidebar-divider);
+  color: var(--sidebar-text);
   padding: 0.7rem 1rem;
   border-radius: 8px;
   display: flex;
@@ -293,8 +290,19 @@ onBeforeUnmount(() => {
   color: #fca5a5;
 }
 
+.sidebar-overlay {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .funcionario-sidebar { transform: translateX(-100%); }
   .funcionario-sidebar.show { transform: translateX(0); }
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: -1;
+  }
 }
 </style>
