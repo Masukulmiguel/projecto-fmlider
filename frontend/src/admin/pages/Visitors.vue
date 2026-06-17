@@ -5,14 +5,14 @@
         <h1 class="page-title"><i class="bi bi-globe2 me-2"></i>Visitantes</h1>
         <p class="text-muted mb-0">Todos os acessos ao site público.</p>
       </div>
-      <div class="d-flex gap-2">
-        <select v-model="deviceFilter" class="form-select form-select-sm" style="width: 140px;">
+      <div class="d-flex gap-2 flex-wrap">
+        <select v-model="deviceFilter" class="form-select form-select-sm" style="min-width: 140px;">
           <option value="">Todos os dispositivos</option>
           <option value="desktop">Desktop</option>
           <option value="mobile">Mobile</option>
           <option value="tablet">Tablet</option>
         </select>
-        <input v-model="search" type="text" class="form-control form-control-sm" placeholder="Pesquisar IP, país, cidade..." style="width: 250px;" />
+        <input v-model="search" type="text" class="form-control form-control-sm" placeholder="Pesquisar IP, país, cidade..." style="min-width: 200px; max-width: 250px;" />
         <button class="btn btn-sm btn-outline-secondary" @click="load" :disabled="loading">
           <i class="bi bi-arrow-clockwise"></i>
         </button>

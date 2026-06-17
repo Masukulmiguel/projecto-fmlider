@@ -1,6 +1,6 @@
 <template>
-  <div class="admin-page p-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="admin-page p-4 p-md-5">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
       <h2 class="mb-0">Banners</h2>
       <button class="btn btn-primary" @click="openCreateModal">+ Novo Banner</button>
     </div>
@@ -17,7 +17,8 @@
           Nenhum banner encontrado.
         </div>
 
-        <table v-else class="table table-hover mb-0">
+        <div v-else class="table-responsive">
+        <table class="table table-hover mb-0">
           <thead class="table-light">
             <tr>
               <th>Título</th>
@@ -64,6 +65,7 @@
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
     </div>
 

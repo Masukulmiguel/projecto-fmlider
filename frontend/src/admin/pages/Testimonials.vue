@@ -1,6 +1,6 @@
 <template>
   <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
       <h4 class="mb-0"><i class="bi bi-chat-quote me-2"></i>Testimonials</h4>
       <button class="btn btn-primary" @click="openModal()"><i class="bi bi-plus-lg me-1"></i>New</button>
     </div>

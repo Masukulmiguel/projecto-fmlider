@@ -1,6 +1,6 @@
 <template>
   <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
       <h4 class="mb-0"><i class="bi bi-envelope me-2"></i>Contacts</h4>
       <span class="badge bg-danger fs-6" v-if="unreadCount">{{ unreadCount }} unread</span>
     </div>
