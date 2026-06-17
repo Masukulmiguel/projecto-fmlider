@@ -33,7 +33,8 @@
 
   <Teleport to="body">
     <div v-if="mobileOpen" class="mobile-nav-overlay" @click="closeMobile"></div>
-    <div class="mobile-nav-panel" :class="{ open: mobileOpen }">
+    <Transition name="slide-panel">
+      <div v-if="mobileOpen" class="mobile-nav-panel open">
       <div class="mobile-nav-header">
         <span class="mobile-nav-title">Menu</span>
         <button class="mobile-nav-close" @click="closeMobile" aria-label="Fechar menu">
@@ -54,6 +55,7 @@
         </router-link>
       </nav>
     </div>
+    </Transition>
   </Teleport>
 </template>
 
@@ -231,15 +233,18 @@ onUnmounted(() => {
   max-width: none;
   background: #fff;
   z-index: 1050;
-  transform: translateX(100%);
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   box-shadow: none;
 }
-.mobile-nav-panel.open {
-  transform: translateX(0);
-}
+
+/* Transition */
+.slide-panel-enter-active { transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
+.slide-panel-leave-active { transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+.slide-panel-enter-from,
+.slide-panel-leave-to { transform: translateX(100%); }
+.slide-panel-enter-to,
+.slide-panel-leave-from { transform: translateX(0); }
 .mobile-nav-header {
   display: flex;
   align-items: center;
