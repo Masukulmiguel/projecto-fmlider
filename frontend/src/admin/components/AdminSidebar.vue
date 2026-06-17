@@ -420,6 +420,7 @@ onBeforeUnmount(() => {
   .admin-sidebar {
     transform: translateX(-100%);
     transition: transform 0.3s ease;
+    width: 280px;
   }
 
   .admin-sidebar.show {
@@ -430,8 +431,19 @@ onBeforeUnmount(() => {
     display: block;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: -1;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+
+  .admin-sidebar .sidebar-inner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    max-width: 85vw;
+    z-index: 1000;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
   }
 }
 </style>
