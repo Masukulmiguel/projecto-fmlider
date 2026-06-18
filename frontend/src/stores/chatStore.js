@@ -124,18 +124,39 @@ export const useChatStore = defineStore('chat', () => {
       const myId = authStore.user?.id
       if (!myId || !userId) { messages.value = []; return }
 
-      const { data, error } = await supabase
+      const { data: sentMsgs } = await supabase
         .from('chat_messages')
         .select('*')
-        .or(`and(sender_id.eq.${myId},receiver_id.eq.${userId}),and(sender_id.eq.${userId},receiver_id.eq.${myId})`)
+        .eq('sender_id', myId)
+        .eq('receiver_id', userId)
         .order('created_at', { ascending: true })
 
-      if (!error) {
-        messages.value = data || []
-        markMessagesAsRead(userId)
-      } else {
-        messages.value = []
-      }
+      const { data: sentNoReceiver } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('sender_id', myId)
+        .is('receiver_id', null)
+        .order('created_at', { ascending: true })
+
+      const { data: receivedMsgs } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('sender_id', userId)
+        .or(`receiver_id.eq.${myId},receiver_id.is.null`)
+        .order('created_at', { ascending: true })
+
+      const all = [...(sentMsgs || []), ...(sentNoReceiver || []), ...(receivedMsgs || [])]
+      all.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+
+      const seen = new Set()
+      const unique = all.filter(m => {
+        if (seen.has(m.id)) return false
+        seen.add(m.id)
+        return true
+      })
+
+      messages.value = unique
+      markMessagesAsRead(userId)
     } catch (e) {
       messages.value = []
     } finally {
