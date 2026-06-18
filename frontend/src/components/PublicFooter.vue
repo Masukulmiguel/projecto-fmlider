@@ -31,6 +31,7 @@
               <li><router-link to="/sobre">Sobre Nós</router-link></li>
               <li><router-link to="/servicos">Serviços</router-link></li>
               <li><router-link to="/frota">Frota</router-link></li>
+              <li><router-link to="/parceiros">Parceiros</router-link></li>
               <li><router-link to="/noticias">Notícias</router-link></li>
               <li><router-link to="/galeria">Galeria</router-link></li>
             </ul>
@@ -39,6 +40,7 @@
           <div class="col-lg-3 col-md-6 col-6">
             <h6 class="footer-heading">Áreas de Cliente</h6>
             <ul class="footer-links">
+              <li><router-link to="/clientes">Nossos Clientes</router-link></li>
               <li><router-link to="/login">Iniciar Sessão</router-link></li>
               <li><router-link to="/registro">Criar Conta</router-link></li>
               <li><router-link to="/dashboard">Dashboard</router-link></li>

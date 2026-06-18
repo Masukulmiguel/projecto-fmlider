@@ -129,22 +129,24 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ffffff;
-  border: 1.5px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
   border-radius: 14px;
   padding: 14px;
   cursor: pointer;
   transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
               box-shadow 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              border-color 0.35s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+              border-color 0.35s ease,
+              background 0.35s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .logo-frame:hover {
   transform: translateY(-6px) scale(1.03);
   border-color: var(--fml-gold);
-  box-shadow: 0 12px 28px rgba(245, 158, 11, 0.18),
-              0 4px 10px rgba(245, 158, 11, 0.08);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 28px rgba(245, 158, 11, 0.2),
+              0 4px 10px rgba(245, 158, 11, 0.1);
 }
 
 .partner-logo {
@@ -153,11 +155,11 @@ onBeforeUnmount(() => {
   max-height: 100%;
   object-fit: contain;
   transition: filter 0.35s ease, transform 0.35s ease;
-  filter: grayscale(30%) opacity(0.85);
+  filter: brightness(1.1) grayscale(20%) opacity(0.9);
 }
 
 .logo-frame:hover .partner-logo {
-  filter: grayscale(0%) opacity(1);
+  filter: brightness(1.2) grayscale(0%) opacity(1);
   transform: scale(1.05);
 }
 
@@ -170,7 +172,7 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   padding: 6px 8px;
-  background: linear-gradient(to top, rgba(15, 23, 42, 0.85), transparent);
+  background: linear-gradient(to top, rgba(212, 175, 55, 0.9), transparent);
   border-radius: 0 0 13px 13px;
   opacity: 0;
   transform: translateY(4px);
@@ -185,8 +187,8 @@ onBeforeUnmount(() => {
 
 .logo-name {
   font-size: 0.65rem;
-  font-weight: 600;
-  color: #ffffff;
+  font-weight: 700;
+  color: #0f172a;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   white-space: nowrap;
@@ -199,8 +201,8 @@ onBeforeUnmount(() => {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  border: 2px solid #e2e8f0;
-  background: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
   color: var(--fml-gold);
   display: flex;
   align-items: center;
@@ -208,7 +210,7 @@ onBeforeUnmount(() => {
   font-size: 1.1rem;
   cursor: pointer;
   transition: all 0.25s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .carousel-arrow:hover:not(:disabled) {
@@ -236,7 +238,7 @@ onBeforeUnmount(() => {
   height: 10px;
   border-radius: 50%;
   border: none;
-  background: #d1d5db;
+  background: rgba(255, 255, 255, 0.3);
   cursor: pointer;
   transition: all 0.3s ease;
   padding: 0;
@@ -245,11 +247,11 @@ onBeforeUnmount(() => {
 .carousel-dot.active {
   background: var(--fml-gold);
   transform: scale(1.25);
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3);
 }
 
 .carousel-dot:hover:not(.active) {
-  background: #9ca3af;
+  background: rgba(255, 255, 255, 0.5);
 }
 
 @media (max-width: 768px) {

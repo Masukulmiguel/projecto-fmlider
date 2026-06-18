@@ -271,24 +271,24 @@
     </section>
 
     <!-- Nossos Clientes -->
-    <section class="partners-section fml-section-sm" v-reveal="'fade'">
+    <section class="clients-section fml-section" v-reveal="'fade'">
       <div class="container">
-        <div class="text-center mb-4">
+        <div class="text-center mb-5">
           <p class="text-uppercase small fw-bold mb-1" style="letter-spacing: 2px; color: var(--fml-gold);">Confiam em nós</p>
-          <h2 class="fw-bold mb-5">Nossos Clientes</h2>
-          <p class="text-muted mb-0">Empresas que confiam na FMLider para o seu dia a dia logístico.</p>
+          <h2 class="fw-bold display-6 mb-3">Nossos Clientes</h2>
+          <p class="text-muted mx-auto" style="max-width: 600px;">Empresas que confiam na FMLider para gestionar as suas necessidades logísticas todos os dias.</p>
         </div>
         <ClientsCarousel />
       </div>
     </section>
 
-    <!-- Parceiros -->
-    <section class="partners-section fml-section-sm" v-reveal="'fade'">
+    <!-- Parceiros Estratégicos -->
+    <section class="partners-section fml-section" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);" v-reveal="'fade'">
       <div class="container">
-        <div class="text-center mb-4">
+        <div class="text-center mb-5">
           <p class="text-uppercase small fw-bold mb-1" style="letter-spacing: 2px; color: var(--fml-gold);">Parcerias estratégicas</p>
-          <h2 class="fw-bold mb-5">Nossos Parceiros</h2>
-          <p class="text-muted mb-0">Parceiros que fortalecem a nossa rede logística.</p>
+          <h2 class="fw-bold display-6 mb-3 text-white">Nossos Parceiros</h2>
+          <p class="text-white-50 mx-auto" style="max-width: 600px;">Parceiros que fortalecem a nossa rede logística e expandem o nosso alcance global.</p>
         </div>
         <PartnersCarousel />
       </div>

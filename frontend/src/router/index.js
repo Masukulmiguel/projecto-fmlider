@@ -14,6 +14,8 @@ const Contact = () => import('@/pages/Contact.vue')
 const Termos = () => import('@/pages/Termos.vue')
 const Politicas = () => import('@/pages/Politicas.vue')
 const FAQ = () => import('@/pages/FAQ.vue')
+const PartnersPage = () => import('@/pages/Partners.vue')
+const ClientListPage = () => import('@/pages/ClientList.vue')
 
 const Login = () => import('@/pages/auth/Login.vue')
 const Register = () => import('@/pages/auth/Register.vue')
@@ -76,6 +78,8 @@ const routes = [
   { path: '/galeria', name: 'Gallery', component: Gallery, meta: { layout: 'public' } },
   { path: '/contacto', name: 'Contact', component: Contact, meta: { layout: 'public' } },
   { path: '/faq', name: 'FAQ', component: FAQ, meta: { layout: 'public' } },
+  { path: '/parceiros', name: 'PartnersPage', component: PartnersPage, meta: { layout: 'public' } },
+  { path: '/clientes', name: 'ClientListPage', component: ClientListPage, meta: { layout: 'public' } },
   { path: '/termos', name: 'Termos', component: Termos, meta: { layout: 'public' } },
   { path: '/politicas', name: 'Politicas', component: Politicas, meta: { layout: 'public' } },
 

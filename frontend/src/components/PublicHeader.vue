@@ -21,6 +21,7 @@
           <router-link to="/frota" class="nav-link" @click="closeMobile">Frota</router-link>
           <router-link to="/noticias" class="nav-link" @click="closeMobile">Notícias</router-link>
           <router-link to="/galeria" class="nav-link" @click="closeMobile">Galeria</router-link>
+          <router-link to="/parceiros" class="nav-link" @click="closeMobile">Parceiros</router-link>
           <router-link to="/faq" class="nav-link" @click="closeMobile">FAQ</router-link>
           <router-link to="/contacto" class="nav-link" @click="closeMobile">Contacto</router-link>
           <router-link to="/login" class="nav-cta" @click="closeMobile">
@@ -48,6 +49,7 @@
         <router-link to="/frota" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-truck"></i> Frota</router-link>
         <router-link to="/noticias" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-newspaper"></i> Notícias</router-link>
         <router-link to="/galeria" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-images"></i> Galeria</router-link>
+        <router-link to="/parceiros" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-handshake"></i> Parceiros</router-link>
         <router-link to="/faq" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-question-circle"></i> FAQ</router-link>
         <router-link to="/contacto" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-envelope"></i> Contacto</router-link>
         <router-link to="/login" class="mobile-nav-cta" @click="closeMobile">
