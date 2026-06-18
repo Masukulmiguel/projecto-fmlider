@@ -123,9 +123,9 @@ onBeforeUnmount(() => {
 }
 
 .logo-frame {
-  flex: 0 0 180px;
+  flex: 0 0 200px;
   position: relative;
-  height: 110px;
+  height: 130px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -260,9 +260,9 @@ onBeforeUnmount(() => {
     padding: 0 0.25rem;
   }
   .logo-frame {
-    flex: 0 0 140px;
-    height: 90px;
-    padding: 10px;
+    flex: 0 0 160px;
+    height: 110px;
+    padding: 12px;
   }
   .carousel-track {
     gap: 1rem;
@@ -279,8 +279,8 @@ onBeforeUnmount(() => {
 
 @media (max-width: 480px) {
   .logo-frame {
-    flex: 0 0 120px;
-    height: 80px;
+    flex: 0 0 140px;
+    height: 95px;
   }
 }
 </style>

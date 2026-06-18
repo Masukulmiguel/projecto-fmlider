@@ -94,17 +94,17 @@ onMounted(async () => {
 }
 
 .partner-logo-area {
-  height: 160px;
+  height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 32px;
   background: #f9fafb;
 }
 
 .partner-logo-img {
-  max-width: 100%;
-  max-height: 100%;
+  max-width: 90%;
+  max-height: 90%;
   object-fit: contain;
 }
 
