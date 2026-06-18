@@ -282,18 +282,6 @@
       </div>
     </section>
 
-    <!-- Parceiros Estratégicos -->
-    <section class="partners-section fml-section" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);" v-reveal="'fade'">
-      <div class="container">
-        <div class="text-center mb-5">
-          <p class="text-uppercase small fw-bold mb-1" style="letter-spacing: 2px; color: var(--fml-gold);">Parcerias estratégicas</p>
-          <h2 class="fw-bold display-6 mb-3 text-white">Nossos Parceiros</h2>
-          <p class="text-white-50 mx-auto" style="max-width: 600px;">Parceiros que fortalecem a nossa rede logística e expandem o nosso alcance global.</p>
-        </div>
-        <PartnersCarousel />
-      </div>
-    </section>
-
     <!-- CTA -->
     <section class="cta-section fml-section-gold" v-reveal="'scale'">
       <div class="container text-center">
@@ -375,7 +363,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import NewsCard from '@/components/NewsCard.vue'
-import PartnersCarousel from '@/components/PartnersCarousel.vue'
 import ClientsCarousel from '@/components/ClientsCarousel.vue'
 import { supabase } from '@/lib/supabase'
 import { useSiteImages } from '@/composables/useSiteImages'
