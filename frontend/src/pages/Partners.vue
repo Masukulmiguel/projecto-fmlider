@@ -259,34 +259,35 @@ onMounted(async () => {
 }
 
 .partner-logo-area {
-  height: 120px;
+  height: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: 12px;
   background: #f9fafb;
 }
 
 .partner-logo-img {
-  max-width: 80%;
-  max-height: 80%;
+  max-width: 70%;
+  max-height: 70%;
   object-fit: contain;
 }
 
 .partner-body {
-  padding: 20px 24px 24px;
+  padding: 16px 18px 20px;
 }
 
 .partner-name {
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   color: #0f172a;
+  font-size: 0.95rem;
 }
 
 .partner-desc {
   color: #6b7280;
-  font-size: 0.9rem;
-  margin-bottom: 12px;
+  font-size: 0.82rem;
+  margin-bottom: 10px;
 }
 
 .partner-link {
