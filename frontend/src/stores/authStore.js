@@ -284,23 +284,24 @@ export const useAuthStore = defineStore('auth', () => {
 
   const uploadPhoto = async (file) => {
     try {
-      const fd = new FormData()
-      fd.append('photo', file)
-      const apiBase = import.meta.env.VITE_API_URL || ''
-      const res = await fetch(`${apiBase}/api/auth/upload-photo`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token.value}` },
-        body: fd,
-      })
-      const json = await res.json()
-      if (!json.success) return { success: false, error: json.message || 'Erro ao enviar foto' }
+      const ext = file.name.split('.').pop()
+      const fileName = `photos/${user.value?.id || 'unknown'}_${Date.now()}.${ext}`
+      const { error: uploadError } = await supabase.storage
+        .from('photos')
+        .upload(fileName, file, { upsert: true })
+      if (uploadError) throw uploadError
 
-      const photoUrl = json.data.photo
+      const { data: urlData } = supabase.storage.from('photos').getPublicUrl(fileName)
+      const photoUrl = urlData.publicUrl
+
+      if (user.value?.auth_id) {
+        await supabase.from('users').update({ photo: photoUrl }).eq('auth_id', user.value.auth_id)
+      }
       if (user.value) {
         user.value = { ...user.value, photo: photoUrl }
         persistUser()
       }
-      return { success: true, photo: photoUrl, message: json.message || 'Foto atualizada' }
+      return { success: true, photo: photoUrl, message: 'Foto atualizada' }
     } catch (err) {
       return { success: false, error: err.message }
     }

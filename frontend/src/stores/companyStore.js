@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import axios from 'axios'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from './authStore'
 
 export const useCompanyStore = defineStore('company', () => {
@@ -8,22 +8,25 @@ export const useCompanyStore = defineStore('company', () => {
   const isCompleted = ref(false)
   const loading = ref(false)
 
-  const authHeader = () => {
-    const auth = useAuthStore()
-    return { headers: { Authorization: `Bearer ${auth.token}` } }
-  }
-
   const fetch = async () => {
     const auth = useAuthStore()
-    if (!auth.token) return
+    if (!auth.user?.id) return
     loading.value = true
     try {
-      const response = await axios.get('/api/company', authHeader())
-      if (response.data.success) {
-        company.value = response.data.data.company
-        isCompleted.value = !!response.data.data.is_completed
+      const { data, error } = await supabase
+        .from('companies')
+        .select('*')
+        .eq('user_id', auth.user.id)
+        .single()
+
+      if (error || !data) {
+        company.value = null
+        isCompleted.value = false
+        return
       }
-    } catch (error) {
+      company.value = data
+      isCompleted.value = !!data.is_completed
+    } catch (e) {
       company.value = null
       isCompleted.value = false
     } finally {
@@ -32,46 +35,73 @@ export const useCompanyStore = defineStore('company', () => {
   }
 
   const save = async (payload) => {
+    const auth = useAuthStore()
+    if (!auth.user?.id) return { success: false, error: 'Não autenticado' }
+
     try {
       const exists = !!company.value
-      const method = exists ? 'put' : 'post'
-      const response = await axios[method]('/api/company', payload, authHeader())
-      if (response.data.success) {
-        await fetch()
-        return { success: true, message: response.data.message }
+      if (exists) {
+        const updateData = { ...payload, is_completed: 1 }
+        const { error } = await supabase
+          .from('companies')
+          .update(updateData)
+          .eq('user_id', auth.user.id)
+        if (error) throw error
+      } else {
+        const insertData = { ...payload, user_id: auth.user.id, is_completed: 1, is_published: 0 }
+        const { error } = await supabase
+          .from('companies')
+          .insert(insertData)
+        if (error) throw error
       }
+      await fetch()
+      return { success: true, message: exists ? 'Dados da empresa atualizados' : 'Empresa configurada. Bem-vindo ao seu dashboard.' }
     } catch (error) {
-      const data = error.response?.data?.data || {}
-      return { success: false, error: error.response?.data?.message || error.message, fields: data }
+      return { success: false, error: error.message || 'Erro ao guardar' }
     }
   }
 
   const uploadLogo = async (file) => {
+    const auth = useAuthStore()
+    if (!auth.user?.id) return { success: false, error: 'Não autenticado' }
     try {
-      const fd = new FormData()
-      fd.append('logo', file)
-      const response = await axios.post('/api/company/logo', fd, {
-        ...authHeader(),
-        headers: { ...authHeader().headers, 'Content-Type': 'multipart/form-data' }
-      })
-      if (response.data.success) {
-        await fetch()
-        return { success: true, logo: response.data.data.logo }
+      const ext = file.name.split('.').pop()
+      const fileName = `company-logos/${auth.user.id}_${Date.now()}.${ext}`
+      const { error: uploadError } = await supabase.storage
+        .from('uploads')
+        .upload(fileName, file)
+      if (uploadError) throw uploadError
+
+      const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(fileName)
+      const logoUrl = urlData.publicUrl
+
+      if (company.value) {
+        const { error } = await supabase
+          .from('companies')
+          .update({ logo: logoUrl })
+          .eq('user_id', auth.user.id)
+        if (error) throw error
       }
+      await fetch()
+      return { success: true, logo: logoUrl }
     } catch (error) {
-      return { success: false, error: error.response?.data?.message || error.message }
+      return { success: false, error: error.message || 'Erro ao enviar logo' }
     }
   }
 
   const togglePublish = async (isPublished) => {
+    const auth = useAuthStore()
+    if (!auth.user?.id) return { success: false, error: 'Não autenticado' }
     try {
-      const response = await axios.post('/api/company/publish', { is_published: !!isPublished }, authHeader())
-      if (response.data.success) {
-        await fetch()
-        return { success: true, is_published: response.data.data.is_published }
-      }
+      const { error } = await supabase
+        .from('companies')
+        .update({ is_published: !!isPublished })
+        .eq('user_id', auth.user.id)
+      if (error) throw error
+      await fetch()
+      return { success: true, is_published: !!isPublished }
     } catch (error) {
-      return { success: false, error: error.response?.data?.message || error.message }
+      return { success: false, error: error.message || 'Erro ao atualizar' }
     }
   }
 
