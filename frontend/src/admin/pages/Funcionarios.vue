@@ -379,28 +379,62 @@ const handleSubmit = async () => {
         }
       }
     } else {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { data: existing } = await supabase.from('users').select('id, email').eq('email', form.email).maybeSingle()
+      if (existing) {
+        throw new Error('Já existe um utilizador com este email.')
+      }
+
+      const { data: existingUser } = await supabase.from('users').select('id, username').eq('username', form.username).maybeSingle()
+      if (existingUser) {
+        throw new Error('Já existe um utilizador com este nome de usuário.')
+      }
+
+      let authUserId = null
+
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: form.email,
         password: form.password,
-        options: {
-          data: {
-            username: form.username,
-            name: form.name,
-            phone: form.phone || '',
-            position: form.position || '',
-            role: 'funcionario',
-            approval_status: 'approved',
-            permissions: form.permissions,
-            company_completed: true,
-            must_change_password: true,
-          },
+        email_confirm: true,
+        user_metadata: {
+          username: form.username,
+          name: form.name,
+          phone: form.phone || '',
+          position: form.position || '',
+          role: 'funcionario',
+          approval_status: 'approved',
+          permissions: form.permissions,
+          company_completed: true,
+          must_change_password: true,
         },
       })
-      if (authError) throw authError
 
-      if (authData.user?.id) {
-        await supabase.from('users').upsert({
-          auth_id: authData.user.id,
+      if (authError) {
+        const { data: authData2, error: authError2 } = await supabase.auth.signUp({
+          email: form.email,
+          password: form.password,
+          options: {
+            data: {
+              username: form.username,
+              name: form.name,
+              phone: form.phone || '',
+              position: form.position || '',
+              role: 'funcionario',
+              approval_status: 'approved',
+              permissions: form.permissions,
+              company_completed: true,
+              must_change_password: true,
+            },
+          },
+        })
+        if (authError2) throw authError2
+        authUserId = authData2.user?.id
+      } else {
+        authUserId = authData.user?.id
+      }
+
+      if (authUserId) {
+        const { error: dbError } = await supabase.from('users').insert({
+          auth_id: authUserId,
           username: form.username,
           name: form.name,
           email: form.email,
@@ -412,7 +446,8 @@ const handleSubmit = async () => {
           permissions: JSON.stringify(form.permissions),
           password_must_change: true,
           password: 'supabase_auth_managed',
-        }, { onConflict: 'auth_id', ignoreDuplicates: true })
+        })
+        if (dbError) throw dbError
       }
     }
     closeForm()
