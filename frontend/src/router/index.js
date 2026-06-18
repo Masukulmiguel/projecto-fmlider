@@ -103,7 +103,7 @@ const routes = [
   { path: '/admin/mensagens', name: 'AdminMessages', component: AdminMessages, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
   { path: '/admin/visitantes', name: 'AdminVisitors', component: AdminVisitors, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
   { path: '/admin/funcionarios', name: 'AdminFuncionarios', component: AdminFuncionarios, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
-  { path: '/admin/configuracoes', name: 'AdminSettings', component: AdminSettings, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
+  { path: '/admin/definicoes', name: 'AdminSettings', component: AdminSettings, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
   { path: '/admin/imagens', name: 'AdminSiteImages', component: AdminSiteImages, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
 
   { path: '/funcionario', name: 'FuncionarioDashboard', component: FuncionarioDashboard, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
@@ -155,7 +155,7 @@ router.beforeEach(async (to, from, next) => {
 
   if (authStore.isAuthenticated) {
     if (!authStore.user) {
-      const savedUser = localStorage.getItem('user')
+      const savedUser = sessionStorage.getItem('user')
       if (savedUser) {
         try {
           authStore.user = JSON.parse(savedUser)
@@ -211,6 +211,17 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.path === '/login' && authStore.isAuthenticated) {
+    if (authStore.user?.role === 'admin') return next('/admin')
+    if (authStore.user?.role === 'funcionario') return next('/funcionario')
+    if (authStore.user?.role === 'cliente') {
+      if (!authStore.companyCompleted) return next('/configurar-empresa')
+      return next('/dashboard')
+    }
+  }
+
+  const isPublicPage = to.meta?.layout === 'public' && !['/login', '/registro', '/esqueci-senha', '/mudar-senha'].some(p => to.path.startsWith(p))
+
+  if (isPublicPage && authStore.isAuthenticated) {
     if (authStore.user?.role === 'admin') return next('/admin')
     if (authStore.user?.role === 'funcionario') return next('/funcionario')
     if (authStore.user?.role === 'cliente') {

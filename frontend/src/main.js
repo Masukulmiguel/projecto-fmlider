@@ -15,7 +15,7 @@ axios.defaults.headers.common['Content-Type'] = 'application/json'
 axios.defaults.headers.common['Accept'] = 'application/json'
 
 axios.interceptors.request.use((config) => {
-  const token = localStorage.getItem('supabase_access_token')
+  const token = sessionStorage.getItem('supabase_access_token')
   if (token && !config.headers.Authorization) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -39,4 +39,12 @@ const authStore = useAuthStore()
 authStore.initSession().then(() => {
   app.use(router)
   app.mount('#app')
+
+  window.addEventListener('beforeunload', () => {
+    sessionStorage.removeItem('supabase_access_token')
+    sessionStorage.removeItem('supabase_refresh_token')
+    sessionStorage.removeItem('user')
+    sessionStorage.removeItem('fmlider_auth')
+    try { authStore.logout() } catch (e) {}
+  })
 })
