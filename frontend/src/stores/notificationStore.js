@@ -65,7 +65,10 @@ export const useNotificationStore = defineStore('notifications', () => {
   const startPolling = (intervalMs = 15000) => {
     stopPolling()
     fetchUnread()
-    pollHandle = setInterval(fetchUnread, intervalMs)
+    fetchAll()
+    pollHandle = setInterval(async () => {
+      await fetchUnread()
+    }, intervalMs)
   }
 
   const stopPolling = () => {

@@ -174,13 +174,12 @@ export const useChatStore = defineStore('chat', () => {
         .eq('sender_id', senderId)
         .eq('receiver_id', myId)
         .eq('is_read', false)
-      supabase
+      await supabase
         .from('notifications')
         .update({ is_read: true })
         .eq('user_id', myId)
-        .eq('type', 'chat')
         .eq('is_read', false)
-        .then(() => {}).catch(() => {})
+        .in('type', ['chat', 'message'])
     } catch (e) {}
   }
 
@@ -204,14 +203,19 @@ export const useChatStore = defineStore('chat', () => {
 
       if (receiverId) {
         const senderName = authStore.user?.name || authStore.user?.email || 'Utilizador'
-        supabase.from('notifications').insert({
+        const notifPayload = {
           user_id: receiverId,
           title: 'Nova mensagem',
           body: `${senderName}: ${text.substring(0, 100)}`,
           type: 'chat',
           is_read: false,
-          link: '/mensagens'
-        }).then(() => {}).catch(() => {})
+          link: '/mensagens',
+          icon: 'bi-chat-dots-fill'
+        }
+        const { error: notifError } = await supabase.from('notifications').insert(notifPayload)
+        if (notifError) {
+          console.warn('Erro ao criar notificação:', notifError.message)
+        }
       }
 
       await fetchMessages(receiverId || activeUserId.value)
