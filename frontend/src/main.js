@@ -39,12 +39,4 @@ const authStore = useAuthStore()
 authStore.initSession().then(() => {
   app.use(router)
   app.mount('#app')
-
-  window.addEventListener('beforeunload', () => {
-    sessionStorage.removeItem('supabase_access_token')
-    sessionStorage.removeItem('supabase_refresh_token')
-    sessionStorage.removeItem('user')
-    sessionStorage.removeItem('fmlider_auth')
-    try { authStore.logout() } catch (e) {}
-  })
 })

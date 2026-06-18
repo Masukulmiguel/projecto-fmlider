@@ -131,11 +131,6 @@ export const useAuthStore = defineStore('auth', () => {
     sessionStorage.removeItem('supabase_access_token')
     sessionStorage.removeItem('supabase_refresh_token')
     sessionStorage.removeItem('user')
-    sessionStorage.removeItem('fmlider_auth')
-    localStorage.removeItem('fmlider_auth')
-    localStorage.removeItem('supabase_access_token')
-    localStorage.removeItem('supabase_refresh_token')
-    localStorage.removeItem('user')
     try { await supabase.auth.signOut({ scope: 'local' }) } catch (e) {}
   }
 
@@ -327,25 +322,15 @@ export const useAuthStore = defineStore('auth', () => {
 
   const initSession = async () => {
     try {
-      const storedToken = sessionStorage.getItem('supabase_access_token')
-      const storedUser = sessionStorage.getItem('user')
-
-      if (!storedToken || !storedUser) {
-        user.value = null
-        token.value = null
-        session.value = null
-        sessionStorage.clear()
-        localStorage.removeItem('fmlider_auth')
-        return
-      }
-
       const { data: { session: supaSession }, error } = await supabase.auth.getSession()
+
       if (error || !supaSession) {
         user.value = null
         token.value = null
         session.value = null
-        sessionStorage.clear()
-        localStorage.removeItem('fmlider_auth')
+        sessionStorage.removeItem('supabase_access_token')
+        sessionStorage.removeItem('supabase_refresh_token')
+        sessionStorage.removeItem('user')
         return
       }
 
@@ -389,8 +374,9 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = null
       token.value = null
       session.value = null
-      sessionStorage.clear()
-      localStorage.removeItem('fmlider_auth')
+      sessionStorage.removeItem('supabase_access_token')
+      sessionStorage.removeItem('supabase_refresh_token')
+      sessionStorage.removeItem('user')
     }
   }
 
