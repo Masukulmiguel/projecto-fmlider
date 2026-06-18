@@ -278,6 +278,18 @@
           <h2 class="fw-bold mb-5">Nossos Clientes</h2>
           <p class="text-muted mb-0">Empresas que confiam na FMLider para o seu dia a dia logístico.</p>
         </div>
+        <ClientsCarousel />
+      </div>
+    </section>
+
+    <!-- Parceiros -->
+    <section class="partners-section fml-section-sm" v-reveal="'fade'">
+      <div class="container">
+        <div class="text-center mb-4">
+          <p class="text-uppercase small fw-bold mb-1" style="letter-spacing: 2px; color: var(--fml-gold);">Parcerias estratégicas</p>
+          <h2 class="fw-bold mb-5">Nossos Parceiros</h2>
+          <p class="text-muted mb-0">Parceiros que fortalecem a nossa rede logística.</p>
+        </div>
         <PartnersCarousel />
       </div>
     </section>
@@ -364,6 +376,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import NewsCard from '@/components/NewsCard.vue'
 import PartnersCarousel from '@/components/PartnersCarousel.vue'
+import ClientsCarousel from '@/components/ClientsCarousel.vue'
 import { supabase } from '@/lib/supabase'
 import { useSiteImages } from '@/composables/useSiteImages'
 
