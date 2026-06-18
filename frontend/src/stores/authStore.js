@@ -327,39 +327,28 @@ export const useAuthStore = defineStore('auth', () => {
 
   const initSession = async () => {
     try {
-      localStorage.removeItem('fmlider_auth')
-      localStorage.removeItem('supabase_access_token')
-      localStorage.removeItem('supabase_refresh_token')
-      localStorage.removeItem('user')
+      const storedToken = sessionStorage.getItem('supabase_access_token')
+      const storedUser = sessionStorage.getItem('user')
 
-      supabase.auth.onAuthStateChange((event, supaSession) => {
-        if (event === 'SIGNED_OUT' || !supaSession) {
-          user.value = null
-          token.value = null
-          session.value = null
-          sessionStorage.removeItem('supabase_access_token')
-          sessionStorage.removeItem('supabase_refresh_token')
-          sessionStorage.removeItem('user')
-          sessionStorage.removeItem('fmlider_auth')
-          window.location.href = '/login'
-        } else if (event === 'TOKEN_REFRESHED' && supaSession) {
-          session.value = supaSession
-          persistSession(supaSession)
-        }
-      })
+      if (!storedToken || !storedUser) {
+        user.value = null
+        token.value = null
+        session.value = null
+        sessionStorage.clear()
+        localStorage.removeItem('fmlider_auth')
+        return
+      }
 
       const { data: { session: supaSession }, error } = await supabase.auth.getSession()
       if (error || !supaSession) {
         user.value = null
         token.value = null
         session.value = null
-        sessionStorage.removeItem('supabase_access_token')
-        sessionStorage.removeItem('supabase_refresh_token')
-        sessionStorage.removeItem('user')
-        sessionStorage.removeItem('fmlider_auth')
+        sessionStorage.clear()
         localStorage.removeItem('fmlider_auth')
         return
       }
+
       session.value = supaSession
       persistSession(supaSession)
 
@@ -400,10 +389,7 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = null
       token.value = null
       session.value = null
-      sessionStorage.removeItem('supabase_access_token')
-      sessionStorage.removeItem('supabase_refresh_token')
-      sessionStorage.removeItem('user')
-      sessionStorage.removeItem('fmlider_auth')
+      sessionStorage.clear()
       localStorage.removeItem('fmlider_auth')
     }
   }
