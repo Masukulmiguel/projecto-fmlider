@@ -3,7 +3,7 @@
     <div class="page-header">
       <div>
         <h1 class="page-title">{{ t('funcionario.clients_title') }}</h1>
-        <p class="text-muted mb-0">Lista de clientes registados na plataforma.</p>
+        <p class="text-muted mb-0">{{ t('funcionario.clients_subtitle') }}</p>
       </div>
     </div>
     <div class="card">
@@ -23,10 +23,10 @@
           <table class="table table-hover mb-0">
             <thead>
               <tr>
-                <th>Cliente</th>
-                <th>Email</th>
-                <th>Telefone</th>
-                <th>Status</th>
+                <th>{{ t('funcionario.clients_col_client') }}</th>
+                <th>{{ t('funcionario.clients_col_email') }}</th>
+                <th>{{ t('funcionario.clients_col_phone') }}</th>
+                <th>{{ t('funcionario.clients_col_status') }}</th>
                 <th>{{ t('funcionario.clients_registered') }}</th>
               </tr>
             </thead>
@@ -44,9 +44,9 @@
                 <td>{{ u.email }}</td>
                 <td>{{ u.phone || '—' }}</td>
                 <td>
-                  <span v-if="u.approval_status === 'pending'" class="badge bg-warning text-dark">Pendente</span>
-                  <span v-else-if="u.approval_status === 'approved'" class="badge bg-success">Aprovado</span>
-                  <span v-else class="badge bg-danger">Rejeitado</span>
+                  <span v-if="u.approval_status === 'pending'" class="badge bg-warning text-dark">{{ t('funcionario.clients_status_pending') }}</span>
+                  <span v-else-if="u.approval_status === 'approved'" class="badge bg-success">{{ t('funcionario.clients_status_approved') }}</span>
+                  <span v-else class="badge bg-danger">{{ t('funcionario.clients_status_rejected') }}</span>
                 </td>
                 <td><small class="text-muted">{{ formatDate(u.created_at) }}</small></td>
               </tr>

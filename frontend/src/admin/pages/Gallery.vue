@@ -13,7 +13,7 @@
 
     <div v-else-if="gallery.length === 0" class="text-center py-5 text-muted">
       <i class="bi bi-image" style="font-size:3rem"></i>
-      <p class="mt-2">Nenhuma imagem na galeria.</p>
+      <p class="mt-2">{{ t('admin.gallery_empty') }}</p>
     </div>
 
     <div v-else class="gallery-grid">
@@ -50,30 +50,30 @@
             <form @submit.prevent="saveItem">
               <div class="row g-3">
                 <div class="col-md-8">
-                  <label class="form-label">Título *</label>
+                  <label class="form-label">{{ t('admin.services_title_col') }} *</label>
                   <input type="text" class="form-control" v-model="form.title" required />
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">Categoria</label>
-                  <input type="text" class="form-control" v-model="form.category" list="categoryList" placeholder="Ex: Produtos" />
+                  <label class="form-label">{{ t('admin.news_category') }}</label>
+                  <input type="text" class="form-control" v-model="form.category" list="categoryList" :placeholder="t('admin.gallery_category_placeholder')" />
                   <datalist id="categoryList">
                     <option v-for="cat in categories" :key="cat" :value="cat"></option>
                   </datalist>
                 </div>
                 <div class="col-12">
-                  <label class="form-label">Descrição</label>
+                  <label class="form-label">{{ t('admin.settings_description') }}</label>
                   <textarea class="form-control" v-model="form.description" rows="2"></textarea>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Texto Alt</label>
-                  <input type="text" class="form-control" v-model="form.alt_text" placeholder="Descrição para acessibilidade" />
+                  <label class="form-label">{{ t('admin.gallery_alt_text_label') }}</label>
+                  <input type="text" class="form-control" v-model="form.alt_text" :placeholder="t('admin.gallery_alt_placeholder')" />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Ordem</label>
+                  <label class="form-label">{{ t('admin.services_order') }}</label>
                   <input type="number" class="form-control" v-model.number="form.order_by" min="0" />
                 </div>
                 <div class="col-12">
-                  <label class="form-label">Imagem *</label>
+                  <label class="form-label">{{ t('admin.services_image') }} *</label>
                   <div
                     class="upload-zone"
                     :class="{ 'dragover': isDragging, 'has-image': previewUrl }"
@@ -91,24 +91,24 @@
                     />
                     <div v-if="!previewUrl" class="text-center py-4">
                       <i class="bi bi-cloud-arrow-up" style="font-size:2.5rem"></i>
-                      <p class="mb-0 mt-2">Arraste uma imagem ou clique para selecionar</p>
-                      <small class="text-muted">JPG, PNG, WEBP (máx. 5MB)</small>
+                      <p class="mb-0 mt-2">{{ t('admin.gallery_upload_zone') }}</p>
+                      <small class="text-muted">{{ t('admin.gallery_upload_hint') }}</small>
                     </div>
                     <div v-else class="text-center">
                       <img :src="previewUrl" class="preview-img" />
-                      <p class="mt-2 mb-0 small text-muted">Clique para trocar a imagem</p>
+                      <p class="mt-2 mb-0 small text-muted">{{ t('admin.gallery_click_change') }}</p>
                     </div>
                   </div>
                   <div v-if="!editingId && !selectedFile" class="text-danger small mt-1">
-                    Selecione uma imagem para fazer upload.
+                    {{ t('admin.gallery_select_image') }}
                   </div>
                 </div>
               </div>
               <div class="modal-footer px-0 pb-0">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
                 <button type="submit" class="btn btn-primary" :disabled="saving">
                   <span v-if="saving" class="spinner-border spinner-border-sm me-1"></span>
-                  {{ saving ? 'Salvando...' : 'Salvar' }}
+                  {{ saving ? t('admin.gallery_saving') : t('common.save') }}
                 </button>
               </div>
             </form>
@@ -126,13 +126,13 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
-            <p>Tem certeza que deseja deletar <strong>{{ deletingItem?.title }}</strong>?</p>
+            <p>{{ t('admin.gallery_confirm_delete') }} <strong>{{ deletingItem?.title }}</strong>?</p>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
             <button type="button" class="btn btn-danger btn-sm" @click="deleteItem" :disabled="deleting">
               <span v-if="deleting" class="spinner-border spinner-border-sm me-1"></span>
-              {{ deleting ? 'Deletando...' : 'Deletar' }}
+              {{ deleting ? t('admin.gallery_deleting') : t('common.delete') }}
             </button>
           </div>
         </div>
@@ -237,7 +237,7 @@ function handleDrop(e) {
 
 function processFile(file) {
   if (file.size > 5 * 1024 * 1024) {
-    alert('Arquivo muito grande. Máximo 5MB.')
+    alert(t('admin.file_too_large'))
     return
   }
   selectedFile.value = file
@@ -273,7 +273,7 @@ async function saveItem() {
       const { error } = await supabase.from('gallery').update(payload).eq('id', editingId.value)
       if (error) throw error
     } else {
-      if (!imagePath) throw new Error('Selecione uma imagem')
+      if (!imagePath) throw new Error(t('admin.gallery_select_image_required'))
       const { error } = await supabase.from('gallery').insert(payload)
       if (error) throw error
     }
@@ -281,7 +281,7 @@ async function saveItem() {
     await fetchGallery()
   } catch (err) {
     console.error('Erro ao salvar:', err)
-    alert(err.message || 'Erro ao salvar item.')
+    alert(err.message || t('admin.gallery_error_saving'))
   } finally {
     saving.value = false
   }
@@ -303,7 +303,7 @@ async function deleteItem() {
     deletingItem.value = null
   } catch (err) {
     console.error('Erro ao deletar:', err)
-    alert('Erro ao deletar item.')
+    alert(t('admin.error_deleting_item'))
   } finally {
     deleting.value = false
   }

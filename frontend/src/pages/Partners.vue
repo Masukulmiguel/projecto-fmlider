@@ -4,12 +4,12 @@
       <div class="container">
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb justify-content-center">
-            <li class="breadcrumb-item"><router-link to="/" class="text-white-50">Início</router-link></li>
-            <li class="breadcrumb-item active text-white">Parceiros</li>
+            <li class="breadcrumb-item"><router-link to="/" class="text-white-50">{{ t('partners.breadcrumb_home') }}</router-link></li>
+            <li class="breadcrumb-item active text-white">{{ t('partners.breadcrumb_partners') }}</li>
           </ol>
         </nav>
-        <h1 class="display-4 fw-bold text-white mb-3">Nossos Parceiros</h1>
-        <p class="lead text-white-50 mx-auto" style="max-width: 650px;">Parcerias estratégicas que fortalecem a nossa rede logística e expandem o nosso alcance global.</p>
+        <h1 class="display-4 fw-bold text-white mb-3">{{ t('partners.hero_title') }}</h1>
+        <p class="lead text-white-50 mx-auto" style="max-width: 650px;">{{ t('partners.hero_subtitle') }}</p>
       </div>
     </section>
 
@@ -17,36 +17,32 @@
       <div class="container">
         <div class="row align-items-center g-5">
           <div class="col-lg-6" v-reveal="'right'">
-            <span class="fml-eyebrow">Quem Somos</span>
-            <h2 class="section-title">Uma Rede de Parceiros de Confiança</h2>
+            <span class="fml-eyebrow">{{ t('partners.section_who') }}</span>
+            <h2 class="section-title">{{ t('partners.title_network') }}</h2>
             <p class="text-muted mb-4">
-              Desde 2017, a FMLider tem construído relações sólidas com operadores logísticos de referência
-              em Angola e no exterior. As nossas parcerias estratégicas permitem oferecer serviços integrados
-              com qualidade, cobrindo todas as etapas da cadeia de abastecimento.
+              {{ t('partners.text_1') }}
             </p>
             <p class="text-muted mb-4">
-              Através destas alianças, conseguemos garantir soluções personalizadas para cada cliente,
-              desde o desembaraço aduaneiro até ao transporte e armazenagem, sempre com a confiança
-              e a segurança que o mercado exige.
+              {{ t('partners.text_2') }}
             </p>
             <div class="row g-4 mt-2">
               <div class="col-6">
                 <div class="stat-card">
                   <span class="stat-number">32+</span>
-                  <span class="stat-label">Países com parcerias</span>
+                  <span class="stat-label">{{ t('partners.stat_countries') }}</span>
                 </div>
               </div>
               <div class="col-6">
                 <div class="stat-card">
                   <span class="stat-number">60+</span>
-                  <span class="stat-label">Parceiros activos</span>
+                  <span class="stat-label">{{ t('partners.stat_partners') }}</span>
                 </div>
               </div>
             </div>
           </div>
           <div class="col-lg-6" v-reveal="'left'">
             <div class="about-image-area">
-              <img :src="getImage('partners', 'about', '/assets/img/construcao2020/image1.jpeg')" alt="Parcerias FMLider" class="about-img">
+              <img :src="getImage('partners', 'about', '/assets/img/construcao2020/image1.jpeg')" :alt="t('partners.img_alt')" class="about-img">
             </div>
           </div>
         </div>
@@ -56,9 +52,9 @@
     <section class="fml-section" style="background: #f8f9fa;">
       <div class="container">
         <div class="text-center mb-5" v-reveal="'fade'">
-          <span class="fml-eyebrow">Vantagens</span>
-          <h2 class="section-title">Por que ser parceiro da FMLider?</h2>
-          <p class="text-muted mx-auto" style="max-width: 600px;">As nossas parcerias trazem benefícios concretos para todos os envolvidos na cadeia logística.</p>
+          <span class="fml-eyebrow">{{ t('partners.section_benefits') }}</span>
+          <h2 class="section-title">{{ t('partners.title_why') }}</h2>
+          <p class="text-muted mx-auto" style="max-width: 600px;">{{ t('partners.text_3') }}</p>
         </div>
         <div class="row g-4">
           <div class="col-md-6 col-lg-3" v-for="(benefit, i) in benefits" :key="i" v-reveal="'fade'">
@@ -77,8 +73,8 @@
     <section class="fml-section">
       <div class="container">
         <div class="text-center mb-5" v-reveal="'fade'">
-          <span class="fml-eyebrow">Nossa Rede</span>
-          <h2 class="section-title">Os Nossos Parceiros</h2>
+          <span class="fml-eyebrow">{{ t('partners.section_network') }}</span>
+          <h2 class="section-title">{{ t('partners.title_partners') }}</h2>
           <p class="text-muted mx-auto" style="max-width: 600px;">Empresas e operadores que confiam na FMLider e que fazem parte da nossa rede logística internacional.</p>
         </div>
         <div class="row g-4">
@@ -91,7 +87,7 @@
                 <h5 class="partner-name">{{ partner.name }}</h5>
                 <p class="partner-desc" v-if="partner.description">{{ partner.description }}</p>
                 <a v-if="partner.website" :href="partner.website" target="_blank" rel="noopener" class="partner-link">
-                  <i class="bi bi-box-arrow-up-right me-1"></i> Visitar site
+                  <i class="bi bi-box-arrow-up-right me-1"></i> {{ t('partners.partner_link') }}
                 </a>
               </div>
             </div>
@@ -99,22 +95,22 @@
         </div>
         <div v-if="partners.length === 0 && !loading" class="text-center py-5">
           <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
-          <p class="text-muted mt-3">Nenhum parceiro encontrado.</p>
+          <p class="text-muted mt-3">{{ t('partners.empty') }}</p>
         </div>
         <div v-if="loading" class="text-center py-5">
           <div class="spinner-border text-primary" role="status"></div>
-          <p class="text-muted mt-3">A carregar parceiros...</p>
+          <p class="text-muted mt-3">{{ t('partners.loading') }}</p>
         </div>
       </div>
     </section>
 
     <section class="fml-section cta-section" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);">
       <div class="container text-center" v-reveal="'scale'">
-        <h2 class="display-5 fw-bold text-white mb-3">Quer tornar-se parceiro?</h2>
-        <p class="lead text-white-50 mb-4 mx-auto" style="max-width: 550px;">Entre em contacto connosco e descubra como a parceria pode fortalecer o seu negócio.</p>
+        <h2 class="display-5 fw-bold text-white mb-3">{{ t('partners.cta_title') }}</h2>
+        <p class="lead text-white-50 mb-4 mx-auto" style="max-width: 550px;">{{ t('partners.cta_subtitle') }}</p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
           <router-link to="/contacto" class="btn btn-gold btn-lg">
-            <i class="bi bi-envelope me-2"></i> Fale Connosco
+            <i class="bi bi-envelope me-2"></i> {{ t('partners.cta_button') }}
           </router-link>
           <a href="tel:+244935141747" class="btn btn-outline-light btn-lg">
             <i class="bi bi-telephone me-2"></i> +244 935 141 747
@@ -126,20 +122,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useSiteImages } from '@/composables/useSiteImages'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const { getImage, fetchAll } = useSiteImages()
 const partners = ref([])
 const loading = ref(true)
 
-const benefits = [
-  { icon: 'bi bi-globe-americas', title: 'Alcance Global', desc: 'Aceda a mercados internacionais através da nossa rede de parceiros em 32 países.' },
-  { icon: 'bi bi-shield-check', title: 'Confiabilidade', desc: 'Parcerias baseadas em confiança, transparência e cumprimento rigoroso de prazos.' },
-  { icon: 'bi bi-gear-wide-connected', title: 'Soluções Integradas', desc: 'Serviços completos de logística, armazenagem e desembaraço aduaneiro em package.' },
-  { icon: 'bi bi-graph-up-arrow', title: 'Crescimento', desc: 'Expandimos juntos, criando valor para todos os membros da rede logística.' },
-]
+const benefits = computed(() => [
+  { icon: 'bi bi-globe-americas', title: t('partners.benefit_1_title'), desc: t('partners.benefit_1_desc') },
+  { icon: 'bi bi-shield-check', title: t('partners.benefit_2_title'), desc: t('partners.benefit_2_desc') },
+  { icon: 'bi bi-gear-wide-connected', title: t('partners.benefit_3_title'), desc: t('partners.benefit_3_desc') },
+  { icon: 'bi bi-graph-up-arrow', title: t('partners.benefit_4_title'), desc: t('partners.benefit_4_desc') },
+])
 
 const resolveLogo = (logo) => {
   if (!logo) return ''

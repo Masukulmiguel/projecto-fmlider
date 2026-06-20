@@ -14,7 +14,7 @@
           <div class="card-body">
             <div class="profile-photo-section">
               <div class="profile-photo-preview">
-                <img v-if="photoPreview || authStore.user?.photo" :src="photoPreview || authStore.user?.photo" alt="Foto de perfil">
+                <img v-if="photoPreview || authStore.user?.photo" :src="photoPreview || authStore.user?.photo" :alt="t('cliente.profile_photo_alt')">
                 <div v-else class="photo-placeholder">
                   <i class="bi bi-person-fill"></i>
                 </div>
@@ -24,7 +24,7 @@
                   <i class="bi bi-camera-fill"></i> {{ t('cliente.profile_change_photo') }}
                   <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" @change="onPhotoChange" hidden>
                 </label>
-                <small class="text-muted d-block">JPG, PNG, WEBP ou GIF · máx 3MB</small>
+                <small class="text-muted d-block">{{ t('cliente.profile_photo_formats') }}</small>
                 <div v-if="photoMessage" class="alert mt-2 mb-0 py-2" :class="photoError ? 'alert-danger' : 'alert-success'">
                   {{ photoMessage }}
                 </div>
@@ -40,23 +40,23 @@
           <div class="card-body">
             <form @submit.prevent="saveProfile">
               <div class="mb-3">
-                <label class="form-label">Nome de utilizador</label>
+                <label class="form-label">{{ t('cliente.profile_username_label') }}</label>
                 <input type="text" class="form-control" :value="authStore.user?.username" disabled>
               </div>
               <div class="mb-3">
-                <label class="form-label">Nome completo *</label>
+                <label class="form-label">{{ t('cliente.profile_fullname_label') }} *</label>
                 <input type="text" class="form-control" v-model="profile.name" required>
               </div>
               <div class="mb-3">
-                <label class="form-label">Email</label>
+                <label class="form-label">{{ t('cliente.profile_email') }}</label>
                 <input type="email" class="form-control" :value="authStore.user?.email" disabled>
               </div>
               <div class="mb-3">
-                <label class="form-label">Telefone</label>
+                <label class="form-label">{{ t('cliente.profile_phone') }}</label>
                 <input type="tel" class="form-control" v-model="profile.phone">
               </div>
               <button type="submit" class="btn btn-primary" :disabled="savingProfile">
-                {{ savingProfile ? 'A guardar...' : 'Guardar alterações' }}
+                {{ savingProfile ? t('cliente.profile_saving') : t('cliente.profile_save_changes') }}
               </button>
             </form>
           </div>
@@ -66,15 +66,15 @@
       <div class="col-lg-6">
         <div class="card">
           <div class="card-header d-flex align-items-center justify-content-between">
-            <h5 class="mb-0">Dados da empresa</h5>
+            <h5 class="mb-0">{{ t('cliente.profile_company_data') }}</h5>
             <span v-if="companyStore.company?.logo" class="badge" :class="companyStore.company.is_published ? 'bg-success' : 'bg-secondary'">
-              {{ companyStore.company.is_published ? 'Visível no site' : 'Oculto do site' }}
+              {{ companyStore.company.is_published ? t('cliente.profile_visible_site') : t('cliente.profile_hidden_site') }}
             </span>
           </div>
           <div class="card-body">
             <div class="logo-block mb-4">
-              <label class="form-label fw-semibold">Logotipo da empresa</label>
-              <p class="text-muted small mb-2">Ao carregar o logotipo, ele aparece automaticamente no carrossel "Nossos Clientes" da página inicial.</p>
+              <label class="form-label fw-semibold">{{ t('cliente.profile_company_logo_label') }}</label>
+              <p class="text-muted small mb-2">{{ t('cliente.profile_carousel_hint') }}</p>
               <div class="logo-preview-row">
                 <div class="logo-preview">
                   <img v-if="logoPreview" :src="resolveLogo(logoPreview)" alt="Logo">
@@ -84,10 +84,10 @@
                 </div>
                 <div class="logo-actions">
                   <label class="btn btn-outline-primary btn-sm mb-2">
-                    <i class="bi bi-upload"></i> Carregar logotipo
+                    <i class="bi bi-upload"></i> {{ t('cliente.profile_upload_logo') }}
                     <input type="file" accept="image/*" @change="onLogoChange" hidden>
                   </label>
-                  <small class="text-muted d-block">JPG, PNG, WEBP, GIF ou SVG · máx 3MB</small>
+                  <small class="text-muted d-block">{{ t('cliente.profile_logo_formats') }}</small>
                 </div>
               </div>
               <div v-if="logoMessage" class="alert mt-2 mb-0 py-2" :class="logoError ? 'alert-danger' : 'alert-success'">
@@ -97,45 +97,45 @@
 
             <form @submit.prevent="saveCompany">
               <div class="mb-3">
-                <label class="form-label">Nome da empresa *</label>
+                <label class="form-label">{{ t('cliente.setup_name') }} *</label>
                 <input type="text" class="form-control" v-model="company.company_name" required>
               </div>
               <div class="mb-3">
-                <label class="form-label">NIF</label>
+                <label class="form-label">{{ t('cliente.dashboard_nif') }}</label>
                 <input type="text" class="form-control" v-model="company.nif">
               </div>
               <div class="mb-3">
-                <label class="form-label">Endereço *</label>
+                <label class="form-label">{{ t('cliente.setup_address') }} *</label>
                 <input type="text" class="form-control" v-model="company.address" required>
               </div>
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Telefone *</label>
+                  <label class="form-label">{{ t('cliente.setup_phone') }} *</label>
                   <input type="tel" class="form-control" v-model="company.phone" required>
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Email *</label>
+                  <label class="form-label">{{ t('cliente.setup_email') }} *</label>
                   <input type="email" class="form-control" v-model="company.email" required>
                 </div>
               </div>
               <div class="mb-3">
-                <label class="form-label">Serviço *</label>
+                <label class="form-label">{{ t('cliente.setup_service_label') }} *</label>
                 <input type="text" class="form-control" v-model="company.service" required>
               </div>
               <div class="mb-3">
-                <label class="form-label">Descrição do caso *</label>
+                <label class="form-label">{{ t('cliente.setup_case_description') }} *</label>
                 <textarea rows="4" class="form-control" v-model="company.case_description" required></textarea>
               </div>
 
               <div v-if="companyStore.company?.logo" class="form-check form-switch mb-3">
                 <input class="form-check-input" type="checkbox" id="showInCarousel" :checked="!!companyStore.company.is_published" :disabled="togglingPublish" @change="onTogglePublish">
                 <label class="form-check-label" for="showInCarousel">
-                  Mostrar o logotipo no carrossel "Nossos Clientes" da página inicial
+                  {{ t('cliente.profile_show_in_carousel') }}
                 </label>
               </div>
 
               <button type="submit" class="btn btn-primary" :disabled="savingCompany">
-                {{ savingCompany ? 'A guardar...' : 'Atualizar empresa' }}
+                {{ savingCompany ? t('cliente.profile_saving') : t('cliente.profile_update_company') }}
               </button>
             </form>
           </div>
@@ -213,7 +213,7 @@ const saveProfile = async () => {
   savingProfile.value = true
   const result = await authStore.updateProfile(profile)
   savingProfile.value = false
-  if (result.success) successMessage.value = 'Perfil atualizado.'
+  if (result.success) successMessage.value = t('cliente.profile_success_updated')
   else errorMessage.value = result.error
 }
 
@@ -223,7 +223,7 @@ const saveCompany = async () => {
   savingCompany.value = true
   const result = await companyStore.save({ ...company })
   savingCompany.value = false
-  if (result.success) successMessage.value = 'Dados da empresa atualizados.'
+  if (result.success) successMessage.value = t('cliente.profile_company_updated')
   else errorMessage.value = result.error
 }
 
@@ -239,7 +239,7 @@ const onLogoChange = async (e) => {
   e.target.value = ''
   if (result.success) {
     logoError.value = false
-    logoMessage.value = 'Logotipo carregado e publicado no site.'
+    logoMessage.value = t('cliente.profile_logo_uploaded')
   } else {
     logoError.value = true
     logoMessage.value = result.error
@@ -253,7 +253,7 @@ const onTogglePublish = async (e) => {
   togglingPublish.value = false
   if (result.success) {
     logoError.value = false
-    logoMessage.value = wanted ? 'Logotipo publicado no site.' : 'Logotipo removido do site.'
+    logoMessage.value = wanted ? t('cliente.profile_logo_published') : t('cliente.profile_logo_removed')
   } else {
     logoError.value = true
     logoMessage.value = result.error
@@ -273,7 +273,7 @@ const onPhotoChange = async (e) => {
   e.target.value = ''
   if (result.success) {
     photoError.value = false
-    photoMessage.value = 'Foto de perfil atualizada.'
+    photoMessage.value = t('cliente.profile_photo_updated')
     photoPreview.value = ''
   } else {
     photoError.value = true

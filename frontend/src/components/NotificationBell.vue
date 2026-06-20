@@ -1,6 +1,6 @@
 <template>
   <div class="notif-wrapper" v-click-outside="close">
-    <button class="notif-bell" :class="{ has: notif.unread > 0 }" @click="notif.toggleDropdown" aria-label="Notificações">
+    <button class="notif-bell" :class="{ has: notif.unread > 0 }" @click="notif.toggleDropdown" :aria-label="t('notifications.aria_label')">
       <i class="bi bi-bell-fill"></i>
       <span v-if="notif.unread > 0" class="notif-badge">{{ notif.unread > 99 ? '99+' : notif.unread }}</span>
     </button>
@@ -8,9 +8,9 @@
     <transition name="notif-fade">
       <div v-if="notif.dropdownOpen" class="notif-dropdown">
         <div class="notif-header">
-          <h6 class="mb-0">Notificações</h6>
+          <h6 class="mb-0">{{ t('notifications.title') }}</h6>
           <button v-if="notif.unread > 0" class="btn btn-sm btn-link p-0" @click="markAllRead">
-            Marcar todas como lidas
+            {{ t('notifications.mark_all_read') }}
           </button>
         </div>
         <div class="notif-list">
@@ -19,7 +19,7 @@
           </div>
           <div v-else-if="notif.items.length === 0" class="notif-empty">
             <i class="bi bi-bell-slash"></i>
-            <p class="mb-0 mt-2 small">Sem notificações.</p>
+            <p class="mb-0 mt-2 small">{{ t('notifications.empty') }}</p>
           </div>
           <div
             v-for="n in notif.items"
@@ -48,7 +48,9 @@
 import { onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useNotificationStore } from '@/stores/notificationStore'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const notif = useNotificationStore()
 const router = useRouter()
 const close = () => notif.closeDropdown()
@@ -76,7 +78,7 @@ const formatTime = (iso) => {
   const d = new Date(iso)
   const now = new Date()
   const diff = (now - d) / 1000
-  if (diff < 60) return 'agora'
+  if (diff < 60) return t('notifications.time_now')
   if (diff < 3600) return `${Math.floor(diff/60)}min`
   if (diff < 86400) return `${Math.floor(diff/3600)}h`
   if (diff < 7 * 86400) return `${Math.floor(diff/86400)}d`

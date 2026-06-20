@@ -132,7 +132,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 import { useI18n } from '@/composables/useI18n'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const authStore = useAuthStore()
 const items = ref([])
 const stats = ref({})
@@ -212,7 +212,7 @@ const formatCurrency = (v, c) => {
   return new Intl.NumberFormat('pt-AO', { style: 'currency', currency: c || 'AOA', maximumFractionDigits: 0 }).format(v)
 }
 
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
+const formatDate = (d) => d ? new Date(d).toLocaleDateString(locale.value === 'pt' ? 'pt-PT' : locale.value === 'en' ? 'en-US' : 'fr-FR') : '—'
 
 onMounted(() => { fetchData(); fetchStats() })
 </script>

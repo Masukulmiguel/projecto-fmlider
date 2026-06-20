@@ -3,7 +3,7 @@
     <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
       <div>
         <h1 class="page-title"><i class="bi bi-globe2 me-2"></i>{{ t('admin.visitors_title') }}</h1>
-        <p class="text-muted mb-0">Todos os acessos ao site público.</p>
+        <p class="text-muted mb-0">{{ t('admin.visitors_description') }}</p>
       </div>
       <div class="d-flex gap-2 flex-wrap">
         <select v-model="deviceFilter" class="form-select form-select-sm" style="min-width: 140px;">
@@ -12,7 +12,7 @@
           <option value="mobile">Mobile</option>
           <option value="tablet">Tablet</option>
         </select>
-        <input v-model="search" type="text" class="form-control form-control-sm" placeholder="Pesquisar IP, país, cidade..." style="min-width: 200px; max-width: 250px;" />
+        <input v-model="search" type="text" class="form-control form-control-sm" :placeholder="t('admin.visitors_search_placeholder')" style="min-width: 200px; max-width: 250px;" />
         <button class="btn btn-sm btn-outline-secondary" @click="load" :disabled="loading">
           <i class="bi bi-arrow-clockwise"></i>
         </button>
@@ -42,7 +42,7 @@
         <div class="mini-card">
           <i class="bi bi-calendar-day-fill text-success"></i>
           <div>
-            <div class="mini-label">Hoje</div>
+            <div class="mini-label">{{ t('admin.visitors_today') }}</div>
             <div class="mini-value">{{ data.today }}</div>
           </div>
         </div>
@@ -51,7 +51,7 @@
         <div class="mini-card">
           <i class="bi bi-person-check-fill text-warning"></i>
           <div>
-            <div class="mini-label">Utilizadores autenticados</div>
+            <div class="mini-label">{{ t('admin.visitors_authenticated') }}</div>
             <div class="mini-value">{{ data.logged_users }}</div>
           </div>
         </div>
@@ -60,21 +60,21 @@
 
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
-        <h6 class="mb-0">Acessos recentes</h6>
+        <h6 class="mb-0">{{ t('admin.visitors_recent') }}</h6>
         <small class="text-muted">{{ filteredRecent.length }} {{ t('common.of') }} {{ data?.recent?.length || 0 }}</small>
       </div>
       <div class="table-responsive">
         <table class="table table-hover mb-0 align-middle">
           <thead>
             <tr>
-              <th>IP</th>
+              <th>{{ t('admin.visitors_col_ip') }}</th>
               <th>{{ t('admin.visitors_location') }}</th>
-              <th>Sistema</th>
-              <th>Browser</th>
-              <th>Dispositivo</th>
-              <th>Utilizador</th>
-              <th>Página</th>
-              <th>Quando</th>
+              <th>{{ t('admin.visitors_col_system') }}</th>
+              <th>{{ t('admin.visitors_col_browser') }}</th>
+              <th>{{ t('admin.visitors_col_device') }}</th>
+              <th>{{ t('admin.visitors_col_user') }}</th>
+              <th>{{ t('admin.visitors_col_page') }}</th>
+              <th>{{ t('admin.visitors_col_when') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -84,13 +84,13 @@
               </td>
             </tr>
             <tr v-else-if="filteredRecent.length === 0">
-              <td colspan="8" class="text-center text-muted py-4">Sem visitas registadas.</td>
+              <td colspan="8" class="text-center text-muted py-4">{{ t('admin.visitors_empty') }}</td>
             </tr>
             <tr v-for="v in filteredRecent" :key="v.id">
               <td><code class="ip">{{ v.ip_address || '—' }}</code></td>
               <td>
                 <i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                <strong>{{ v.country || 'Desconhecido' }}</strong>
+                <strong>{{ v.country || t('admin.visitors_unknown') }}</strong>
                 <small v-if="v.city" class="text-muted d-block">{{ v.city }}</small>
               </td>
               <td><i :class="osIcon(v.os)" class="me-1"></i>{{ v.os || '—' }}</td>
@@ -102,7 +102,7 @@
               </td>
               <td>
                 <span v-if="v.user_name" class="badge bg-success">{{ v.user_name }}</span>
-                <span v-else class="text-muted small">Anónimo</span>
+                <span v-else class="text-muted small">{{ t('admin.visitors_anonymous') }}</span>
               </td>
               <td><small class="text-muted text-truncate d-inline-block" style="max-width: 200px;" :title="v.page_url">{{ v.page_url || '—' }}</small></td>
               <td><small class="text-muted">{{ formatTime(v.visited_at) }}</small></td>
@@ -169,10 +169,10 @@ const formatTime = (iso) => {
   const d = new Date(iso)
   const now = new Date()
   const diff = (now - d) / 1000
-  if (diff < 60) return 'agora'
-  if (diff < 3600) return `há ${Math.floor(diff/60)}min`
-  if (diff < 86400) return `há ${Math.floor(diff/3600)}h`
-  if (diff < 7 * 86400) return `há ${Math.floor(diff/86400)}d`
+  if (diff < 60) return t('admin.visitors_time_now')
+  if (diff < 3600) return t('admin.visitors_time_min').replace('{n}', Math.floor(diff/60))
+  if (diff < 86400) return t('admin.visitors_time_hour').replace('{n}', Math.floor(diff/3600))
+  if (diff < 7 * 86400) return t('admin.visitors_time_day').replace('{n}', Math.floor(diff/86400))
   return d.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
 }
 

@@ -7,7 +7,7 @@
           <div class="brand-icon"><i class="bi bi-box-seam-fill"></i></div>
           <span class="brand-text">FMLider</span>
         </div>
-        <button class="collapse-btn d-none d-lg-flex" @click="emit('toggle-collapse')" :title="collapsed ? 'Expandir' : 'Recolher'">
+        <button class="collapse-btn d-none d-lg-flex" @click="emit('toggle-collapse')" :title="collapsed ? t('admin_sidebar.expand') : t('admin_sidebar.collapse')">
           <i :class="collapsed ? 'bi bi-chevron-double-right' : 'bi bi-chevron-double-left'"></i>
         </button>
         <button class="close-btn d-lg-none" @click="$emit('close')">
@@ -60,9 +60,9 @@
           <i class="bi bi-person nav-icon"></i>
           <span class="nav-text">{{ t('funcionario.sidebar_profile') }}</span>
         </router-link>
-        <router-link to="/mudar-senha" class="nav-item" active-class="active" :class="{ 'icon-only': collapsed }" :title="collapsed ? t('funcionario.sidebar_profile') : ''">
+        <router-link to="/mudar-senha" class="nav-item" active-class="active" :class="{ 'icon-only': collapsed }" :title="collapsed ? t('funcionario.sidebar_change_password') : ''">
           <i class="bi bi-shield-lock nav-icon"></i>
-          <span class="nav-text">{{ t('funcionario.sidebar_profile') }}</span>
+          <span class="nav-text">{{ t('funcionario.sidebar_change_password') }}</span>
         </router-link>
       </nav>
 

@@ -64,7 +64,7 @@
                   <input :value="authStore.user?.email" type="email" class="form-control" disabled>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Cargo</label>
+                  <label class="form-label">{{ t('funcionario.profile_cargo') }}</label>
                   <input :value="authStore.user?.position || t('funcionario.profile_role')" type="text" class="form-control" disabled>
                 </div>
               </div>
@@ -140,7 +140,7 @@ const save = async () => {
     if (!result.success) throw new Error(result.error)
     successMessage.value = t('funcionario.profile_save')
   } catch (e) {
-    errorMessage.value = e.message || 'Erro ao guardar.'
+    errorMessage.value = e.message || t('funcionario.profile_error_saving')
   } finally {
     saving.value = false
   }
@@ -149,15 +149,15 @@ const save = async () => {
 const changePassword = async () => {
   passwordError.value = ''
   passwordSuccess.value = ''
-  if (pwd.new !== pwd.confirm) { passwordError.value = 'As senhas não coincidem.'; return }
+  if (pwd.new !== pwd.confirm) { passwordError.value = t('funcionario.profile_passwords_mismatch'); return }
   changingPwd.value = true
   try {
     const result = await authStore.changePassword({ new_password: pwd.new })
     if (!result.success) throw new Error(result.error)
-    passwordSuccess.value = 'Senha alterada com sucesso.'
+    passwordSuccess.value = t('funcionario.profile_password_changed')
     pwd.current = ''; pwd.new = ''; pwd.confirm = ''
   } catch (e) {
-    passwordError.value = e.message || 'Erro ao alterar senha.'
+    passwordError.value = e.message || t('funcionario.profile_error_changing_password')
   } finally {
     changingPwd.value = false
   }
@@ -169,7 +169,7 @@ const onPhotoChange = async (event) => {
   if (!file) return
   if (file.size > 3 * 1024 * 1024) {
     photoError.value = true
-    photoMessage.value = 'Imagem demasiado grande (máx 3MB).'
+    photoMessage.value = t('funcionario.profile_image_too_large')
     return
   }
   uploadingPhoto.value = true
@@ -179,10 +179,10 @@ const onPhotoChange = async (event) => {
   uploadingPhoto.value = false
   if (!result.success) {
     photoError.value = true
-    photoMessage.value = result.error || 'Erro ao enviar foto.'
+    photoMessage.value = result.error || t('funcionario.profile_error_uploading_photo')
   } else {
     photoError.value = false
-    photoMessage.value = 'Foto atualizada.'
+    photoMessage.value = t('funcionario.profile_photo_updated')
   }
 }
 
@@ -196,9 +196,9 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT', { day: '2-
 
 const restorePhoto = async (p) => {
   if (p.is_current) return
-  if (!confirm('Repor esta foto como atual?')) return
+  if (!confirm(t('funcionario.profile_restore_confirm'))) return
   photoError.value = true
-  photoMessage.value = 'Funcionalidade de repor foto ainda não disponível.'
+  photoMessage.value = t('funcionario.profile_restore_not_available')
 }
 </script>
 

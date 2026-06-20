@@ -55,7 +55,7 @@ const authStore = useAuthStore()
 const items = ref([])
 const loading = ref(false)
 
-const statusLabel = (s) => ({ pendente: 'Pendente', em_transito: 'Em trânsito', entregue: 'Entregue', cancelado: 'Cancelado' }[s] || s)
+const statusLabel = (s) => ({ pendente: t('funcionario.embarques_status_pending'), em_transito: t('funcionario.embarques_status_transit'), entregue: t('funcionario.embarques_status_delivered'), cancelado: t('funcionario.embarques_status_cancelled') }[s] || s)
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
 
 const load = async () => {

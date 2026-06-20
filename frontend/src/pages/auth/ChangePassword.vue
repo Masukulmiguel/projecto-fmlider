@@ -53,7 +53,7 @@
                     minlength="6"
                     required
                   >
-                  <label for="new_password">{{ t('auth.change_new') }} (mín. 6 caracteres)</label>
+                  <label for="new_password">{{ t('auth.change_new') }}{{ t('common.min_chars_label') }}</label>
                 </div>
 
                 <div class="form-floating mb-4 animate-fade-up delay-3">
@@ -93,7 +93,7 @@
             </div>
           </div>
           <p class="text-center text-white-50 small mt-3 mb-0">
-            <i class="bi bi-shield-check me-1"></i> FMLider · Gestão segura
+            <i class="bi bi-shield-check me-1"></i> FMLider · {{ t('common.secure_management') }}
           </p>
         </div>
       </div>

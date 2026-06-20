@@ -110,7 +110,7 @@
         <div class="sidebar-user" v-show="!collapsed">
           <div class="user-avatar">{{ userInitials }}</div>
           <div class="user-info">
-            <span class="user-name">{{ authStore.user?.name || 'Admin' }}</span>
+            <span class="user-name">{{ authStore.user?.name || t('admin_sidebar.admin') }}</span>
             <span class="user-role">{{ t('admin_sidebar.admin') }}</span>
           </div>
           <button class="logout-btn" @click="handleLogout" :title="t('admin_sidebar.logout')">

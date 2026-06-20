@@ -5,12 +5,16 @@
       <h5>{{ news.title }}</h5>
       <p class="text-muted">{{ news.date }}</p>
       <p>{{ news.description }}</p>
-      <router-link :to="`/noticias/${news.slug}`" class="btn btn-sm btn-primary">Ler Mais</router-link>
+      <router-link :to="`/noticias/${news.slug}`" class="btn btn-sm btn-primary">{{ t('news.read_more') }}</router-link>
     </div>
   </div>
 </template>
 
 <script setup>
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
+
 defineProps({
   news: {
     type: Object,

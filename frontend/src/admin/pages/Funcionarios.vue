@@ -3,10 +3,10 @@
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
       <div>
         <h1 class="page-title"><i class="bi bi-person-badge-fill me-2"></i>{{ t('admin.employees_title') }}</h1>
-        <p class="text-muted mb-0">Gere as contas dos teus funcionários e define as suas permissões.</p>
+        <p class="text-muted mb-0">{{ t('admin.employees_description') }}</p>
       </div>
       <button class="btn btn-primary" @click="openForm()">
-        <i class="bi bi-plus-lg me-1"></i> Novo funcionário
+        <i class="bi bi-plus-lg me-1"></i> {{ t('admin.employees_new') }}
       </button>
     </div>
 
@@ -15,7 +15,7 @@
       <div class="card-body text-center py-5">
         <i class="bi bi-person-badge" style="font-size: 3rem; color: #0f766e;"></i>
         <h5 class="mt-3">{{ t('admin.employees_empty') }}</h5>
-        <p class="text-muted mb-3">Cria a primeira conta de funcionário para começar.</p>
+        <p class="text-muted mb-3">{{ t('admin.employees_add_first') }}</p>
         <button class="btn btn-primary" @click="openForm()">
           <i class="bi bi-plus-lg me-1"></i> {{ t('admin.employees_new') }}
         </button>
@@ -27,13 +27,13 @@
           <table class="table table-hover mb-0 align-middle">
             <thead>
               <tr>
-                <th>Funcionário</th>
+                <th>{{ t('admin.employees_col_employee') }}</th>
                 <th>{{ t('admin.employees_position') }}</th>
                 <th>Email</th>
                 <th>{{ t('admin.services_status') }}</th>
                 <th>{{ t('admin.employees_permissions') }}</th>
                 <th>{{ t('admin.last_login') }}</th>
-                <th class="text-end">Ações</th>
+                <th class="text-end">{{ t('admin.employees_col_actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -54,34 +54,34 @@
                 <td>{{ f.email }}</td>
                 <td>
                   <span v-if="isLocked(f)" class="badge bg-danger" :title="lockTooltip(f)">
-                    <i class="bi bi-lock-fill me-1"></i>Bloqueado
+                    <i class="bi bi-lock-fill me-1"></i>{{ t('admin.employees_status_locked') }}
                   </span>
                   <span v-else-if="f.status === 0" class="badge bg-secondary">
-                    <i class="bi bi-slash-circle me-1"></i>Desativado
+                    <i class="bi bi-slash-circle me-1"></i>{{ t('admin.employees_status_disabled') }}
                   </span>
                   <span v-else-if="f.password_must_change" class="badge bg-warning text-dark">
-                    <i class="bi bi-key me-1"></i>Alterar senha
+                    <i class="bi bi-key me-1"></i>{{ t('admin.employees_status_password_change') }}
                   </span>
                   <span v-else class="badge bg-success">
-                    <i class="bi bi-check-circle me-1"></i>Ativo
+                    <i class="bi bi-check-circle me-1"></i>{{ t('admin.employees_status_active') }}
                   </span>
                 </td>
                 <td>
                   <span class="text-muted small">{{ (f.permissions || []).length }} de {{ allPermissions.length }}</span>
                 </td>
-                <td><small class="text-muted">{{ f.last_login ? formatDate(f.last_login) : 'Nunca' }}</small></td>
+                <td><small class="text-muted">{{ f.last_login ? formatDate(f.last_login) : t('admin.employees_never') }}</small></td>
                 <td class="text-end">
                   <div class="action-buttons">
-                    <button v-if="isLocked(f)" class="btn btn-sm btn-outline-success" @click="unlockUser(f)" title="Desbloquear">
+                    <button v-if="isLocked(f)" class="btn btn-sm btn-outline-success" @click="unlockUser(f)" :title="t('admin.employees_action_unlock')">
                       <i class="bi bi-unlock-fill"></i>
                     </button>
-                    <button v-else class="btn btn-sm btn-outline-warning" @click="openLockModal(f)" title="Bloquear">
+                    <button v-else class="btn btn-sm btn-outline-warning" @click="openLockModal(f)" :title="t('admin.employees_action_lock')">
                       <i class="bi bi-lock-fill"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary" @click="openForm(f)" title="Editar">
+                    <button class="btn btn-sm btn-outline-secondary" @click="openForm(f)" :title="t('admin.employees_action_edit')">
                       <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(f)" title="Eliminar">
+                    <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(f)" :title="t('admin.employees_action_delete')">
                       <i class="bi bi-trash"></i>
                     </button>
                   </div>
@@ -98,7 +98,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">
-              <i class="bi bi-person-badge-fill me-2"></i>{{ editing ? 'Editar funcionário' : 'Novo funcionário' }}
+              <i class="bi bi-person-badge-fill me-2"></i>{{ editing ? t('admin.employees_edit_title') : t('admin.employees_new_title') }}
             </h5>
             <button type="button" class="btn-close" @click="closeForm"></button>
           </div>
@@ -107,7 +107,7 @@
               <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label">Nome completo *</label>
+                  <label class="form-label">{{ t('admin.employees_full_name') }}</label>
                   <input v-model="form.name" type="text" class="form-control" required>
                 </div>
                 <div class="col-md-6">
@@ -119,21 +119,21 @@
                   <input v-model="form.email" type="email" class="form-control" required>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Telefone</label>
+                  <label class="form-label">{{ t('admin.employees_phone') }}</label>
                   <input v-model="form.phone" type="text" class="form-control">
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Cargo / posição</label>
-                  <input v-model="form.position" type="text" class="form-control" placeholder="Ex: Operador de Embarques">
+                  <label class="form-label">{{ t('admin.employees_position_label') }}</label>
+                  <input v-model="form.position" type="text" class="form-control" :placeholder="t('admin.employees_position_placeholder')">
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">
-                    {{ editing ? 'Nova senha (deixar vazio para manter)' : 'Senha *' }}
+                    {{ editing ? t('admin.employees_new_password') : t('admin.employees_password_label') }}
                   </label>
                   <input v-model="form.password" type="password" class="form-control" :required="!editing" minlength="6">
                 </div>
                 <div class="col-12">
-                  <label class="form-label fw-bold">Permissões de acesso</label>
+                  <label class="form-label fw-bold">{{ t('admin.employees_access_permissions') }}</label>
                   <div class="perm-grid">
                     <label v-for="group in permissionGroups" :key="group.label" class="perm-group">
                       <div class="perm-group-title">
@@ -168,7 +168,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">
-              <i class="bi bi-lock-fill me-2 text-warning"></i>Bloquear funcionário
+              <i class="bi bi-lock-fill me-2 text-warning"></i>{{ t('admin.employees_lock_title') }}
             </h5>
             <button type="button" class="btn-close" @click="closeLockModal"></button>
           </div>
@@ -181,16 +181,16 @@
               <div class="mb-3">
                 <label class="form-label">{{ t('admin.lock_duration') }}</label>
                 <select v-model.number="lockForm.duration_hours" class="form-select">
-                  <option :value="1">1 hora</option>
-                  <option :value="6">6 horas</option>
-                  <option :value="12">12 horas</option>
-                  <option :value="24">24 horas (padrão)</option>
-                  <option :value="48">2 dias</option>
-                  <option :value="168">7 dias</option>
+                  <option :value="1">{{ t('admin.employees_lock_1h') }}</option>
+                  <option :value="6">{{ t('admin.employees_lock_6h') }}</option>
+                  <option :value="12">{{ t('admin.employees_lock_12h') }}</option>
+                  <option :value="24">{{ t('admin.employees_lock_24h_default') }}</option>
+                  <option :value="48">{{ t('admin.employees_lock_2d') }}</option>
+                  <option :value="168">{{ t('admin.employees_lock_7d') }}</option>
                 </select>
               </div>
               <div class="mb-3">
-                <label class="form-label">Motivo</label>
+                <label class="form-label">{{ t('admin.employees_lock_reason') }}</label>
                 <textarea v-model="lockForm.reason" class="form-control" rows="3" :placeholder="t('admin.lock_reason_placeholder')"></textarea>
               </div>
             </div>
@@ -232,29 +232,29 @@ const lockError = ref('')
 
 const PERM_LABELS = {
   'dashboard.view': 'Dashboard',
-  'clients.view': 'Ver clientes', 'clients.manage': 'Gerir clientes',
-  'embarques.view': 'Ver embarques', 'embarques.manage': 'Gerir embarques',
-  'cotacoes.view': 'Ver cotações', 'cotacoes.manage': 'Gerir cotações',
-  'documentos.view': 'Ver documentos', 'documentos.manage': 'Gerir documentos',
-  'contactos.view': 'Ver contactos', 'contactos.manage': 'Gerir contactos',
-  'chat.view': 'Ver chat', 'chat.reply': 'Responder chat',
-  'visitors.view': 'Ver visitantes',
-  'content.manage': 'Gerir conteúdo',
+  'clients.view': t('admin.perm_view_clients'), 'clients.manage': t('admin.perm_manage_clients'),
+  'embarques.view': t('admin.perm_view_shipments'), 'embarques.manage': t('admin.perm_manage_shipments'),
+  'cotacoes.view': t('admin.perm_view_quotes'), 'cotacoes.manage': t('admin.perm_manage_quotes'),
+  'documentos.view': t('admin.perm_view_documents'), 'documentos.manage': t('admin.perm_manage_documents'),
+  'contactos.view': t('admin.perm_view_contacts'), 'contactos.manage': t('admin.perm_manage_contacts'),
+  'chat.view': t('admin.perm_view_chat'), 'chat.reply': t('admin.perm_reply_chat'),
+  'visitors.view': t('admin.perm_view_visitors'),
+  'content.manage': t('admin.perm_manage_content'),
 }
 
 const permissionGroups = [
-  { label: 'Clientes', icon: 'bi-people-fill', perms: ['clients.view', 'clients.manage'] },
-  { label: 'Embarques', icon: 'bi-box-seam-fill', perms: ['embarques.view', 'embarques.manage'] },
-  { label: 'Cotações', icon: 'bi-receipt', perms: ['cotacoes.view', 'cotacoes.manage'] },
-  { label: 'Documentos', icon: 'bi-file-earmark-text-fill', perms: ['documentos.view', 'documentos.manage'] },
-  { label: 'Contactos', icon: 'bi-person-rolodex', perms: ['contactos.view', 'contactos.manage'] },
-  { label: 'Chat', icon: 'bi-chat-dots-fill', perms: ['chat.view', 'chat.reply'] },
-  { label: 'Outros', icon: 'bi-three-dots', perms: ['dashboard.view', 'visitors.view', 'content.manage'] },
+  { label: t('admin.perm_group_clients'), icon: 'bi-people-fill', perms: ['clients.view', 'clients.manage'] },
+  { label: t('admin.perm_group_shipments'), icon: 'bi-box-seam-fill', perms: ['embarques.view', 'embarques.manage'] },
+  { label: t('admin.perm_group_quotes'), icon: 'bi-receipt', perms: ['cotacoes.view', 'cotacoes.manage'] },
+  { label: t('admin.perm_group_documents'), icon: 'bi-file-earmark-text-fill', perms: ['documentos.view', 'documentos.manage'] },
+  { label: t('admin.perm_group_contacts'), icon: 'bi-person-rolodex', perms: ['contactos.view', 'contactos.manage'] },
+  { label: t('admin.perm_group_chat'), icon: 'bi-chat-dots-fill', perms: ['chat.view', 'chat.reply'] },
+  { label: t('admin.perm_group_others'), icon: 'bi-three-dots', perms: ['dashboard.view', 'visitors.view', 'content.manage'] },
 ]
 
 const permLabel = (code) => PERM_LABELS[code] || code
 const initials = (n) => (n || '?').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Nunca'
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' }) : t('admin.employees_never')
 
 const isLocked = (u) => {
   if (!u.locked_at) return false
@@ -282,7 +282,7 @@ const closeLockModal = () => {
 }
 const submitLock = async () => {
   if (!lockForm.reason.trim()) {
-    lockError.value = 'Indique um motivo para o bloqueio.'
+    lockError.value = t('admin.employees_lock_reason_required')
     return
   }
   locking.value = true
@@ -298,7 +298,7 @@ const submitLock = async () => {
   await fetchList()
 }
 const unlockUser = async (u) => {
-  if (!confirm(`Desbloquear o funcionário "${u.name}"?`)) return
+  if (!confirm(`${t('admin.employees_lock_confirm')} "${u.name}"?`)) return
   const { error } = await supabase.from('users').update({ locked_at: null, locked_reason: null }).eq('id', u.id)
   if (error) {
     alert(error.message || t('admin.unlock_error'))
@@ -460,7 +460,7 @@ const handleSubmit = async () => {
 }
 
 const confirmDelete = async (item) => {
-  if (!confirm(`Eliminar o funcionário "${item.name}"? Esta acção é irreversível.`)) return
+  if (!confirm(`${t('admin.employees_delete_confirm')} "${item.name}"? ${t('admin.employees_delete_warning')}`)) return
   try {
     const { error } = await supabase.from('users').delete().eq('id', item.id)
     if (error) throw error

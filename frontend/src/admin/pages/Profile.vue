@@ -18,7 +18,7 @@
             </div>
             <h5 class="mt-3 mb-1">{{ authStore.user?.name }}</h5>
             <p class="text-muted small mb-2">{{ authStore.user?.email }}</p>
-            <span class="badge bg-primary mb-2">{{ authStore.user?.position || 'Administrador' }}</span>
+            <span class="badge bg-primary mb-2">{{ authStore.user?.position || t('admin.profile_role_admin') }}</span>
             <p class="text-muted small mb-0">@{{ authStore.user?.username }}</p>
           </div>
         </div>
@@ -32,14 +32,14 @@
                 :key="p.id"
                 class="photo-thumb"
                 :class="{ current: p.is_current, clickable: !p.is_current }"
-                :title="formatDate(p.created_at) + (p.is_current ? ' · Atual' : '')"
+                :title="formatDate(p.created_at) + (p.is_current ? ' ' + t('admin.profile_current_suffix') : '')"
                 @click="restorePhoto(p)"
               >
                 <img :src="p.photo" :alt="formatDate(p.created_at)">
-                <span v-if="p.is_current" class="badge bg-success current-badge">Atual</span>
+                <span v-if="p.is_current" class="badge bg-success current-badge">{{ t('admin.profile_current_label') }}</span>
               </div>
             </div>
-            <p class="text-muted small mb-0 mt-2">Clica numa foto antiga para a repor.</p>
+            <p class="text-muted small mb-0 mt-2">{{ t('admin.profile_select_old') }}</p>
           </div>
         </div>
       </div>
@@ -53,11 +53,11 @@
               <div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label">Nome *</label>
+                  <label class="form-label">{{ t('admin.profile_name_label') }}</label>
                   <input v-model="form.name" type="text" class="form-control" required>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Telefone</label>
+                  <label class="form-label">{{ t('admin.profile_phone_label') }}</label>
                   <input v-model="form.phone" type="text" class="form-control">
                 </div>
                 <div class="col-md-6">
@@ -65,8 +65,8 @@
                   <input :value="authStore.user?.email" type="email" class="form-control" disabled>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Cargo</label>
-                  <input :value="authStore.user?.position || 'Administrador'" type="text" class="form-control" disabled>
+                  <label class="form-label">{{ t('admin.profile_cargo_label') }}</label>
+                  <input :value="authStore.user?.position || t('admin.profile_role_admin')" type="text" class="form-control" disabled>
                 </div>
               </div>
               <div class="mt-3 d-flex justify-content-end">
@@ -141,10 +141,10 @@ const save = async () => {
   try {
     const { error } = await supabase.auth.updateUser({ data: form })
     if (error) throw error
-    successMessage.value = 'Perfil atualizado.'
+    successMessage.value = t('admin.profile_profile_updated')
     await authStore.getProfile()
   } catch (e) {
-    errorMessage.value = e.message || 'Erro ao guardar.'
+    errorMessage.value = e.message || t('admin.profile_error_saving')
   } finally {
     saving.value = false
   }
@@ -153,16 +153,16 @@ const save = async () => {
 const changePassword = async () => {
   passwordError.value = ''
   passwordSuccess.value = ''
-  if (pwd.new !== pwd.confirm) { passwordError.value = 'As senhas não coincidem.'; return }
+  if (pwd.new !== pwd.confirm) { passwordError.value = t('admin.profile_passwords_mismatch'); return }
   changingPwd.value = true
   try {
     const { error } = await supabase.auth.updateUser({ password: pwd.new })
     if (error) throw error
-    passwordSuccess.value = 'Senha alterada com sucesso.'
+    passwordSuccess.value = t('admin.profile_password_changed')
     pwd.current = ''; pwd.new = ''; pwd.confirm = ''
     await authStore.getProfile()
   } catch (e) {
-    passwordError.value = e.message || 'Erro ao alterar senha.'
+    passwordError.value = e.message || t('admin.profile_error_changing_password')
   } finally {
     changingPwd.value = false
   }
@@ -174,7 +174,7 @@ const onPhotoChange = async (event) => {
   if (!file) return
   if (file.size > 3 * 1024 * 1024) {
     photoError.value = true
-    photoMessage.value = 'Imagem demasiado grande (máx 3MB).'
+    photoMessage.value = t('admin.profile_image_too_large')
     return
   }
   uploadingPhoto.value = true
@@ -184,18 +184,18 @@ const onPhotoChange = async (event) => {
   uploadingPhoto.value = false
   if (!result.success) {
     photoError.value = true
-    photoMessage.value = result.error || 'Erro ao enviar foto.'
+    photoMessage.value = result.error || t('admin.profile_error_uploading_photo')
   } else {
     photoError.value = false
-    photoMessage.value = 'Foto atualizada.'
+    photoMessage.value = t('admin.profile_photo_updated')
   }
 }
 
 const restorePhoto = async (p) => {
   if (p.is_current) return
-  if (!confirm('Repor esta foto como atual?')) return
+  if (!confirm(t('admin.profile_restore_confirm'))) return
   photoError.value = true
-  photoMessage.value = 'Funcionalidade de repor foto ainda não disponível.'
+  photoMessage.value = t('admin.profile_restore_not_available')
 }
 
 onMounted(async () => {

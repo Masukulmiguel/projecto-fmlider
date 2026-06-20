@@ -200,20 +200,20 @@ const greeting = computed(() => {
 
 const initials = (n) => (n || '?').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()
 
-const PERM_LABELS = {
-  'dashboard.view': 'Dashboard',
-  'clients.view': 'Ver clientes', 'clients.manage': 'Gerir clientes',
-  'embarques.view': 'Ver embarques', 'embarques.manage': 'Gerir embarques',
-  'cotacoes.view': 'Ver cotações', 'cotacoes.manage': 'Gerir cotações',
-  'documentos.view': 'Ver documentos', 'documentos.manage': 'Gerir documentos',
-  'contactos.view': 'Ver contactos', 'contactos.manage': 'Gerir contactos',
-  'chat.view': 'Ver chat', 'chat.reply': 'Responder chat',
-  'visitors.view': 'Ver visitantes',
-  'content.manage': 'Gerir conteúdo do site',
-}
+const PERM_LABELS = computed(() => ({
+  'dashboard.view': t('funcionario.perm_dashboard'),
+  'clients.view': t('funcionario.perm_view_clients'), 'clients.manage': t('funcionario.perm_manage_clients'),
+  'embarques.view': t('funcionario.perm_view_shipments'), 'embarques.manage': t('funcionario.perm_manage_shipments'),
+  'cotacoes.view': t('funcionario.perm_view_quotes'), 'cotacoes.manage': t('funcionario.perm_manage_quotes'),
+  'documentos.view': t('funcionario.perm_view_documents'), 'documentos.manage': t('funcionario.perm_manage_documents'),
+  'contactos.view': t('funcionario.perm_view_contacts'), 'contactos.manage': t('funcionario.perm_manage_contacts'),
+  'chat.view': t('funcionario.perm_view_chat'), 'chat.reply': t('funcionario.perm_reply_chat'),
+  'visitors.view': t('funcionario.perm_view_visitors'),
+  'content.manage': t('funcionario.perm_manage_content'),
+}))
 
 const permissionLabels = computed(() => {
-  return (authStore.permissions || []).map(code => ({ code, label: PERM_LABELS[code] || code }))
+  return (authStore.permissions || []).map(code => ({ code, label: PERM_LABELS.value[code] || code }))
 })
 
 const can = (perm) => authStore.can(perm)

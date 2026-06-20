@@ -53,7 +53,7 @@ const authStore = useAuthStore()
 const items = ref([])
 const loading = ref(false)
 
-const statusLabel = (s) => ({ pendente: 'Pendente', aprovada: 'Aprovada', rejeitada: 'Rejeitada', expirada: 'Expirada' }[s] || s)
+const statusLabel = (s) => ({ pendente: t('funcionario.quotes_status_pending'), aprovada: t('funcionario.quotes_status_approved'), rejeitada: t('funcionario.quotes_status_rejected'), expirada: t('funcionario.quotes_status_expired') }[s] || s)
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
 
 const load = async () => {

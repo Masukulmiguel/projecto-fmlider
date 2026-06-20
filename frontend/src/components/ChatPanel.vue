@@ -143,7 +143,7 @@ import { useChatStore } from '@/stores/chatStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useI18n } from '@/composables/useI18n'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const props = defineProps({
   selected: { type: Object, default: null },
@@ -207,10 +207,11 @@ const formatTime = (iso) => {
   const d = new Date(iso)
   const now = new Date()
   const sameDay = d.toDateString() === now.toDateString()
-  if (sameDay) return d.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })
+  const loc = locale.value === 'fr' ? 'fr-FR' : locale.value === 'en' ? 'en-US' : 'pt-PT'
+  if (sameDay) return d.toLocaleTimeString(loc, { hour: '2-digit', minute: '2-digit' })
   const diff = (now - d) / 1000
-  if (diff < 7 * 86400) return d.toLocaleDateString('pt-PT', { weekday: 'short' })
-  return d.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' })
+  if (diff < 7 * 86400) return d.toLocaleDateString(loc, { weekday: 'short' })
+  return d.toLocaleDateString(loc, { day: '2-digit', month: '2-digit' })
 }
 
 const scrollDown = async () => {

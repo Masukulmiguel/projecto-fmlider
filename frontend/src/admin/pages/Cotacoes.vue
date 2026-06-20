@@ -3,7 +3,7 @@
     <div class="page-header mb-4">
       <div>
         <h2>{{ t('admin.cotacoes_title') }}</h2>
-        <p class="text-muted mb-0">Todas as cotações dos clientes.</p>
+        <p class="text-muted mb-0">{{ t('admin.cotacoes_description') }}</p>
       </div>
     </div>
 
@@ -15,11 +15,11 @@
             <input v-model="filters.q" type="text" :placeholder="t('admin.cotacoes_search')" @input="debounceSearch">
           </div>
           <select v-model="filters.status" class="form-select" @change="fetchData">
-            <option value="">Todos os estados</option>
-            <option value="pendente">Pendente</option>
-            <option value="aprovada">Aprovada</option>
-            <option value="rejeitada">Rejeitada</option>
-            <option value="expirada">Expirada</option>
+            <option value="">{{ t('admin.cotacoes_all_statuses') }}</option>
+            <option value="pendente">{{ t('admin.cotacoes_status_pendente') }}</option>
+            <option value="aprovada">{{ t('admin.cotacoes_status_aprovada') }}</option>
+            <option value="rejeitada">{{ t('admin.cotacoes_status_rejeitada') }}</option>
+            <option value="expirada">{{ t('admin.cotacoes_expired') }}</option>
           </select>
         </div>
 
@@ -27,19 +27,19 @@
           <div class="spinner-border text-primary" role="status"></div>
         </div>
         <div v-else-if="items.length === 0" class="text-center py-5 text-muted">
-          Nenhuma cotação encontrada.
+          {{ t('admin.cotacoes_empty') }}
         </div>
         <div v-else class="table-responsive">
           <table class="table align-middle">
             <thead>
               <tr>
                 <th>{{ t('admin.cotacoes_ref') }}</th>
-                <th>Cliente</th>
+                <th>{{ t('admin.cotacoes_client') }}</th>
                 <th>{{ t('admin.cotacoes_route') }}</th>
-                <th>Tipo</th>
-                <th>Valor</th>
-                <th>Estado</th>
-                <th>Data</th>
+                <th>{{ t('admin.cotacoes_type') }}</th>
+                <th>{{ t('admin.cotacoes_value_label') }}</th>
+                <th>{{ t('admin.cotacoes_status') }}</th>
+                <th>{{ t('admin.cotacoes_date') }}</th>
                 <th>{{ t('admin.actions_col') }}</th>
               </tr>
             </thead>
@@ -60,10 +60,10 @@
                 <td><small class="text-muted">{{ formatDate(item.created_at) }}</small></td>
                 <td>
                   <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-primary" @click="openEdit(item)" title="Editar">
+                    <button class="btn btn-sm btn-outline-primary" @click="openEdit(item)" :title="t('common.edit')">
                       <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" @click="openDelete(item)" title="Eliminar">
+                    <button class="btn btn-sm btn-outline-danger" @click="openDelete(item)" :title="t('common.delete')">
                       <i class="bi bi-trash"></i>
                     </button>
                   </div>
@@ -83,21 +83,21 @@
         </div>
         <div class="modal-body">
           <div class="mb-3">
-            <label class="form-label">Estado</label>
+            <label class="form-label">{{ t('admin.cotacoes_status_label') }}</label>
             <select v-model="editForm.status" class="form-select">
-              <option value="pendente">Pendente</option>
-              <option value="aprovada">Aprovada</option>
-              <option value="rejeitada">Rejeitada</option>
-              <option value="convertida">Convertida</option>
+              <option value="pendente">{{ t('admin.cotacoes_status_pendente') }}</option>
+              <option value="aprovada">{{ t('admin.cotacoes_status_aprovada') }}</option>
+              <option value="rejeitada">{{ t('admin.cotacoes_status_rejeitada') }}</option>
+              <option value="convertida">{{ t('admin.cotacoes_status_convertida') }}</option>
             </select>
           </div>
           <div class="mb-3">
-            <label class="form-label">Valor</label>
+            <label class="form-label">{{ t('admin.cotacoes_value_label') }}</label>
             <input v-model="editForm.value" type="number" class="form-control" placeholder="0.00">
           </div>
           <div class="mb-3">
-            <label class="form-label">Notas</label>
-            <textarea v-model="editForm.notes" class="form-control" rows="3" placeholder="Notas..."></textarea>
+            <label class="form-label">{{ t('admin.cotacoes_notes') }}</label>
+            <textarea v-model="editForm.notes" class="form-control" rows="3" :placeholder="t('admin.cotacoes_notes_placeholder')"></textarea>
           </div>
         </div>
         <div class="modal-footer">
@@ -117,8 +117,8 @@
           <button class="btn-close" @click="closeDelete"></button>
         </div>
         <div class="modal-body">
-          <p>Tem certeza que deseja eliminar a cotação <strong>{{ deleteItem?.reference }}</strong>?</p>
-          <p class="text-muted small mb-0">Esta ação não pode ser desfeita.</p>
+          <p>{{ t('admin.cotacoes_confirm_delete') }} <strong>{{ deleteItem?.reference }}</strong>?</p>
+          <p class="text-muted small mb-0">{{ t('admin.cotacoes_delete_warning') }}</p>
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" @click="closeDelete">{{ t('common.cancel') }}</button>
@@ -162,8 +162,8 @@ const fetchData = async () => {
 
 const debounceSearch = () => { clearTimeout(searchTimer); searchTimer = setTimeout(fetchData, 300) }
 
-const typeLabel = (t) => ({ maritimo: 'Marítimo', aereo: 'Aéreo', terrestre: 'Terrestre', ferroviario: 'Ferroviário', multimodal: 'Multimodal' }[t] || t)
-const statusLabel = (s) => ({ pendente: 'Pendente', aprovada: 'Aprovada', rejeitada: 'Rejeitada', expirada: 'Expirada' }[s] || s)
+const typeLabel = (type) => ({ maritimo: t('admin.cotacoes_type_maritimo'), aereo: t('admin.cotacoes_type_aereo'), terrestre: t('admin.cotacoes_type_terrestre'), ferroviario: t('admin.cotacoes_type_ferroviario'), multimodal: t('admin.cotacoes_type_multimodal') }[type] || type)
+const statusLabel = (status) => ({ pendente: t('admin.cotacoes_status_pendente'), aprovada: t('admin.cotacoes_status_aprovada'), rejeitada: t('admin.cotacoes_status_rejeitada'), expirada: t('admin.cotacoes_expired') }[status] || status)
 const formatCurrency = (v, c) => v ? new Intl.NumberFormat('pt-AO', { style: 'currency', currency: c || 'AOA', maximumFractionDigits: 0 }).format(v) : '—'
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
 
@@ -194,11 +194,11 @@ const submitEdit = async () => {
       notes: editForm.notes
     }).eq('id', editItem.value.id)
     if (error) throw error
-    showToast('success', 'Cotação atualizada com sucesso.')
+    showToast('success', t('admin.cotacoes_success_updated'))
     closeEdit()
     fetchData()
   } catch (e) {
-    showToast('error', 'Erro ao atualizar cotação.')
+    showToast('error', t('admin.cotacoes_error_updating'))
   } finally { saving.value = false }
 }
 
@@ -221,11 +221,11 @@ const submitDelete = async () => {
   try {
     const { error } = await supabase.from('cotacoes').delete().eq('id', deleteItem.value.id)
     if (error) throw error
-    showToast('success', 'Cotação eliminada com sucesso.')
+    showToast('success', t('admin.cotacoes_success_deleted'))
     closeDelete()
     fetchData()
   } catch (e) {
-    showToast('error', 'Erro ao eliminar cotação.')
+    showToast('error', t('admin.cotacoes_error_deleting'))
   } finally { deleting.value = false }
 }
 

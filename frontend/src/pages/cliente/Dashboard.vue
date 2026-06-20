@@ -177,7 +177,7 @@ import {
 } from 'chart.js'
 import { useI18n } from '@/composables/useI18n'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend, ArcElement, DoughnutController, BarController)
 
@@ -190,7 +190,7 @@ const recentEmbarques = ref([])
 const embarques = ref([])
 const cotacoes = ref([])
 
-const statusLabel = (s) => ({ pendente: 'Pendente', em_transito: 'Em trânsito', entregue: 'Entregue', cancelado: 'Cancelado' }[s] || s)
+const statusLabel = (s) => ({ pendente: t('cliente.dashboard_status_pending'), em_transito: t('cliente.dashboard_status_transit'), entregue: t('cliente.dashboard_status_delivered'), cancelado: t('cliente.dashboard_status_cancelled') }[s] || s)
 
 const goToDocumentos = () => router.push('/documentos')
 
@@ -236,7 +236,7 @@ const monthlyData = computed(() => {
   for (let i = 5; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
     const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-    labels.push(d.toLocaleDateString('pt-PT', { month: 'short' }))
+    labels.push(d.toLocaleDateString(locale.value === 'pt' ? 'pt-PT' : locale.value === 'en' ? 'en-US' : 'fr-FR', { month: 'short' }))
     mapEmb.set(k, 0)
     mapCot.set(k, 0)
   }
@@ -245,8 +245,8 @@ const monthlyData = computed(() => {
   return {
     labels,
     datasets: [
-      { label: 'Embarques', data: [...mapEmb.values()], backgroundColor: '#2563eb', borderRadius: 6 },
-      { label: 'Cotações', data: [...mapCot.values()], backgroundColor: '#10b981', borderRadius: 6 },
+      { label: t('cliente.dashboard_chart_shipments_label'), data: [...mapEmb.values()], backgroundColor: '#2563eb', borderRadius: 6 },
+      { label: t('cliente.dashboard_chart_quotes_label'), data: [...mapCot.values()], backgroundColor: '#10b981', borderRadius: 6 },
     ],
   }
 })
@@ -261,7 +261,7 @@ const statusData = computed(() => {
   const groups = { pendente: 0, em_transito: 0, entregue: 0, cancelado: 0 }
   embarques.value.forEach(e => { if (groups[e.status] !== undefined) groups[e.status]++ })
   return {
-    labels: ['Pendente', 'Em trânsito', 'Entregue', 'Cancelado'],
+    labels: [t('cliente.dashboard_status_pending'), t('cliente.dashboard_status_transit'), t('cliente.dashboard_status_delivered'), t('cliente.dashboard_status_cancelled')],
     datasets: [{
       data: [groups.pendente, groups.em_transito, groups.entregue, groups.cancelado],
       backgroundColor: ['#f59e0b', '#06b6d4', '#10b981', '#ef4444'],

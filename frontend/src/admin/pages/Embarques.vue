@@ -3,7 +3,7 @@
     <div class="page-header mb-4">
       <div>
         <h2>{{ t('admin.embarques_title') }}</h2>
-        <p class="text-muted mb-0">Todos os embarques de todos os clientes.</p>
+        <p class="text-muted mb-0">{{ t('admin.embarques_description') }}</p>
       </div>
     </div>
 
@@ -27,19 +27,19 @@
           <div class="spinner-border text-primary" role="status"></div>
         </div>
         <div v-else-if="items.length === 0" class="text-center py-5 text-muted">
-          Nenhum embarque encontrado.
+          {{ t('admin.embarques_empty') }}
         </div>
         <div v-else class="table-responsive">
           <table class="table align-middle">
             <thead>
               <tr>
                 <th>{{ t('admin.embarques_tracking') }}</th>
-                <th>Cliente</th>
+                <th>{{ t('admin.embarques_client') }}</th>
                 <th>{{ t('admin.embarques_route') }}</th>
-                <th>Tipo</th>
-                <th>Estado</th>
+                <th>{{ t('admin.embarques_type') }}</th>
+                <th>{{ t('admin.embarques_status') }}</th>
                 <th>{{ t('admin.embarques_value') }}</th>
-                <th>Data</th>
+                <th>{{ t('admin.embarques_date') }}</th>
                 <th>{{ t('admin.actions_col') }}</th>
               </tr>
             </thead>
@@ -63,10 +63,10 @@
                 <td><small class="text-muted">{{ formatDate(item.created_at) }}</small></td>
                 <td>
                   <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-primary" @click="openEdit(item)" title="Editar">
+                    <button class="btn btn-sm btn-outline-primary" @click="openEdit(item)" :title="t('common.edit')">
                       <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" @click="openDelete(item)" title="Eliminar">
+                    <button class="btn btn-sm btn-outline-danger" @click="openDelete(item)" :title="t('common.delete')">
                       <i class="bi bi-trash"></i>
                     </button>
                   </div>
@@ -86,24 +86,24 @@
         </div>
         <div class="modal-body">
           <div class="mb-3">
-            <label class="form-label">Estado</label>
+            <label class="form-label">{{ t('admin.embarques_status') }}</label>
             <select v-model="editForm.status" class="form-select">
-              <option value="pendente">Pendente</option>
-              <option value="em_transito">Em trânsito</option>
-              <option value="entregue">Entregue</option>
-              <option value="cancelado">Cancelado</option>
+              <option value="pendente">{{ t('admin.embarques_status_pendente') }}</option>
+              <option value="em_transito">{{ t('admin.embarques_status_em_transito') }}</option>
+              <option value="entregue">{{ t('admin.embarques_status_entregue') }}</option>
+              <option value="cancelado">{{ t('admin.embarques_status_cancelado') }}</option>
             </select>
           </div>
           <div class="mb-3">
-            <label class="form-label">Notas</label>
-            <textarea v-model="editForm.notes" class="form-control" rows="3" placeholder="Notas..."></textarea>
+            <label class="form-label">{{ t('admin.embarques_notes') }}</label>
+            <textarea v-model="editForm.notes" class="form-control" rows="3" :placeholder="t('admin.embarques_notes_placeholder')"></textarea>
           </div>
           <div class="mb-3">
-            <label class="form-label">Valor Declarado</label>
+            <label class="form-label">{{ t('admin.embarques_declared_value') }}</label>
             <input v-model="editForm.declared_value" type="number" class="form-control" placeholder="0.00">
           </div>
           <div class="mb-3">
-            <label class="form-label">Moeda</label>
+            <label class="form-label">{{ t('admin.embarques_currency') }}</label>
             <select v-model="editForm.currency" class="form-select">
               <option value="AOA">AOA</option>
               <option value="USD">USD</option>
@@ -128,8 +128,8 @@
           <button class="btn-close" @click="closeDelete"></button>
         </div>
         <div class="modal-body">
-          <p>Tem certeza que deseja eliminar o embarque <strong>{{ deleteItem?.tracking_number }}</strong>?</p>
-          <p class="text-muted small mb-0">Esta ação não pode ser desfeita.</p>
+          <p>{{ t('admin.embarques_confirm_delete') }} <strong>{{ deleteItem?.tracking_number }}</strong>?</p>
+          <p class="text-muted small mb-0">{{ t('admin.embarques_delete_warning') }}</p>
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" @click="closeDelete">{{ t('common.cancel') }}</button>
@@ -173,8 +173,8 @@ const fetchData = async () => {
 
 const debounceSearch = () => { clearTimeout(searchTimer); searchTimer = setTimeout(fetchData, 300) }
 
-const typeLabel = (t) => ({ maritimo: 'Marítimo', aereo: 'Aéreo', terrestre: 'Terrestre', ferroviario: 'Ferroviário', multimodal: 'Multimodal' }[t] || t)
-const statusLabel = (s) => ({ pendente: 'Pendente', em_transito: 'Em trânsito', entregue: 'Entregue', cancelado: 'Cancelado' }[s] || s)
+const typeLabel = (type) => ({ maritimo: t('admin.embarques_type_maritimo'), aereo: t('admin.embarques_type_aereo'), terrestre: t('admin.embarques_type_terrestre'), ferroviario: t('admin.embarques_type_ferroviario'), multimodal: t('admin.embarques_type_multimodal') }[type] || type)
+const statusLabel = (status) => ({ pendente: t('admin.embarques_status_pendente'), em_transito: t('admin.embarques_status_em_transito'), entregue: t('admin.embarques_status_entregue'), cancelado: t('admin.embarques_status_cancelado') }[status] || status)
 const formatCurrency = (v, c) => v ? new Intl.NumberFormat('pt-AO', { style: 'currency', currency: c || 'AOA', maximumFractionDigits: 0 }).format(v) : '—'
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
 
@@ -207,11 +207,11 @@ const submitEdit = async () => {
       currency: editForm.currency
     }).eq('id', editItem.value.id)
     if (error) throw error
-    showToast('success', 'Embarque atualizado com sucesso.')
+    showToast('success', t('admin.embarques_success_updated'))
     closeEdit()
     fetchData()
   } catch (e) {
-    showToast('error', 'Erro ao atualizar embarque.')
+    showToast('error', t('admin.embarques_error_updating'))
   } finally { saving.value = false }
 }
 
@@ -234,11 +234,11 @@ const submitDelete = async () => {
   try {
     const { error } = await supabase.from('embarques').delete().eq('id', deleteItem.value.id)
     if (error) throw error
-    showToast('success', 'Embarque eliminado com sucesso.')
+    showToast('success', t('admin.embarques_success_deleted'))
     closeDelete()
     fetchData()
   } catch (e) {
-    showToast('error', 'Erro ao eliminar embarque.')
+    showToast('error', t('admin.embarques_error_deleting'))
   } finally { deleting.value = false }
 }
 

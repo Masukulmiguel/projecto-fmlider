@@ -9,12 +9,12 @@
       <div class="card-body p-0">
         <div v-if="loading" class="text-center py-5">
           <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Carregando...</span>
+            <span class="visually-hidden">{{ t('common.loading') }}</span>
           </div>
         </div>
 
         <div v-else-if="news.length === 0" class="text-center py-5 text-muted">
-          Nenhuma notícia encontrada.
+          {{ t('admin.news_empty') }}
         </div>
 
         <div v-else class="table-responsive">
@@ -49,7 +49,7 @@
                 <span
                   :class="item.status === 'published' ? 'badge bg-success' : 'badge bg-secondary'"
                 >
-                  {{ item.status === 'published' ? 'Publicada' : 'Rascunho' }}
+                  {{ item.status === 'published' ? t('admin.news_published') : t('admin.news_draft') }}
                 </span>
               </td>
               <td class="align-middle">{{ formatDate(item.published_at) }}</td>
@@ -97,7 +97,7 @@
           <div class="modal-body">
             <form @submit.prevent="submitForm">
               <div class="mb-3">
-                <label for="newsTitle" class="form-label">Título *</label>
+                <label for="newsTitle" class="form-label">{{ t('admin.services_title_col') }} *</label>
                 <input
                   id="newsTitle"
                   v-model="form.title"
@@ -108,7 +108,7 @@
               </div>
 
               <div class="mb-3">
-                <label for="newsDescription" class="form-label">Descrição</label>
+                <label for="newsDescription" class="form-label">{{ t('admin.settings_description') }}</label>
                 <textarea
                   id="newsDescription"
                   v-model="form.description"
@@ -118,7 +118,7 @@
               </div>
 
               <div class="mb-3">
-                <label for="newsContent" class="form-label">Conteúdo</label>
+                <label for="newsContent" class="form-label">{{ t('admin.news_content_label') }}</label>
                 <textarea
                   id="newsContent"
                   v-model="form.content"
@@ -129,17 +129,17 @@
 
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label for="newsCategory" class="form-label">Categoria</label>
+                  <label for="newsCategory" class="form-label">{{ t('admin.news_category') }}</label>
                   <input
                     id="newsCategory"
                     v-model="form.category"
                     type="text"
                     class="form-control"
-                    placeholder="Ex: Economia, Política..."
+                    :placeholder="t('admin.news_category_placeholder')"
                   />
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label for="newsImage" class="form-label">Imagem</label>
+                  <label for="newsImage" class="form-label">{{ t('admin.services_image') }}</label>
                   <input
                     id="newsImage"
                     ref="imageInput"
@@ -160,7 +160,7 @@
 
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Status</label>
+                  <label class="form-label">{{ t('admin.services_status') }}</label>
                   <div class="form-check form-switch mt-2">
                     <input
                       id="newsStatus"
@@ -169,12 +169,12 @@
                       type="checkbox"
                     />
                     <label class="form-check-label" for="newsStatus">
-                      {{ isPublished ? 'Publicada' : 'Rascunho' }}
+                      {{ isPublished ? t('admin.news_published') : t('admin.news_draft') }}
                     </label>
                   </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label for="newsPublishedAt" class="form-label">Data de Publicação</label>
+                  <label for="newsPublishedAt" class="form-label">{{ t('admin.news_published_at_label') }}</label>
                   <input
                     id="newsPublishedAt"
                     v-model="form.published_at"
@@ -191,7 +191,7 @@
               class="btn btn-secondary"
               data-bs-dismiss="modal"
             >
-              Cancelar
+              {{ t('common.cancel') }}
             </button>
             <button
               type="button"
@@ -229,7 +229,7 @@
             ></button>
           </div>
           <div class="modal-body">
-            Tem certeza que deseja deletar a notícia
+            {{ t('admin.news_confirm_delete') }}
             <strong>{{ newsToDelete?.title }}</strong>?
           </div>
           <div class="modal-footer">
@@ -238,7 +238,7 @@
               class="btn btn-secondary"
               data-bs-dismiss="modal"
             >
-              Cancelar
+              {{ t('common.cancel') }}
             </button>
             <button
               type="button"
@@ -319,7 +319,7 @@ async function fetchNews() {
     if (!error) news.value = data
   } catch (err) {
     console.error('Erro ao buscar notícias:', err)
-    alert('Erro ao carregar notícias.')
+    alert(t('admin.error_loading_news'))
   } finally {
     loading.value = false
   }
@@ -378,7 +378,7 @@ async function uploadImage() {
 
 async function submitForm() {
   if (!form.title.trim()) {
-    alert('O título é obrigatório.')
+    alert(t('admin.news_title_required'))
     return
   }
   submitting.value = true
@@ -407,7 +407,7 @@ async function submitForm() {
     await fetchNews()
   } catch (err) {
     console.error('Erro ao salvar notícia:', err)
-    alert('Erro ao salvar notícia. Tente novamente.')
+    alert(t('admin.error_saving_news'))
   } finally {
     submitting.value = false
   }
@@ -428,7 +428,7 @@ async function deleteNews() {
     await fetchNews()
   } catch (err) {
     console.error('Erro ao deletar notícia:', err)
-    alert('Erro ao deletar notícia. Tente novamente.')
+    alert(t('admin.error_deleting_news'))
   } finally {
     deleting.value = false
   }

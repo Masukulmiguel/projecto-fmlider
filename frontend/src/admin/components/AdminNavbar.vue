@@ -13,7 +13,7 @@
         <input
           type="text"
           class="search-input"
-          placeholder="Pesquisar..."
+          :placeholder="t('common.search') + '...'"
           v-model="searchQuery"
           @focus="searchFocused = true"
           @blur="handleSearchBlur"
@@ -38,7 +38,7 @@
       <NotificationBell />
       <div class="user-section" @click="toggleDropdown" ref="dropdownRef">
         <div class="user-avatar-sm">{{ userInitials }}</div>
-        <span class="user-name-sm">{{ authStore.user?.name || 'Admin' }}</span>
+        <span class="user-name-sm">{{ authStore.user?.name || t('admin_sidebar.admin') }}</span>
         <i class="bi bi-chevron-down chevron"></i>
         <Transition name="dropdown">
           <div v-if="showDropdown" class="user-dropdown">
@@ -118,7 +118,7 @@ const pageTitle = computed(() => {
     'AdminProfile': 'admin.profile_title',
   }
   const key = map[route.name]
-  return key ? t(key) : 'Admin'
+  return key ? t(key) : t('admin_sidebar.admin')
 })
 
 const searchPages = computed(() => [

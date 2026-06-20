@@ -72,210 +72,137 @@ import { useI18n } from '@/composables/useI18n'
 const route = useRoute()
 const { t } = useI18n()
 
-const allServices = {
+const allServices = computed(() => ({
   'desembaraco-aduaneiro': {
-    title: 'Desembaraço Aduaneiro',
-    subtitle: 'Especialistas em processos aduaneiros em Angola. Agilizamos a sua importação e exportação.',
+    title: t('service_detail_pages.desembaraco_aduaneiro.title'),
+    subtitle: t('service_detail_pages.desembaraco_aduaneiro.subtitle'),
     icon: 'bi bi-stamp',
     image: '/assets/img/servico/Desembaraço Aduaneiro.jpeg',
-    description: 'A FMLider é especialista em desembaraço aduaneiro, oferecendo serviços completos de importação e exportação junto à Alfândega de Angola. A nossa equipa de despachantes certificados garante o cumprimento de todas as formalidades legais com rapidez e rigor.',
+    description: t('service_detail_pages.desembaraco_aduaneiro.description'),
     sections: [
       {
-        title: 'O Que Fazemos',
+        title: t('service_detail_pages.desembaraco_aduaneiro.section_1_title'),
         icon: 'bi bi-gear',
-        text: 'Gerimos todo o processo aduaneiro, desde a preparação da documentação até à libertação da carga. Trabalhamos com todos os tipos de mercadoria e modalidades de transporte.',
-        list: [
-          'Desalfandegamento de importação e exportação',
-          'Elaboração de Declaração Única (DU)',
-          'Obtenção de licenças e autorizações especiais',
-          'Classificação fiscal e tributária',
-          'Acompanhamento junto à Alfândega',
-          'Resolução de pendências aduaneiras',
-        ]
+        text: t('service_detail_pages.desembaraco_aduaneiro.section_1_text'),
+        list: t('service_detail_pages.desembaraco_aduaneiro.section_1_list'),
       },
       {
-        title: 'Vantagens',
+        title: t('service_detail_pages.desembaraco_aduaneiro.section_2_title'),
         icon: 'bi bi-trophy',
-        text: 'Com a FMLider, o seu processo aduaneiro é tratado com profissionalismo e transparência.',
-        list: [
-          'Redução de tempos de espera na Alfândega',
-          'Evitamento de multas e penalizações',
-          'Consultoria sobre regulamentação actualizada',
-          'Relatórios detalhados de cada operação',
-        ]
+        text: t('service_detail_pages.desembaraco_aduaneiro.section_2_text'),
+        list: t('service_detail_pages.desembaraco_aduaneiro.section_2_list'),
       }
     ]
   },
   'transportes': {
-    title: 'Transportes',
-    subtitle: 'Frota própria e rastreamento GPS. Transporte seguro em todo o território nacional e internacional.',
+    title: t('service_detail_pages.transportes.title'),
+    subtitle: t('service_detail_pages.transportes.subtitle'),
     icon: 'bi bi-truck',
     image: '/assets/img/servico/Transportes.jpg',
-    description: 'A FMLider dispõe de frota própria de camiões e equipamentos para transporte de cargas gerais e especiais. Com rastreamento GPS em tempo real, oferecemos segurança e visibilidade total durante todo o percurso.',
+    description: t('service_detail_pages.transportes.description'),
     sections: [
       {
-        title: 'Modalidades de Transporte',
+        title: t('service_detail_pages.transportes.section_1_title'),
         icon: 'bi bi-box-seam',
-        text: 'Oferecemos diferentes modalidades de transporte para se adaptar às necessidades de cada cliente.',
-        list: [
-          'Transporte rodoviário — cobertura nacional',
-          'Transporte marítimo — cargas internacional',
-          'Transporte aéreo — urgências e cargas valiosas',
-          'Contentores 20" e 40"',
-          'Carga geral e project cargo',
-          'Carga perigosa e temperatura controlada',
-        ]
+        text: t('service_detail_pages.transportes.section_1_text'),
+        list: t('service_detail_pages.transportes.section_1_list'),
       },
       {
-        title: 'Rastreamento e Segurança',
+        title: t('service_detail_pages.transportes.section_2_title'),
         icon: 'bi bi-geo-alt',
-        text: 'Todos os nossos veículos estão equipados com GPS, permitindo acompanhamento em tempo real.',
-        list: [
-          'Rastreamento GPS 24/7',
-          'Notificações automáticas de estado',
-          'Seguro All Risks em todas as cargas',
-          'Condutores certificados e experientes',
-        ]
+        text: t('service_detail_pages.transportes.section_2_text'),
+        list: t('service_detail_pages.transportes.section_2_list'),
       }
     ]
   },
   'armazenagem': {
-    title: 'Armazenagem',
-    subtitle: '5.000m² de armazéns próprios em Luanda, Viana e Benguela. Segurança e gestão profissional.',
+    title: t('service_detail_pages.armazenagem.title'),
+    subtitle: t('service_detail_pages.armazenagem.subtitle'),
     icon: 'bi bi-box-seam',
     image: '/assets/img/servico/service-storage.jpg',
-    description: 'A FMLider disponibiliza 5.000m² de armazéns próprios estrategicamente localizados em Luanda, Viana e Benguela. Os nossos armazéns são equipados com sistemas de segurança de última geração e condições ideais para todos os tipos de mercadoria.',
+    description: t('service_detail_pages.armazenagem.description'),
     sections: [
       {
-        title: 'Infraestrutura',
+        title: t('service_detail_pages.armazenagem.section_1_title'),
         icon: 'bi bi-building',
-        text: 'Os nossos armazéns são projetados para garantir a segurança e integridade da sua mercadoria.',
-        list: [
-          '5.000m² de área de armazenagem',
-          'CCTV e segurança 24/7',
-          'Sistema de inventário digital',
-          'Controlo de temperatura e humidade',
-          'Acesso para contentores e camiões',
-          'Estantes industriais para todos os volumes',
-        ]
+        text: t('service_detail_pages.armazenagem.section_1_text'),
+        list: t('service_detail_pages.armazenagem.section_1_list'),
       },
       {
-        title: 'Serviços de Valor Acrescentado',
+        title: t('service_detail_pages.armazenagem.section_2_title'),
         icon: 'bi bi-plus-circle',
-        text: 'Para além da armazenagem, oferecemos serviços complementares.',
-        list: [
-          'Cross-docking e transhipment',
-          'Picking e packing',
-          'Etiquetagem e reembalagem',
-          'Inventários periódicos',
-          'Gestão de stock em tempo real',
-        ]
+        text: t('service_detail_pages.armazenagem.section_2_text'),
+        list: t('service_detail_pages.armazenagem.section_2_list'),
       }
     ]
   },
   'door-to-door': {
-    title: 'Door To Door',
-    subtitle: 'Solução completa desde a origem internacional até à entrega final em Angola.',
+    title: t('service_detail_pages.door_to_door.title'),
+    subtitle: t('service_detail_pages.door_to_door.subtitle'),
     icon: 'bi bi-house-door',
     image: '/assets/img/servico/service-door.jpg',
-    description: 'O serviço Door to Door da FMLider é a solução mais prática e completa. Cuidamos de todo o processo logístico — desde a recolha na origem internacional até à entrega no destino final em Angola — para que o cliente não se preocupe com nada.',
+    description: t('service_detail_pages.door_to_door.description'),
     sections: [
       {
-        title: 'O Incluído',
+        title: t('service_detail_pages.door_to_door.section_1_title'),
         icon: 'bi bi-list-check',
-        text: 'Um único ponto de contacto para toda a operação logística.',
-        list: [
-          'Recolha na origem internacional',
-          'Transporte marítimo ou aéreo',
-          'Desembaraço aduaneiro em Angola',
-          'Transporte terrestre até ao destino',
-          'Seguro da carga internacional',
-          'Entrega com prova de entrega (POD)',
-        ]
+        text: t('service_detail_pages.door_to_door.section_1_text'),
+        list: t('service_detail_pages.door_to_door.section_1_list'),
       },
       {
-        title: 'Vantagens',
+        title: t('service_detail_pages.door_to_door.section_2_title'),
         icon: 'bi bi-star',
-        text: 'Simplicidade e segurança em cada etapa.',
-        list: [
-          'Um único interlocutor para toda a operação',
-          'Prazos definidos e cumpridos',
-          'Custo total transparente',
-          'Rastreamento de ponta a ponta',
-        ]
+        text: t('service_detail_pages.door_to_door.section_2_text'),
+        list: t('service_detail_pages.door_to_door.section_2_list'),
       }
     ]
   },
   'consultoria': {
-    title: 'Consultoria Logística',
-    subtitle: 'Optimizamos a sua cadeia logística para reduzir custos e aumentar eficiência.',
+    title: t('service_detail_pages.consultoria.title'),
+    subtitle: t('service_detail_pages.consultoria.subtitle'),
     icon: 'bi bi-people',
     image: '/assets/img/servico/service1.jpg',
-    description: 'A FMLider oferece serviços de consultoria logística para empresas que pretendem optimizar os seus processos. Analisamos a cadeia logística completa e implementamos melhorias concretas que resultam em redução de custos e aumento da eficiência.',
+    description: t('service_detail_pages.consultoria.description'),
     sections: [
       {
-        title: 'Áreas de Actuação',
+        title: t('service_detail_pages.consultoria.section_1_title'),
         icon: 'bi bi-lightbulb',
-        text: 'Trabalhamos nas principais áreas da cadeia logística.',
-        list: [
-          'Análise completa da cadeia logística',
-          'Optimização de rotas e transportes',
-          'Gestão de stock e inventário',
-          'Planeamento de distribuição',
-          'Selección de fornecedores logísticos',
-          'Implementação de sistemas WMS',
-        ]
+        text: t('service_detail_pages.consultoria.section_1_text'),
+        list: t('service_detail_pages.consultoria.section_1_list'),
       },
       {
-        title: 'Resultados',
+        title: t('service_detail_pages.consultoria.section_2_title'),
         icon: 'bi bi-graph-up',
-        text: 'Os nossos clientes registam melhorias significativas.',
-        list: [
-          'Redução de 15-30% nos custos logísticos',
-          'Melhoria nos tempos de entrega',
-          'Maior visibilidade da cadeia',
-          'Relatórios e indicadores KPI',
-        ]
+        text: t('service_detail_pages.consultoria.section_2_text'),
+        list: t('service_detail_pages.consultoria.section_2_list'),
       }
     ]
   },
   'logistica-maritima': {
-    title: 'Logística Marítima',
-    subtitle: 'Operações completas no Porto de Luanda e outros portos de Angola.',
+    title: t('service_detail_pages.logistica_maritima.title'),
+    subtitle: t('service_detail_pages.logistica_maritima.subtitle'),
     icon: 'bi bi-water',
     image: '/assets/img/servico/Logística Marítima-1.jpg',
-    description: 'A FMLider realiza operações completas de logística marítima no Porto de Luanda e noutros portos de Angola. Trabalhamos com as principais linhas marítimas internacionais, oferecendo condições competitivas para todos os tipos de carga.',
+    description: t('service_detail_pages.logistica_maritima.description'),
     sections: [
       {
-        title: 'Serviços Marítimos',
+        title: t('service_detail_pages.logistica_maritima.section_1_title'),
         icon: 'bi bi-ship',
-        text: 'Soluções completas para cargas marítimas.',
-        list: [
-          'Operações no Porto de Luanda',
-          'Carga contentorizada 20" e 40"',
-          'FCL (Full Container Load)',
-          'LCL (Less than Container Load)',
-          'Project cargo e cargas especiais',
-          'Carga frigorífica',
-        ]
+        text: t('service_detail_pages.logistica_maritima.section_1_text'),
+        list: t('service_detail_pages.logistica_maritima.section_1_list'),
       },
       {
-        title: 'Parcerias',
+        title: t('service_detail_pages.logistica_maritima.section_2_title'),
         icon: 'bi bi-handshake',
-        text: 'Trabalhamos com as melhores linhas marítimas.',
-        list: [
-          'Parceria com linhas internacionais',
-          'Rotas para Europa, América e Ásia',
-          'Condições especiais para volumes regulares',
-          'Tracking marítimo em tempo real',
-        ]
+        text: t('service_detail_pages.logistica_maritima.section_2_text'),
+        list: t('service_detail_pages.logistica_maritima.section_2_list'),
       }
     ]
   },
-}
+}))
 
 const slug = computed(() => route.params.slug)
-const service = computed(() => allServices[slug.value] || allServices['desembaraco-aduaneiro'])
+const service = computed(() => allServices.value[slug.value] || allServices.value['desembaraco-aduaneiro'])
 </script>
 
 <style scoped>

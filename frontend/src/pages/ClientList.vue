@@ -4,12 +4,12 @@
       <div class="container">
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb justify-content-center">
-            <li class="breadcrumb-item"><router-link to="/" class="text-white-50">Início</router-link></li>
-            <li class="breadcrumb-item active text-white">Clientes</li>
+            <li class="breadcrumb-item"><router-link to="/" class="text-white-50">{{ t('nav.home') }}</router-link></li>
+            <li class="breadcrumb-item active text-white">{{ t('nav.partners') }}</li>
           </ol>
         </nav>
-        <h1 class="display-4 fw-bold text-white mb-3">Nossos Clientes</h1>
-        <p class="lead text-white-50 mx-auto" style="max-width: 650px;">Empresas que confiam na FMLider para gestionar as suas necessidades logísticas todos os dias.</p>
+        <h1 class="display-4 fw-bold text-white mb-3">{{ t('client_list.title') }}</h1>
+        <p class="lead text-white-50 mx-auto" style="max-width: 650px;">{{ t('client_list.subtitle') }}</p>
       </div>
     </section>
 
@@ -29,11 +29,11 @@
         </div>
         <div v-if="clients.length === 0 && !loading" class="text-center py-5">
           <i class="bi bi-building text-muted" style="font-size: 3rem;"></i>
-          <p class="text-muted mt-3">Nenhum cliente encontrado.</p>
+          <p class="text-muted mt-3">{{ t('partners.empty') }}</p>
         </div>
         <div v-if="loading" class="text-center py-5">
           <div class="spinner-border text-primary" role="status"></div>
-          <p class="text-muted mt-3">A carregar clientes...</p>
+          <p class="text-muted mt-3">{{ t('partners.loading') }}</p>
         </div>
       </div>
     </section>
@@ -43,7 +43,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const clients = ref([])
 const loading = ref(true)
 

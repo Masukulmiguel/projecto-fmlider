@@ -9,23 +9,23 @@
       <div class="card-body p-0">
         <div v-if="loading" class="text-center py-5">
           <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Carregando...</span>
+            <span class="visually-hidden">{{ t('common.loading') }}</span>
           </div>
         </div>
 
         <div v-else-if="banners.length === 0" class="text-center py-5 text-muted">
-          Nenhum banner encontrado.
+          {{ t('admin.banners_empty') }}
         </div>
 
         <div v-else class="table-responsive">
         <table class="table table-hover mb-0">
           <thead class="table-light">
             <tr>
-              <th>Título</th>
-              <th>Imagem</th>
-              <th>Status</th>
-              <th>Ordem</th>
-              <th class="text-end">Ações</th>
+              <th>{{ t('admin.services_title_col') }}</th>
+              <th>{{ t('admin.services_image') }}</th>
+              <th>{{ t('admin.services_status') }}</th>
+              <th>{{ t('admin.services_order') }}</th>
+              <th class="text-end">{{ t('admin.actions_col') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -44,7 +44,7 @@
                 <span
                   :class="banner.status ? 'badge bg-success' : 'badge bg-secondary'"
                 >
-                  {{ banner.status ? 'Ativo' : 'Inativo' }}
+                  {{ banner.status ? t('admin.banners_active') : t('admin.banners_inactive') }}
                 </span>
               </td>
               <td class="align-middle">{{ banner.order_by }}</td>
@@ -53,13 +53,13 @@
                   class="btn btn-sm btn-outline-primary me-2"
                   @click="openEditModal(banner)"
                 >
-                  Editar
+                  {{ t('common.edit') }}
                 </button>
                 <button
                   class="btn btn-sm btn-outline-danger"
                   @click="confirmDelete(banner)"
                 >
-                  Deletar
+                  {{ t('common.delete') }}
                 </button>
               </td>
             </tr>
@@ -92,7 +92,7 @@
           <div class="modal-body">
             <form @submit.prevent="submitForm">
               <div class="mb-3">
-                <label for="bannerTitle" class="form-label">Título *</label>
+                <label for="bannerTitle" class="form-label">{{ t('admin.services_title_col') }} *</label>
                 <input
                   id="bannerTitle"
                   v-model="form.title"
@@ -103,7 +103,7 @@
               </div>
 
               <div class="mb-3">
-                <label for="bannerDescription" class="form-label">Descrição</label>
+                <label for="bannerDescription" class="form-label">{{ t('admin.settings_description') }}</label>
                 <textarea
                   id="bannerDescription"
                   v-model="form.description"
@@ -113,7 +113,7 @@
               </div>
 
               <div class="mb-3">
-                <label for="bannerImage" class="form-label">Imagem</label>
+                <label for="bannerImage" class="form-label">{{ t('admin.services_image') }}</label>
                 <input
                   id="bannerImage"
                   ref="imageInput"
@@ -132,7 +132,7 @@
               </div>
 
               <div class="mb-3">
-                <label for="bannerLink" class="form-label">Link</label>
+                <label for="bannerLink" class="form-label">{{ t('admin.banners_link_label') }}</label>
                 <input
                   id="bannerLink"
                   v-model="form.link"
@@ -144,7 +144,7 @@
 
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label for="bannerOrder" class="form-label">Ordem</label>
+                  <label for="bannerOrder" class="form-label">{{ t('admin.services_order') }}</label>
                   <input
                     id="bannerOrder"
                     v-model.number="form.order_by"
@@ -154,7 +154,7 @@
                   />
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Status</label>
+                  <label class="form-label">{{ t('admin.services_status') }}</label>
                   <div class="form-check form-switch mt-2">
                     <input
                       id="bannerStatus"
@@ -163,7 +163,7 @@
                       type="checkbox"
                     />
                     <label class="form-check-label" for="bannerStatus">
-                      {{ form.status ? 'Ativo' : 'Inativo' }}
+                      {{ form.status ? t('admin.banners_active') : t('admin.banners_inactive') }}
                     </label>
                   </div>
                 </div>
@@ -176,7 +176,7 @@
               class="btn btn-secondary"
               data-bs-dismiss="modal"
             >
-              Cancelar
+              {{ t('common.cancel') }}
             </button>
             <button
               type="button"
@@ -188,7 +188,7 @@
                 v-if="submitting"
                 class="spinner-border spinner-border-sm me-1"
               ></span>
-              {{ editing ? 'Salvar' : 'Criar' }}
+              {{ editing ? t('common.save') : t('admin.banners_create') }}
             </button>
           </div>
         </div>
@@ -214,7 +214,7 @@
             ></button>
           </div>
           <div class="modal-body">
-            Tem certeza que deseja deletar o banner
+            {{ t('admin.banners_confirm_delete') }}
             <strong>{{ bannerToDelete?.title }}</strong>?
           </div>
           <div class="modal-footer">
@@ -223,7 +223,7 @@
               class="btn btn-secondary"
               data-bs-dismiss="modal"
             >
-              Cancelar
+              {{ t('common.cancel') }}
             </button>
             <button
               type="button"
@@ -235,7 +235,7 @@
                 v-if="deleting"
                 class="spinner-border spinner-border-sm me-1"
               ></span>
-              Deletar
+              {{ t('common.delete') }}
             </button>
           </div>
         </div>
@@ -285,7 +285,7 @@ async function fetchBanners() {
     if (!error) banners.value = data
   } catch (err) {
     console.error('Erro ao buscar banners:', err)
-    alert('Erro ao carregar banners.')
+    alert(t('admin.error_loading_banners'))
   } finally {
     loading.value = false
   }
@@ -347,7 +347,7 @@ async function uploadImage() {
 
 async function submitForm() {
   if (!form.title.trim()) {
-    alert('O título é obrigatório.')
+    alert(t('admin.banners_title_required'))
     return
   }
   submitting.value = true
@@ -375,7 +375,7 @@ async function submitForm() {
     await fetchBanners()
   } catch (err) {
     console.error('Erro ao salvar banner:', err)
-    alert('Erro ao salvar banner:\n' + (err?.message || err?.error?.message || JSON.stringify(err)))
+    alert(t('admin.error_saving_banner') + '\n' + (err?.message || err?.error?.message || JSON.stringify(err)))
   } finally {
     submitting.value = false
   }
@@ -396,7 +396,7 @@ async function deleteBanner() {
     await fetchBanners()
   } catch (err) {
     console.error('Erro ao deletar banner:', err)
-    alert('Erro ao deletar banner. Tente novamente.')
+    alert(t('admin.error_deleting_banner'))
   } finally {
     deleting.value = false
   }

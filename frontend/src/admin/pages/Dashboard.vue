@@ -51,7 +51,7 @@
               <div class="stat-trend" :class="trendClass(data.clients.trend)">
                 <i class="bi" :class="trendIcon(data.clients.trend)"></i>
                 <span>{{ Math.abs(data.clients.trend || 0) }}%</span>
-                <span class="trend-period">vs anterior</span>
+                <span class="trend-period">{{ t('admin.dashboard_vs_previous') }}</span>
               </div>
             </div>
           </div>
@@ -65,7 +65,7 @@
               <div class="stat-label">{{ t('admin.visitors_title') }}</div>
               <div class="stat-value">{{ data.visitors.total }}</div>
               <div class="stat-trend">
-                <span class="trend-info">{{ data.visitors.today }} hoje</span>
+                <span class="trend-info">{{ data.visitors.today }} {{ t('admin.dashboard_today') }}</span>
               </div>
             </div>
           </div>
@@ -79,10 +79,10 @@
               <div class="stat-label">{{ t('admin.messages_title') }}</div>
               <div class="stat-value">{{ data.messages.total }}</div>
               <div class="stat-trend" v-if="data.messages.unread > 0">
-                <span class="trend-badge badge-warning">{{ data.messages.unread }} por ler</span>
+                <span class="trend-badge badge-warning">{{ data.messages.unread }} {{ t('admin.dashboard_unread') }}</span>
               </div>
               <div class="stat-trend" v-else>
-                <span class="trend-info">Todas lidas</span>
+                <span class="trend-info">{{ t('admin.dashboard_all_read') }}</span>
               </div>
             </div>
           </div>
@@ -93,10 +93,10 @@
               <i class="bi bi-box-seam-fill"></i>
             </div>
             <div class="stat-content">
-              <div class="stat-label">Operações</div>
+              <div class="stat-label">{{ t('admin.dashboard_operations') }}</div>
               <div class="stat-value">{{ totalOperations }}</div>
               <div class="stat-trend">
-                <span class="trend-info">{{ data.embarques }} embarques · {{ data.cotacoes }} cotações</span>
+                <span class="trend-info">{{ data.embarques }} {{ t('admin.dashboard_shipments_count') }} · {{ data.cotacoes }} {{ t('admin.dashboard_quotes_count') }}</span>
               </div>
             </div>
           </div>
@@ -109,7 +109,7 @@
             <div class="chart-header">
               <h6 class="chart-title">
                 <i class="bi bi-graph-up-arrow"></i>
-                Atividade nos últimos {{ statsDays }} dias
+                {{ t('admin.dashboard_activity_days') }} {{ statsDays }} {{ t('admin.dashboard_days') }}
               </h6>
             </div>
             <div class="chart-body">
@@ -122,14 +122,14 @@
             <div class="chart-header">
               <h6 class="chart-title">
                 <i class="bi bi-pie-chart-fill"></i>
-                Top países
+                {{ t('admin.dashboard_top_countries') }}
               </h6>
             </div>
             <div class="chart-body">
               <Doughnut v-if="countryData.datasets[0].data.length" :data="countryData" :options="countryOptions" style="height: 320px" />
               <div v-else class="chart-empty">
                 <i class="bi bi-globe2"></i>
-                <p>Sem dados de países</p>
+                <p>{{ t('admin.dashboard_no_country_data') }}</p>
               </div>
             </div>
           </div>
@@ -145,7 +145,7 @@
                 {{ t('admin.total_clients') }}
               </h6>
               <router-link to="/admin/utilizadores" class="list-action">
-                Ver todos <i class="bi bi-arrow-right"></i>
+                {{ t('admin.dashboard_view_all') }} <i class="bi bi-arrow-right"></i>
               </router-link>
             </div>
             <div class="list-body">
@@ -163,7 +163,7 @@
                 </span>
               </div>
               <div v-if="data.recent.clients.length === 0" class="list-empty">
-                Sem clientes recentes
+                {{ t('admin.dashboard_no_recent_clients') }}
               </div>
             </div>
           </div>
@@ -176,7 +176,7 @@
                 {{ t('admin.messages_title') }}
               </h6>
               <router-link to="/admin/mensagens" class="list-action">
-                Ver chat <i class="bi bi-arrow-right"></i>
+                {{ t('admin.dashboard_view_chat') }} <i class="bi bi-arrow-right"></i>
               </router-link>
             </div>
             <div class="list-body">
@@ -185,13 +185,13 @@
                   <i class="bi bi-chat-left-text"></i>
                 </div>
                 <div class="list-item-content">
-                  <div class="list-item-name">{{ m.users?.name || 'Cliente' }}</div>
+                  <div class="list-item-name">{{ m.users?.name || t('admin.dashboard_client') }}</div>
                   <div class="list-item-meta text-truncate">{{ m.message }}</div>
                 </div>
                 <div class="list-item-time">{{ formatTime(m.created_at) }}</div>
               </div>
               <div v-if="data.recent.messages.length === 0" class="list-empty">
-                Sem mensagens recentes
+                {{ t('admin.dashboard_no_recent_messages') }}
               </div>
             </div>
           </div>
@@ -202,24 +202,24 @@
     <div v-if="showResetModal" class="reset-overlay" @click.self="showResetModal = false">
       <div class="reset-modal">
         <div class="reset-modal-header">
-          <h5><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>Reset do Sistema</h5>
+          <h5><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>{{ t('admin.dashboard_system_reset') }}</h5>
           <button class="btn-close" @click="showResetModal = false"></button>
         </div>
         <div class="reset-modal-body">
-          <p class="text-danger fw-bold mb-3">Esta ação irá apagar permanentemente:</p>
+          <p class="text-danger fw-bold mb-3">{{ t('admin.dashboard_reset_warning') }}</p>
           <ul class="reset-list mb-3">
-            <li><i class="bi bi-people-fill"></i> Todos os funcionários e clientes</li>
-            <li><i class="bi bi-globe"></i> Todos os visitantes registados</li>
-            <li><i class="bi bi-chat-dots-fill"></i> Todas as mensagens</li>
-            <li><i class="bi bi-box-seam-fill"></i> Todos os embarques</li>
-            <li><i class="bi bi-file-earmark"></i> Todos os documentos</li>
-            <li><i class="bi bi-receipt"></i> Todas as cotações</li>
-            <li><i class="bi bi-person-rolodex"></i> Todos os contactos</li>
+            <li><i class="bi bi-people-fill"></i> {{ t('admin.dashboard_reset_all_employees_clients') }}</li>
+            <li><i class="bi bi-globe"></i> {{ t('admin.dashboard_reset_all_visitors') }}</li>
+            <li><i class="bi bi-chat-dots-fill"></i> {{ t('admin.dashboard_reset_all_messages') }}</li>
+            <li><i class="bi bi-box-seam-fill"></i> {{ t('admin.dashboard_reset_all_shipments') }}</li>
+            <li><i class="bi bi-file-earmark"></i> {{ t('admin.dashboard_reset_all_documents') }}</li>
+            <li><i class="bi bi-receipt"></i> {{ t('admin.dashboard_reset_all_quotes') }}</li>
+            <li><i class="bi bi-person-rolodex"></i> {{ t('admin.dashboard_reset_all_contacts') }}</li>
           </ul>
-          <p class="text-muted small mb-3">A conta de administrador será mantida.</p>
+          <p class="text-muted small mb-3">{{ t('admin.dashboard_admin_kept') }}</p>
           <div class="mb-3">
-            <label class="form-label fw-bold">Chave secreta:</label>
-            <input v-model="resetSecretKey" type="password" class="form-control" placeholder="Insira a chave secreta" @keyup.enter="executeReset">
+            <label class="form-label fw-bold">{{ t('admin.dashboard_secret_key') }}</label>
+            <input v-model="resetSecretKey" type="password" class="form-control" :placeholder="t('admin.dashboard_enter_key')" @keyup.enter="executeReset">
           </div>
           <div v-if="resetError" class="alert alert-danger py-2">{{ resetError }}</div>
           <div v-if="resetSuccess" class="alert alert-success py-2">{{ resetSuccess }}</div>
@@ -228,7 +228,7 @@
           <button class="btn btn-secondary" @click="showResetModal = false">{{ t('common.cancel') }}</button>
           <button class="btn btn-danger" :disabled="!resetSecretKey || resetLoading" @click="executeReset">
             <span v-if="resetLoading" class="spinner-border spinner-border-sm me-1"></span>
-            {{ resetLoading ? 'A apagar...' : 'Apagar Tudo' }}
+            {{ resetLoading ? t('admin.dashboard_deleting') : t('admin.dashboard_delete_all') }}
           </button>
         </div>
       </div>
@@ -388,10 +388,10 @@ const executeReset = async () => {
       await supabase.from(table).delete().neq('id', '00000000-0000-0000-0000-000000000000')
     }
     await supabase.from('users').delete().neq('role', 'admin')
-    resetSuccess.value = 'Reset efetuado com sucesso! A recarregar...'
+    resetSuccess.value = t('admin.dashboard_reset_success')
     setTimeout(() => { window.location.reload() }, 2000)
   } catch (e) {
-    resetError.value = e.message || 'Erro ao efetar reset'
+    resetError.value = e.message || t('admin.dashboard_reset_error')
   } finally {
     resetLoading.value = false
   }
@@ -423,7 +423,7 @@ const formatTime = (iso) => {
   const d = new Date(iso)
   const now = new Date()
   const diff = (now - d) / 1000
-  if (diff < 60) return 'agora'
+  if (diff < 60) return t('admin.dashboard_now')
   if (diff < 3600) return `${Math.floor(diff/60)}min`
   if (diff < 86400) return `${Math.floor(diff/3600)}h`
   return d.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' })
@@ -453,7 +453,7 @@ const trendData = computed(() => {
     labels: v.labels,
     datasets: [
       {
-        label: 'Visitantes',
+        label: t('admin.dashboard_chart_visitors'),
         data: v.data,
         borderColor: '#1877f2',
         backgroundColor: 'rgba(24, 119, 242, 0.1)',
@@ -467,7 +467,7 @@ const trendData = computed(() => {
         borderWidth: 2,
       },
       {
-        label: 'Mensagens',
+        label: t('admin.dashboard_chart_messages'),
         data: m.data,
         borderColor: '#31a24c',
         backgroundColor: 'rgba(49, 162, 76, 0.1)',
@@ -481,7 +481,7 @@ const trendData = computed(() => {
         borderWidth: 2,
       },
       {
-        label: 'Novos clientes',
+        label: t('admin.dashboard_chart_new_clients'),
         data: c.data,
         borderColor: '#f7b928',
         backgroundColor: 'rgba(247, 185, 40, 0.1)',

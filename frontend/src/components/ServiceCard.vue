@@ -4,12 +4,16 @@
     <div class="card-content">
       <h5>{{ service.title }}</h5>
       <p>{{ service.description }}</p>
-      <router-link :to="`/servicos/${service.slug}`" class="btn btn-sm btn-primary">Saiba Mais</router-link>
+      <router-link :to="`/servicos/${service.slug}`" class="btn btn-sm btn-primary">{{ t('services.card_link') }}</router-link>
     </div>
   </div>
 </template>
 
 <script setup>
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
+
 defineProps({
   service: {
     type: Object,
