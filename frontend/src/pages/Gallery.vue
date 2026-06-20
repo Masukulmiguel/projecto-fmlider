@@ -5,10 +5,10 @@
       <div class="gal-hero-bg" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(${heroBg})` }"></div>
       <div class="container position-relative">
         <div class="gal-hero-content">
-          <span class="fml-eyebrow">Galeria</span>
-          <h1 class="gal-hero-title">A Nossa Galeria</h1>
+          <span class="fml-eyebrow">{{ t('gallery.hero_eyebrow') }}</span>
+          <h1 class="gal-hero-title">{{ t('gallery.hero_title') }}</h1>
           <p class="gal-hero-subtitle">
-            Imagens da nossa infraestrutura, equipa, equipamentos e operações.
+            {{ t('gallery.hero_subtitle') }}
           </p>
         </div>
       </div>
@@ -46,14 +46,14 @@
         <!-- Loading -->
         <div v-if="loading" class="text-center py-5">
           <div class="spinner-border text-warning" role="status">
-            <span class="visually-hidden">A carregar...</span>
+            <span class="visually-hidden">{{ t('gallery.loading') }}</span>
           </div>
         </div>
 
         <!-- Empty State (no data at all) -->
         <div v-else-if="allImages.length === 0 && !loading" class="gal-empty">
           <i class="bi bi-images"></i>
-          <p>Nenhuma imagem disponível de momento.</p>
+          <p>{{ t('gallery.empty_data') }}</p>
         </div>
 
         <!-- Grid -->
@@ -80,7 +80,7 @@
         <!-- Empty State (filtered) -->
         <div v-if="!loading && allImages.length > 0 && filteredImages.length === 0" class="gal-empty">
           <i class="bi bi-images"></i>
-          <p>Nenhuma imagem encontrada nesta categoria.</p>
+          <p>{{ t('gallery.empty_filtered') }}</p>
         </div>
       </div>
     </section>
@@ -108,7 +108,9 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useSiteImages } from '@/composables/useSiteImages'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const { getImage, fetchAll } = useSiteImages()
 const heroBg = ref('/assets/img/construcao2020/image1.jpeg')
 
@@ -131,7 +133,7 @@ const defaultIcon = 'bi bi-folder2'
 const categories = computed(() => {
   const keys = [...new Set(allImages.value.map(img => img.category))]
   const cats = [
-    { key: 'all', label: 'Todas', icon: 'bi bi-grid' },
+    { key: 'all', label: t('gallery.category_all'), icon: 'bi bi-grid' },
   ]
   keys.forEach(key => {
     cats.push({ key, label: key, icon: categoryIcons[key] || defaultIcon })
@@ -140,10 +142,10 @@ const categories = computed(() => {
 })
 
 const stats = computed(() => [
-  { value: String(allImages.value.length), label: 'Imagens', icon: 'bi bi-images' },
-  { value: String(categories.value.length - 1), label: 'Categorias', icon: 'bi bi-folder2' },
-  { value: '+60', label: 'Colaboradores', icon: 'bi bi-people' },
-  { value: '8+', label: 'Anos', icon: 'bi bi-calendar-check' },
+  { value: String(allImages.value.length), label: t('gallery.stat_images'), icon: 'bi bi-images' },
+  { value: String(categories.value.length - 1), label: t('gallery.stat_categories'), icon: 'bi bi-folder2' },
+  { value: '+60', label: t('gallery.stat_employees'), icon: 'bi bi-people' },
+  { value: '8+', label: t('gallery.stat_years'), icon: 'bi bi-calendar-check' },
 ])
 
 const fetchGallery = async () => {
@@ -157,7 +159,7 @@ const fetchGallery = async () => {
 
       allImages.value = items.map((img, idx) => ({
         id: img.id,
-        src: img.image?.startsWith('/') ? img.image : `/backend/storage/uploads/gallery/${img.image}`,
+        src: img.image?.startsWith('http') ? img.image : (img.image?.startsWith('/') ? img.image : `/backend/storage/uploads/gallery/${img.image}`),
         caption: img.title || img.alt_text || '',
         alt_text: img.alt_text || img.title || '',
         category: img.category || 'Geral',

@@ -2,8 +2,8 @@
   <div class="crud-page">
     <div class="page-header">
       <div>
-        <h1 class="page-title">Documentos</h1>
-        <p class="text-muted mb-0">Documentos carregados pelos clientes.</p>
+        <h1 class="page-title">{{ t('funcionario.documents_title') }}</h1>
+        <p class="text-muted mb-0">{{ t('funcionario.documents_subtitle') }}</p>
       </div>
     </div>
     <div class="card">
@@ -11,17 +11,17 @@
         <div v-if="loading" class="text-center py-5"><div class="spinner-border text-primary"></div></div>
         <div v-else-if="items.length === 0" class="empty-state">
           <i class="bi bi-file-earmark-text"></i>
-          <p>Sem documentos.</p>
+          <p>{{ t('funcionario.documents_empty') }}</p>
         </div>
         <div v-else class="table-responsive">
           <table class="table table-hover mb-0">
             <thead>
               <tr>
-                <th>Nome</th>
-                <th>Tipo</th>
-                <th>Cliente</th>
-                <th>Tamanho</th>
-                <th>Data</th>
+                <th>{{ t('funcionario.documents_name') }}</th>
+                <th>{{ t('funcionario.documents_type') }}</th>
+                <th>{{ t('funcionario.documents_client') }}</th>
+                <th>{{ t('funcionario.documents_size') }}</th>
+                <th>{{ t('funcionario.documents_date') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -44,7 +44,9 @@
 import { ref, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const items = ref([])
 const loading = ref(false)

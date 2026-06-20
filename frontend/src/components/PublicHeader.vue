@@ -6,7 +6,7 @@
           <img :src="logoUrl" alt="FMLider" class="brand-logo">
           <div class="brand-text">
             <span class="brand-name">FMLider</span>
-            <span class="brand-tagline">Logística & Transitário</span>
+            <span class="brand-tagline">{{ t('brand.tagline') }}</span>
           </div>
         </router-link>
 
@@ -15,17 +15,18 @@
         </button>
 
         <nav class="main-nav">
-          <router-link to="/" class="nav-link" @click="closeMobile">Início</router-link>
-          <router-link to="/sobre" class="nav-link" @click="closeMobile">Sobre</router-link>
-          <router-link to="/servicos" class="nav-link" @click="closeMobile">Serviços</router-link>
-          <router-link to="/frota" class="nav-link" @click="closeMobile">Frota</router-link>
-          <router-link to="/noticias" class="nav-link" @click="closeMobile">Notícias</router-link>
-          <router-link to="/galeria" class="nav-link" @click="closeMobile">Galeria</router-link>
-          <router-link to="/parceiros" class="nav-link" @click="closeMobile">Parceiros</router-link>
-          <router-link to="/faq" class="nav-link" @click="closeMobile">FAQ</router-link>
-          <router-link to="/contacto" class="nav-link" @click="closeMobile">Contacto</router-link>
+          <router-link to="/" class="nav-link" @click="closeMobile">{{ t('nav.home') }}</router-link>
+          <router-link to="/sobre" class="nav-link" @click="closeMobile">{{ t('nav.about') }}</router-link>
+          <router-link to="/servicos" class="nav-link" @click="closeMobile">{{ t('nav.services') }}</router-link>
+          <router-link to="/frota" class="nav-link" @click="closeMobile">{{ t('nav.fleet') }}</router-link>
+          <router-link to="/noticias" class="nav-link" @click="closeMobile">{{ t('nav.news') }}</router-link>
+          <router-link to="/galeria" class="nav-link" @click="closeMobile">{{ t('nav.gallery') }}</router-link>
+          <router-link to="/parceiros" class="nav-link" @click="closeMobile">{{ t('nav.partners') }}</router-link>
+          <router-link to="/faq" class="nav-link" @click="closeMobile">{{ t('nav.faq') }}</router-link>
+          <router-link to="/contacto" class="nav-link" @click="closeMobile">{{ t('nav.contact') }}</router-link>
+          <LanguageSwitcher />
           <router-link to="/login" class="nav-cta" @click="closeMobile">
-            <i class="bi bi-person-circle me-1"></i> Entrar
+            <i class="bi bi-person-circle me-1"></i> {{ t('nav.login') }}
           </router-link>
         </nav>
       </div>
@@ -37,23 +38,26 @@
     <Transition name="slide-panel">
       <div v-if="mobileOpen" class="mobile-nav-panel open">
       <div class="mobile-nav-header">
-        <span class="mobile-nav-title">Menu</span>
-        <button class="mobile-nav-close" @click="closeMobile" aria-label="Fechar menu">
+        <span class="mobile-nav-title">{{ t('nav.menu') }}</span>
+        <button class="mobile-nav-close" @click="closeMobile" :aria-label="t('nav.close_menu')">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
       <nav class="mobile-nav-links">
-        <router-link to="/" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-house-door"></i> Início</router-link>
-        <router-link to="/sobre" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-info-circle"></i> Sobre</router-link>
-        <router-link to="/servicos" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-gear"></i> Serviços</router-link>
-        <router-link to="/frota" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-truck"></i> Frota</router-link>
-        <router-link to="/noticias" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-newspaper"></i> Notícias</router-link>
-        <router-link to="/galeria" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-images"></i> Galeria</router-link>
-        <router-link to="/parceiros" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-handshake"></i> Parceiros</router-link>
-        <router-link to="/faq" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-question-circle"></i> FAQ</router-link>
-        <router-link to="/contacto" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-envelope"></i> Contacto</router-link>
+        <router-link to="/" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-house-door"></i> {{ t('nav.home') }}</router-link>
+        <router-link to="/sobre" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-info-circle"></i> {{ t('nav.about') }}</router-link>
+        <router-link to="/servicos" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-gear"></i> {{ t('nav.services') }}</router-link>
+        <router-link to="/frota" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-truck"></i> {{ t('nav.fleet') }}</router-link>
+        <router-link to="/noticias" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-newspaper"></i> {{ t('nav.news') }}</router-link>
+        <router-link to="/galeria" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-images"></i> {{ t('nav.gallery') }}</router-link>
+        <router-link to="/parceiros" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-handshake"></i> {{ t('nav.partners') }}</router-link>
+        <router-link to="/faq" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-question-circle"></i> {{ t('nav.faq') }}</router-link>
+        <router-link to="/contacto" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-envelope"></i> {{ t('nav.contact') }}</router-link>
+        <div class="mobile-lang-row">
+          <LanguageSwitcher />
+        </div>
         <router-link to="/login" class="mobile-nav-cta" @click="closeMobile">
-          <i class="bi bi-person-circle me-1"></i> Entrar
+          <i class="bi bi-person-circle me-1"></i> {{ t('nav.login') }}
         </router-link>
       </nav>
     </div>
@@ -64,7 +68,10 @@
 <script setup>
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useSiteImages } from '@/composables/useSiteImages'
+import { useI18n } from '@/composables/useI18n'
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 
+const { t } = useI18n()
 const { getImage, fetchAll } = useSiteImages()
 const logoUrl = ref('/assets/img/logo.png')
 
@@ -197,6 +204,10 @@ onUnmounted(() => {
   cursor: pointer;
   z-index: 1040;
   position: relative;
+}
+
+.mobile-lang-row {
+  padding: 0.5rem 1.25rem;
 }
 
 @media (max-width: 991px) {

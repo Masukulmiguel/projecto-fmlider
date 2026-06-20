@@ -2,11 +2,11 @@
   <div class="crud-page">
     <div class="page-header">
       <div>
-        <h1 class="page-title">Embarques</h1>
-        <p class="text-muted mb-0">Gerencie os embarques e o seu estado.</p>
+        <h1 class="page-title">{{ t('cliente.embarques_title') }}</h1>
+        <p class="text-muted mb-0">{{ t('cliente.embarques_subtitle') }}</p>
       </div>
       <router-link to="/embarques/novo" class="btn btn-primary">
-        <i class="bi bi-plus-lg me-1"></i> Novo embarque
+        <i class="bi bi-plus-lg me-1"></i> {{ t('cliente.embarques_new') }}
       </router-link>
     </div>
 
@@ -14,28 +14,28 @@
       <div class="stat-card">
         <div class="stat-icon bg-primary-soft"><i class="bi bi-box-seam"></i></div>
         <div>
-          <div class="stat-label">Total</div>
+          <div class="stat-label">{{ t('cliente.embarques_total') }}</div>
           <div class="stat-value">{{ stats.total || 0 }}</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon bg-warning-soft"><i class="bi bi-hourglass-split"></i></div>
         <div>
-          <div class="stat-label">Pendentes</div>
+          <div class="stat-label">{{ t('cliente.embarques_pending') }}</div>
           <div class="stat-value">{{ stats.pendente || 0 }}</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon bg-info-soft"><i class="bi bi-truck"></i></div>
         <div>
-          <div class="stat-label">Em trânsito</div>
+          <div class="stat-label">{{ t('cliente.embarques_in_transit') }}</div>
           <div class="stat-value">{{ stats.em_transito || 0 }}</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon bg-success-soft"><i class="bi bi-check-circle"></i></div>
         <div>
-          <div class="stat-label">Entregues</div>
+          <div class="stat-label">{{ t('cliente.embarques_delivered') }}</div>
           <div class="stat-value">{{ stats.entregue || 0 }}</div>
         </div>
       </div>
@@ -46,22 +46,22 @@
         <div class="filters">
           <div class="search-box">
             <i class="bi bi-search"></i>
-            <input v-model="filters.q" type="text" placeholder="Pesquisar por tracking, origem, destino..." @input="debounceSearch">
+            <input v-model="filters.q" type="text" :placeholder="t('cliente.embarques_search')" @input="debounceSearch">
           </div>
           <select v-model="filters.status" class="form-select" @change="fetchData">
-            <option value="">Todos os estados</option>
-            <option value="pendente">Pendente</option>
-            <option value="em_transito">Em trânsito</option>
-            <option value="entregue">Entregue</option>
-            <option value="cancelado">Cancelado</option>
+            <option value="">{{ t('cliente.embarques_all_statuses') }}</option>
+            <option value="pendente">{{ t('cliente.embarques_status_pendente') }}</option>
+            <option value="em_transito">{{ t('cliente.embarques_status_em_transito') }}</option>
+            <option value="entregue">{{ t('cliente.embarques_status_entregue') }}</option>
+            <option value="cancelado">{{ t('cliente.embarques_status_cancelado') }}</option>
           </select>
           <select v-model="filters.type" class="form-select" @change="fetchData">
-            <option value="">Todos os tipos</option>
-            <option value="maritimo">Marítimo</option>
-            <option value="aereo">Aéreo</option>
-            <option value="terrestre">Terrestre</option>
-            <option value="ferroviario">Ferroviário</option>
-            <option value="multimodal">Multimodal</option>
+            <option value="">{{ t('cliente.embarques_all_types') }}</option>
+            <option value="maritimo">{{ t('cliente.embarques_type_maritimo') }}</option>
+            <option value="aereo">{{ t('cliente.embarques_type_aereo') }}</option>
+            <option value="terrestre">{{ t('cliente.embarques_type_terrestre') }}</option>
+            <option value="ferroviario">{{ t('cliente.embarques_type_ferroviario') }}</option>
+            <option value="multimodal">{{ t('cliente.embarques_type_multimodal') }}</option>
           </select>
         </div>
       </div>
@@ -71,22 +71,22 @@
         </div>
         <div v-else-if="items.length === 0" class="empty-state">
           <i class="bi bi-inbox"></i>
-          <p>Nenhum embarque encontrado.</p>
+          <p>{{ t('cliente.embarques_empty') }}</p>
           <router-link to="/embarques/novo" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-lg me-1"></i> Criar primeiro embarque
+            <i class="bi bi-plus-lg me-1"></i> {{ t('cliente.embarques_create_first') }}
           </router-link>
         </div>
         <div v-else class="table-responsive">
           <table class="table table-hover mb-0">
             <thead>
               <tr>
-                <th>Tracking</th>
-                <th>Origem → Destino</th>
-                <th>Tipo</th>
-                <th>Estado</th>
-                <th>Valor</th>
-                <th>Data</th>
-                <th class="text-end">Ações</th>
+                <th>{{ t('cliente.embarques_col_tracking') }}</th>
+                <th>{{ t('cliente.embarques_col_route') }}</th>
+                <th>{{ t('cliente.embarques_col_type') }}</th>
+                <th>{{ t('cliente.embarques_col_status') }}</th>
+                <th>{{ t('cliente.embarques_col_value') }}</th>
+                <th>{{ t('cliente.embarques_col_date') }}</th>
+                <th class="text-end">{{ t('cliente.embarques_col_actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -109,10 +109,10 @@
                 <td><small class="text-muted">{{ formatDate(item.created_at) }}</small></td>
                 <td class="text-end">
                   <div class="action-buttons">
-                    <router-link :to="`/embarques/${item.id}/editar`" class="btn btn-sm btn-outline-primary" title="Editar">
+                    <router-link :to="`/embarques/${item.id}/editar`" class="btn btn-sm btn-outline-primary" :title="t('cliente.embarques_edit')">
                       <i class="bi bi-pencil"></i>
                     </router-link>
-                    <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(item)" title="Eliminar">
+                    <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(item)" :title="t('cliente.embarques_delete')">
                       <i class="bi bi-trash"></i>
                     </button>
                   </div>
@@ -130,7 +130,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const items = ref([])
 const stats = ref({})
@@ -179,31 +181,31 @@ const debounceSearch = () => {
 }
 
 const confirmDelete = async (item) => {
-  if (!confirm(`Eliminar embarque ${item.tracking_number}?`)) return
+  if (!confirm(`${t('cliente.embarques_confirm_delete')} ${item.tracking_number}?`)) return
   try {
     const { error } = await supabase.from('embarques').delete().eq('id', item.id)
     if (error) throw error
     await fetchData()
   } catch (error) {
-    alert(error.message || 'Erro ao eliminar')
+    alert(error.message || t('cliente.embarques_error_deleting'))
   }
 }
 
-const typeIcon = (t) => ({
+const typeIcon = (type) => ({
   maritimo: 'bi bi-water',
   aereo: 'bi bi-airplane',
   terrestre: 'bi bi-truck',
   ferroviario: 'bi bi-train-front',
   multimodal: 'bi bi-arrow-left-right'
-}[t] || 'bi bi-box')
+}[type] || 'bi bi-box')
 
-const typeLabel = (t) => ({
-  maritimo: 'Marítimo', aereo: 'Aéreo', terrestre: 'Terrestre', ferroviario: 'Ferroviário', multimodal: 'Multimodal'
-}[t] || t)
+const typeLabel = (type) => ({
+  maritimo: t('cliente.embarques_type_maritimo'), aereo: t('cliente.embarques_type_aereo'), terrestre: t('cliente.embarques_type_terrestre'), ferroviario: t('cliente.embarques_type_ferroviario'), multimodal: t('cliente.embarques_type_multimodal')
+}[type] || type)
 
-const statusLabel = (s) => ({
-  pendente: 'Pendente', em_transito: 'Em trânsito', entregue: 'Entregue', cancelado: 'Cancelado'
-}[s] || s)
+const statusLabel = (status) => ({
+  pendente: t('cliente.embarques_status_pendente'), em_transito: t('cliente.embarques_status_em_transito'), entregue: t('cliente.embarques_status_entregue'), cancelado: t('cliente.embarques_status_cancelado')
+}[status] || status)
 
 const formatCurrency = (v, c) => {
   if (!v || v == 0) return '—'

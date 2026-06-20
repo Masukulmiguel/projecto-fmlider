@@ -26,9 +26,9 @@
                     <span class="typewriter">{{ typedSubtitle }}</span><span class="cursor">|</span>
                   </p>
                   <ul class="brand-features animate-fade-up delay-3">
-                    <li><span class="feature-icon">✓</span> Gestão simplificada</li>
-                    <li><span class="feature-icon">✓</span> Acompanhamento em tempo real</li>
-                    <li><span class="feature-icon">✓</span> Equipa dedicada a si</li>
+                    <li><span class="feature-icon">✓</span> {{ t('auth.login_feat_1') }}</li>
+                    <li><span class="feature-icon">✓</span> {{ t('auth.login_feat_2') }}</li>
+                    <li><span class="feature-icon">✓</span> {{ t('auth.login_feat_3') }}</li>
                   </ul>
                 </div>
               </div>
@@ -40,8 +40,8 @@
                   </div>
 
                   <div class="form-header animate-fade-up">
-                    <h1 class="form-title">Bem-vindo de volta</h1>
-                    <p class="form-subtitle">Inicie sessão para continuar a sua jornada.</p>
+                    <h1 class="form-title">{{ t('auth.login_welcome_back') }}</h1>
+                    <p class="form-subtitle">{{ t('auth.login_subtitle') }}</p>
                   </div>
 
                   <div v-if="errorMessage" class="alert alert-danger animate-shake" role="alert">
@@ -51,20 +51,20 @@
                   <form @submit.prevent="handleLogin" novalidate>
                     <div class="form-floating mb-3 animate-fade-up delay-1">
                       <input type="email" class="form-control" id="email" v-model="form.email" placeholder="nome@exemplo.com" required>
-                      <label for="email">Email</label>
+                      <label for="email">{{ t('auth.login_email') }}</label>
                     </div>
                     <div class="form-floating mb-3 animate-fade-up delay-2">
-                      <input type="password" class="form-control" id="password" v-model="form.password" placeholder="Senha" required>
-                      <label for="password">Senha</label>
+                      <input type="password" class="form-control" id="password" v-model="form.password" :placeholder="t('auth.login_password')" required>
+                      <label for="password">{{ t('auth.login_password') }}</label>
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100 login-btn animate-fade-up delay-3" :disabled="loading">
                       <span v-if="loading" class="d-flex align-items-center justify-content-center gap-2">
                         <span class="spinner-border spinner-border-sm" role="status"></span>
-                        A entrar...
+                        {{ t('auth.login_loading') }}
                       </span>
                       <span v-else class="d-flex align-items-center justify-content-center gap-2">
-                        Entrar
+                        {{ t('auth.login_submit') }}
                         <span class="arrow">→</span>
                       </span>
                     </button>
@@ -72,10 +72,10 @@
 
                   <div class="links animate-fade-up delay-4">
                     <p class="text-center mb-1">
-                      Não tem conta? <router-link to="/registro" class="link-primary">Criar conta</router-link>
+                      {{ t('auth.login_no_account') }} <router-link to="/registro" class="link-primary">{{ t('auth.login_create_account') }}</router-link>
                     </p>
                     <p class="text-center mb-0">
-                      <router-link to="/esqueci-senha" class="link-muted">Esqueci a senha</router-link>
+                      <router-link to="/esqueci-senha" class="link-muted">{{ t('auth.login_forgot') }}</router-link>
                     </p>
                   </div>
                 </div>
@@ -89,23 +89,25 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from '@/composables/useI18n'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 const form = ref({ email: '', password: '' })
 const errorMessage = ref('')
 const loading = ref(false)
 
-const subtitles = [
-  'Logística sem fronteiras.',
-  'Soluções que movem o seu negócio.',
-  'A sua carga, o nosso compromisso.',
-  'Conectamos destinos, entregamos confiança.'
-]
+const subtitles = computed(() => [
+  t('auth.login_typewriter_1'),
+  t('auth.login_typewriter_2'),
+  t('auth.login_typewriter_3'),
+  t('auth.login_typewriter_4')
+])
 
 const typedSubtitle = ref('')
 let typewriterInterval = null
@@ -123,13 +125,13 @@ const eraseSubtitle = (text) => {
   if (text.length > 0) {
     typeSubtitle(text.substring(0, text.length - 1))
   } else {
-    const next = subtitles[(subtitles.indexOf(text) + 1) % subtitles.length]
+    const next = subtitles.value[(subtitles.value.indexOf(text) + 1) % subtitles.value.length]
     setTimeout(() => typeSubtitle(next), 600)
   }
 }
 
 onMounted(() => {
-  typeSubtitle(subtitles[0])
+  typeSubtitle(subtitles.value[0])
 })
 
 onBeforeUnmount(() => {
@@ -161,7 +163,7 @@ const handleLogin = async () => {
     router.push(user.company_completed ? '/dashboard' : '/configurar-empresa')
   } else {
     authStore.logout()
-    errorMessage.value = 'A sua conta ainda não foi aprovada.'
+    errorMessage.value = t('auth.login_not_approved')
   }
 }
 </script>

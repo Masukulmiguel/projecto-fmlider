@@ -1,6 +1,6 @@
 <template>
   <div class="admin-profile p-4 p-md-5">
-    <h1 class="page-title mb-4"><i class="bi bi-person-fill me-2"></i>Perfil</h1>
+    <h1 class="page-title mb-4"><i class="bi bi-person-fill me-2"></i>{{ t('admin.profile_title') }}</h1>
     <div class="row g-3">
       <div class="col-lg-4">
         <div class="card">
@@ -8,7 +8,7 @@
             <div class="avatar-wrapper" :class="{ 'has-photo': !!authStore.user?.photo }">
               <img v-if="authStore.user?.photo" :src="authStore.user.photo" :alt="authStore.user?.name" class="avatar-img">
               <div v-else class="avatar-xl">{{ initials(authStore.user?.name) }}</div>
-              <label class="avatar-upload-btn" :class="{ disabled: uploadingPhoto }" title="Alterar foto">
+              <label class="avatar-upload-btn" :class="{ disabled: uploadingPhoto }" :title="t('admin.profile_change_photo')">
                 <i class="bi bi-camera-fill"></i>
                 <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" @change="onPhotoChange" hidden>
               </label>
@@ -24,7 +24,7 @@
         </div>
 
         <div v-if="authStore.photoHistory && authStore.photoHistory.length > 1" class="card mt-3">
-          <div class="card-header"><h6 class="mb-0">Histórico de fotos</h6></div>
+          <div class="card-header"><h6 class="mb-0">{{ t('admin.profile_photo_history') }}</h6></div>
           <div class="card-body">
             <div class="photo-history">
               <div
@@ -46,7 +46,7 @@
 
       <div class="col-lg-8">
         <div class="card">
-          <div class="card-header"><h6 class="mb-0">Dados pessoais</h6></div>
+          <div class="card-header"><h6 class="mb-0">{{ t('admin.profile_personal') }}</h6></div>
           <div class="card-body">
             <form @submit.prevent="save">
               <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
@@ -72,7 +72,7 @@
               <div class="mt-3 d-flex justify-content-end">
                 <button class="btn btn-primary" :disabled="saving">
                   <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
-                  Guardar alterações
+                  {{ t('admin.profile_save') }}
                 </button>
               </div>
             </form>
@@ -80,27 +80,27 @@
         </div>
 
         <div class="card mt-3">
-          <div class="card-header"><h6 class="mb-0">Alterar senha</h6></div>
+          <div class="card-header"><h6 class="mb-0">{{ t('admin.profile_password') }}</h6></div>
           <div class="card-body">
             <form @submit.prevent="changePassword">
               <div v-if="passwordError" class="alert alert-danger">{{ passwordError }}</div>
               <div v-if="passwordSuccess" class="alert alert-success">{{ passwordSuccess }}</div>
               <div class="row g-3">
                 <div class="col-md-4">
-                  <label class="form-label">Senha atual</label>
-                  <input v-model="pwd.current" type="password" class="form-control" required>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label">Nova senha</label>
-                  <input v-model="pwd.new" type="password" class="form-control" minlength="6" required>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label">Confirmar</label>
+                  <label class="form-label">{{ t('admin.profile_password') }}</label>
+                   <input v-model="pwd.current" type="password" class="form-control" required>
+                 </div>
+                 <div class="col-md-4">
+                   <label class="form-label">{{ t('admin.profile_password') }}</label>
+                   <input v-model="pwd.new" type="password" class="form-control" minlength="6" required>
+                 </div>
+                 <div class="col-md-4">
+                   <label class="form-label">{{ t('common.confirm') }}</label>
                   <input v-model="pwd.confirm" type="password" class="form-control" minlength="6" required>
                 </div>
               </div>
               <div class="mt-3 d-flex justify-content-end">
-                <button class="btn btn-outline-primary" :disabled="changingPwd">Alterar senha</button>
+                <button class="btn btn-outline-primary" :disabled="changingPwd">{{ t('admin.profile_password') }}</button>
               </div>
             </form>
           </div>
@@ -114,6 +114,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const authStore = useAuthStore()
 const form = reactive({ name: '', phone: '' })

@@ -5,22 +5,22 @@
       <div v-if="loadingBanners" class="hero-slide active" :style="defaultSlideStyle">
         <div class="container">
           <div class="hero-content">
-            <span class="hero-eyebrow">FMLider</span>
-            <h1 class="hero-title">A sua carga, o nosso compromisso</h1>
-            <p class="hero-subtitle">Especialistas em logística, transporte e desembaraço aduaneiro em Angola e mais de 30 países.</p>
+            <span class="hero-eyebrow">{{ t('home.hero_eyebrow') }}</span>
+            <h1 class="hero-title">{{ t('home.hero_title') }}</h1>
+            <p class="hero-subtitle">{{ t('home.hero_subtitle') }}</p>
             <div class="hero-ctas">
               <router-link to="/servicos" class="btn btn-gold btn-lg">
-                <i class="bi bi-arrow-right-circle me-2"></i> Conhecer Serviços
+                <i class="bi bi-arrow-right-circle me-2"></i> {{ t('home.hero_cta_services') }}
               </router-link>
               <router-link to="/contacto" class="btn btn-outline-light btn-lg">
-                <i class="bi bi-telephone me-2"></i> Falar Connosco
+                <i class="bi bi-telephone me-2"></i> {{ t('home.hero_cta_contact') }}
               </router-link>
             </div>
             <div class="hero-stats">
-              <div class="hero-stat"><strong>+8</strong><span>anos</span></div>
-              <div class="hero-stat"><strong>+60</strong><span>colaboradores</span></div>
-              <div class="hero-stat"><strong>+32</strong><span>países</span></div>
-              <div class="hero-stat"><strong>+1000</strong><span>clientes</span></div>
+              <div class="hero-stat"><strong>+8</strong><span>{{ t('home.stat_years') }}</span></div>
+              <div class="hero-stat"><strong>+60</strong><span>{{ t('home.stat_employees') }}</span></div>
+              <div class="hero-stat"><strong>+32</strong><span>{{ t('home.stat_countries') }}</span></div>
+              <div class="hero-stat"><strong>+1000</strong><span>{{ t('home.stat_clients') }}</span></div>
             </div>
           </div>
         </div>
@@ -34,17 +34,17 @@
               <p class="hero-subtitle" data-aos="fade-up" data-aos-delay="200">{{ s.description }}</p>
               <div class="hero-ctas" data-aos="fade-up" data-aos-delay="300">
                 <router-link :to="s.link || '/servicos'" class="btn btn-gold btn-lg">
-                  <i class="bi bi-arrow-right-circle me-2"></i> Saber mais
+                  <i class="bi bi-arrow-right-circle me-2"></i> {{ t('home.learn_more') }}
                 </router-link>
                 <router-link to="/contacto" class="btn btn-outline-light btn-lg">
-                  <i class="bi bi-telephone me-2"></i> Falar Connosco
+                  <i class="bi bi-telephone me-2"></i> {{ t('home.hero_cta_contact') }}
                 </router-link>
               </div>
               <div class="hero-stats" data-aos="fade-up" data-aos-delay="400">
-                <div class="hero-stat"><strong>+8</strong><span>anos</span></div>
-                <div class="hero-stat"><strong>+60</strong><span>colaboradores</span></div>
-                <div class="hero-stat"><strong>+32</strong><span>países</span></div>
-                <div class="hero-stat"><strong>+1000</strong><span>clientes</span></div>
+                <div class="hero-stat"><strong>+8</strong><span>{{ t('home.stat_years') }}</span></div>
+                <div class="hero-stat"><strong>+60</strong><span>{{ t('home.stat_employees') }}</span></div>
+                <div class="hero-stat"><strong>+32</strong><span>{{ t('home.stat_countries') }}</span></div>
+                <div class="hero-stat"><strong>+1000</strong><span>{{ t('home.stat_clients') }}</span></div>
               </div>
             </div>
           </div>
@@ -53,36 +53,36 @@
       <div v-else class="hero-slide active" :style="defaultSlideStyle">
         <div class="container">
           <div class="hero-content">
-            <span class="hero-eyebrow">FMLider</span>
-            <h1 class="hero-title">A sua carga, o nosso compromisso</h1>
-            <p class="hero-subtitle">Especialistas em logística, transporte e desembaraço aduaneiro em Angola e mais de 30 países.</p>
+            <span class="hero-eyebrow">{{ t('home.hero_eyebrow') }}</span>
+            <h1 class="hero-title">{{ t('home.hero_title') }}</h1>
+            <p class="hero-subtitle">{{ t('home.hero_subtitle') }}</p>
             <div class="hero-ctas">
               <router-link to="/servicos" class="btn btn-gold btn-lg">
-                <i class="bi bi-arrow-right-circle me-2"></i> Conhecer Serviços
+                <i class="bi bi-arrow-right-circle me-2"></i> {{ t('home.hero_cta_services') }}
               </router-link>
               <router-link to="/contacto" class="btn btn-outline-light btn-lg">
-                <i class="bi bi-telephone me-2"></i> Falar Connosco
+                <i class="bi bi-telephone me-2"></i> {{ t('home.hero_cta_contact') }}
               </router-link>
             </div>
             <div class="hero-stats">
-              <div class="hero-stat"><strong>+8</strong><span>anos</span></div>
-              <div class="hero-stat"><strong>+60</strong><span>colaboradores</span></div>
-              <div class="hero-stat"><strong>+32</strong><span>países</span></div>
-              <div class="hero-stat"><strong>+1000</strong><span>clientes</span></div>
+              <div class="hero-stat"><strong>+8</strong><span>{{ t('home.stat_years') }}</span></div>
+              <div class="hero-stat"><strong>+60</strong><span>{{ t('home.stat_employees') }}</span></div>
+              <div class="hero-stat"><strong>+32</strong><span>{{ t('home.stat_countries') }}</span></div>
+              <div class="hero-stat"><strong>+1000</strong><span>{{ t('home.stat_clients') }}</span></div>
             </div>
           </div>
         </div>
       </div>
 
-      <button class="hero-nav prev" @click="prevSlide" aria-label="Slide anterior">
+      <button class="hero-nav prev" @click="prevSlide" :aria-label="t('home.prev_slide')">
         <i class="bi bi-chevron-left"></i>
       </button>
-      <button class="hero-nav next" @click="nextSlide" aria-label="Slide seguinte">
+      <button class="hero-nav next" @click="nextSlide" :aria-label="t('home.next_slide')">
         <i class="bi bi-chevron-right"></i>
       </button>
 
       <div class="hero-dots">
-        <button v-for="(_, i) in slides" :key="i" :class="{ active: i === currentSlide }" @click="currentSlide = i" :aria-label="`Ir para slide ${i+1}`"></button>
+        <button v-for="(_, i) in slides" :key="i" :class="{ active: i === currentSlide }" @click="currentSlide = i" :aria-label="`${t('home.goto_slide')} ${i+1}`"></button>
       </div>
     </section>
 
@@ -91,13 +91,9 @@
       <div class="container">
         <div class="row align-items-center g-4">
           <div class="col-lg-7" v-reveal="'right'">
-            <span class="fml-eyebrow">Quem Somos</span>
-            <h2 class="section-title mb-3">Logística que move o seu negócio</h2>
-            <p class="text-muted mb-0">
-              A <strong>FMLider</strong> iniciou a sua actividade em Fevereiro de 2017 em Luanda.
-              Actualmente conta com cerca de 60 colaboradores, instalações próprias e frota de camiões própria.
-              Operamos em todo o território nacional e em mais de 30 países, com soluções integradas
-              de transporte, transitário, armazenagem e logística.
+            <span class="fml-eyebrow">{{ t('home.about_eyebrow') }}</span>
+            <h2 class="section-title mb-3">{{ t('home.about_title') }}</h2>
+            <p class="text-muted mb-0" v-html="t('home.about_text')">
             </p>
           </div>
           <div class="col-lg-5" v-reveal="'left'">
@@ -105,29 +101,29 @@
               <div class="cert-item">
                 <i class="bi bi-shield-check"></i>
                 <div>
-                  <h6>Seguro All Risks</h6>
-                  <small>Cobertura internacional</small>
+                  <h6>{{ t('home.cert_all_risks') }}</h6>
+                  <small>{{ t('home.cert_all_risks_desc') }}</small>
                 </div>
               </div>
               <div class="cert-item">
                 <i class="bi bi-award"></i>
                 <div>
-                  <h6>Certificação ISO</h6>
-                  <small>Qualidade e segurança</small>
+                  <h6>{{ t('home.cert_iso') }}</h6>
+                  <small>{{ t('home.cert_iso_desc') }}</small>
                 </div>
               </div>
               <div class="cert-item">
                 <i class="bi bi-truck"></i>
                 <div>
-                  <h6>Frota Própria</h6>
-                  <small>+15 camiões e Reachstacker</small>
+                  <h6>{{ t('home.cert_fleet') }}</h6>
+                  <small>{{ t('home.cert_fleet_desc') }}</small>
                 </div>
               </div>
               <div class="cert-item">
                 <i class="bi bi-geo-alt"></i>
                 <div>
-                  <h6>Cobertura Global</h6>
-                  <small>+30 países servidos</small>
+                  <h6>{{ t('home.cert_global') }}</h6>
+                  <small>{{ t('home.cert_global_desc') }}</small>
                 </div>
               </div>
             </div>
@@ -140,9 +136,9 @@
     <section class="services-section fml-section bg-fml-navy text-white">
       <div class="container">
         <div class="text-center mb-5" v-reveal="'up'">
-          <span class="fml-eyebrow">O Que Fazemos</span>
-          <h2 class="section-title text-white">Serviços Integrados</h2>
-          <p class="section-subtitle text-white">Soluções completas de logística, transporte e transitário adaptadas ao seu negócio.</p>
+          <span class="fml-eyebrow">{{ t('home.services_eyebrow') }}</span>
+          <h2 class="section-title text-white">{{ t('home.services_title') }}</h2>
+          <p class="section-subtitle text-white">{{ t('home.services_subtitle') }}</p>
         </div>
         <div v-if="loadingServices" class="row g-4">
           <div class="col-lg-3 col-md-6" v-for="n in 4" :key="n">
@@ -159,13 +155,13 @@
               <div class="service-icon"><i :class="getServiceIcon(s.title)"></i></div>
               <h5>{{ s.title }}</h5>
               <p>{{ s.description }}</p>
-              <span class="service-link">Saber mais <i class="bi bi-arrow-right"></i></span>
+              <span class="service-link">{{ t('home.service_learn_more') }} <i class="bi bi-arrow-right"></i></span>
             </router-link>
           </div>
         </div>
         <div class="text-center mt-5">
           <router-link to="/servicos" class="btn btn-gold btn-lg">
-            Ver Todos os Serviços <i class="bi bi-arrow-right ms-2"></i>
+            {{ t('home.view_all_services') }} <i class="bi bi-arrow-right ms-2"></i>
           </router-link>
         </div>
       </div>
@@ -175,8 +171,8 @@
     <section class="process-section fml-section">
       <div class="container">
         <div class="text-center mb-5" v-reveal="'up'">
-          <span class="fml-eyebrow">Como Trabalhamos</span>
-          <h2 class="section-title">Do Pedido à Entrega em 4 Passos</h2>
+          <span class="fml-eyebrow">{{ t('home.process_eyebrow') }}</span>
+          <h2 class="section-title">{{ t('home.process_title') }}</h2>
         </div>
         <div class="row g-4 process-steps">
           <div class="col-md-6 col-lg-3" v-for="(step, i) in processSteps" :key="i" v-reveal="'up'" :data-reveal-delay="i * 120">
@@ -195,27 +191,23 @@
       <div class="container">
         <div class="row align-items-center g-5">
           <div class="col-lg-6" v-reveal="'right'">
-            <span class="fml-eyebrow">Frota & Equipamentos</span>
-            <h2 class="section-title">Reachstacker Kalmar de 45 toneladas</h2>
-            <p class="text-muted mb-4">
-              Em 2022 investimos num <strong>Reachstacker Kalmar</strong> para optimizar o
-              manuseamento de contentores, ferro e cargas especiais. Esta máquina representa
-              uma mais-valia significativa para a nossa estrutura e para os nossos clientes,
-              permitindo operações de carga e descarga mais rápidas e seguras.
+            <span class="fml-eyebrow">{{ t('home.fleet_eyebrow') }}</span>
+            <h2 class="section-title">{{ t('home.fleet_title') }}</h2>
+            <p class="text-muted mb-4" v-html="t('home.fleet_text')">
             </p>
             <ul class="feature-list">
-              <li><i class="bi bi-check-circle-fill"></i> Capacidade de elevação de 45 toneladas</li>
-              <li><i class="bi bi-check-circle-fill"></i> Manuseamento de contentores 20' e 40'</li>
-              <li><i class="bi bi-check-circle-fill"></i> Stack de até 4 contentores</li>
-              <li><i class="bi bi-check-circle-fill"></i> Operadores certificados e experientes</li>
+              <li><i class="bi bi-check-circle-fill"></i> {{ t('home.fleet_feat_1') }}</li>
+              <li><i class="bi bi-check-circle-fill"></i> {{ t('home.fleet_feat_2') }}</li>
+              <li><i class="bi bi-check-circle-fill"></i> {{ t('home.fleet_feat_3') }}</li>
+              <li><i class="bi bi-check-circle-fill"></i> {{ t('home.fleet_feat_4') }}</li>
             </ul>
             <router-link to="/frota" class="btn btn-primary mt-3">
-              Ver a Nossa Frota <i class="bi bi-arrow-right ms-2"></i>
+              {{ t('home.fleet_cta') }} <i class="bi bi-arrow-right ms-2"></i>
             </router-link>
           </div>
           <div class="col-lg-6" v-reveal="'scale'">
             <div class="fleet-image">
-              <img :src="fleetImage" alt="Reachstacker FMLider" class="img-fluid rounded">
+              <img :src="fleetImage" :alt="t('home.fleet_img_alt')" class="img-fluid rounded">
             </div>
           </div>
         </div>
@@ -227,11 +219,11 @@
       <div class="container">
         <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-2" v-reveal="'up'">
           <div>
-            <span class="fml-eyebrow">Novidades</span>
-            <h2 class="section-title mb-0">Últimas Notícias</h2>
+            <span class="fml-eyebrow">{{ t('home.news_eyebrow') }}</span>
+            <h2 class="section-title mb-0">{{ t('home.news_title') }}</h2>
           </div>
           <router-link to="/noticias" class="btn btn-outline-primary">
-            Ver Todas <i class="bi bi-arrow-right ms-1"></i>
+            {{ t('home.news_view_all') }} <i class="bi bi-arrow-right ms-1"></i>
           </router-link>
         </div>
         <div class="row g-4">
@@ -246,8 +238,8 @@
     <section v-if="testimonials.length" class="testimonials-section fml-section bg-fml-navy text-white">
       <div class="container">
         <div class="text-center mb-5" v-reveal="'up'">
-          <span class="fml-eyebrow">Confiança</span>
-          <h2 class="section-title text-white">O Que Dizem os Nossos Clientes</h2>
+          <span class="fml-eyebrow">{{ t('home.testimonials_eyebrow') }}</span>
+          <h2 class="section-title text-white">{{ t('home.testimonials_title') }}</h2>
         </div>
         <div class="row g-4">
           <div class="col-md-4" v-for="(t, i) in testimonials.slice(0, 3)" :key="t.id || i" v-reveal="'up'" :data-reveal-delay="i * 120">
@@ -274,9 +266,9 @@
     <section class="clients-section fml-section" v-reveal="'fade'">
       <div class="container">
         <div class="text-center mb-5">
-          <p class="text-uppercase small fw-bold mb-1" style="letter-spacing: 2px; color: var(--fml-gold);">Confiam em nós</p>
-          <h2 class="fw-bold display-6 mb-3">Nossos Clientes</h2>
-          <p class="text-muted mx-auto" style="max-width: 600px;">Empresas que confiam na FMLider para gestionar as suas necessidades logísticas todos os dias.</p>
+          <p class="text-uppercase small fw-bold mb-1" style="letter-spacing: 2px; color: var(--fml-gold);">{{ t('home.clients_eyebrow') }}</p>
+          <h2 class="fw-bold display-6 mb-3">{{ t('home.clients_title') }}</h2>
+          <p class="text-muted mx-auto" style="max-width: 600px;">{{ t('home.clients_desc') }}</p>
         </div>
         <ClientsCarousel />
       </div>
@@ -285,11 +277,11 @@
     <!-- CTA -->
     <section class="cta-section fml-section-gold" v-reveal="'scale'">
       <div class="container text-center">
-        <h2 class="display-5 fw-bold mb-3">Pronto para Enviar?</h2>
-        <p class="lead mb-4">Solicite um orçamento gratuito em menos de 24 horas.</p>
+        <h2 class="display-5 fw-bold mb-3">{{ t('home.cta_title') }}</h2>
+        <p class="lead mb-4">{{ t('home.cta_subtitle') }}</p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
           <router-link to="/cotacoes/novo" class="btn btn-dark btn-lg">
-            <i class="bi bi-receipt me-2"></i> Pedir Cotação
+            <i class="bi bi-receipt me-2"></i> {{ t('home.cta_button') }}
           </router-link>
           <a href="tel:+244935141747" class="btn btn-outline-dark btn-lg">
             <i class="bi bi-telephone me-2"></i> +244 935 141 747
@@ -303,38 +295,38 @@
       <div class="container">
         <div class="row align-items-center g-5">
           <div class="col-lg-5" v-reveal="'right'">
-            <span class="fml-eyebrow">Onde Estamos</span>
-            <h2 class="section-title">Visite-nos</h2>
-            <p class="text-muted mb-4">Estamos localizados em Cacuaco, com acesso facilitado às principais vias e ao Porto de Luanda.</p>
+            <span class="fml-eyebrow">{{ t('home.location_eyebrow') }}</span>
+            <h2 class="section-title">{{ t('home.location_title') }}</h2>
+            <p class="text-muted mb-4">{{ t('home.location_desc') }}</p>
             <ul class="location-info list-unstyled">
               <li class="d-flex align-items-start mb-3">
                 <i class="bi bi-geo-alt-fill text-primary fs-4 me-3"></i>
                 <div>
-                  <strong class="d-block text-dark">Morada</strong>
-                  FMLider Base, Estrada da Pedreira<br>
-                  Bairro da Vidrul, Cacuaco, Luanda
+                  <strong class="d-block text-dark">{{ t('home.location_address_label') }}</strong>
+                  {{ t('home.location_address_line1') }}<br>
+                  {{ t('home.location_address_line2') }}
                 </div>
               </li>
               <li class="d-flex align-items-start mb-3">
                 <i class="bi bi-telephone-fill text-primary fs-4 me-3"></i>
                 <div>
-                  <strong class="d-block text-dark">Telefone</strong>
+                  <strong class="d-block text-dark">{{ t('home.location_phone_label') }}</strong>
                   <a href="tel:+244935141747" class="text-decoration-none text-dark">+244 935 141 747</a>
                 </div>
               </li>
               <li class="d-flex align-items-start mb-3">
                 <i class="bi bi-envelope-fill text-primary fs-4 me-3"></i>
                 <div>
-                  <strong class="d-block text-dark">Email</strong>
+                  <strong class="d-block text-dark">{{ t('home.location_email_label') }}</strong>
                   <a href="mailto:geral@fmlider.co.ao" class="text-decoration-none text-dark">geral@fmlider.co.ao</a>
                 </div>
               </li>
               <li class="d-flex align-items-start mb-3">
                 <i class="bi bi-clock-fill text-primary fs-4 me-3"></i>
                 <div>
-                  <strong class="d-block text-dark">Horário</strong>
-                  Segunda a sexta: 08:00 - 18:00<br>
-                  Sábado: 08:00 - 13:00
+                  <strong class="d-block text-dark">{{ t('home.location_hours_label') }}</strong>
+                  {{ t('home.location_hours_line1') }}<br>
+                  {{ t('home.location_hours_line2') }}
                 </div>
               </li>
             </ul>
@@ -345,13 +337,13 @@
                 src="https://maps.google.com/maps?q=FMLider+Base+Cacuaco+Luanda+Angola&hl=pt&z=15&output=embed"
                 width="100%" height="420" style="border:0; border-radius: 12px;"
                 allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-                title="Localização FMLider"
+                :title="t('home.location_map_title')"
               ></iframe>
             </div>
             <a href="https://www.google.com/maps/place/FMLider+-+Base/@-8.7693538,13.3973228,359m/data=!3m1!1e3!4m6!3m5!1s0x1a51e5684ed42f1b:0x5630ab6f53efd403!8m2!3d-8.769266!4d13.3984122"
                target="_blank" rel="noopener"
                class="btn btn-outline-primary w-100 mt-3">
-              <i class="bi bi-geo-alt-fill me-2"></i> Abrir no Google Maps
+              <i class="bi bi-geo-alt-fill me-2"></i> {{ t('home.location_map_cta') }}
             </a>
           </div>
         </div>
@@ -366,7 +358,9 @@ import NewsCard from '@/components/NewsCard.vue'
 import ClientsCarousel from '@/components/ClientsCarousel.vue'
 import { supabase } from '@/lib/supabase'
 import { useSiteImages } from '@/composables/useSiteImages'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const { getImage, fetchAll } = useSiteImages()
 const heroBg = ref('/assets/img/construcao2020/image1.jpeg')
 const fleetImage = ref('/assets/img/resachstacker/resachstacker1.jpeg')
@@ -397,12 +391,12 @@ function slideBg(s) {
   return FALLBACK_BG.value
 }
 
-const processSteps = [
-  { title: 'Contacto', desc: 'O cliente entra em contacto connosco com a sua necessidade logística.' },
-  { title: 'Cotação', desc: 'Preparamos uma cotação personalizada com as melhores opções.' },
-  { title: 'Execução', desc: 'A equipa executa o serviço com rigor e transparência total.' },
-  { title: 'Entrega', desc: 'A carga é entregue no destino com segurança e pontualidade.' },
-]
+const processSteps = computed(() => [
+  { title: t('home.process_contact_title'), desc: t('home.process_contact_desc') },
+  { title: t('home.process_quote_title'), desc: t('home.process_quote_desc') },
+  { title: t('home.process_execution_title'), desc: t('home.process_execution_desc') },
+  { title: t('home.process_delivery_title'), desc: t('home.process_delivery_desc') },
+])
 
 const serviceIconMap = {
   'despacho': 'bi bi-shield-check',

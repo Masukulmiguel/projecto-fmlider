@@ -6,103 +6,103 @@
         <div class="sidebar-logo">
           <img :src="logoUrl" alt="FMLider" class="logo-img" />
           <span class="logo-text" v-show="!collapsed">FMLider</span>
-          <button class="collapse-btn" @click="$emit('toggle-collapse')" :title="collapsed ? 'Expandir' : 'Recolher'">
+          <button class="collapse-btn" @click="$emit('toggle-collapse')" :title="collapsed ? t('admin_sidebar.expand') : t('admin_sidebar.collapse')">
             <i :class="collapsed ? 'bi bi-chevron-right' : 'bi bi-chevron-left'"></i>
           </button>
         </div>
 
         <nav class="sidebar-menu" @click="handleNavClick">
           <div class="menu-section">
-            <span class="section-label" v-show="!collapsed">Principal</span>
-            <router-link to="/admin" class="menu-item" :class="{ active: $route.path === '/admin' }" :title="collapsed ? 'Dashboard' : ''">
+            <span class="section-label" v-show="!collapsed">{{ t('admin_sidebar.main') }}</span>
+            <router-link to="/admin" class="menu-item" :class="{ active: $route.path === '/admin' }" :title="collapsed ? t('admin.dashboard_title') : ''">
               <i class="bi bi-grid-1x2-fill menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">Dashboard</span>
+              <span class="menu-text" v-show="!collapsed">{{ t('admin.dashboard_title') }}</span>
             </router-link>
-            <router-link to="/admin/utilizadores" class="menu-item" :class="{ active: $route.path === '/admin/utilizadores' }" :title="collapsed ? 'Utilizadores' : ''">
+            <router-link to="/admin/utilizadores" class="menu-item" :class="{ active: $route.path === '/admin/utilizadores' }" :title="collapsed ? t('admin_sidebar.users') : ''">
               <i class="bi bi-people-fill menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">Utilizadores</span>
+              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.users') }}</span>
               <span v-if="pendingCount > 0" class="menu-badge badge-yellow">{{ pendingCount }}</span>
             </router-link>
-            <router-link to="/admin/funcionarios" class="menu-item" :class="{ active: $route.path === '/admin/funcionarios' }" :title="collapsed ? 'Funcionários' : ''">
+            <router-link to="/admin/funcionarios" class="menu-item" :class="{ active: $route.path === '/admin/funcionarios' }" :title="collapsed ? t('admin_sidebar.employees') : ''">
               <i class="bi bi-person-badge-fill menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">Funcionários</span>
+              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.employees') }}</span>
             </router-link>
           </div>
 
           <div class="menu-section">
-            <span class="section-label" v-show="!collapsed">Operações</span>
-            <router-link to="/admin/embarques" class="menu-item" :class="{ active: $route.path === '/admin/embarques' }" :title="collapsed ? 'Embarques' : ''">
+            <span class="section-label" v-show="!collapsed">{{ t('admin_sidebar.operations') }}</span>
+            <router-link to="/admin/embarques" class="menu-item" :class="{ active: $route.path === '/admin/embarques' }" :title="collapsed ? t('admin_sidebar.shipments') : ''">
               <i class="bi bi-box-seam-fill menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">Embarques</span>
+              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.shipments') }}</span>
             </router-link>
-            <router-link to="/admin/cotacoes" class="menu-item" :class="{ active: $route.path === '/admin/cotacoes' }" :title="collapsed ? 'Cotações' : ''">
+            <router-link to="/admin/cotacoes" class="menu-item" :class="{ active: $route.path === '/admin/cotacoes' }" :title="collapsed ? t('admin_sidebar.quotes') : ''">
               <i class="bi bi-receipt-cutoff menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">Cotações</span>
+              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.quotes') }}</span>
             </router-link>
-            <router-link to="/admin/documentos" class="menu-item" :class="{ active: $route.path === '/admin/documentos' }" :title="collapsed ? 'Documentos' : ''">
+            <router-link to="/admin/documentos" class="menu-item" :class="{ active: $route.path === '/admin/documentos' }" :title="collapsed ? t('admin_sidebar.documents') : ''">
               <i class="bi bi-file-earmark-text-fill menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">Documentos</span>
+              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.documents') }}</span>
             </router-link>
-            <router-link to="/admin/contactos" class="menu-item" :class="{ active: $route.path === '/admin/contactos' }" :title="collapsed ? 'Contactos' : ''">
+            <router-link to="/admin/contactos" class="menu-item" :class="{ active: $route.path === '/admin/contactos' }" :title="collapsed ? t('admin_sidebar.contacts') : ''">
               <i class="bi bi-person-lines-fill menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">Contactos</span>
+              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.contacts') }}</span>
             </router-link>
           </div>
 
           <div class="menu-section">
-            <span class="section-label" v-show="!collapsed">Conteúdo</span>
-            <router-link to="/admin/servicos" class="menu-item" :class="{ active: $route.path === '/admin/servicos' }" :title="collapsed ? 'Serviços' : ''">
+            <span class="section-label" v-show="!collapsed">{{ t('admin_sidebar.content') }}</span>
+            <router-link to="/admin/servicos" class="menu-item" :class="{ active: $route.path === '/admin/servicos' }" :title="collapsed ? t('admin_sidebar.services') : ''">
               <i class="bi bi-gear-wide-connected menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">Serviços</span>
+              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.services') }}</span>
             </router-link>
-            <router-link to="/admin/noticias" class="menu-item" :class="{ active: $route.path === '/admin/noticias' }" :title="collapsed ? 'Notícias' : ''">
+            <router-link to="/admin/noticias" class="menu-item" :class="{ active: $route.path === '/admin/noticias' }" :title="collapsed ? t('admin_sidebar.news') : ''">
               <i class="bi bi-newspaper menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">Notícias</span>
+              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.news') }}</span>
             </router-link>
-            <router-link to="/admin/galeria" class="menu-item" :class="{ active: $route.path === '/admin/galeria' }" :title="collapsed ? 'Galeria' : ''">
+            <router-link to="/admin/galeria" class="menu-item" :class="{ active: $route.path === '/admin/galeria' }" :title="collapsed ? t('admin_sidebar.gallery') : ''">
               <i class="bi bi-images menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">Galeria</span>
+              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.gallery') }}</span>
             </router-link>
-            <router-link to="/admin/parceiros" class="menu-item" :class="{ active: $route.path === '/admin/parceiros' }" :title="collapsed ? 'Parceiros' : ''">
+            <router-link to="/admin/parceiros" class="menu-item" :class="{ active: $route.path === '/admin/parceiros' }" :title="collapsed ? t('admin_sidebar.partners') : ''">
               <i class="bi bi-handshake menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">Parceiros</span>
+              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.partners') }}</span>
             </router-link>
-            <router-link to="/admin/banners" class="menu-item" :class="{ active: $route.path === '/admin/banners' }" :title="collapsed ? 'Banners' : ''">
+            <router-link to="/admin/banners" class="menu-item" :class="{ active: $route.path === '/admin/banners' }" :title="collapsed ? t('admin_sidebar.banners') : ''">
               <i class="bi bi-card-image menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">Banners</span>
+              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.banners') }}</span>
             </router-link>
-            <router-link to="/admin/testemunhos" class="menu-item" :class="{ active: $route.path === '/admin/testemunhos' }" :title="collapsed ? 'Testemunhos' : ''">
+            <router-link to="/admin/testemunhos" class="menu-item" :class="{ active: $route.path === '/admin/testemunhos' }" :title="collapsed ? t('admin_sidebar.testimonials') : ''">
               <i class="bi bi-chat-quote-fill menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">Testemunhos</span>
+              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.testimonials') }}</span>
             </router-link>
-            <router-link to="/admin/faqs" class="menu-item" :class="{ active: $route.path === '/admin/faqs' }" :title="collapsed ? 'FAQs' : ''">
+            <router-link to="/admin/faqs" class="menu-item" :class="{ active: $route.path === '/admin/faqs' }" :title="collapsed ? t('admin_sidebar.faqs') : ''">
               <i class="bi bi-question-circle-fill menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">FAQs</span>
+              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.faqs') }}</span>
             </router-link>
           </div>
 
           <div class="menu-section">
-            <span class="section-label" v-show="!collapsed">Sistema</span>
-            <router-link to="/admin/mensagens" class="menu-item" :class="{ active: $route.path === '/admin/mensagens' }" :title="collapsed ? 'Mensagens' : ''">
+            <span class="section-label" v-show="!collapsed">{{ t('admin_sidebar.system') }}</span>
+            <router-link to="/admin/mensagens" class="menu-item" :class="{ active: $route.path === '/admin/mensagens' }" :title="collapsed ? t('admin_sidebar.messages') : ''">
               <i class="bi bi-chat-dots-fill menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">Mensagens</span>
+              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.messages') }}</span>
               <span v-if="chatUnread > 0" class="menu-badge badge-red">{{ chatUnread }}</span>
             </router-link>
-            <router-link to="/admin/visitantes" class="menu-item" :class="{ active: $route.path === '/admin/visitantes' }" :title="collapsed ? 'Visitantes' : ''">
+            <router-link to="/admin/visitantes" class="menu-item" :class="{ active: $route.path === '/admin/visitantes' }" :title="collapsed ? t('admin_sidebar.visitors') : ''">
               <i class="bi bi-eye-fill menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">Visitantes</span>
+              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.visitors') }}</span>
             </router-link>
-            <router-link to="/admin/contactos" class="menu-item" :class="{ active: $route.path === '/admin/contactos' }" :title="collapsed ? 'Contactos Form' : ''">
+            <router-link to="/admin/contactos" class="menu-item" :class="{ active: $route.path === '/admin/contactos' }" :title="collapsed ? t('admin_sidebar.form_contacts') : ''">
               <i class="bi bi-envelope-fill menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">Contactos Form</span>
+              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.form_contacts') }}</span>
             </router-link>
-            <router-link to="/admin/imagens" class="menu-item" :class="{ active: $route.path === '/admin/imagens' }" :title="collapsed ? 'Imagens' : ''">
+            <router-link to="/admin/imagens" class="menu-item" :class="{ active: $route.path === '/admin/imagens' }" :title="collapsed ? t('admin_sidebar.images') : ''">
               <i class="bi bi-image-fill menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">Imagens</span>
+              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.images') }}</span>
             </router-link>
-            <router-link to="/admin/definicoes" class="menu-item" :class="{ active: $route.path === '/admin/definicoes' }" :title="collapsed ? 'Definições' : ''">
+            <router-link to="/admin/definicoes" class="menu-item" :class="{ active: $route.path === '/admin/definicoes' }" :title="collapsed ? t('admin_sidebar.settings') : ''">
               <i class="bi bi-sliders menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">Definições</span>
+              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.settings') }}</span>
             </router-link>
           </div>
         </nav>
@@ -111,15 +111,15 @@
           <div class="user-avatar">{{ userInitials }}</div>
           <div class="user-info">
             <span class="user-name">{{ authStore.user?.name || 'Admin' }}</span>
-            <span class="user-role">Administrador</span>
+            <span class="user-role">{{ t('admin_sidebar.admin') }}</span>
           </div>
-          <button class="logout-btn" @click="handleLogout" title="Sair">
+          <button class="logout-btn" @click="handleLogout" :title="t('admin_sidebar.logout')">
             <i class="bi bi-box-arrow-right"></i>
           </button>
         </div>
 
         <div class="sidebar-user collapsed-user" v-show="collapsed">
-          <button class="logout-btn-icon" @click="handleLogout" title="Sair">
+          <button class="logout-btn-icon" @click="handleLogout" :title="t('admin_sidebar.logout')">
             <i class="bi bi-box-arrow-right"></i>
           </button>
         </div>
@@ -134,6 +134,9 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useChatStore } from '@/stores/chatStore'
 import { useSiteImages } from '@/composables/useSiteImages'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   isOpen: Boolean,

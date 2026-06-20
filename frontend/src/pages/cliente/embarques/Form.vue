@@ -3,9 +3,9 @@
     <div class="page-header">
       <div>
         <router-link to="/embarques" class="back-link">
-          <i class="bi bi-arrow-left"></i> Voltar
+          <i class="bi bi-arrow-left"></i> {{ t('cliente.embarques_back') }}
         </router-link>
-        <h1 class="page-title">{{ isEdit ? 'Editar Embarque' : 'Novo Embarque' }}</h1>
+        <h1 class="page-title">{{ isEdit ? t('cliente.embarques_edit_title') : t('cliente.embarques_new_title') }}</h1>
       </div>
     </div>
 
@@ -16,52 +16,52 @@
       <div class="card-body">
         <div class="row g-3">
           <div class="col-md-6">
-            <label class="form-label">Origem *</label>
+            <label class="form-label">{{ t('cliente.embarques_origin') }} *</label>
             <input v-model="form.origin" type="text" class="form-control" :class="{'is-invalid': errors.origin}" required>
             <div class="invalid-feedback">{{ errors.origin }}</div>
           </div>
           <div class="col-md-6">
-            <label class="form-label">Destino *</label>
+            <label class="form-label">{{ t('cliente.embarques_destination') }} *</label>
             <input v-model="form.destination" type="text" class="form-control" :class="{'is-invalid': errors.destination}" required>
             <div class="invalid-feedback">{{ errors.destination }}</div>
           </div>
           <div class="col-md-4">
-            <label class="form-label">Tipo</label>
+            <label class="form-label">{{ t('cliente.embarques_type') }}</label>
             <select v-model="form.type" class="form-select">
-              <option value="maritimo">Marítimo</option>
-              <option value="aereo">Aéreo</option>
-              <option value="terrestre">Terrestre</option>
-              <option value="ferroviario">Ferroviário</option>
-              <option value="multimodal">Multimodal</option>
+              <option value="maritimo">{{ t('cliente.embarques_type_maritimo') }}</option>
+              <option value="aereo">{{ t('cliente.embarques_type_aereo') }}</option>
+              <option value="terrestre">{{ t('cliente.embarques_type_terrestre') }}</option>
+              <option value="ferroviario">{{ t('cliente.embarques_type_ferroviario') }}</option>
+              <option value="multimodal">{{ t('cliente.embarques_type_multimodal') }}</option>
             </select>
           </div>
           <div class="col-md-4">
-            <label class="form-label">Estado</label>
+            <label class="form-label">{{ t('cliente.embarques_status') }}</label>
             <select v-model="form.status" class="form-select">
-              <option value="pendente">Pendente</option>
-              <option value="em_transito">Em trânsito</option>
-              <option value="entregue">Entregue</option>
-              <option value="cancelado">Cancelado</option>
+              <option value="pendente">{{ t('cliente.embarques_status_pendente') }}</option>
+              <option value="em_transito">{{ t('cliente.embarques_status_em_transito') }}</option>
+              <option value="entregue">{{ t('cliente.embarques_status_entregue') }}</option>
+              <option value="cancelado">{{ t('cliente.embarques_status_cancelado') }}</option>
             </select>
           </div>
           <div class="col-md-4">
-            <label class="form-label">Tracking</label>
-            <input :value="form.tracking_number || 'Gerado automaticamente'" type="text" class="form-control" disabled>
+            <label class="form-label">{{ t('cliente.embarques_tracking_label') }}</label>
+            <input :value="form.tracking_number || t('cliente.embarques_auto_tracking')" type="text" class="form-control" disabled>
           </div>
           <div class="col-md-3">
-            <label class="form-label">Peso (kg)</label>
+            <label class="form-label">{{ t('cliente.embarques_weight') }}</label>
             <input v-model="form.weight" type="number" step="0.01" class="form-control">
           </div>
           <div class="col-md-3">
-            <label class="form-label">Volume (m³)</label>
+            <label class="form-label">{{ t('cliente.embarques_volume') }}</label>
             <input v-model="form.volume" type="number" step="0.0001" class="form-control">
           </div>
           <div class="col-md-3">
-            <label class="form-label">Valor declarado</label>
+            <label class="form-label">{{ t('cliente.embarques_declared_value') }}</label>
             <input v-model="form.declared_value" type="number" step="0.01" class="form-control">
           </div>
           <div class="col-md-3">
-            <label class="form-label">Moeda</label>
+            <label class="form-label">{{ t('cliente.embarques_currency') }}</label>
             <select v-model="form.currency" class="form-select">
               <option value="AOA">AOA</option>
               <option value="USD">USD</option>
@@ -69,28 +69,28 @@
             </select>
           </div>
           <div class="col-md-6">
-            <label class="form-label">Data de embarque</label>
+            <label class="form-label">{{ t('cliente.embarques_ship_date') }}</label>
             <input v-model="form.ship_date" type="date" class="form-control">
           </div>
           <div class="col-md-6">
-            <label class="form-label">Data de entrega</label>
+            <label class="form-label">{{ t('cliente.embarques_delivery_date') }}</label>
             <input v-model="form.delivery_date" type="date" class="form-control">
           </div>
           <div class="col-12">
-            <label class="form-label">Descrição</label>
-            <textarea v-model="form.description" rows="3" class="form-control" placeholder="Descrição da carga..."></textarea>
+            <label class="form-label">{{ t('cliente.embarques_description') }}</label>
+            <textarea v-model="form.description" rows="3" class="form-control" :placeholder="t('cliente.embarques_desc_placeholder')"></textarea>
           </div>
           <div class="col-12">
-            <label class="form-label">Notas internas</label>
+            <label class="form-label">{{ t('cliente.embarques_notes') }}</label>
             <textarea v-model="form.notes" rows="2" class="form-control"></textarea>
           </div>
         </div>
       </div>
       <div class="card-footer">
-        <router-link to="/embarques" class="btn btn-outline-secondary">Cancelar</router-link>
+        <router-link to="/embarques" class="btn btn-outline-secondary">{{ t('cliente.embarques_cancel') }}</router-link>
         <button type="submit" class="btn btn-primary" :disabled="saving">
           <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
-          {{ isEdit ? 'Atualizar' : 'Criar embarque' }}
+          {{ isEdit ? t('cliente.embarques_update') : t('cliente.embarques_create') }}
         </button>
       </div>
     </form>
@@ -102,10 +102,12 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from '@/composables/useI18n'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 const isEdit = computed(() => !!route.params.id)
 const form = reactive({ tracking_number: '', origin: '', destination: '', type: 'maritimo', status: 'pendente', weight: 0, volume: 0, declared_value: 0, currency: 'AOA', ship_date: '', delivery_date: '', description: '', notes: '' })
@@ -121,7 +123,7 @@ onMounted(async () => {
       if (error) throw error
       if (data) Object.assign(form, data)
     } catch (e) {
-      errorMessage.value = 'Erro ao carregar embarque'
+      errorMessage.value = t('cliente.embarques_error_loading')
     }
   }
 })
@@ -135,16 +137,16 @@ const handleSubmit = async () => {
     if (isEdit.value) {
       const { error } = await supabase.from('embarques').update(form).eq('id', route.params.id)
       if (error) throw error
-      successMessage.value = 'Embarque atualizado.'
+      successMessage.value = t('cliente.embarques_success_updated')
     } else {
       const userId = authStore.user?.id
       const { error } = await supabase.from('embarques').insert({ ...form, user_id: userId })
       if (error) throw error
-      successMessage.value = 'Embarque criado com sucesso.'
+      successMessage.value = t('cliente.embarques_success_created')
       setTimeout(() => router.push('/embarques'), 1000)
     }
   } catch (error) {
-    errorMessage.value = error.message || 'Erro ao guardar'
+    errorMessage.value = error.message || t('cliente.embarques_error_saving')
   } finally {
     saving.value = false
   }

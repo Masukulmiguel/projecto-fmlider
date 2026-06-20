@@ -2,18 +2,18 @@
   <div class="cliente-messages-page">
     <div class="page-header">
       <div>
-        <h1 class="page-title"><i class="bi bi-chat-dots-fill me-2"></i>Mensagens</h1>
-        <p class="text-muted mb-0">Converse diretamente com a equipa FMLider.</p>
+        <h1 class="page-title"><i class="bi bi-chat-dots-fill me-2"></i>{{ t('cliente.messages_title') }}</h1>
+        <p class="text-muted mb-0">{{ t('cliente.messages_subtitle') }}</p>
       </div>
     </div>
 
     <div v-if="!adminConv" class="card empty-card">
       <div class="card-body text-center py-5">
         <i class="bi bi-headset" style="font-size: 3rem; color: #2563eb;"></i>
-        <h5 class="mt-3">Suporte FMLider</h5>
-        <p class="text-muted mb-3">A nossa equipa está pronta para ajudar. Envie a sua mensagem abaixo.</p>
+        <h5 class="mt-3">{{ t('cliente.messages_support_title') }}</h5>
+        <p class="text-muted mb-3">{{ t('cliente.messages_support_desc') }}</p>
         <button class="btn btn-primary" @click="startChat">
-          <i class="bi bi-chat-dots me-1"></i> Iniciar conversa
+          <i class="bi bi-chat-dots me-1"></i> {{ t('cliente.messages_start_chat') }}
         </button>
       </div>
     </div>
@@ -31,7 +31,9 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import ChatPanel from '@/components/ChatPanel.vue'
 import { useChatStore } from '@/stores/chatStore'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const chatStore = useChatStore()
 const adminConv = ref(null)
 

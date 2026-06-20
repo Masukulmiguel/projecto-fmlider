@@ -2,8 +2,8 @@
   <div class="admin-page p-5">
     <div class="page-header mb-4">
       <div>
-        <h2>Contactos dos Clientes</h2>
-        <p class="text-muted mb-0">Lista consolidada de contactos.</p>
+        <h2>{{ t('admin.contactos_cliente_title') }}</h2>
+        <p class="text-muted mb-0">{{ t('admin.contactos_cliente_subtitle') }}</p>
       </div>
     </div>
 
@@ -12,7 +12,7 @@
         <div class="filters mb-3">
           <div class="search-box">
             <i class="bi bi-search"></i>
-            <input v-model="filters.q" type="text" placeholder="Pesquisar..." @input="debounceSearch">
+            <input v-model="filters.q" type="text" :placeholder="t('admin.documentos_search')" @input="debounceSearch">
           </div>
         </div>
 
@@ -20,18 +20,18 @@
           <div class="spinner-border text-primary" role="status"></div>
         </div>
         <div v-else-if="items.length === 0" class="text-center py-5 text-muted">
-          Nenhum contacto encontrado.
+          {{ t('admin.contactos_cliente_empty') }}
         </div>
         <div v-else class="table-responsive">
           <table class="table align-middle">
             <thead>
               <tr>
-                <th>Nome</th>
-                <th>Cliente</th>
-                <th>Empresa</th>
-                <th>Email</th>
-                <th>Telefone</th>
-                <th>Ações</th>
+                <th>{{ t('admin.contactos_cliente_name') }}</th>
+                <th>{{ t('admin.contactos_cliente_client') }}</th>
+                <th>{{ t('admin.contactos_cliente_company') }}</th>
+                <th>{{ t('admin.contactos_cliente_email') }}</th>
+                <th>{{ t('admin.contactos_cliente_phone') }}</th>
+                <th>{{ t('admin.contactos_cliente_actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -43,10 +43,10 @@
                 <td>{{ item.phone || '—' }}</td>
                 <td>
                   <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-info" @click="openDetail(item)" title="Ver Detalhe">
+                    <button class="btn btn-sm btn-outline-info" @click="openDetail(item)" :title="t('admin.contactos_cliente_detail')">
                       <i class="bi bi-eye"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" @click="openDelete(item)" title="Eliminar">
+                    <button class="btn btn-sm btn-outline-danger" @click="openDelete(item)" :title="t('common.delete')">
                       <i class="bi bi-trash"></i>
                     </button>
                   </div>
@@ -61,41 +61,41 @@
     <div v-if="showDetailModal" class="modal-overlay" @click.self="closeDetail">
       <div class="modal-content">
         <div class="modal-header">
-          <h5>Detalhe do Contacto</h5>
+          <h5>{{ t('admin.contactos_cliente_detail_title') }}</h5>
           <button class="btn-close" @click="closeDetail"></button>
         </div>
         <div class="modal-body">
           <div class="detail-row">
-            <label class="form-label fw-bold">Nome</label>
+            <label class="form-label fw-bold">{{ t('admin.contactos_cliente_name') }}</label>
             <p>{{ detailItem?.name || '—' }}</p>
           </div>
           <div class="detail-row">
-            <label class="form-label fw-bold">Email</label>
+            <label class="form-label fw-bold">{{ t('admin.contactos_cliente_email') }}</label>
             <p>{{ detailItem?.email || '—' }}</p>
           </div>
           <div class="detail-row">
-            <label class="form-label fw-bold">Telefone</label>
+            <label class="form-label fw-bold">{{ t('admin.contactos_cliente_phone') }}</label>
             <p>{{ detailItem?.phone || '—' }}</p>
           </div>
           <div class="detail-row">
-            <label class="form-label fw-bold">Empresa</label>
+            <label class="form-label fw-bold">{{ t('admin.contactos_cliente_company') }}</label>
             <p>{{ detailItem?.company || '—' }}</p>
           </div>
           <div class="detail-row">
-            <label class="form-label fw-bold">Cliente</label>
+            <label class="form-label fw-bold">{{ t('admin.contactos_cliente_client') }}</label>
             <p>{{ detailItem?.company_name || detailItem?.client_name || '—' }}</p>
           </div>
           <div class="detail-row">
-            <label class="form-label fw-bold">Assunto</label>
+            <label class="form-label fw-bold">{{ t('admin.contactos_cliente_subject') }}</label>
             <p>{{ detailItem?.subject || '—' }}</p>
           </div>
           <div class="detail-row">
-            <label class="form-label fw-bold">Mensagem</label>
+            <label class="form-label fw-bold">{{ t('admin.contactos_cliente_message') }}</label>
             <p class="message-text">{{ detailItem?.message || '—' }}</p>
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" @click="closeDetail">Fechar</button>
+          <button class="btn btn-secondary" @click="closeDetail">{{ t('common.close') }}</button>
         </div>
       </div>
     </div>
@@ -103,18 +103,18 @@
     <div v-if="showDeleteModal" class="modal-overlay" @click.self="closeDelete">
       <div class="modal-content modal-sm">
         <div class="modal-header">
-          <h5>Confirmar Eliminação</h5>
+          <h5>{{ t('common.confirm') }}</h5>
           <button class="btn-close" @click="closeDelete"></button>
         </div>
         <div class="modal-body">
-          <p>Tem certeza que deseja eliminar o contacto de <strong>{{ deleteItem?.name }}</strong>?</p>
-          <p class="text-muted small mb-0">Esta ação não pode ser desfeita.</p>
+          <p>{{ t('admin.contactos_cliente_confirm_delete') }} <strong>{{ deleteItem?.name }}</strong>?</p>
+          <p class="text-muted small mb-0">{{ t('admin.contactos_cliente_delete_warning') }}</p>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" @click="closeDelete">Cancelar</button>
+          <button class="btn btn-secondary" @click="closeDelete">{{ t('common.cancel') }}</button>
           <button class="btn btn-danger" @click="submitDelete" :disabled="deleting">
             <span v-if="deleting" class="spinner-border spinner-border-sm me-1"></span>
-            Eliminar
+            {{ t('common.delete') }}
           </button>
         </div>
       </div>
@@ -130,6 +130,9 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const items = ref([])
 const loading = ref(false)
@@ -180,11 +183,11 @@ const submitDelete = async () => {
   try {
     const { error } = await supabase.from('contactos').delete().eq('id', deleteItem.value.id)
     if (error) throw error
-    showToast('success', 'Contacto eliminado com sucesso.')
+    showToast('success', t('admin.contactos_cliente_success_delete'))
     closeDelete()
     fetchData()
   } catch (e) {
-    showToast('error', 'Erro ao eliminar contacto.')
+    showToast('error', t('admin.contactos_cliente_error_delete'))
   } finally { deleting.value = false }
 }
 

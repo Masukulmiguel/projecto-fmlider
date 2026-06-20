@@ -4,7 +4,7 @@
     <section class="sd-hero" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(${service.image})` }">
       <div class="container position-relative">
         <router-link to="/servicos" class="sd-back">
-          <i class="bi bi-arrow-left"></i> Voltar aos Serviços
+          <i class="bi bi-arrow-left"></i> {{ t('service_detail.back') }}
         </router-link>
         <div class="sd-hero-content">
           <div class="sd-icon"><i :class="service.icon"></i></div>
@@ -36,24 +36,24 @@
           <div class="col-lg-4">
             <div class="sd-sidebar">
               <div class="sd-cta-box">
-                <h4>Interessado neste serviço?</h4>
-                <p>Fale connosco para uma proposta personalizada.</p>
+                <h4>{{ t('service_detail.sidebar_title') }}</h4>
+                <p>{{ t('service_detail.sidebar_text') }}</p>
                 <router-link to="/contacto" class="btn btn-primary w-100 mb-2">
-                  <i class="bi bi-envelope me-2"></i> Solicitar Cotação
+                  <i class="bi bi-envelope me-2"></i> {{ t('service_detail.cta_quote') }}
                 </router-link>
                 <a href="tel:+244935141747" class="btn btn-outline-primary w-100">
-                  <i class="bi bi-telephone me-2"></i> Ligar Agora
+                  <i class="bi bi-telephone me-2"></i> {{ t('service_detail.cta_call') }}
                 </a>
               </div>
 
               <div class="sd-features-box">
-                <h5>Porquê a FMLider</h5>
+                <h5>{{ t('service_detail.features_title') }}</h5>
                 <ul>
-                  <li><i class="bi bi-shield-check"></i> Seguro All Risks</li>
-                  <li><i class="bi bi-speedometer"></i> Rastreamento GPS</li>
-                  <li><i class="bi bi-clock"></i> Entrega pontual</li>
-                  <li><i class="bi bi-people"></i> Equipas certificadas</li>
-                  <li><i class="bi bi-globe"></i> Cobertura global</li>
+                  <li><i class="bi bi-shield-check"></i> {{ t('service_detail.feature_1') }}</li>
+                  <li><i class="bi bi-speedometer"></i> {{ t('service_detail.feature_2') }}</li>
+                  <li><i class="bi bi-clock"></i> {{ t('service_detail.feature_3') }}</li>
+                  <li><i class="bi bi-people"></i> {{ t('service_detail.feature_4') }}</li>
+                  <li><i class="bi bi-globe"></i> {{ t('service_detail.feature_5') }}</li>
                 </ul>
               </div>
             </div>
@@ -67,8 +67,10 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from '@/composables/useI18n'
 
 const route = useRoute()
+const { t } = useI18n()
 
 const allServices = {
   'desembaraco-aduaneiro': {

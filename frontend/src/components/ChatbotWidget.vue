@@ -7,13 +7,13 @@
             <i class="bi bi-robot"></i>
           </div>
           <div class="chatbot-info">
-            <h6>Assistente FMLider</h6>
+            <h6>{{ t('chatbot.title') }}</h6>
             <span class="status">
               <span class="status-dot"></span>
-              Online · responde em segundos
+              {{ t('chatbot.status') }}
             </span>
           </div>
-          <button class="chatbot-close" @click="isOpen = false" aria-label="Fechar">
+          <button class="chatbot-close" @click="isOpen = false" :aria-label="t('chatbot.close')">
             <i class="bi bi-x-lg"></i>
           </button>
         </div>
@@ -48,23 +48,23 @@
           <input
             v-model="input"
             type="text"
-            placeholder="Escreve a tua mensagem…"
+            :placeholder="t('chatbot.input_placeholder')"
             :disabled="loading"
             maxlength="1000"
           />
-          <button type="submit" :disabled="!input.trim() || loading" aria-label="Enviar">
+          <button type="submit" :disabled="!input.trim() || loading" :aria-label="t('chatbot.send')">
             <i class="bi bi-send-fill"></i>
           </button>
         </form>
 
         <div class="chatbot-footer">
           <i class="bi bi-shield-check"></i>
-          Alimentado por IA · pode cometer erros
+          {{ t('chatbot.footer_text') }}
         </div>
       </div>
     </transition>
 
-    <button class="chatbot-toggle" :class="{ open: isOpen }" @click="isOpen = !isOpen" aria-label="Abrir chat">
+    <button class="chatbot-toggle" :class="{ open: isOpen }" @click="isOpen = !isOpen" :aria-label="t('chatbot.open_chat')">
       <i v-if="!isOpen" class="bi bi-chat-dots-fill"></i>
       <i v-else class="bi bi-x-lg"></i>
       <span v-if="!isOpen" class="chatbot-pulse"></span>
@@ -73,19 +73,22 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted } from 'vue'
+import { ref, computed, nextTick, onMounted } from 'vue'
+import { useI18n } from '@/composables/useI18n'
+
+const { t, locale } = useI18n()
 
 const isOpen = ref(false)
 const input = ref('')
 const loading = ref(false)
 const messages = ref([])
 const messagesRef = ref(null)
-const suggestions = [
-  'Quais serviços oferecem?',
-  'Como faço um embarque?',
-  'Onde fica a sede?',
-  'Têm FAQ?',
-]
+const suggestions = computed(() => [
+  t('chatbot.suggestion_1'),
+  t('chatbot.suggestion_2'),
+  t('chatbot.suggestion_3'),
+  t('chatbot.suggestion_4'),
+])
 
 const API_URL = import.meta.env.VITE_API_URL || ''
 const CHATBOT_URL = API_URL ? `${API_URL}/chatbot/chat` : '/api/chatbot/chat'
@@ -148,7 +151,7 @@ ${SERVICES.map((s, i) => `${i + 1}. ${s}`).join('\n')}
 8. Se a pergunta for sobre tracking, orienta a fazer login no site ou a ligar
 9. Cumprimenta de forma variada`
 
-const now = () => new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })
+const now = () => new Date().toLocaleTimeString(locale.value === 'pt' ? 'pt-PT' : locale.value === 'fr' ? 'fr-FR' : 'en-GB', { hour: '2-digit', minute: '2-digit' })
 
 const scrollDown = async () => {
   await nextTick()
@@ -193,7 +196,7 @@ const send = async (text) => {
     console.error('Chatbot error:', e)
     messages.value.push({
       role: 'bot',
-      text: `Ops! Tive um probleminha técnico. 😅 Podes tentar de novo ou liga-nos em ${COMPANY.phone}.`,
+      text: `${t('chatbot.error')} ${COMPANY.phone}.`,
       time: now(),
     })
   } finally {
@@ -205,7 +208,7 @@ const send = async (text) => {
 onMounted(() => {
   messages.value.push({
     role: 'bot',
-    text: 'Olá! Sou o assistente virtual da FMLider. Posso ajudar-te com informações sobre os nossos serviços de logística e transporte. Em que posso ajudar?',
+    text: t('chatbot.welcome'),
     time: now(),
   })
 })

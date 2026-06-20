@@ -2,12 +2,12 @@
   <div class="admin-visitors p-4 p-md-5">
     <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
       <div>
-        <h1 class="page-title"><i class="bi bi-globe2 me-2"></i>Visitantes</h1>
+        <h1 class="page-title"><i class="bi bi-globe2 me-2"></i>{{ t('admin.visitors_title') }}</h1>
         <p class="text-muted mb-0">Todos os acessos ao site público.</p>
       </div>
       <div class="d-flex gap-2 flex-wrap">
         <select v-model="deviceFilter" class="form-select form-select-sm" style="min-width: 140px;">
-          <option value="">Todos os dispositivos</option>
+          <option value="">{{ t('admin.embarques_all') }}</option>
           <option value="desktop">Desktop</option>
           <option value="mobile">Mobile</option>
           <option value="tablet">Tablet</option>
@@ -24,7 +24,7 @@
         <div class="mini-card">
           <i class="bi bi-eye-fill text-primary"></i>
           <div>
-            <div class="mini-label">Total de visitas</div>
+            <div class="mini-label">{{ t('admin.visitors_total') }}</div>
             <div class="mini-value">{{ data.total }}</div>
           </div>
         </div>
@@ -33,7 +33,7 @@
         <div class="mini-card">
           <i class="bi bi-people-fill text-info"></i>
           <div>
-            <div class="mini-label">Sessões únicas</div>
+            <div class="mini-label">{{ t('admin.visitors_unique') }}</div>
             <div class="mini-value">{{ data.unique_sessions }}</div>
           </div>
         </div>
@@ -61,14 +61,14 @@
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
         <h6 class="mb-0">Acessos recentes</h6>
-        <small class="text-muted">{{ filteredRecent.length }} de {{ data?.recent?.length || 0 }}</small>
+        <small class="text-muted">{{ filteredRecent.length }} {{ t('common.of') }} {{ data?.recent?.length || 0 }}</small>
       </div>
       <div class="table-responsive">
         <table class="table table-hover mb-0 align-middle">
           <thead>
             <tr>
               <th>IP</th>
-              <th>Localização</th>
+              <th>{{ t('admin.visitors_location') }}</th>
               <th>Sistema</th>
               <th>Browser</th>
               <th>Dispositivo</th>
@@ -117,6 +117,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const data = ref(null)
 const loading = ref(false)

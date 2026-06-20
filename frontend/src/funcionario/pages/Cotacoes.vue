@@ -2,8 +2,8 @@
   <div class="crud-page">
     <div class="page-header">
       <div>
-        <h1 class="page-title">Cotações</h1>
-        <p class="text-muted mb-0">Lista de cotações dos clientes.</p>
+        <h1 class="page-title">{{ t('funcionario.quotes_title') }}</h1>
+        <p class="text-muted mb-0">{{ t('funcionario.quotes_subtitle') }}</p>
       </div>
     </div>
     <div class="card">
@@ -11,18 +11,18 @@
         <div v-if="loading" class="text-center py-5"><div class="spinner-border text-primary"></div></div>
         <div v-else-if="items.length === 0" class="empty-state">
           <i class="bi bi-receipt"></i>
-          <p>Sem cotações.</p>
+          <p>{{ t('funcionario.quotes_empty') }}</p>
         </div>
         <div v-else class="table-responsive">
           <table class="table table-hover mb-0">
             <thead>
               <tr>
-                <th>Referência</th>
-                <th>Cliente</th>
-                <th>Rota</th>
-                <th>Valor</th>
-                <th>Status</th>
-                <th>Data</th>
+                <th>{{ t('funcionario.quotes_ref') }}</th>
+                <th>{{ t('funcionario.quotes_client') }}</th>
+                <th>{{ t('funcionario.quotes_route') }}</th>
+                <th>{{ t('funcionario.quotes_value') }}</th>
+                <th>{{ t('funcionario.quotes_status') }}</th>
+                <th>{{ t('funcionario.quotes_date') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -46,7 +46,9 @@
 import { ref, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const items = ref([])
 const loading = ref(false)

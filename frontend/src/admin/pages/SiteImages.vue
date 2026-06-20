@@ -1,19 +1,19 @@
 <template>
   <div class="admin-page p-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="mb-0">Imagens do Site</h2>
-      <button class="btn btn-primary" @click="openCreateModal">+ Nova Imagem</button>
+      <h2 class="mb-0">{{ t('admin.site_images_title') }}</h2>
+      <button class="btn btn-primary" @click="openCreateModal">+ {{ t('admin.site_images_new') }}</button>
     </div>
 
     <div v-if="loading" class="text-center py-5">
       <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Carregando...</span>
+        <span class="visually-hidden">{{ t('admin.site_images_loading') }}</span>
       </div>
     </div>
 
     <div v-else-if="images.length === 0" class="card">
       <div class="card-body text-center py-5 text-muted">
-        Nenhuma imagem encontrada.
+        {{ t('admin.site_images_empty') }}
       </div>
     </div>
 
@@ -27,11 +27,11 @@
           <table class="table table-hover mb-0">
             <thead class="table-light">
               <tr>
-                <th>Chave</th>
-                <th>Imagem</th>
-                <th>Texto Alternativo</th>
-                <th>Status</th>
-                <th class="text-end">Ações</th>
+                <th>{{ t('admin.site_images_key') }}</th>
+                <th>{{ t('admin.site_images_image') }}</th>
+                <th>{{ t('admin.site_images_alt') }}</th>
+                <th>{{ t('admin.site_images_status') }}</th>
+                <th class="text-end">{{ t('admin.site_images_actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -46,20 +46,20 @@
                     :alt="img.alt_text"
                     class="site-img-thumb"
                   />
-                  <span v-else class="text-muted">Sem imagem</span>
+                  <span v-else class="text-muted">{{ t('admin.site_images_no_image') }}</span>
                 </td>
                 <td class="align-middle">{{ img.alt_text || '—' }}</td>
                 <td class="align-middle">
                   <span :class="img.status ? 'badge bg-success' : 'badge bg-secondary'">
-                    {{ img.status ? 'Ativo' : 'Inativo' }}
+                    {{ img.status ? t('admin.site_images_active') : t('admin.site_images_inactive') }}
                   </span>
                 </td>
                 <td class="align-middle text-end">
                   <button class="btn btn-sm btn-outline-primary me-2" @click="openEditModal(img)">
-                    Editar
+                    {{ t('admin.site_images_edit') }}
                   </button>
                   <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(img)">
-                    Deletar
+                    {{ t('admin.site_images_delete') }}
                   </button>
                 </td>
               </tr>
@@ -74,27 +74,27 @@
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ editing ? 'Editar Imagem' : 'Nova Imagem' }}</h5>
+            <h5 class="modal-title">{{ editing ? t('admin.site_images_title') : t('admin.site_images_new') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <form @submit.prevent="submitForm">
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Secção *</label>
+                  <label class="form-label">{{ t('admin.site_images_section') }} *</label>
                   <select v-model="form.section" class="form-select" required>
-                    <option value="">Selecionar secção...</option>
+                    <option value="">{{ t('admin.site_images_select_section') }}</option>
                     <option v-for="(label, key) in sectionLabels" :key="key" :value="key">{{ label }}</option>
                   </select>
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Chave *</label>
+                  <label class="form-label">{{ t('admin.site_images_key_label') }} *</label>
                   <input v-model="form.key" type="text" class="form-control" placeholder="ex: logo, hero_bg" required />
                 </div>
               </div>
 
               <div class="mb-3">
-                <label class="form-label">Imagem</label>
+                <label class="form-label">{{ t('admin.site_images_image') }}</label>
                 <input ref="imageInput" type="file" class="form-control" accept="image/*" @change="handleImageChange" />
                 <div v-if="imagePreview || form.image_url" class="mt-2">
                   <img :src="imagePreview || form.image_url" alt="Preview" class="site-img-preview" />
@@ -102,29 +102,29 @@
               </div>
 
               <div class="mb-3">
-                <label class="form-label">URL da Imagem (alternativo ao upload)</label>
+                <label class="form-label">{{ t('admin.site_images_image_url') }}</label>
                 <input v-model="form.image_url" type="url" class="form-control" placeholder="https://... ou /assets/img/..." />
               </div>
 
               <div class="mb-3">
-                <label class="form-label">Texto Alternativo</label>
+                <label class="form-label">{{ t('admin.site_images_alt_text') }}</label>
                 <input v-model="form.alt_text" type="text" class="form-control" placeholder="Descrição da imagem" />
               </div>
 
               <div class="mb-3">
-                <label class="form-label">Status</label>
+                <label class="form-label">{{ t('admin.site_images_status_label') }}</label>
                 <div class="form-check form-switch mt-2">
                   <input v-model="form.status" class="form-check-input" type="checkbox" id="imgStatus" />
-                  <label class="form-check-label" for="imgStatus">{{ form.status ? 'Ativo' : 'Inativo' }}</label>
+                  <label class="form-check-label" for="imgStatus">{{ form.status ? t('admin.site_images_active') : t('admin.site_images_inactive') }}</label>
                 </div>
               </div>
             </form>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
             <button type="button" class="btn btn-primary" :disabled="submitting" @click="submitForm">
               <span v-if="submitting" class="spinner-border spinner-border-sm me-1"></span>
-              {{ editing ? 'Salvar' : 'Criar' }}
+              {{ editing ? t('common.save') : t('admin.site_images_new') }}
             </button>
           </div>
         </div>
@@ -136,18 +136,18 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Confirmar Exclusão</h5>
+            <h5 class="modal-title">{{ t('common.confirm') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            Tem certeza que deseja deletar a imagem
+            {{ t('admin.site_images_confirm_delete') }}
             <strong>{{ imageToDelete?.section }}/{{ imageToDelete?.key }}</strong>?
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
             <button type="button" class="btn btn-danger" :disabled="deleting" @click="deleteImage">
               <span v-if="deleting" class="spinner-border spinner-border-sm me-1"></span>
-              Deletar
+              {{ t('admin.site_images_delete') }}
             </button>
           </div>
         </div>
@@ -160,6 +160,9 @@
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const images = ref([])
 const loading = ref(false)
@@ -178,17 +181,17 @@ const imageInput = ref(null)
 let formModalInstance = null
 let deleteModalInstance = null
 
-const sectionLabels = {
-  header: 'Cabeçalho (Header)',
-  footer: 'Rodapé (Footer)',
-  sidebar: 'Barras Laterais',
-  home: 'Página Inicial',
-  about: 'Sobre Nós',
-  fleet: 'Frota',
-  services: 'Serviços',
-  news: 'Notícias',
-  gallery: 'Galeria',
-}
+const sectionLabels = computed(() => ({
+  header: t('admin.site_images_section_header'),
+  footer: t('admin.site_images_section_footer'),
+  sidebar: t('admin.site_images_section_sidebar'),
+  home: t('admin.site_images_section_home'),
+  about: t('admin.site_images_section_about'),
+  fleet: t('admin.site_images_section_fleet'),
+  services: t('admin.site_images_section_services'),
+  news: t('admin.site_images_section_news'),
+  gallery: t('admin.site_images_section_gallery'),
+}))
 
 const form = reactive({
   section: '',
@@ -268,7 +271,7 @@ async function uploadImage() {
 
 async function submitForm() {
   if (!form.section || !form.key.trim()) {
-    alert('Secção e Chave são obrigatórios.')
+    alert(t('admin.site_images_section_key_required'))
     return
   }
   submitting.value = true
@@ -295,7 +298,7 @@ async function submitForm() {
     await fetchImages()
   } catch (err) {
     console.error('Erro ao salvar imagem:', err)
-    alert('Erro ao salvar: ' + (err?.message || JSON.stringify(err)))
+    alert(t('admin.site_images_error_saving') + (err?.message || JSON.stringify(err)))
   } finally {
     submitting.value = false
   }
@@ -316,7 +319,7 @@ async function deleteImage() {
     await fetchImages()
   } catch (err) {
     console.error('Erro ao deletar:', err)
-    alert('Erro ao deletar imagem.')
+    alert(t('admin.site_images_error_deleting'))
   } finally {
     deleting.value = false
   }

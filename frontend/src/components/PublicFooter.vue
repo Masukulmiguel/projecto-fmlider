@@ -9,7 +9,7 @@
               <h4 class="footer-title">{{ settings.company_name || 'FMLider' }}</h4>
             </div>
             <p class="footer-desc">
-              {{ settings.company_description || 'Soluções integradas de logística, transporte e serviços de transitário em Angola. Ligamos o seu negócio ao mundo desde 2017.' }}
+              {{ settings.company_description || t('footer.description') }}
             </p>
             <div class="social-links">
               <a v-if="settings.facebook" :href="settings.facebook" target="_blank" rel="noopener" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
@@ -26,36 +26,36 @@
           </div>
 
           <div class="col-lg-2 col-md-6 col-6">
-            <h6 class="footer-heading">Empresa</h6>
+            <h6 class="footer-heading">{{ t('footer.section_company') }}</h6>
             <ul class="footer-links">
-              <li><router-link to="/sobre">Sobre Nós</router-link></li>
-              <li><router-link to="/servicos">Serviços</router-link></li>
-              <li><router-link to="/frota">Frota</router-link></li>
-              <li><router-link to="/parceiros">Parceiros</router-link></li>
-              <li><router-link to="/noticias">Notícias</router-link></li>
-              <li><router-link to="/galeria">Galeria</router-link></li>
+              <li><router-link to="/sobre">{{ t('footer.link_about') }}</router-link></li>
+              <li><router-link to="/servicos">{{ t('footer.link_services') }}</router-link></li>
+              <li><router-link to="/frota">{{ t('footer.link_fleet') }}</router-link></li>
+              <li><router-link to="/parceiros">{{ t('footer.link_partners') }}</router-link></li>
+              <li><router-link to="/noticias">{{ t('footer.link_news') }}</router-link></li>
+              <li><router-link to="/galeria">{{ t('footer.link_gallery') }}</router-link></li>
             </ul>
           </div>
 
           <div class="col-lg-3 col-md-6 col-6">
-            <h6 class="footer-heading">Áreas de Cliente</h6>
+            <h6 class="footer-heading">{{ t('footer.section_client') }}</h6>
             <ul class="footer-links">
-              <li><router-link to="/clientes">Nossos Clientes</router-link></li>
-              <li><router-link to="/login">Iniciar Sessão</router-link></li>
-              <li><router-link to="/registro">Criar Conta</router-link></li>
-              <li><router-link to="/dashboard">Dashboard</router-link></li>
-              <li><router-link to="/embarques">Rastrear Envio</router-link></li>
-              <li><router-link to="/cotacoes/novo">Pedir Cotação</router-link></li>
+              <li><router-link to="/clientes">{{ t('footer.link_clients') }}</router-link></li>
+              <li><router-link to="/login">{{ t('footer.link_login') }}</router-link></li>
+              <li><router-link to="/registro">{{ t('footer.link_register') }}</router-link></li>
+              <li><router-link to="/dashboard">{{ t('footer.link_dashboard') }}</router-link></li>
+              <li><router-link to="/embarques">{{ t('footer.link_tracking') }}</router-link></li>
+              <li><router-link to="/cotacoes/novo">{{ t('footer.link_quote') }}</router-link></li>
             </ul>
           </div>
 
           <div class="col-lg-3 col-md-6">
-            <h6 class="footer-heading">Contacto</h6>
+            <h6 class="footer-heading">{{ t('footer.section_contact') }}</h6>
             <ul class="footer-contact">
-              <li><i class="bi bi-geo-alt-fill"></i> {{ settings.address || 'FMLider Base, Estrada da Pedreira, Bairro da Vidrul, Cacuaco, Luanda' }}</li>
+              <li><i class="bi bi-geo-alt-fill"></i> {{ settings.address || t('footer.address') }}</li>
               <li><i class="bi bi-telephone-fill"></i> <a :href="phoneUrl">{{ settings.phone || '+244 935 141 747' }}</a></li>
               <li><i class="bi bi-envelope-fill"></i> <a :href="emailUrl">{{ settings.email || 'geral@fmlider.co.ao' }}</a></li>
-              <li><i class="bi bi-clock-fill"></i> {{ settings.working_hours || 'Seg–Sex 08:00–18:00 · Sáb 08:00–13:00' }}</li>
+              <li><i class="bi bi-clock-fill"></i> {{ settings.working_hours || t('footer.working_hours') }}</li>
             </ul>
           </div>
         </div>
@@ -65,10 +65,10 @@
     <div class="footer-bottom">
       <div class="container">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-          <p class="mb-0">© {{ year }} {{ settings.company_name || 'FMLider' }} — Logística, Transporte e Serviços, Lda. Todos os direitos reservados.</p>
+          <p class="mb-0">© {{ year }} {{ settings.company_name || 'FMLider' }} — {{ t('footer.copyright') }}</p>
           <ul class="legal-links">
-            <li><router-link to="/termos">Termos e Condições</router-link></li>
-            <li><router-link to="/politicas">Política de Privacidade</router-link></li>
+            <li><router-link to="/termos">{{ t('footer.terms') }}</router-link></li>
+            <li><router-link to="/politicas">{{ t('footer.privacy') }}</router-link></li>
           </ul>
         </div>
       </div>
@@ -80,18 +80,17 @@
 import { ref, computed, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useSiteImages } from '@/composables/useSiteImages'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const { getImage, fetchAll } = useSiteImages()
 const logoUrl = ref('/assets/img/logo.png')
 const year = new Date().getFullYear()
 
 const defaults = {
   company_name: 'FMLider',
-  company_description: 'Soluções integradas de logística, transporte e serviços de transitário em Angola. Ligamos o seu negócio ao mundo desde 2017.',
   phone: '+244 935 141 747',
   email: 'geral@fmlider.co.ao',
-  address: 'FMLider Base, Estrada da Pedreira, Bairro da Vidrul, Cacuaco, Luanda',
-  working_hours: 'Seg–Sex 08:00–18:00 · Sáb 08:00–13:00',
   facebook: '',
   instagram: '',
   linkedin: '',

@@ -21,15 +21,15 @@
                   <div class="brand-logo animate-pop">
                     <img src="/assets/img/logo.png" alt="FMLider">
                   </div>
-                  <h2 class="brand-title animate-fade-up delay-1">Junte-se a nós</h2>
+                  <h2 class="brand-title animate-fade-up delay-1">{{ t('auth.register_subtitle') }}</h2>
                   <p class="brand-subtitle animate-fade-up delay-2">
                     <span class="typewriter">{{ typedSubtitle }}</span><span class="cursor">|</span>
                   </p>
                   <ul class="brand-features animate-fade-up delay-3">
-                    <li><span class="feature-icon">✓</span> Registo gratuito</li>
-                    <li><span class="feature-icon">✓</span> Aprovação rápida</li>
-                    <li><span class="feature-icon">✓</span> Dashboard personalizado</li>
-                    <li><span class="feature-icon">✓</span> Suporte dedicado</li>
+                    <li><span class="feature-icon">✓</span> {{ t('auth.register_feat_1') }}</li>
+                    <li><span class="feature-icon">✓</span> {{ t('auth.register_feat_2') }}</li>
+                    <li><span class="feature-icon">✓</span> {{ t('auth.register_feat_3') }}</li>
+                    <li><span class="feature-icon">✓</span> {{ t('auth.register_feat_4') }}</li>
                   </ul>
                 </div>
               </div>
@@ -41,8 +41,8 @@
                   </div>
 
                   <div class="form-header animate-fade-up">
-                    <h1 class="form-title">Criar Conta</h1>
-                    <p class="form-subtitle">Comece agora a sua jornada connosco.</p>
+                    <h1 class="form-title">{{ t('auth.register_title') }}</h1>
+                    <p class="form-subtitle">{{ t('auth.register_form_subtitle') }}</p>
                   </div>
 
                   <div v-if="successMessage" class="alert alert-success animate-fade-in" role="alert">
@@ -56,15 +56,15 @@
                     <div class="row">
                       <div class="col-md-6 mb-3 animate-fade-up delay-1">
                         <div class="form-floating">
-                          <input type="text" class="form-control" :class="{'is-invalid': errors.username}" id="username" v-model="form.username" placeholder="Utilizador" required>
-                          <label for="username">Nome de utilizador *</label>
+                          <input type="text" class="form-control" :class="{'is-invalid': errors.username}" id="username" v-model="form.username" :placeholder="t('auth.register_username')" required>
+                          <label for="username">{{ t('auth.register_username') }} *</label>
                           <div class="invalid-feedback">{{ errors.username }}</div>
                         </div>
                       </div>
                       <div class="col-md-6 mb-3 animate-fade-up delay-1">
                         <div class="form-floating">
-                          <input type="text" class="form-control" :class="{'is-invalid': errors.name}" id="name" v-model="form.name" placeholder="Nome completo" required>
-                          <label for="name">Nome completo *</label>
+                          <input type="text" class="form-control" :class="{'is-invalid': errors.name}" id="name" v-model="form.name" :placeholder="t('auth.register_name')" required>
+                          <label for="name">{{ t('auth.register_name') }} *</label>
                           <div class="invalid-feedback">{{ errors.name }}</div>
                         </div>
                       </div>
@@ -72,16 +72,16 @@
 
                     <div class="mb-3 animate-fade-up delay-2">
                       <div class="form-floating">
-                        <input type="email" class="form-control" :class="{'is-invalid': errors.email}" id="email" v-model="form.email" placeholder="Email" required>
-                        <label for="email">Email *</label>
+                        <input type="email" class="form-control" :class="{'is-invalid': errors.email}" id="email" v-model="form.email" :placeholder="t('auth.register_email')" required>
+                        <label for="email">{{ t('auth.register_email') }} *</label>
                         <div class="invalid-feedback">{{ errors.email }}</div>
                       </div>
                     </div>
 
                     <div class="mb-3 animate-fade-up delay-2">
                       <div class="form-floating">
-                        <input type="tel" class="form-control" :class="{'is-invalid': errors.phone}" id="phone" v-model="form.phone" placeholder="Telefone" required>
-                        <label for="phone">Número de telefone *</label>
+                        <input type="tel" class="form-control" :class="{'is-invalid': errors.phone}" id="phone" v-model="form.phone" :placeholder="t('auth.register_phone')" required>
+                        <label for="phone">{{ t('auth.register_phone') }} *</label>
                         <div class="invalid-feedback">{{ errors.phone }}</div>
                       </div>
                     </div>
@@ -89,15 +89,15 @@
                     <div class="row">
                       <div class="col-md-6 mb-3 animate-fade-up delay-3">
                         <div class="form-floating">
-                          <input type="password" class="form-control" :class="{'is-invalid': errors.password}" id="password" v-model="form.password" placeholder="Senha" required>
-                          <label for="password">Senha *</label>
+                          <input type="password" class="form-control" :class="{'is-invalid': errors.password}" id="password" v-model="form.password" :placeholder="t('auth.register_password')" required>
+                          <label for="password">{{ t('auth.register_password') }} *</label>
                           <div class="invalid-feedback">{{ errors.password }}</div>
                         </div>
                       </div>
                       <div class="col-md-6 mb-3 animate-fade-up delay-3">
                         <div class="form-floating">
-                          <input type="password" class="form-control" :class="{'is-invalid': errors.password_confirm}" id="password_confirm" v-model="form.password_confirm" placeholder="Confirmar" required>
-                          <label for="password_confirm">Confirmar senha *</label>
+                          <input type="password" class="form-control" :class="{'is-invalid': errors.password_confirm}" id="password_confirm" v-model="form.password_confirm" :placeholder="t('auth.register_confirm_password')" required>
+                          <label for="password_confirm">{{ t('auth.register_confirm_password') }} *</label>
                           <div class="invalid-feedback">{{ errors.password_confirm }}</div>
                         </div>
                       </div>
@@ -106,17 +106,17 @@
                     <div class="form-check mb-4 animate-fade-up delay-4">
                       <input class="form-check-input" type="checkbox" id="terms" v-model="form.acceptTerms" required>
                       <label class="form-check-label" for="terms">
-                        Aceito os <a href="#" class="link-primary">termos e condições</a>
+                        {{ t('auth.register_terms_text') }} <a href="#" class="link-primary">{{ t('auth.register_terms_link') }}</a>
                       </label>
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100 register-btn animate-fade-up delay-4" :disabled="loading">
                       <span v-if="loading" class="d-flex align-items-center justify-content-center gap-2">
                         <span class="spinner-border spinner-border-sm" role="status"></span>
-                        A registar...
+                        {{ t('auth.register_loading') }}
                       </span>
                       <span v-else class="d-flex align-items-center justify-content-center gap-2">
-                        Criar conta
+                        {{ t('auth.register_submit') }}
                         <span class="arrow">→</span>
                       </span>
                     </button>
@@ -124,7 +124,7 @@
 
                   <div class="links animate-fade-up delay-4">
                     <p class="text-center mb-0">
-                      Já tem conta? <router-link to="/login" class="link-primary">Entrar</router-link>
+                      {{ t('auth.register_has_account') }} <router-link to="/login" class="link-primary">{{ t('auth.register_login') }}</router-link>
                     </p>
                   </div>
                 </div>
@@ -138,12 +138,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from '@/composables/useI18n'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 const form = reactive({
   username: '',
@@ -160,12 +162,12 @@ const successMessage = ref('')
 const errorMessage = ref('')
 const loading = ref(false)
 
-const subtitles = [
-  'Crie a sua conta em segundos.',
-  'Aprovação em poucas horas.',
-  'O seu dashboard à distância de um clique.',
-  'Transparência em cada etapa.'
-]
+const subtitles = computed(() => [
+  t('auth.register_typewriter_1'),
+  t('auth.register_typewriter_2'),
+  t('auth.register_typewriter_3'),
+  t('auth.register_typewriter_4')
+])
 
 const typedSubtitle = ref('')
 let typeTimeout = null
@@ -183,13 +185,13 @@ const eraseSubtitle = (text) => {
   if (text.length > 0) {
     typeSubtitle(text.substring(0, text.length - 1))
   } else {
-    const next = subtitles[(subtitles.indexOf(text) + 1) % subtitles.length]
+    const next = subtitles.value[(subtitles.value.indexOf(text) + 1) % subtitles.value.length]
     typeTimeout = setTimeout(() => typeSubtitle(next), 600)
   }
 }
 
 onMounted(() => {
-  typeSubtitle(subtitles[0])
+  typeSubtitle(subtitles.value[0])
 })
 
 onBeforeUnmount(() => {
@@ -202,7 +204,7 @@ const handleRegister = async () => {
   errorMessage.value = ''
 
   if (!form.acceptTerms) {
-    errorMessage.value = 'Deve aceitar os termos e condições.'
+    errorMessage.value = t('auth.register_accept_terms')
     return
   }
 
@@ -218,7 +220,7 @@ const handleRegister = async () => {
   loading.value = false
 
   if (result.success) {
-    successMessage.value = result.message || 'Conta criada! Aguarde aprovação do administrador.'
+    successMessage.value = result.message || t('auth.register_success')
     setTimeout(() => router.push('/login'), 2500)
   } else {
     errorMessage.value = result.error

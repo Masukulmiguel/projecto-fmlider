@@ -1,9 +1,9 @@
 <template>
   <div class="admin-page p-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="mb-0">Galeria</h2>
+      <h2 class="mb-0">{{ t('admin.gallery_title') }}</h2>
       <button class="btn btn-primary" @click="openAddModal">
-        <i class="bi bi-plus-lg me-1"></i> Adicionar Imagem
+        <i class="bi bi-plus-lg me-1"></i> {{ t('admin.gallery_add') }}
       </button>
     </div>
 
@@ -26,13 +26,13 @@
         </div>
         <div class="card-body p-2">
           <h6 class="card-title mb-1 text-truncate">{{ item.title }}</h6>
-          <span class="badge bg-secondary mb-1">{{ item.category || 'Sem categoria' }}</span>
+          <span class="badge bg-secondary mb-1">{{ item.category || t('admin.gallery_no_category') }}</span>
           <p class="card-text small text-muted mb-1 text-truncate-2">{{ item.description }}</p>
-          <small class="text-muted">Ordem: {{ item.order_by || 0 }}</small>
+          <small class="text-muted">{{ t('admin.gallery_order') }}: {{ item.order_by || 0 }}</small>
         </div>
         <div class="card-footer bg-transparent border-0 p-2 pt-0">
           <button class="btn btn-sm btn-outline-danger w-100" @click="confirmDelete(item)">
-            <i class="bi bi-trash me-1"></i> Deletar
+            <i class="bi bi-trash me-1"></i> {{ t('admin.gallery_delete') }}
           </button>
         </div>
       </div>
@@ -43,7 +43,7 @@
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ editingId ? 'Editar Imagem' : 'Adicionar Imagem' }}</h5>
+            <h5 class="modal-title">{{ editingId ? t('admin.gallery_title') : t('admin.gallery_add') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
@@ -122,7 +122,7 @@
       <div class="modal-dialog modal-sm modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Confirmar exclusão</h5>
+            <h5 class="modal-title">{{ t('common.confirm') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
@@ -155,6 +155,9 @@
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const gallery = ref([])
 const loading = ref(true)

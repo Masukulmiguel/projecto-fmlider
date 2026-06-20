@@ -2,11 +2,11 @@
   <div class="crud-page">
     <div class="page-header">
       <div>
-        <h1 class="page-title">Cotações</h1>
-        <p class="text-muted mb-0">Gerencie os pedidos de cotação.</p>
+        <h1 class="page-title">{{ t('cliente.cotacoes_title') }}</h1>
+        <p class="text-muted mb-0">{{ t('cliente.cotacoes_subtitle') }}</p>
       </div>
       <router-link to="/cotacoes/novo" class="btn btn-primary">
-        <i class="bi bi-plus-lg me-1"></i> Nova cotação
+        <i class="bi bi-plus-lg me-1"></i> {{ t('cliente.cotacoes_new') }}
       </router-link>
     </div>
 
@@ -14,28 +14,28 @@
       <div class="stat-card">
         <div class="stat-icon bg-primary-soft"><i class="bi bi-file-text"></i></div>
         <div>
-          <div class="stat-label">Total</div>
+          <div class="stat-label">{{ t('cliente.cotacoes_total') }}</div>
           <div class="stat-value">{{ stats.total || 0 }}</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon bg-warning-soft"><i class="bi bi-hourglass-split"></i></div>
         <div>
-          <div class="stat-label">Pendentes</div>
+          <div class="stat-label">{{ t('cliente.cotacoes_pending') }}</div>
           <div class="stat-value">{{ stats.pendente || 0 }}</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon bg-success-soft"><i class="bi bi-check-circle"></i></div>
         <div>
-          <div class="stat-label">Aprovadas</div>
+          <div class="stat-label">{{ t('cliente.cotacoes_approved') }}</div>
           <div class="stat-value">{{ stats.aprovada || 0 }}</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon bg-danger-soft"><i class="bi bi-x-circle"></i></div>
         <div>
-          <div class="stat-label">Rejeitadas</div>
+          <div class="stat-label">{{ t('cliente.cotacoes_rejected') }}</div>
           <div class="stat-value">{{ stats.rejeitada || 0 }}</div>
         </div>
       </div>
@@ -46,14 +46,14 @@
         <div class="filters">
           <div class="search-box">
             <i class="bi bi-search"></i>
-            <input v-model="filters.q" type="text" placeholder="Pesquisar por referência, origem, destino..." @input="debounceSearch">
+            <input v-model="filters.q" type="text" :placeholder="t('cliente.cotacoes_search')" @input="debounceSearch">
           </div>
           <select v-model="filters.status" class="form-select" @change="fetchData">
-            <option value="">Todos os estados</option>
-            <option value="pendente">Pendente</option>
-            <option value="aprovada">Aprovada</option>
-            <option value="rejeitada">Rejeitada</option>
-            <option value="expirada">Expirada</option>
+            <option value="">{{ t('cliente.cotacoes_all_statuses') }}</option>
+            <option value="pendente">{{ t('cliente.cotacoes_status_pendente') }}</option>
+            <option value="aprovada">{{ t('cliente.cotacoes_status_aprovada') }}</option>
+            <option value="rejeitada">{{ t('cliente.cotacoes_status_rejeitada') }}</option>
+            <option value="expirada">{{ t('cliente.cotacoes_status_expirada') }}</option>
           </select>
         </div>
       </div>
@@ -63,22 +63,22 @@
         </div>
         <div v-else-if="items.length === 0" class="empty-state">
           <i class="bi bi-receipt"></i>
-          <p>Nenhuma cotação encontrada.</p>
+          <p>{{ t('cliente.cotacoes_empty') }}</p>
           <router-link to="/cotacoes/novo" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-lg me-1"></i> Criar primeira cotação
+            <i class="bi bi-plus-lg me-1"></i> {{ t('cliente.cotacoes_create_first') }}
           </router-link>
         </div>
         <div v-else class="table-responsive">
           <table class="table table-hover mb-0">
             <thead>
               <tr>
-                <th>Referência</th>
-                <th>Rota</th>
-                <th>Tipo</th>
-                <th>Peso</th>
-                <th>Valor estimado</th>
-                <th>Estado</th>
-                <th class="text-end">Ações</th>
+                <th>{{ t('cliente.cotacoes_col_reference') }}</th>
+                <th>{{ t('cliente.cotacoes_col_route') }}</th>
+                <th>{{ t('cliente.cotacoes_col_type') }}</th>
+                <th>{{ t('cliente.cotacoes_col_weight') }}</th>
+                <th>{{ t('cliente.cotacoes_col_value') }}</th>
+                <th>{{ t('cliente.cotacoes_col_status') }}</th>
+                <th class="text-end">{{ t('cliente.cotacoes_col_actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -97,10 +97,10 @@
                 <td><span class="status-badge" :class="`status-${item.status}`">{{ statusLabel(item.status) }}</span></td>
                 <td class="text-end">
                   <div class="action-buttons">
-                    <router-link :to="`/cotacoes/${item.id}/editar`" class="btn btn-sm btn-outline-primary" title="Editar">
+                    <router-link :to="`/cotacoes/${item.id}/editar`" class="btn btn-sm btn-outline-primary" :title="t('cliente.cotacoes_edit')">
                       <i class="bi bi-pencil"></i>
                     </router-link>
-                    <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(item)" title="Eliminar">
+                    <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(item)" :title="t('cliente.cotacoes_delete')">
                       <i class="bi bi-trash"></i>
                     </button>
                   </div>
@@ -118,7 +118,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const items = ref([])
 const stats = ref({})
@@ -159,16 +161,16 @@ const fetchData = async () => {
 const debounceSearch = () => { clearTimeout(searchTimer); searchTimer = setTimeout(fetchData, 300) }
 
 const confirmDelete = async (item) => {
-  if (!confirm(`Eliminar cotação ${item.reference}?`)) return
+  if (!confirm(`${t('cliente.cotacoes_confirm_delete')} ${item.reference}?`)) return
   try {
     const { error } = await supabase.from('cotacoes').delete().eq('id', item.id)
     if (error) throw error
     await fetchData()
-  } catch (e) { alert('Erro ao eliminar') }
+  } catch (e) { alert(t('cliente.cotacoes_error_deleting')) }
 }
 
-const typeLabel = (t) => ({ maritimo: 'Marítimo', aereo: 'Aéreo', terrestre: 'Terrestre', ferroviario: 'Ferroviário', multimodal: 'Multimodal' }[t] || t)
-const statusLabel = (s) => ({ pendente: 'Pendente', aprovada: 'Aprovada', rejeitada: 'Rejeitada', expirada: 'Expirada' }[s] || s)
+const typeLabel = (type) => ({ maritimo: t('cliente.cotacoes_type_maritimo'), aereo: t('cliente.cotacoes_type_aereo'), terrestre: t('cliente.cotacoes_type_terrestre'), ferroviario: t('cliente.cotacoes_type_ferroviario'), multimodal: t('cliente.cotacoes_type_multimodal') }[type] || type)
+const statusLabel = (status) => ({ pendente: t('cliente.cotacoes_status_pendente'), aprovada: t('cliente.cotacoes_status_aprovada'), rejeitada: t('cliente.cotacoes_status_rejeitada'), expirada: t('cliente.cotacoes_status_expirada') }[status] || status)
 const formatCurrency = (v, c) => v ? new Intl.NumberFormat('pt-AO', { style: 'currency', currency: c || 'AOA', maximumFractionDigits: 0 }).format(v) : '—'
 
 onMounted(() => { fetchData(); fetchStats() })

@@ -1,6 +1,6 @@
 <template>
   <div class="funcionario-profile p-4 p-md-5">
-    <h1 class="page-title mb-4"><i class="bi bi-person-fill me-2"></i>Perfil</h1>
+    <h1 class="page-title mb-4"><i class="bi bi-person-fill me-2"></i>{{ t('funcionario.profile_title') }}</h1>
     <div class="row g-3">
       <div class="col-lg-4">
         <div class="card">
@@ -8,7 +8,7 @@
             <div class="avatar-wrapper" :class="{ 'has-photo': !!authStore.user?.photo }">
               <img v-if="authStore.user?.photo" :src="authStore.user.photo" :alt="authStore.user?.name" class="avatar-img">
               <div v-else class="avatar-xl">{{ initials(authStore.user?.name) }}</div>
-              <label class="avatar-upload-btn" :class="{ disabled: uploadingPhoto }" title="Alterar foto">
+              <label class="avatar-upload-btn" :class="{ disabled: uploadingPhoto }" :title="t('funcionario.profile_change_photo')">
                 <i class="bi bi-camera-fill"></i>
                 <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" @change="onPhotoChange" hidden>
               </label>
@@ -18,13 +18,13 @@
             </div>
             <h5 class="mt-3 mb-1">{{ authStore.user?.name }}</h5>
             <p class="text-muted small mb-2">{{ authStore.user?.email }}</p>
-            <span class="badge bg-success mb-2">{{ authStore.user?.position || 'Funcionário' }}</span>
+            <span class="badge bg-success mb-2">{{ authStore.user?.position || t('funcionario.profile_role') }}</span>
             <p class="text-muted small mb-0">@{{ authStore.user?.username }}</p>
           </div>
         </div>
 
         <div v-if="authStore.photoHistory && authStore.photoHistory.length > 1" class="card mt-3">
-          <div class="card-header"><h6 class="mb-0">Histórico de fotos</h6></div>
+          <div class="card-header"><h6 class="mb-0">{{ t('funcionario.profile_photo_history') }}</h6></div>
           <div class="card-body">
             <div class="photo-history">
               <div
@@ -36,42 +36,42 @@
                 @click="restorePhoto(p)"
               >
                 <img :src="p.photo" :alt="formatDate(p.created_at)">
-                <span v-if="p.is_current" class="badge bg-success current-badge">Atual</span>
+                <span v-if="p.is_current" class="badge bg-success current-badge">{{ t('funcionario.profile_current') }}</span>
               </div>
             </div>
-            <p class="text-muted small mb-0 mt-2">Clica numa foto antiga para a repor.</p>
+            <p class="text-muted small mb-0 mt-2">{{ t('funcionario.profile_select_old') }}</p>
           </div>
         </div>
       </div>
       <div class="col-lg-8">
         <div class="card">
-          <div class="card-header"><h6 class="mb-0">Dados pessoais</h6></div>
+          <div class="card-header"><h6 class="mb-0">{{ t('funcionario.profile_personal') }}</h6></div>
           <div class="card-body">
             <form @submit.prevent="save">
               <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
               <div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label">Nome *</label>
+                  <label class="form-label">{{ t('funcionario.profile_name') }} *</label>
                   <input v-model="form.name" type="text" class="form-control" required>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Telefone</label>
+                  <label class="form-label">{{ t('funcionario.profile_phone') }}</label>
                   <input v-model="form.phone" type="text" class="form-control">
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Email</label>
+                  <label class="form-label">{{ t('funcionario.profile_email') }}</label>
                   <input :value="authStore.user?.email" type="email" class="form-control" disabled>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Cargo</label>
-                  <input :value="authStore.user?.position || 'Funcionário'" type="text" class="form-control" disabled>
+                  <input :value="authStore.user?.position || t('funcionario.profile_role')" type="text" class="form-control" disabled>
                 </div>
               </div>
               <div class="mt-3 d-flex justify-content-end">
                 <button class="btn btn-primary" :disabled="saving">
                   <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
-                  Guardar alterações
+                  {{ t('funcionario.profile_save') }}
                 </button>
               </div>
             </form>
@@ -79,27 +79,27 @@
         </div>
 
         <div class="card mt-3">
-          <div class="card-header"><h6 class="mb-0">Alterar senha</h6></div>
+          <div class="card-header"><h6 class="mb-0">{{ t('funcionario.profile_change_password') }}</h6></div>
           <div class="card-body">
             <form @submit.prevent="changePassword">
               <div v-if="passwordError" class="alert alert-danger">{{ passwordError }}</div>
               <div v-if="passwordSuccess" class="alert alert-success">{{ passwordSuccess }}</div>
               <div class="row g-3">
                 <div class="col-md-4">
-                  <label class="form-label">Senha atual</label>
+                  <label class="form-label">{{ t('funcionario.profile_current_password') }}</label>
                   <input v-model="pwd.current" type="password" class="form-control" required>
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">Nova senha</label>
+                  <label class="form-label">{{ t('funcionario.profile_new_password') }}</label>
                   <input v-model="pwd.new" type="password" class="form-control" minlength="6" required>
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">Confirmar</label>
+                  <label class="form-label">{{ t('funcionario.profile_confirm_password') }}</label>
                   <input v-model="pwd.confirm" type="password" class="form-control" minlength="6" required>
                 </div>
               </div>
               <div class="mt-3 d-flex justify-content-end">
-                <button class="btn btn-outline-primary" :disabled="changingPwd">Alterar senha</button>
+                <button class="btn btn-outline-primary" :disabled="changingPwd">{{ t('funcionario.profile_change_password') }}</button>
               </div>
             </form>
           </div>
@@ -113,7 +113,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { supabase } from '@/lib/supabase'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const form = reactive({ name: '', phone: '' })
 const pwd = reactive({ current: '', new: '', confirm: '' })
@@ -136,7 +138,7 @@ const save = async () => {
   try {
     const result = await authStore.updateProfile({ name: form.name, phone: form.phone })
     if (!result.success) throw new Error(result.error)
-    successMessage.value = 'Perfil atualizado.'
+    successMessage.value = t('funcionario.profile_save')
   } catch (e) {
     errorMessage.value = e.message || 'Erro ao guardar.'
   } finally {

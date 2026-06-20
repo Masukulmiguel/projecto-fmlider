@@ -2,8 +2,8 @@
   <div class="admin-messages-page">
     <div class="page-header">
       <div>
-        <h1 class="page-title"><i class="bi bi-chat-dots-fill me-2"></i>Mensagens</h1>
-        <p class="text-muted mb-0">Converse diretamente com os seus clientes.</p>
+        <h1 class="page-title"><i class="bi bi-chat-dots-fill me-2"></i>{{ t('admin.messages_title') }}</h1>
+        <p class="text-muted mb-0">{{ t('admin.messages_subtitle') }}</p>
       </div>
     </div>
     <ChatPanel
@@ -19,6 +19,9 @@
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import ChatPanel from '@/components/ChatPanel.vue'
 import { useChatStore } from '@/stores/chatStore'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const chatStore = useChatStore()
 const selected = ref(null)

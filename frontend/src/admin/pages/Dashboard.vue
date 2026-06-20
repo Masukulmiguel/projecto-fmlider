@@ -2,7 +2,7 @@
   <div class="admin-dashboard">
     <div class="dashboard-header">
       <div class="header-left">
-        <h1 class="welcome-title">Bem-vindo, Admin</h1>
+        <h1 class="welcome-title">{{ t('admin.dashboard_welcome') }}</h1>
         <p class="welcome-subtitle">{{ currentDate }}</p>
       </div>
       <div class="header-right">
@@ -46,7 +46,7 @@
               <i class="bi bi-people-fill"></i>
             </div>
             <div class="stat-content">
-              <div class="stat-label">Clientes</div>
+              <div class="stat-label">{{ t('admin.total_clients') }}</div>
               <div class="stat-value">{{ data.clients.total }}</div>
               <div class="stat-trend" :class="trendClass(data.clients.trend)">
                 <i class="bi" :class="trendIcon(data.clients.trend)"></i>
@@ -62,7 +62,7 @@
               <i class="bi bi-globe"></i>
             </div>
             <div class="stat-content">
-              <div class="stat-label">Visitantes</div>
+              <div class="stat-label">{{ t('admin.visitors_title') }}</div>
               <div class="stat-value">{{ data.visitors.total }}</div>
               <div class="stat-trend">
                 <span class="trend-info">{{ data.visitors.today }} hoje</span>
@@ -76,7 +76,7 @@
               <i class="bi bi-chat-dots-fill"></i>
             </div>
             <div class="stat-content">
-              <div class="stat-label">Mensagens</div>
+              <div class="stat-label">{{ t('admin.messages_title') }}</div>
               <div class="stat-value">{{ data.messages.total }}</div>
               <div class="stat-trend" v-if="data.messages.unread > 0">
                 <span class="trend-badge badge-warning">{{ data.messages.unread }} por ler</span>
@@ -142,7 +142,7 @@
             <div class="list-header">
               <h6 class="list-title">
                 <i class="bi bi-person-plus-fill"></i>
-                Clientes recentes
+                {{ t('admin.total_clients') }}
               </h6>
               <router-link to="/admin/utilizadores" class="list-action">
                 Ver todos <i class="bi bi-arrow-right"></i>
@@ -173,7 +173,7 @@
             <div class="list-header">
               <h6 class="list-title">
                 <i class="bi bi-chat-dots-fill"></i>
-                Mensagens recentes
+                {{ t('admin.messages_title') }}
               </h6>
               <router-link to="/admin/mensagens" class="list-action">
                 Ver chat <i class="bi bi-arrow-right"></i>
@@ -225,7 +225,7 @@
           <div v-if="resetSuccess" class="alert alert-success py-2">{{ resetSuccess }}</div>
         </div>
         <div class="reset-modal-footer">
-          <button class="btn btn-secondary" @click="showResetModal = false">Cancelar</button>
+          <button class="btn btn-secondary" @click="showResetModal = false">{{ t('common.cancel') }}</button>
           <button class="btn btn-danger" :disabled="!resetSecretKey || resetLoading" @click="executeReset">
             <span v-if="resetLoading" class="spinner-border spinner-border-sm me-1"></span>
             {{ resetLoading ? 'A apagar...' : 'Apagar Tudo' }}
@@ -245,6 +245,9 @@ import {
   CategoryScale, LinearScale, Tooltip, Legend, Filler,
   ArcElement, DoughnutController
 } from 'chart.js'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 Chart.register(
   LineElement, PointElement, LineController,
@@ -263,9 +266,9 @@ const resetError = ref('')
 const resetSuccess = ref('')
 
 const periods = [
-  { label: '7 dias', value: 7 },
-  { label: '30 dias', value: 30 },
-  { label: '90 dias', value: 90 }
+  { label: t('admin.last_7_days'), value: 7 },
+  { label: t('admin.last_30_days'), value: 30 },
+  { label: t('admin.last_90_days'), value: 90 }
 ]
 
 const currentDate = computed(() => {
@@ -403,7 +406,7 @@ const handleSecretKey = (e) => {
 
 const initials = (n) => (n || '?').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()
 
-const statusLabel = (s) => ({ pending: 'Pendente', approved: 'Aprovado', rejected: 'Rejeitado' }[s] || s)
+const statusLabel = (s) => ({ pending: t('admin.embarques_pending'), approved: t('admin.approve'), rejected: t('admin.reject') }[s] || s)
 
 const trendClass = (trend) => {
   if (!trend || trend === 0) return 'trend-neutral'

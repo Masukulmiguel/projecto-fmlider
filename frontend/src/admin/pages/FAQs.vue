@@ -1,8 +1,8 @@
 <template>
   <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-      <h4 class="mb-0"><i class="bi bi-question-circle me-2"></i>FAQs</h4>
-      <button class="btn btn-primary" @click="openModal()"><i class="bi bi-plus-lg me-1"></i>New</button>
+      <h4 class="mb-0"><i class="bi bi-question-circle me-2"></i>{{ t('admin.faqs_title') }}</h4>
+      <button class="btn btn-primary" @click="openModal()"><i class="bi bi-plus-lg me-1"></i>{{ t('admin.faqs_new') }}</button>
     </div>
 
     <div v-if="loading" class="text-center py-5">
@@ -13,7 +13,7 @@
       <table class="table table-hover align-middle">
         <thead class="table-light">
           <tr>
-            <th>Question</th><th>Answer</th><th>Category</th><th>Status</th><th>Order</th><th>Actions</th>
+            <th>{{ t('admin.faqs_question') }}</th><th>{{ t('admin.faqs_answer') }}</th><th>{{ t('admin.faqs_category') }}</th><th>{{ t('admin.faqs_status') }}</th><th>{{ t('admin.faqs_order') }}</th><th>{{ t('admin.faqs_actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -28,7 +28,7 @@
               <button class="btn btn-sm btn-outline-danger" @click="deleteItem(item.id)"><i class="bi bi-trash"></i></button>
             </td>
           </tr>
-          <tr v-if="!faqs.length"><td colspan="6" class="text-center text-muted py-4">No FAQs found.</td></tr>
+          <tr v-if="!faqs.length"><td colspan="6" class="text-center text-muted py-4">{{ t('admin.faqs_empty') }}</td></tr>
         </tbody>
       </table>
     </div>
@@ -37,40 +37,40 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ form.id ? 'Edit' : 'New' }} FAQ</h5>
+            <h5 class="modal-title">{{ form.id ? t('admin.faqs_edit') : t('admin.faqs_new_faq') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label">Question *</label>
+              <label class="form-label">{{ t('admin.faqs_question') }} *</label>
               <input v-model="form.question" type="text" class="form-control" required>
             </div>
             <div class="mb-3">
-              <label class="form-label">Answer *</label>
+              <label class="form-label">{{ t('admin.faqs_answer') }} *</label>
               <textarea v-model="form.answer" class="form-control" rows="5" required></textarea>
             </div>
             <div class="row mb-3">
               <div class="col">
-                <label class="form-label">Category</label>
+                <label class="form-label">{{ t('admin.faqs_category') }}</label>
                 <input v-model="form.category" type="text" class="form-control" placeholder="e.g. Pricing, Services">
               </div>
               <div class="col">
-                <label class="form-label">Status</label>
+                <label class="form-label">{{ t('admin.faqs_status') }}</label>
                 <select v-model="form.status" class="form-select">
-                  <option value="published">Published</option>
-                  <option value="draft">Draft</option>
+                  <option value="published">{{ t('admin.testimonials_published') }}</option>
+                  <option value="draft">{{ t('admin.testimonials_draft') }}</option>
                 </select>
               </div>
               <div class="col">
-                <label class="form-label">Order</label>
+                <label class="form-label">{{ t('admin.faqs_order') }}</label>
                 <input v-model.number="form.order_by" type="number" class="form-control" min="0">
               </div>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
             <button type="button" class="btn btn-primary" @click="save" :disabled="saving">
-              <span v-if="saving" class="spinner-border spinner-border-sm me-1"></span>Save
+              <span v-if="saving" class="spinner-border spinner-border-sm me-1"></span>{{ t('common.save') }}
             </button>
           </div>
         </div>
@@ -83,6 +83,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const faqs = ref([])
 const loading = ref(true)
@@ -117,7 +120,7 @@ function openModal(item = null) {
 }
 
 async function save() {
-  if (!form.question || !form.answer) return alert('Question and answer are required.')
+  if (!form.question || !form.answer) return alert(t('admin.faqs_required'))
   saving.value = true
   try {
     if (form.id) {
@@ -129,16 +132,16 @@ async function save() {
     }
     bsModal.hide()
     await fetchAll()
-  } catch (e) { alert('Error saving: ' + (e.message || e)) }
+  } catch (e) { alert(t('admin.faqs_error_saving') + ' ' + (e.message || e)) }
   saving.value = false
 }
 
 async function deleteItem(id) {
-  if (!confirm('Delete this FAQ?')) return
+  if (!confirm(t('admin.faqs_confirm_delete'))) return
   try {
     const { error } = await supabase.from('faqs').delete().eq('id', id)
     if (error) throw error
     await fetchAll()
-  } catch (e) { alert('Error deleting.') }
+  } catch (e) { alert(t('admin.faqs_error_deleting')) }
 }
 </script>

@@ -4,7 +4,7 @@
     <section class="nd-hero" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(${article.image})` }">
       <div class="container position-relative">
         <router-link to="/noticias" class="nd-back">
-          <i class="bi bi-arrow-left"></i> Voltar às Notícias
+          <i class="bi bi-arrow-left"></i> {{ t('news.back') }}
         </router-link>
         <div class="nd-hero-content">
           <span class="nd-category">{{ article.category }}</span>
@@ -28,7 +28,7 @@
 
             <!-- Share -->
             <div class="nd-share">
-              <h6><i class="bi bi-share"></i> Partilhar</h6>
+              <h6><i class="bi bi-share"></i> {{ t('news.share') }}</h6>
               <div class="nd-share-buttons">
                 <a href="#" class="share-btn facebook"><i class="bi bi-facebook"></i></a>
                 <a href="#" class="share-btn twitter"><i class="bi bi-twitter-x"></i></a>
@@ -42,7 +42,7 @@
             <div class="nd-sidebar">
               <!-- Recent -->
               <div class="sidebar-box">
-                <h5><i class="bi bi-clock-history"></i> Notícias Recentes</h5>
+                <h5><i class="bi bi-clock-history"></i> {{ t('news.recent_news') }}</h5>
                 <div class="sidebar-recent" v-for="item in recentNews" :key="item.id" @click="goToDetail(item.slug)">
                   <img :src="item.image" :alt="item.title">
                   <div>
@@ -55,9 +55,9 @@
               <!-- CTA -->
               <div class="sidebar-cta">
                 <i class="bi bi-envelope-paper"></i>
-                <h5>Contacte-nos</h5>
-                <p>Precisa de mais informações? Fale connosco.</p>
-                <router-link to="/contacto" class="btn btn-light btn-sm w-100">Contactar</router-link>
+                <h5>{{ t('news.contact_title') }}</h5>
+                <p>{{ t('news.contact_text') }}</p>
+                <router-link to="/contacto" class="btn btn-light btn-sm w-100">{{ t('news.contact_button') }}</router-link>
               </div>
             </div>
           </div>
@@ -71,120 +71,124 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
+import { useI18n } from '@/composables/useI18n'
 
+const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const article = ref({})
 const allNews = ref([])
 
-const fallbackNews = [
+const fallbackNews = computed(() => [
   {
-    title: 'FMLider Investe em Novo Reachstacker Kalmar de 45 Toneladas',
+    title: t('news.fallback_title_1'),
     slug: 'investimento-reachstacker',
     image: '/assets/img/resachstacker/resachstacker2.jpeg',
     date: '2024-11-15',
-    category: 'Investimentos',
+    category: t('news.fallback_category_1'),
     content: `
-      <p class="nd-lead">A FMLider reforçou a sua capacidade operacional com a aquisição de um novo Reachstacker Kalmar de 45 toneladas.</p>
-      <h3>Um Investimento Estratégico</h3>
-      <p>A FMLider anunciou hoje a aquisição de um novo Reachstacker Kalmar de 45 toneladas, reforçando significativamente a sua capacidade de manuseamento de contentores e cargas especiais. Este investimento representa um marco importante na história da empresa.</p>
-      <p>O novo equipamento permite-nos realizar até <strong>30 operações por hora</strong>, elevando significativamente a produtividade no Porto de Luanda. Com esta aquisição, a FMLider consolida a sua posição como referência em logística em Angola.</p>
-      <h3>Especificações Técnicas</h3>
+      <p class="nd-lead">${t('news.fallback_lead_1')}</p>
+      <h3>${t('news.fallback_h3_1a')}</h3>
+      <p>${t('news.fallback_p_1a')}</p>
+      <p>${t('news.fallback_p_1b')}</p>
+      <h3>${t('news.fallback_h3_1b')}</h3>
       <ul>
-        <li>Capacidade de elevação: 45 toneladas</li>
-        <li>Manuseamento de contentores 20" e 40"</li>
-        <li>Stack de até 4 contentores</li>
-        <li>Operadores certificados pela Kalmar</li>
-        <li>Manutenção preventiva garantida</li>
+        <li>${t('news.fallback_li_1a')}</li>
+        <li>${t('news.fallback_li_1b')}</li>
+        <li>${t('news.fallback_li_1c')}</li>
+        <li>${t('news.fallback_li_1d')}</li>
+        <li>${t('news.fallback_li_1e')}</li>
       </ul>
-      <h3>Impacto na Operação</h3>
-      <p>Com o novo Reachstacker, a FMLider espera aumentar a sua capacidade de processamento em <strong>40%</strong>, permitindo servir mais clientes e reduzir tempos de espera. O investimento faz parte de um plano de expansão mais amplo que inclui a aquisição de novos camiões e a abertura de novos armazéns.</p>
+      <h3>${t('news.fallback_h3_1c')}</h3>
+      <p>${t('news.fallback_p_1c')}</p>
     `,
   },
   {
-    title: 'FMLider Alarga Cobertura para 30 Países na Região SADC',
+    title: t('news.fallback_title_2'),
     slug: 'expansao-sadc',
     image: '/assets/img/construcao2020/image3.jpeg',
     date: '2024-10-20',
-    category: 'Expansão',
+    category: t('news.fallback_category_2'),
     content: `
-      <p class="nd-lead">A FMLider agora oferece serviços logísticos completos em mais de 30 países.</p>
-      <h3>Expansão Internacional</h3>
-      <p>Com uma estratégia de expansão agressiva, a FMLider alargou a sua cobertura internacional para mais de 30 países. A empresa agora oferece serviços completos de logística, transporte e transitário em toda a região SADC.</p>
-      <p>Os mercados prioritários incluem África do Sul, Moçambique, Zâmbia, Zimbabwe e Namíbia, com perspectivas de expansão para outros países do continente.</p>
-      <h3>Países Cobertos</h3>
+      <p class="nd-lead">${t('news.fallback_lead_2')}</p>
+      <h3>${t('news.fallback_h3_2a')}</h3>
+      <p>${t('news.fallback_p_2a')}</p>
+      <p>${t('news.fallback_p_2b')}</p>
+      <h3>${t('news.fallback_h3_2b')}</h3>
       <ul>
-        <li>África do Sul</li>
-        <li>Moçambique</li>
-        <li>Zâmbia</li>
-        <li>Zimbabwe</li>
-        <li>Namíbia</li>
-        <li>Botswana</li>
-        <li>E mais de 24 países</li>
+        <li>${t('news.fallback_li_2a')}</li>
+        <li>${t('news.fallback_li_2b')}</li>
+        <li>${t('news.fallback_li_2c')}</li>
+        <li>${t('news.fallback_li_2d')}</li>
+        <li>${t('news.fallback_li_2e')}</li>
+        <li>${t('news.fallback_li_2f')}</li>
+        <li>${t('news.fallback_li_2g')}</li>
       </ul>
     `,
   },
   {
-    title: 'Novo Armazém em Viana com 2.000m² de Área',
+    title: t('news.fallback_title_3'),
     slug: 'novo-armazem-viana',
     image: '/assets/img/servico/service-storage.jpg',
     date: '2024-09-10',
-    category: 'Infraestrutura',
+    category: t('news.fallback_category_3'),
     content: `
-      <p class="nd-lead">A FMLider inaugurou um novo armazém em Viana com 2.000m² de área de armazenagem.</p>
-      <h3>Infraestrutura Moderna</h3>
-      <p>O novo armazém conta com as mais modernas tecnologias de segurança e gestão, incluindo sistema de CCTV 24/7, inventário digital em tempo real e condições ideais para armazenagem de mercadorias de alto valor.</p>
-      <h3>Características</h3>
+      <p class="nd-lead">${t('news.fallback_lead_3')}</p>
+      <h3>${t('news.fallback_h3_3a')}</h3>
+      <p>${t('news.fallback_p_3a')}</p>
+      <h3>${t('news.fallback_h3_3b')}</h3>
       <ul>
-        <li>2.000m² de área de armazenagem</li>
-        <li>CCTV e segurança 24/7</li>
-        <li>Sistema de inventário digital</li>
-        <li>Controlo de temperatura e humidade</li>
-        <li>Acesso directo para contentores</li>
+        <li>${t('news.fallback_li_3a')}</li>
+        <li>${t('news.fallback_li_3b')}</li>
+        <li>${t('news.fallback_li_3c')}</li>
+        <li>${t('news.fallback_li_3d')}</li>
+        <li>${t('news.fallback_li_3e')}</li>
       </ul>
     `,
   },
   {
-    title: 'Parceria com Linhas Marítimas Internacionais',
+    title: t('news.fallback_title_4'),
     slug: 'parceria-maritima',
     image: '/assets/img/servico/Logística Marítima-1.jpg',
     date: '2024-08-05',
-    category: 'Parcerias',
+    category: t('news.fallback_category_4'),
     content: `
-      <p class="nd-lead">A FMLider firmou parcerias com as principais linhas marítimas internacionais.</p>
-      <h3>Rotas Competitivas</h3>
-      <p>Estas parcerias garantem aos nossos clientes condições competitivas e rotas optimizadas para destinos na Europa, América e Ásia. A FMLider agora oferece serviços completos de logística marítima com as melhores condições do mercado.</p>
+      <p class="nd-lead">${t('news.fallback_lead_4')}</p>
+      <h3>${t('news.fallback_h3_4a')}</h3>
+      <p>${t('news.fallback_p_4a')}</p>
     `,
   },
   {
-    title: 'Certificação ISO 9001:2015 Renovada',
+    title: t('news.fallback_title_5'),
     slug: 'certificacao-iso',
     image: '/assets/img/pessoal/partner2.png',
     date: '2024-07-01',
-    category: 'Qualidade',
+    category: t('news.fallback_category_5'),
     content: `
-      <p class="nd-lead">A FMLider renovou com sucesso a sua certificação ISO 9001:2015.</p>
-      <h3>Compromisso com a Qualidade</h3>
-      <p>Após auditoria realizada por entidade certificadora internacional, a FMLider demonstrou o cumprimento rigoroso de todos os requisitos da norma ISO 9001:2015. Esta certificação confirma que os nossos processos cumprem os mais altos padrões de qualidade e segurança.</p>
+      <p class="nd-lead">${t('news.fallback_lead_5')}</p>
+      <h3>${t('news.fallback_h3_5a')}</h3>
+      <p>${t('news.fallback_p_5a')}</p>
     `,
   },
   {
-    title: 'Campanha de Segurança Rodoviária',
+    title: t('news.fallback_title_6'),
     slug: 'campanha-seguranca',
     image: '/assets/img/construcao2020/image5.jpeg',
     date: '2024-06-15',
-    category: 'Segurança',
+    category: t('news.fallback_category_6'),
     content: `
-      <p class="nd-lead">A FMLider lançou uma campanha de segurança rodoviária para todos os seus colaboradores.</p>
-      <h3>Segurança em Primeiro Lugar</h3>
-      <p>No âmbito do Dia Mundial da Segurança Rodoviária, a FMLider lançou uma campanha de sensibilização para todos os seus colaboradores e condutores. A campanha inclui formações, palestras e distribuição de materiais educativos.</p>
+      <p class="nd-lead">${t('news.fallback_lead_6')}</p>
+      <h3>${t('news.fallback_h3_6a')}</h3>
+      <p>${t('news.fallback_p_6a')}</p>
     `,
   },
-]
+])
+
+const dateLocale = computed(() => locale.value === 'pt' ? 'pt-PT' : locale.value === 'en' ? 'en-GB' : 'fr-FR')
 
 const formatDate = (date) => {
   if (!date) return ''
-  return new Date(date).toLocaleDateString('pt-PT', { year: 'numeric', month: 'long', day: 'numeric' })
+  return new Date(date).toLocaleDateString(dateLocale.value, { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
 const goToDetail = (slug) => {
@@ -200,19 +204,19 @@ const loadArticle = async () => {
         id: n.id,
         title: n.title,
         slug: n.slug,
-        image: n.image ? (n.image.startsWith('/') ? n.image : '/assets/img/' + n.image) : '/assets/img/construcao2020/image1.jpeg',
+        image: n.image ? (n.image.startsWith('http') ? n.image : (n.image.startsWith('/') ? n.image : '/assets/img/' + n.image)) : '/assets/img/construcao2020/image1.jpeg',
         date: n.published_at || n.created_at,
         category: n.category || 'Geral',
-        content: n.content || '<p>Sem conteúdo disponível.</p>',
+        content: n.content || `<p>${t('news.default_content')}</p>`,
       }))
     } else {
-      allNews.value = fallbackNews
+      allNews.value = fallbackNews.value
     }
   } catch {
-    allNews.value = fallbackNews
+    allNews.value = fallbackNews.value
   }
   const found = allNews.value.find(n => n.slug === slug)
-  article.value = found || fallbackNews[0]
+  article.value = found || fallbackNews.value[0]
 }
 
 const recentNews = computed(() => allNews.value.filter(n => n.slug !== route.params.slug).slice(0, 4))

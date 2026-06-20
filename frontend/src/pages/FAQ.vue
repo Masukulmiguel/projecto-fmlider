@@ -2,26 +2,26 @@
   <div class="faq-page">
     <div class="faq-hero">
       <div class="container">
-        <h1><i class="bi bi-question-circle-fill me-2"></i>Perguntas Frequentes</h1>
-        <p>Encontre respostas às suas dúvidas mais comuns</p>
+        <h1><i class="bi bi-question-circle-fill me-2"></i>{{ t('faq.hero_title') }}</h1>
+        <p>{{ t('faq.hero_subtitle') }}</p>
       </div>
     </div>
 
     <div class="container py-5">
       <div v-if="loading" class="text-center py-5">
         <div class="spinner-border text-primary"></div>
-        <p class="mt-2 text-muted">A carregar perguntas...</p>
+        <p class="mt-2 text-muted">{{ t('faq.loading') }}</p>
       </div>
 
       <div v-else-if="filteredFaqs.length === 0" class="text-center py-5">
         <i class="bi bi-inbox" style="font-size: 3rem; color: #94a3b8;"></i>
-        <p class="mt-3 text-muted">Nenhuma pergunta encontrada.</p>
+        <p class="mt-3 text-muted">{{ t('faq.empty') }}</p>
       </div>
 
       <template v-else>
         <div class="faq-search">
           <i class="bi bi-search"></i>
-          <input v-model="search" type="text" placeholder="Pesquisar pergunta..." />
+          <input v-model="search" type="text" :placeholder="t('faq.search_placeholder')" />
         </div>
 
         <div v-if="categories.length > 1" class="faq-categories">
@@ -32,7 +32,7 @@
             :class="{ active: activeCategory === cat }"
             @click="activeCategory = cat"
           >
-            {{ cat || 'Todas' }}
+            {{ cat || t('faq.category_all') }}
           </button>
         </div>
 
@@ -55,7 +55,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const faqs = ref([])
 const loading = ref(true)
 const search = ref('')

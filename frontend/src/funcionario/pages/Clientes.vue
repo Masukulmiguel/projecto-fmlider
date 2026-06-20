@@ -2,7 +2,7 @@
   <div class="crud-page">
     <div class="page-header">
       <div>
-        <h1 class="page-title">Clientes</h1>
+        <h1 class="page-title">{{ t('funcionario.clients_title') }}</h1>
         <p class="text-muted mb-0">Lista de clientes registados na plataforma.</p>
       </div>
     </div>
@@ -10,14 +10,14 @@
       <div class="card-header">
         <div class="search-box">
           <i class="bi bi-search"></i>
-          <input v-model="search" type="text" placeholder="Pesquisar...">
+          <input v-model="search" type="text" :placeholder="t('funcionario.clients_search')">
         </div>
       </div>
       <div class="card-body p-0">
         <div v-if="loading" class="text-center py-5"><div class="spinner-border text-primary"></div></div>
         <div v-else-if="filtered.length === 0" class="empty-state">
           <i class="bi bi-people"></i>
-          <p>Sem clientes.</p>
+          <p>{{ t('funcionario.clients_empty') }}</p>
         </div>
         <div v-else class="table-responsive">
           <table class="table table-hover mb-0">
@@ -27,7 +27,7 @@
                 <th>Email</th>
                 <th>Telefone</th>
                 <th>Status</th>
-                <th>Registado</th>
+                <th>{{ t('funcionario.clients_registered') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -62,7 +62,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const items = ref([])
 const loading = ref(false)

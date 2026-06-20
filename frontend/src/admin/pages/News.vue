@@ -1,8 +1,8 @@
 <template>
   <div class="admin-page p-4 p-md-5">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-      <h2 class="mb-0">Notícias</h2>
-      <button class="btn btn-primary" @click="openCreateModal">+ Nova Notícia</button>
+      <h2 class="mb-0">{{ t('admin.news_title') }}</h2>
+      <button class="btn btn-primary" @click="openCreateModal">+ {{ t('admin.news_new') }}</button>
     </div>
 
     <div class="card">
@@ -21,12 +21,12 @@
         <table class="table table-hover mb-0">
           <thead class="table-light">
             <tr>
-              <th>Imagem</th>
-              <th>Título</th>
-              <th>Categoria</th>
-              <th>Status</th>
-              <th>Data</th>
-              <th class="text-end">Ações</th>
+                <th>{{ t('admin.services_image') }}</th>
+                <th>{{ t('admin.services_title_col') }}</th>
+                <th>{{ t('admin.news_category') }}</th>
+                <th>{{ t('admin.services_status') }}</th>
+                <th>{{ t('admin.news_date') }}</th>
+                <th class="text-end">{{ t('admin.actions_col') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -38,7 +38,7 @@
                   :alt="item.title"
                   class="news-thumb"
                 />
-                <span v-else class="text-muted">Sem imagem</span>
+                <span v-else class="text-muted">{{ t('admin.news_no_image') }}</span>
               </td>
               <td class="align-middle">{{ item.title }}</td>
               <td class="align-middle">
@@ -58,13 +58,13 @@
                   class="btn btn-sm btn-outline-primary me-2"
                   @click="openEditModal(item)"
                 >
-                  Editar
+                  {{ t('common.edit') }}
                 </button>
                 <button
                   class="btn btn-sm btn-outline-danger"
                   @click="confirmDelete(item)"
                 >
-                  Deletar
+                  {{ t('common.delete') }}
                 </button>
               </td>
             </tr>
@@ -85,7 +85,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">
-              {{ editing ? 'Editar Notícia' : 'Nova Notícia' }}
+              {{ editing ? t('admin.news_title') : t('admin.news_new') }}
             </h5>
             <button
               type="button"
@@ -203,7 +203,7 @@
                 v-if="submitting"
                 class="spinner-border spinner-border-sm me-1"
               ></span>
-              {{ editing ? 'Salvar' : 'Criar' }}
+              {{ editing ? t('common.save') : t('admin.news_create') }}
             </button>
           </div>
         </div>
@@ -220,7 +220,7 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Confirmar Exclusão</h5>
+            <h5 class="modal-title">{{ t('common.confirm') }}</h5>
             <button
               type="button"
               class="btn-close"
@@ -250,7 +250,7 @@
                 v-if="deleting"
                 class="spinner-border spinner-border-sm me-1"
               ></span>
-              Deletar
+              {{ t('common.delete') }}
             </button>
           </div>
         </div>
@@ -263,6 +263,9 @@
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const news = ref([])
 const loading = ref(false)

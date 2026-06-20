@@ -1,8 +1,8 @@
 <template>
   <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-      <h4 class="mb-0"><i class="bi bi-envelope me-2"></i>Contacts</h4>
-      <span class="badge bg-danger fs-6" v-if="unreadCount">{{ unreadCount }} unread</span>
+      <h4 class="mb-0"><i class="bi bi-envelope me-2"></i>{{ t('admin.contacts_title') }}</h4>
+      <span class="badge bg-danger fs-6" v-if="unreadCount">{{ unreadCount }} {{ t('admin.contacts_unread') }}</span>
     </div>
 
     <div v-if="loading" class="text-center py-5">
@@ -13,7 +13,7 @@
       <table class="table table-hover align-middle">
         <thead class="table-light">
           <tr>
-            <th style="width:30px"></th><th>Name</th><th>Email</th><th>Phone</th><th>Subject</th><th>Date</th><th>Actions</th>
+            <th style="width:30px"></th><th>{{ t('admin.contacts_name') }}</th><th>{{ t('admin.contacts_email') }}</th><th>{{ t('admin.contacts_phone') }}</th><th>{{ t('admin.contacts_subject') }}</th><th>{{ t('admin.contacts_date') }}</th><th>{{ t('admin.contacts_actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -25,12 +25,12 @@
             <td class="text-truncate" style="max-width:200px">{{ item.subject }}</td>
             <td>{{ formatDate(item.created_at) }}</td>
             <td @click.stop>
-              <button v-if="!item.is_read" class="btn btn-sm btn-outline-success me-1" @click="markRead(item.id)" title="Mark as read"><i class="bi bi-check-lg"></i></button>
-              <button class="btn btn-sm btn-outline-primary me-1" @click="openReply(item)" title="Reply"><i class="bi bi-reply"></i></button>
-              <button class="btn btn-sm btn-outline-danger" @click="deleteItem(item.id)" title="Delete"><i class="bi bi-trash"></i></button>
+              <button v-if="!item.is_read" class="btn btn-sm btn-outline-success me-1" @click="markRead(item.id)" :title="t('admin.contacts_mark_read')"><i class="bi bi-check-lg"></i></button>
+              <button class="btn btn-sm btn-outline-primary me-1" @click="openReply(item)" :title="t('admin.contacts_reply')"><i class="bi bi-reply"></i></button>
+              <button class="btn btn-sm btn-outline-danger" @click="deleteItem(item.id)" :title="t('admin.contacts_delete')"><i class="bi bi-trash"></i></button>
             </td>
           </tr>
-          <tr v-if="!contacts.length"><td colspan="7" class="text-center text-muted py-4">No contacts found.</td></tr>
+          <tr v-if="!contacts.length"><td colspan="7" class="text-center text-muted py-4">{{ t('admin.contacts_empty') }}</td></tr>
         </tbody>
       </table>
     </div>
@@ -45,20 +45,20 @@
           </div>
           <div class="modal-body">
             <div class="row mb-3">
-              <div class="col-6"><strong>From:</strong> {{ viewing?.name }}</div>
+              <div class="col-6"><strong>{{ t('admin.contacts_from') }}</strong> {{ viewing?.name }}</div>
               <div class="col-6"><strong>Email:</strong> {{ viewing?.email }}</div>
             </div>
             <div class="row mb-3">
-              <div class="col-6"><strong>Phone:</strong> {{ viewing?.phone || '-' }}</div>
-              <div class="col-6"><strong>Date:</strong> {{ formatDate(viewing?.created_at) }}</div>
+              <div class="col-6"><strong>{{ t('admin.contacts_phone') }}:</strong> {{ viewing?.phone || '-' }}</div>
+              <div class="col-6"><strong>{{ t('admin.contacts_date_label') }}</strong> {{ formatDate(viewing?.created_at) }}</div>
             </div>
             <hr>
             <div class="p-3 bg-light rounded">{{ viewing?.message }}</div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-outline-success" v-if="viewing && !viewing.is_read" @click="markRead(viewing.id); viewing.is_read = true"><i class="bi bi-check-lg me-1"></i>Mark as Read</button>
-            <button class="btn btn-primary" @click="bsViewModal.hide(); openReply(viewing)"><i class="bi bi-reply me-1"></i>Reply</button>
-            <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button class="btn btn-outline-success" v-if="viewing && !viewing.is_read" @click="markRead(viewing.id); viewing.is_read = true"><i class="bi bi-check-lg me-1"></i>{{ t('admin.contacts_mark_as_read') }}</button>
+            <button class="btn btn-primary" @click="bsViewModal.hide(); openReply(viewing)"><i class="bi bi-reply me-1"></i>{{ t('admin.contacts_reply') }}</button>
+            <button class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.close') }}</button>
           </div>
         </div>
       </div>
@@ -69,27 +69,27 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Reply to {{ replying?.name }}</h5>
+            <h5 class="modal-title">{{ t('admin.contacts_reply_to') }} {{ replying?.name }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label">To</label>
+              <label class="form-label">{{ t('admin.contacts_to') }}</label>
               <input :value="replying?.email" type="email" class="form-control" disabled>
             </div>
             <div class="mb-3">
-              <label class="form-label">Subject</label>
+              <label class="form-label">{{ t('admin.contacts_subject') }}</label>
               <input :value="'Re: ' + replying?.subject" type="text" class="form-control" disabled>
             </div>
             <div class="mb-3">
-              <label class="form-label">Message *</label>
-              <textarea v-model="replyMessage" class="form-control" rows="6" placeholder="Write your reply..." required></textarea>
+              <label class="form-label">{{ t('admin.contacts_message') }} *</label>
+              <textarea v-model="replyMessage" class="form-control" rows="6" :placeholder="t('admin.contacts_write_reply')" required></textarea>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
             <button type="button" class="btn btn-primary" @click="sendReply" :disabled="replying || !replyMessage.trim()">
-              <span v-if="sendingReply" class="spinner-border spinner-border-sm me-1"></span>Send Reply
+              <span v-if="sendingReply" class="spinner-border spinner-border-sm me-1"></span>{{ t('admin.contacts_send_reply') }}
             </button>
           </div>
         </div>
@@ -102,6 +102,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const contacts = ref([])
 const loading = ref(true)
@@ -161,26 +164,24 @@ function openReply(item) {
 }
 
 async function sendReply() {
-  if (!replyMessage.value.trim()) return alert('Please enter a message.')
+  if (!replyMessage.value.trim()) return alert(t('admin.contacts_enter_message'))
   sendingReply.value = true
   try {
-    // Note: You may need to implement email sending via a Supabase Edge Function
-    // For now, we just mark it as replied and show success
     const { error } = await supabase.from('contacts').update({ is_replied: true, reply_message: replyMessage.value }).eq('id', replying.value.id)
     if (error) throw error
     bsReplyModal.hide()
-    alert('Reply sent successfully.')
-  } catch (e) { alert('Error sending reply: ' + (e.message || e)) }
+    alert(t('admin.contacts_reply_sent'))
+  } catch (e) { alert(t('admin.contacts_error_sending') + ' ' + (e.message || e)) }
   sendingReply.value = false
 }
 
 async function deleteItem(id) {
-  if (!confirm('Delete this contact?')) return
+  if (!confirm(t('admin.contacts_confirm_delete'))) return
   try {
     const { error } = await supabase.from('contacts').delete().eq('id', id)
     if (error) throw error
     await fetchAll()
-  } catch (e) { alert('Error deleting.') }
+  } catch (e) { alert(t('admin.contacts_error_deleting')) }
 }
 </script>
 

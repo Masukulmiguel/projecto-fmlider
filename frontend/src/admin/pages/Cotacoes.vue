@@ -2,7 +2,7 @@
   <div class="admin-page p-5">
     <div class="page-header mb-4">
       <div>
-        <h2>Cotações</h2>
+        <h2>{{ t('admin.cotacoes_title') }}</h2>
         <p class="text-muted mb-0">Todas as cotações dos clientes.</p>
       </div>
     </div>
@@ -12,7 +12,7 @@
         <div class="filters mb-3">
           <div class="search-box">
             <i class="bi bi-search"></i>
-            <input v-model="filters.q" type="text" placeholder="Pesquisar..." @input="debounceSearch">
+            <input v-model="filters.q" type="text" :placeholder="t('admin.cotacoes_search')" @input="debounceSearch">
           </div>
           <select v-model="filters.status" class="form-select" @change="fetchData">
             <option value="">Todos os estados</option>
@@ -33,14 +33,14 @@
           <table class="table align-middle">
             <thead>
               <tr>
-                <th>Referência</th>
+                <th>{{ t('admin.cotacoes_ref') }}</th>
                 <th>Cliente</th>
-                <th>Rota</th>
+                <th>{{ t('admin.cotacoes_route') }}</th>
                 <th>Tipo</th>
                 <th>Valor</th>
                 <th>Estado</th>
                 <th>Data</th>
-                <th>Ações</th>
+                <th>{{ t('admin.actions_col') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -78,7 +78,7 @@
     <div v-if="showEditModal" class="modal-overlay" @click.self="closeEdit">
       <div class="modal-content">
         <div class="modal-header">
-          <h5>Editar Cotação</h5>
+          <h5>{{ t('admin.cotacoes_title') }}</h5>
           <button class="btn-close" @click="closeEdit"></button>
         </div>
         <div class="modal-body">
@@ -101,10 +101,10 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" @click="closeEdit">Cancelar</button>
+          <button class="btn btn-secondary" @click="closeEdit">{{ t('common.cancel') }}</button>
           <button class="btn btn-primary" @click="submitEdit" :disabled="saving">
             <span v-if="saving" class="spinner-border spinner-border-sm me-1"></span>
-            Guardar
+            {{ t('common.save') }}
           </button>
         </div>
       </div>
@@ -113,7 +113,7 @@
     <div v-if="showDeleteModal" class="modal-overlay" @click.self="closeDelete">
       <div class="modal-content modal-sm">
         <div class="modal-header">
-          <h5>Confirmar Eliminação</h5>
+          <h5>{{ t('common.confirm') }}</h5>
           <button class="btn-close" @click="closeDelete"></button>
         </div>
         <div class="modal-body">
@@ -121,10 +121,10 @@
           <p class="text-muted small mb-0">Esta ação não pode ser desfeita.</p>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" @click="closeDelete">Cancelar</button>
+          <button class="btn btn-secondary" @click="closeDelete">{{ t('common.cancel') }}</button>
           <button class="btn btn-danger" @click="submitDelete" :disabled="deleting">
             <span v-if="deleting" class="spinner-border spinner-border-sm me-1"></span>
-            Eliminar
+            {{ t('common.delete') }}
           </button>
         </div>
       </div>
@@ -140,6 +140,9 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const items = ref([])
 const loading = ref(false)

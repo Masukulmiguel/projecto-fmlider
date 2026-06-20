@@ -2,8 +2,8 @@
   <div class="crud-page">
     <div class="page-header">
       <div>
-        <h1 class="page-title">Embarques</h1>
-        <p class="text-muted mb-0">Lista de embarques de todos os clientes.</p>
+        <h1 class="page-title">{{ t('funcionario.embarques_title') }}</h1>
+        <p class="text-muted mb-0">{{ t('funcionario.embarques_subtitle') }}</p>
       </div>
     </div>
     <div class="card">
@@ -13,18 +13,18 @@
         </div>
         <div v-else-if="items.length === 0" class="empty-state">
           <i class="bi bi-box-seam"></i>
-          <p>Sem embarques.</p>
+          <p>{{ t('funcionario.embarques_empty') }}</p>
         </div>
         <div v-else class="table-responsive">
           <table class="table table-hover mb-0">
             <thead>
               <tr>
-                <th>Tracking</th>
-                <th>Cliente</th>
-                <th>Rota</th>
-                <th>Tipo</th>
-                <th>Status</th>
-                <th>Data</th>
+                <th>{{ t('funcionario.embarques_tracking') }}</th>
+                <th>{{ t('funcionario.embarques_client') }}</th>
+                <th>{{ t('funcionario.embarques_route') }}</th>
+                <th>{{ t('funcionario.embarques_type') }}</th>
+                <th>{{ t('funcionario.embarques_status') }}</th>
+                <th>{{ t('funcionario.embarques_date') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -48,7 +48,9 @@
 import { ref, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const items = ref([])
 const loading = ref(false)

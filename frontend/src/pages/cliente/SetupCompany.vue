@@ -6,8 +6,8 @@
           <div class="card shadow-sm">
             <div class="card-body p-5">
               <div class="text-center mb-4">
-                <h2 class="mb-2">Configurar Empresa</h2>
-                <p class="text-muted mb-0">Bem-vindo, {{ authStore.user?.name }}. Preencha os dados da sua empresa para começar a usar o dashboard.</p>
+                <h2 class="mb-2">{{ t('cliente.setup_title') }}</h2>
+                <p class="text-muted mb-0">{{ t('cliente.setup_welcome') }}, {{ authStore.user?.name }}. {{ t('cliente.setup_fill_data') }}</p>
               </div>
 
               <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
@@ -15,72 +15,72 @@
               <form @submit.prevent="handleSubmit" novalidate>
                 <div class="row">
                   <div class="col-md-6 mb-3">
-                    <label for="company_name" class="form-label">Nome da empresa *</label>
+                    <label for="company_name" class="form-label">{{ t('cliente.setup_name') }} *</label>
                     <input type="text" id="company_name" class="form-control" :class="{'is-invalid': errors.company_name}" v-model="form.company_name" required>
                     <div class="invalid-feedback">{{ errors.company_name }}</div>
                   </div>
                   <div class="col-md-6 mb-3">
                     <label for="nif" class="form-label">NIF</label>
-                    <input type="text" id="nif" class="form-control" v-model="form.nif" placeholder="Opcional">
+                    <input type="text" id="nif" class="form-control" v-model="form.nif" :placeholder="t('cliente.setup_nif_optional')">
                   </div>
                 </div>
 
                 <div class="mb-3">
-                  <label class="form-label">Logotipo</label>
+                  <label class="form-label">{{ t('cliente.setup_logo') }}</label>
                   <div class="logo-uploader">
                     <div class="logo-preview" :class="{ 'has-image': logoPreview }">
                       <img v-if="logoPreview" :src="resolveLogo(logoPreview)" alt="Logo" />
-                      <span v-else class="placeholder">Sem logotipo</span>
+                      <span v-else class="placeholder">{{ t('cliente.setup_no_logo') }}</span>
                     </div>
                     <div class="logo-actions">
                       <label class="btn btn-outline-primary btn-sm mb-2">
-                        Escolher imagem
+                        {{ t('cliente.setup_choose_image') }}
                         <input type="file" accept="image/*" @change="onLogoChange" hidden>
                       </label>
                       <button v-if="logoFile" type="button" class="btn btn-sm btn-success me-2" :disabled="uploadingLogo" @click="handleLogoUpload">
-                        {{ uploadingLogo ? 'A enviar...' : 'Carregar logotipo' }}
+                        {{ uploadingLogo ? t('cliente.setup_uploading') : t('cliente.setup_upload_logo') }}
                       </button>
-                      <small class="text-muted d-block">JPG, PNG, WEBP, GIF ou SVG. Máx 3MB.</small>
+                      <small class="text-muted d-block">{{ t('cliente.setup_image_formats') }}</small>
                     </div>
                   </div>
                 </div>
 
                 <div class="mb-3">
-                  <label for="address" class="form-label">Endereço *</label>
+                  <label for="address" class="form-label">{{ t('cliente.setup_address') }} *</label>
                   <input type="text" id="address" class="form-control" :class="{'is-invalid': errors.address}" v-model="form.address" required>
                   <div class="invalid-feedback">{{ errors.address }}</div>
                 </div>
 
                 <div class="row">
                   <div class="col-md-6 mb-3">
-                    <label for="phone" class="form-label">Número de telefone *</label>
+                    <label for="phone" class="form-label">{{ t('cliente.setup_phone') }} *</label>
                     <input type="tel" id="phone" class="form-control" :class="{'is-invalid': errors.phone}" v-model="form.phone" required>
                     <div class="invalid-feedback">{{ errors.phone }}</div>
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label for="email" class="form-label">Email *</label>
+                    <label for="email" class="form-label">{{ t('cliente.setup_email') }} *</label>
                     <input type="email" id="email" class="form-control" :class="{'is-invalid': errors.email}" v-model="form.email" required>
                     <div class="invalid-feedback">{{ errors.email }}</div>
                   </div>
                 </div>
 
                 <div class="mb-3">
-                  <label for="service" class="form-label">Serviço *</label>
-                  <input type="text" id="service" class="form-control" :class="{'is-invalid': errors.service}" v-model="form.service" placeholder="Ex.: Logística, Desembaraço Aduaneiro" required>
+                  <label for="service" class="form-label">{{ t('cliente.setup_service_label') }} *</label>
+                  <input type="text" id="service" class="form-control" :class="{'is-invalid': errors.service}" v-model="form.service" :placeholder="t('cliente.setup_service_placeholder')" required>
                   <div class="invalid-feedback">{{ errors.service }}</div>
                 </div>
 
                 <div class="mb-4">
-                  <label for="case_description" class="form-label">Descrição do caso *</label>
-                  <textarea id="case_description" rows="4" class="form-control" :class="{'is-invalid': errors.case_description}" v-model="form.case_description" placeholder="Descreva brevemente o motivo do seu contacto ou o que pretende." required></textarea>
+                  <label for="case_description" class="form-label">{{ t('cliente.setup_case_description') }} *</label>
+                  <textarea id="case_description" rows="4" class="form-control" :class="{'is-invalid': errors.case_description}" v-model="form.case_description" :placeholder="t('cliente.setup_case_placeholder')" required></textarea>
                   <div class="invalid-feedback">{{ errors.case_description }}</div>
                 </div>
 
                 <div class="d-flex justify-content-end gap-2">
-                  <button type="button" class="btn btn-outline-secondary" @click="handleLogout">Sair</button>
+                  <button type="button" class="btn btn-outline-secondary" @click="handleLogout">{{ t('cliente.setup_logout') }}</button>
                   <button type="submit" class="btn btn-primary" :disabled="loading">
-                    <span v-if="loading">A guardar...</span>
-                    <span v-else>Concluir configuração</span>
+                    <span v-if="loading">{{ t('cliente.setup_saving') }}</span>
+                    <span v-else>{{ t('cliente.setup_finish') }}</span>
                   </button>
                 </div>
               </form>
@@ -97,11 +97,13 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useCompanyStore } from '@/stores/companyStore'
+import { useI18n } from '@/composables/useI18n'
 import axios from 'axios'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const companyStore = useCompanyStore()
+const { t } = useI18n()
 
 const resolveLogo = (logo) => {
   if (!logo) return ''

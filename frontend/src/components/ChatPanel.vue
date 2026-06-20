@@ -2,8 +2,8 @@
   <div class="chat-panel">
     <div v-if="showSidebar" class="chat-sidebar">
       <div class="chat-sidebar-header">
-        <h6 class="mb-0"><i class="bi bi-chat-dots-fill me-2"></i>Conversas</h6>
-        <button class="new-chat-btn" @click="showNewChat = !showNewChat" title="Nova conversa">
+        <h6 class="mb-0"><i class="bi bi-chat-dots-fill me-2"></i>{{ t('chat.conversations') }}</h6>
+        <button class="new-chat-btn" @click="showNewChat = !showNewChat" :title="t('chat.new_chat')">
           <i class="bi bi-plus-lg"></i>
         </button>
       </div>
@@ -11,11 +11,11 @@
       <div v-if="showNewChat" class="new-chat-panel">
         <div class="new-chat-search">
           <i class="bi bi-search"></i>
-          <input v-model="newChatSearch" type="text" placeholder="Pesquisar utilizador..." autofocus />
+          <input v-model="newChatSearch" type="text" :placeholder="t('chat.search_users')" autofocus />
         </div>
         <div class="new-chat-list">
           <div v-if="filteredAvailable.length === 0" class="empty-conversations">
-            <p class="mb-0">Nenhum utilizador encontrado</p>
+            <p class="mb-0">{{ t('chat.no_users') }}</p>
           </div>
           <div
             v-for="u in filteredAvailable"
@@ -30,7 +30,7 @@
             <div class="conv-body">
               <div class="conv-top">
                 <strong class="conv-name">{{ u.name }}</strong>
-                <span class="role-tag" :class="u.role === 'funcionario' ? 'role-func' : 'role-client'">{{ u.role === 'funcionario' ? 'Func.' : 'Cliente' }}</span>
+                <span class="role-tag" :class="u.role === 'funcionario' ? 'role-func' : 'role-client'">{{ u.role === 'funcionario' ? t('chat.role_employee') : t('chat.role_client') }}</span>
               </div>
               <div class="conv-preview">
                 <span class="conv-last">{{ u.email }}</span>
@@ -43,12 +43,12 @@
       <div v-if="!showNewChat">
         <div class="chat-search">
           <i class="bi bi-search"></i>
-          <input v-model="search" type="text" placeholder="Pesquisar..." />
+          <input v-model="search" type="text" :placeholder="t('chat.search')" />
         </div>
         <div class="chat-conversations">
           <div v-if="filtered.length === 0" class="empty-conversations">
             <i class="bi bi-inbox"></i>
-            <p class="mb-0">Sem conversas.</p>
+            <p class="mb-0">{{ t('chat.no_conversations') }}</p>
           </div>
           <div
             v-for="c in filtered"
@@ -64,11 +64,11 @@
             <div class="conv-body">
                 <div class="conv-top">
                 <strong class="conv-name">{{ c.name }}</strong>
-                <span v-if="c.role === 'funcionario'" class="role-tag">Funcionário</span>
+                <span v-if="c.role === 'funcionario'" class="role-tag">{{ t('chat.role_employee_full') }}</span>
                 <small class="conv-time">{{ formatTime(c.last_at) }}</small>
               </div>
               <div class="conv-preview">
-                <span class="conv-last">{{ c.last_message || 'Sem mensagens...' }}</span>
+                <span class="conv-last">{{ c.last_message || t('chat.no_messages') }}</span>
                 <span v-if="(parseInt(c.unread) || 0) > 0" class="conv-badge">{{ c.unread }}</span>
               </div>
             </div>
@@ -96,17 +96,17 @@
         </button>
       </div>
       <div v-else class="chat-header placeholder">
-        <div class="text-muted"><i class="bi bi-chat-dots me-2"></i>Selecione uma conversa</div>
+        <div class="text-muted"><i class="bi bi-chat-dots me-2"></i>{{ t('chat.select_conversation') }}</div>
       </div>
 
       <div class="chat-messages" ref="messagesRef">
         <div v-if="chatStore.loading && chatStore.messages.length === 0" class="text-center py-4 text-muted">
           <div class="spinner-border spinner-border-sm"></div>
-          <p class="mb-0 mt-2 small">A carregar mensagens...</p>
+          <p class="mb-0 mt-2 small">{{ t('chat.loading') }}</p>
         </div>
         <div v-else-if="chatStore.messages.length === 0" class="empty-chat">
           <i class="bi bi-chat-square-text"></i>
-          <p class="mb-0">Sem mensagens. Comece a conversa!</p>
+          <p class="mb-0">{{ t('chat.empty_chat') }}</p>
         </div>
         <template v-else>
           <div v-for="(m, i) in chatStore.messages" :key="m.id || i" class="msg" :class="isMine(m) ? 'mine' : 'theirs'">
@@ -125,7 +125,7 @@
         <textarea
           v-model="input"
           rows="1"
-          placeholder="Escreve uma mensagem..."
+          :placeholder="t('chat.input_placeholder')"
           :disabled="chatStore.sending"
           @keydown.enter.exact.prevent="onSend"
         ></textarea>
@@ -141,6 +141,9 @@
 import { ref, computed, nextTick, watch } from 'vue'
 import { useChatStore } from '@/stores/chatStore'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   selected: { type: Object, default: null },

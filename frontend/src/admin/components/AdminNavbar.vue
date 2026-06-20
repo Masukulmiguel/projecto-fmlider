@@ -1,148 +1,179 @@
 <template>
-  <nav class="admin-navbar">
-    <div class="navbar-content">
-      <div class="navbar-left">
-        <button class="hamburger-btn d-lg-none" @click="$emit('toggle-sidebar')">
-          <i class="bi bi-list"></i>
-        </button>
-        <h1 class="navbar-title">{{ pageTitle }}</h1>
-      </div>
+  <header class="admin-navbar">
+    <div class="navbar-left">
+      <button class="hamburger-btn" @click="$emit('toggle-sidebar')">
+        <i class="bi bi-list"></i>
+      </button>
+      <h1 class="page-title">{{ pageTitle }}</h1>
+    </div>
 
-      <div class="navbar-center">
-        <div class="search-bar">
-          <i class="bi bi-search search-icon"></i>
-          <input
-            type="text"
-            class="search-input"
-            placeholder="Pesquisar..."
-            v-model="searchQuery"
-            @keyup.enter="handleSearch"
-          />
-        </div>
-      </div>
-
-      <div class="navbar-right">
-        <NotificationBell />
-
-        <div class="user-dropdown" ref="dropdownRef">
-          <button class="user-dropdown-toggle" @click="toggleDropdown">
-            <div class="user-avatar">
-              <img v-if="authStore.user?.photo" :src="authStore.user.photo" :alt="authStore.user?.name">
-              <span v-else>{{ initials(authStore.user?.name) }}</span>
-            </div>
-            <div class="user-info">
-              <span class="user-name">{{ authStore.user?.name || 'Admin' }}</span>
-              <span class="user-role">{{ authStore.user?.position || 'Administrador' }}</span>
-            </div>
-            <i class="bi bi-chevron-down dropdown-arrow" :class="{ open: showDropdown }"></i>
-          </button>
-          <transition name="dropdown">
-            <div v-if="showDropdown" class="dropdown-menu-custom">
-              <router-link to="/admin/perfil" class="dropdown-item-custom" @click="showDropdown = false">
-                <i class="bi bi-person"></i>
-                <span>Meu Perfil</span>
-              </router-link>
-              <router-link to="/admin/configuracoes" class="dropdown-item-custom" @click="showDropdown = false">
-                <i class="bi bi-gear"></i>
-                <span>Definições</span>
-              </router-link>
-              <div class="dropdown-divider"></div>
-              <button class="dropdown-item-custom dropdown-item-danger" @click="logout">
-                <i class="bi bi-box-arrow-right"></i>
-                <span>Sair</span>
-              </button>
-            </div>
-          </transition>
+    <div class="navbar-center">
+      <div class="search-box" :class="{ focused: searchFocused }">
+        <i class="bi bi-search search-icon"></i>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Pesquisar..."
+          v-model="searchQuery"
+          @focus="searchFocused = true"
+          @blur="handleSearchBlur"
+          @input="handleSearch"
+        >
+        <div v-if="showResults && filteredPages.length" class="search-dropdown">
+          <router-link
+            v-for="page in filteredPages"
+            :key="page.route"
+            :to="page.route"
+            class="search-result"
+            @click="clearSearch"
+          >
+            <i :class="page.icon" class="result-icon"></i>
+            <span>{{ page.label }}</span>
+          </router-link>
         </div>
       </div>
     </div>
-  </nav>
+
+    <div class="navbar-right">
+      <NotificationBell />
+      <div class="user-section" @click="toggleDropdown" ref="dropdownRef">
+        <div class="user-avatar-sm">{{ userInitials }}</div>
+        <span class="user-name-sm">{{ authStore.user?.name || 'Admin' }}</span>
+        <i class="bi bi-chevron-down chevron"></i>
+        <Transition name="dropdown">
+          <div v-if="showDropdown" class="user-dropdown">
+            <div class="dropdown-header">
+              <div class="dropdown-avatar">{{ userInitials }}</div>
+              <div>
+                <div class="dropdown-name">{{ authStore.user?.name }}</div>
+                <div class="dropdown-role">{{ t('admin_sidebar.admin') }}</div>
+              </div>
+            </div>
+            <div class="dropdown-divider"></div>
+            <router-link to="/admin/perfil" class="dropdown-item" @click="showDropdown = false">
+              <i class="bi bi-person"></i> {{ t('admin.profile_title') }}
+            </router-link>
+            <router-link to="/admin/definicoes" class="dropdown-item" @click="showDropdown = false">
+              <i class="bi bi-gear"></i> {{ t('admin.settings_title') }}
+            </router-link>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item danger" @click="handleLogout">
+              <i class="bi bi-box-arrow-right"></i> {{ t('admin_sidebar.logout') }}
+            </button>
+          </div>
+        </Transition>
+      </div>
+    </div>
+  </header>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import NotificationBell from '@/components/NotificationBell.vue'
+import { useI18n } from '@/composables/useI18n'
 
-defineEmits(['toggle-sidebar'])
+const { t } = useI18n()
+
+defineProps({ collapsed: Boolean })
+defineEmits(['toggle-sidebar', 'toggle-collapse'])
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 
 const searchQuery = ref('')
+const searchFocused = ref(false)
 const showDropdown = ref(false)
+const showResults = ref(false)
 const dropdownRef = ref(null)
 
-const searchPages = [
-  { keyword: 'utilizador', route: '/admin/utilizadores', label: 'Utilizadores' },
-  { keyword: 'funcionario', route: '/admin/funcionarios', label: 'Funcionários' },
-  { keyword: 'cliente', route: '/admin/utilizadores', label: 'Utilizadores' },
-  { keyword: 'embarque', route: '/admin/embarques', label: 'Embarques' },
-  { keyword: 'cotação', route: '/admin/cotacoes', label: 'Cotações' },
-  { keyword: 'cotacao', route: '/admin/cotacoes', label: 'Cotações' },
-  { keyword: 'documento', route: '/admin/documentos', label: 'Documentos' },
-  { keyword: 'contacto', route: '/admin/contactos-cliente', label: 'Contactos' },
-  { keyword: 'serviço', route: '/admin/servicos', label: 'Serviços' },
-  { keyword: 'servico', route: '/admin/servicos', label: 'Serviços' },
-  { keyword: 'notícia', route: '/admin/noticias', label: 'Notícias' },
-  { keyword: 'noticia', route: '/admin/noticias', label: 'Notícias' },
-  { keyword: 'galeria', route: '/admin/galeria', label: 'Galeria' },
-  { keyword: 'parceiro', route: '/admin/parceiros', label: 'Parceiros' },
-  { keyword: 'banner', route: '/admin/banners', label: 'Banners' },
-  { keyword: 'testemunho', route: '/admin/testemunhos', label: 'Testemunhos' },
-  { keyword: 'faq', route: '/admin/faqs', label: 'FAQs' },
-  { keyword: 'mensagem', route: '/admin/mensagens', label: 'Mensagens' },
-  { keyword: 'chat', route: '/admin/mensagens', label: 'Mensagens' },
-  { keyword: 'visitante', route: '/admin/visitantes', label: 'Visitantes' },
-  { keyword: 'definição', route: '/admin/configuracoes', label: 'Definições' },
-  { keyword: 'definicao', route: '/admin/configuracoes', label: 'Definições' },
-  { keyword: 'configuração', route: '/admin/configuracoes', label: 'Definições' },
-  { keyword: 'config', route: '/admin/configuracoes', label: 'Definições' },
-]
-
-const handleSearch = () => {
-  const q = searchQuery.value.trim().toLowerCase()
-  if (!q) return
-  const match = searchPages.find(p => q.includes(p.keyword))
-  if (match) {
-    router.push(match.route)
-    searchQuery.value = ''
-  }
-}
-
-const pageTitle = computed(() => {
-  const titles = {
-    'AdminDashboard': 'Dashboard',
-    'AdminUsers': 'Utilizadores',
-    'AdminServices': 'Serviços',
-    'AdminNews': 'Notícias',
-    'AdminGallery': 'Galeria',
-    'AdminPartners': 'Parceiros',
-    'AdminContacts': 'Contactos',
-    'AdminTestimonials': 'Testemunhos',
-    'AdminFAQs': 'FAQs',
-    'AdminBanners': 'Banners',
-    'AdminProfile': 'Perfil',
-    'AdminEmbarques': 'Embarques',
-    'AdminDocumentos': 'Documentos',
-    'AdminCotacoes': 'Cotações',
-    'AdminContactosCliente': 'Contactos dos Clientes',
-    'AdminMessages': 'Mensagens',
-    'AdminVisitors': 'Visitantes',
-    'AdminFuncionarios': 'Funcionários'
-  }
-  return titles[route.name] || 'Admin'
+const userInitials = computed(() => {
+  const name = authStore.user?.name || 'A'
+  return name.split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()
 })
 
-const initials = (n) => (n || '?').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()
+const pageTitle = computed(() => {
+  const map = {
+    'AdminDashboard': 'admin.dashboard_title',
+    'AdminUsers': 'admin.users_title',
+    'AdminFuncionarios': 'admin.employees_title',
+    'AdminEmbarques': 'admin.embarques_title',
+    'AdminCotacoes': 'admin.cotacoes_title',
+    'AdminDocumentos': 'admin.documentos_title',
+    'AdminContacts': 'admin_sidebar.contacts',
+    'AdminServices': 'admin.services_title',
+    'AdminNews': 'admin.news_title',
+    'AdminGallery': 'admin.gallery_title',
+    'AdminPartners': 'admin.partners_title',
+    'AdminBanners': 'admin.banners_title',
+    'AdminTestimonials': 'admin_sidebar.testimonials',
+    'AdminFAQs': 'admin_sidebar.faqs',
+    'AdminMessages': 'admin.messages_title',
+    'AdminVisitors': 'admin.visitors_title',
+    'AdminContactsForm': 'admin_sidebar.form_contacts',
+    'AdminSiteImages': 'admin.site_images_title',
+    'AdminSettings': 'admin.settings_title',
+    'AdminProfile': 'admin.profile_title',
+  }
+  const key = map[route.name]
+  return key ? t(key) : 'Admin'
+})
 
-const toggleDropdown = () => {
+const searchPages = computed(() => [
+  { label: t('admin.dashboard_title'), route: '/admin', icon: 'bi bi-grid-1x2-fill', keywords: ['dashboard', 'inicio', 'home'] },
+  { label: t('admin.users_title'), route: '/admin/utilizadores', icon: 'bi bi-people-fill', keywords: ['utilizadores', 'users', 'clientes'] },
+  { label: t('admin.employees_title'), route: '/admin/funcionarios', icon: 'bi bi-person-badge-fill', keywords: ['funcionarios', 'employees'] },
+  { label: t('admin.embarques_title'), route: '/admin/embarques', icon: 'bi bi-box-seam-fill', keywords: ['embarques', 'shipments', 'envios'] },
+  { label: t('admin.cotacoes_title'), route: '/admin/cotacoes', icon: 'bi bi-receipt-cutoff', keywords: ['cotacoes', 'quotes', 'orcamentos'] },
+  { label: t('admin.documentos_title'), route: '/admin/documentos', icon: 'bi bi-file-earmark-text-fill', keywords: ['documentos', 'docs', 'ficheiros'] },
+  { label: t('admin_sidebar.contacts'), route: '/admin/contactos', icon: 'bi bi-person-lines-fill', keywords: ['contactos', 'contacts', 'telefones'] },
+  { label: t('admin.services_title'), route: '/admin/servicos', icon: 'bi bi-gear-wide-connected', keywords: ['servicos', 'services'] },
+  { label: t('admin.news_title'), route: '/admin/noticias', icon: 'bi bi-newspaper', keywords: ['noticias', 'news', 'blog'] },
+  { label: t('admin.gallery_title'), route: '/admin/galeria', icon: 'bi bi-images', keywords: ['galeria', 'gallery', 'fotos'] },
+  { label: t('admin.partners_title'), route: '/admin/parceiros', icon: 'bi bi-handshake', keywords: ['parceiros', 'partners'] },
+  { label: t('admin.banners_title'), route: '/admin/banners', icon: 'bi bi-card-image', keywords: ['banners', 'banner'] },
+  { label: t('admin_sidebar.testimonials'), route: '/admin/testemunhos', icon: 'bi bi-chat-quote-fill', keywords: ['testemunhos', 'testimonials'] },
+  { label: t('admin_sidebar.faqs'), route: '/admin/faqs', icon: 'bi bi-question-circle-fill', keywords: ['faqs', 'perguntas'] },
+  { label: t('admin.messages_title'), route: '/admin/mensagens', icon: 'bi bi-chat-dots-fill', keywords: ['mensagens', 'messages', 'chat'] },
+  { label: t('admin.visitors_title'), route: '/admin/visitantes', icon: 'bi bi-eye-fill', keywords: ['visitantes', 'visitors'] },
+  { label: t('admin.site_images_title'), route: '/admin/imagens', icon: 'bi bi-image-fill', keywords: ['imagens', 'images', 'site images'] },
+  { label: t('admin.settings_title'), route: '/admin/definicoes', icon: 'bi bi-sliders', keywords: ['definicoes', 'settings', 'config'] },
+  { label: t('admin.profile_title'), route: '/admin/perfil', icon: 'bi bi-person', keywords: ['perfil', 'profile', 'conta'] },
+])
+
+const filteredPages = computed(() => {
+  if (!searchQuery.value) return []
+  const q = searchQuery.value.toLowerCase()
+  return searchPages.value.filter(p =>
+    p.label.toLowerCase().includes(q) ||
+    p.keywords.some(k => k.includes(q))
+  ).slice(0, 8)
+})
+
+const handleSearch = () => {
+  showResults.value = searchQuery.value.length > 0
+}
+
+const handleSearchBlur = () => {
+  setTimeout(() => {
+    searchFocused.value = false
+    showResults.value = false
+  }, 200)
+}
+
+const clearSearch = () => {
+  searchQuery.value = ''
+  showResults.value = false
+}
+
+const toggleDropdown = (e) => {
+  e.stopPropagation()
   showDropdown.value = !showDropdown.value
 }
 
-const logout = () => {
+const handleLogout = () => {
   showDropdown.value = false
   authStore.logout()
   router.push('/login')
@@ -165,21 +196,17 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .admin-navbar {
-  background: #ffffff;
-  border-bottom: 1px solid #dddfe2;
   position: sticky;
   top: 0;
   z-index: 100;
-  height: 64px;
-}
-
-.navbar-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
-  height: 100%;
-  gap: 16px;
+  height: 60px;
+  padding: 0 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #e4e6eb;
+  gap: 12px;
 }
 
 .navbar-left {
@@ -190,29 +217,28 @@ onBeforeUnmount(() => {
 }
 
 .hamburger-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
   width: 40px;
   height: 40px;
   border: none;
+  border-radius: 50%;
   background: #f0f2f5;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  color: #050505;
+  font-size: 1.4rem;
   cursor: pointer;
-  color: #65676b;
-  font-size: 1.25rem;
-  transition: all 0.2s ease;
+  transition: background 0.2s;
 }
 
 .hamburger-btn:hover {
-  background: #e4e6e9;
-  color: #1c1e21;
+  background: #e4e6eb;
 }
 
-.navbar-title {
+.page-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1c1e21;
+  color: #050505;
   margin: 0;
   white-space: nowrap;
 }
@@ -220,43 +246,78 @@ onBeforeUnmount(() => {
 .navbar-center {
   flex: 1;
   max-width: 480px;
-  margin: 0 16px;
+  margin: 0 auto;
 }
 
-.search-bar {
+.search-box {
   position: relative;
-  width: 100%;
+  display: flex;
+  align-items: center;
+  background: #f0f2f5;
+  border-radius: 50px;
+  padding: 0 14px;
+  height: 40px;
+  transition: all 0.2s;
+}
+
+.search-box.focused {
+  background: #fff;
+  box-shadow: 0 0 0 2px #1877f2;
 }
 
 .search-icon {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
   color: #65676b;
-  font-size: 0.9rem;
-  pointer-events: none;
+  font-size: 1rem;
+  flex-shrink: 0;
 }
 
 .search-input {
-  width: 100%;
-  padding: 10px 16px 10px 42px;
+  flex: 1;
   border: none;
-  border-radius: 20px;
-  background: #f0f2f5;
-  font-size: 0.9rem;
-  color: #1c1e21;
-  transition: all 0.2s ease;
+  background: transparent;
   outline: none;
+  padding: 0 10px;
+  font-size: 0.938rem;
+  color: #050505;
 }
 
 .search-input::placeholder {
   color: #65676b;
 }
 
-.search-input:focus {
-  background: #ffffff;
-  box-shadow: 0 0 0 2px #1877f2;
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  padding: 6px;
+  z-index: 200;
+}
+
+.search-result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: #050505;
+  text-decoration: none;
+  font-size: 0.938rem;
+  transition: background 0.15s;
+}
+
+.search-result:hover {
+  background: #f0f2f5;
+  color: #050505;
+  text-decoration: none;
+}
+
+.result-icon {
+  color: #1877f2;
+  font-size: 1.1rem;
 }
 
 .navbar-right {
@@ -266,133 +327,130 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
 }
 
-.user-dropdown {
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px 4px 4px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background 0.2s;
   position: relative;
 }
 
-.user-dropdown-toggle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 12px 6px 6px;
-  border: none;
-  background: transparent;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.user-dropdown-toggle:hover {
+.user-section:hover {
   background: #f0f2f5;
 }
 
-.user-avatar {
-  width: 36px;
-  height: 36px;
+.user-avatar-sm {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #1877f2, #0d5bbd);
-  color: #ffffff;
+  background: linear-gradient(135deg, #1877f2, #0a5dc2);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.user-name-sm {
+  font-size: 0.875rem;
   font-weight: 600;
-  overflow: hidden;
-  flex-shrink: 0;
+  color: #050505;
 }
 
-.user-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.user-info {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-}
-
-.user-name {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #1c1e21;
-  line-height: 1.2;
-}
-
-.user-role {
+.chevron {
   font-size: 0.7rem;
   color: #65676b;
-  line-height: 1.2;
+  transition: transform 0.2s;
 }
 
-.dropdown-arrow {
-  font-size: 0.75rem;
-  color: #65676b;
-  transition: transform 0.2s ease;
-}
-
-.dropdown-arrow.open {
-  transform: rotate(180deg);
-}
-
-.dropdown-menu-custom {
+.user-dropdown {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  min-width: 220px;
-  background: #ffffff;
+  width: 280px;
+  background: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-  padding: 8px 0;
-  z-index: 1000;
-  border: 1px solid #e4e6e9;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2);
+  padding: 8px;
+  z-index: 300;
 }
 
-.dropdown-item-custom {
+.dropdown-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
-  color: #1c1e21;
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background 0.2s ease;
-  cursor: pointer;
-  border: none;
-  background: none;
-  width: 100%;
-  text-align: left;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 8px;
 }
 
-.dropdown-item-custom:hover {
+.dropdown-header:hover {
   background: #f0f2f5;
 }
 
-.dropdown-item-custom i {
-  font-size: 1.1rem;
+.dropdown-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1877f2, #0a5dc2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.dropdown-name {
+  font-size: 0.938rem;
+  font-weight: 600;
+  color: #050505;
+}
+
+.dropdown-role {
+  font-size: 0.8rem;
   color: #65676b;
-  width: 20px;
-  text-align: center;
-}
-
-.dropdown-item-danger {
-  color: #dc3545;
-}
-
-.dropdown-item-danger i {
-  color: #dc3545;
-}
-
-.dropdown-item-danger:hover {
-  background: #fee2e2;
 }
 
 .dropdown-divider {
   height: 1px;
-  background: #e4e6e9;
+  background: #e4e6eb;
   margin: 4px 0;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: #050505;
+  text-decoration: none;
+  font-size: 0.938rem;
+  font-weight: 500;
+  border: none;
+  background: none;
+  width: 100%;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.dropdown-item:hover {
+  background: #f0f2f5;
+  color: #050505;
+  text-decoration: none;
+}
+
+.dropdown-item.danger {
+  color: #dc3545;
+}
+
+.dropdown-item.danger:hover {
+  background: #fee2e2;
+  color: #dc3545;
 }
 
 .dropdown-enter-active,
@@ -403,33 +461,51 @@ onBeforeUnmount(() => {
 .dropdown-enter-from,
 .dropdown-leave-to {
   opacity: 0;
-  transform: translateY(-8px);
+  transform: translateY(-8px) scale(0.96);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
+  .hamburger-btn {
+    display: flex;
+  }
+
+  .page-title {
+    font-size: 1rem;
+  }
+
   .navbar-center {
     display: none;
   }
 
-  .user-info {
+  .user-name-sm {
     display: none;
   }
 
-  .dropdown-arrow {
+  .chevron {
     display: none;
   }
 
-  .navbar-content {
-    padding: 0 16px;
+  .user-dropdown {
+    right: -8px;
+    width: calc(100vw - 16px);
+    max-width: 300px;
   }
 }
 
-@media (max-width: 992px) {
-  .user-info {
+@media (min-width: 768px) and (max-width: 1023px) {
+  .page-title {
+    font-size: 1rem;
+  }
+
+  .navbar-center {
+    max-width: 280px;
+  }
+
+  .user-name-sm {
     display: none;
   }
 
-  .dropdown-arrow {
+  .chevron {
     display: none;
   }
 }

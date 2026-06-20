@@ -1,8 +1,8 @@
 <template>
   <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-      <h4 class="mb-0"><i class="bi bi-chat-quote me-2"></i>Testimonials</h4>
-      <button class="btn btn-primary" @click="openModal()"><i class="bi bi-plus-lg me-1"></i>New</button>
+      <h4 class="mb-0"><i class="bi bi-chat-quote me-2"></i>{{ t('admin.testimonials_title') }}</h4>
+      <button class="btn btn-primary" @click="openModal()"><i class="bi bi-plus-lg me-1"></i>{{ t('admin.testimonials_new') }}</button>
     </div>
 
     <div v-if="loading" class="text-center py-5">
@@ -13,7 +13,7 @@
       <table class="table table-hover align-middle">
         <thead class="table-light">
           <tr>
-            <th>Name</th><th>Position</th><th>Company</th><th>Message</th><th>Rating</th><th>Status</th><th>Order</th><th>Actions</th>
+            <th>{{ t('admin.testimonials_name') }}</th><th>{{ t('admin.testimonials_position') }}</th><th>{{ t('admin.testimonials_company') }}</th><th>{{ t('admin.testimonials_message') }}</th><th>{{ t('admin.testimonials_rating') }}</th><th>{{ t('admin.testimonials_status') }}</th><th>{{ t('admin.testimonials_order') }}</th><th>{{ t('admin.testimonials_actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -30,7 +30,7 @@
               <button class="btn btn-sm btn-outline-danger" @click="deleteItem(item.id)"><i class="bi bi-trash"></i></button>
             </td>
           </tr>
-          <tr v-if="!testimonials.length"><td colspan="8" class="text-center text-muted py-4">No testimonials found.</td></tr>
+          <tr v-if="!testimonials.length"><td colspan="8" class="text-center text-muted py-4">{{ t('admin.testimonials_empty') }}</td></tr>
         </tbody>
       </table>
     </div>
@@ -39,57 +39,52 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ form.id ? 'Edit' : 'New' }} Testimonial</h5>
+            <h5 class="modal-title">{{ form.id ? t('admin.testimonials_edit') : t('admin.testimonials_new_testimonial') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label">Name *</label>
+              <label class="form-label">{{ t('admin.testimonials_name') }} *</label>
               <input v-model="form.name" type="text" class="form-control" required>
             </div>
             <div class="row mb-3">
               <div class="col">
-                <label class="form-label">Position</label>
+                <label class="form-label">{{ t('admin.testimonials_position') }}</label>
                 <input v-model="form.position" type="text" class="form-control">
               </div>
               <div class="col">
-                <label class="form-label">Company</label>
+                <label class="form-label">{{ t('admin.testimonials_company') }}</label>
                 <input v-model="form.company" type="text" class="form-control">
               </div>
             </div>
             <div class="mb-3">
-              <label class="form-label">Message *</label>
+              <label class="form-label">{{ t('admin.testimonials_message') }} *</label>
               <textarea v-model="form.message" class="form-control" rows="4" required></textarea>
             </div>
             <div class="row mb-3">
               <div class="col">
-                <label class="form-label">Rating</label>
+                <label class="form-label">{{ t('admin.testimonials_rating') }}</label>
                 <select v-model="form.rating" class="form-select">
                   <option v-for="r in 5" :key="r" :value="r">{{ r }} star{{ r > 1 ? 's' : '' }}</option>
                 </select>
               </div>
               <div class="col">
-                <label class="form-label">Status</label>
+                <label class="form-label">{{ t('admin.testimonials_status') }}</label>
                 <select v-model="form.status" class="form-select">
-                  <option value="published">Published</option>
-                  <option value="draft">Draft</option>
+                  <option value="published">{{ t('admin.testimonials_published') }}</option>
+                  <option value="draft">{{ t('admin.testimonials_draft') }}</option>
                 </select>
               </div>
               <div class="col">
-                <label class="form-label">Order</label>
+                <label class="form-label">{{ t('admin.testimonials_order') }}</label>
                 <input v-model.number="form.order_by" type="number" class="form-control" min="0">
               </div>
             </div>
-            <div class="mb-3">
-              <label class="form-label">Photo</label>
-              <input type="file" class="form-control" accept="image/*" @change="onFileChange">
-              <img v-if="form.photo_url" :src="form.photo_url" class="mt-2 rounded" style="height:60px">
-            </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
             <button type="button" class="btn btn-primary" @click="save" :disabled="saving">
-              <span v-if="saving" class="spinner-border spinner-border-sm me-1"></span>Save
+              <span v-if="saving" class="spinner-border spinner-border-sm me-1"></span>{{ t('common.save') }}
             </button>
           </div>
         </div>
@@ -102,15 +97,17 @@
 import { ref, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const testimonials = ref([])
 const loading = ref(true)
 const saving = ref(false)
 const modalRef = ref(null)
 let bsModal = null
-const photoFile = ref(null)
 
-const defaultForm = { id: null, name: '', position: '', company: '', message: '', rating: 5, status: 'published', order_by: 0, photo_url: '' }
+const defaultForm = { id: null, name: '', position: '', company: '', message: '', rating: 5, status: 'published', order_by: 0 }
 const form = reactive({ ...defaultForm })
 
 onMounted(async () => {
@@ -128,7 +125,6 @@ async function fetchAll() {
 }
 
 function openModal(item = null) {
-  photoFile.value = null
   if (item) {
     Object.assign(form, { ...item })
   } else {
@@ -137,25 +133,10 @@ function openModal(item = null) {
   bsModal.show()
 }
 
-function onFileChange(e) {
-  const file = e.target.files[0]
-  if (file) photoFile.value = file
-}
-
 async function save() {
-  if (!form.name || !form.message) return alert('Name and message are required.')
+  if (!form.name || !form.message) return alert(t('admin.testimonials_required'))
   saving.value = true
   try {
-    let photoUrl = form.photo_url
-    if (photoFile.value) {
-      const fileExt = photoFile.value.name.split('.').pop()
-      const fileName = `testimonials/${Date.now()}.${fileExt}`
-      const { data, error: uploadError } = await supabase.storage.from('uploads').upload(fileName, photoFile.value)
-      if (uploadError) throw uploadError
-      const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(fileName)
-      photoUrl = urlData.publicUrl
-    }
-
     const payload = {
       name: form.name,
       position: form.position,
@@ -163,8 +144,7 @@ async function save() {
       message: form.message,
       rating: form.rating,
       status: form.status,
-      order_by: form.order_by,
-      photo_url: photoUrl
+      order_by: form.order_by
     }
 
     if (form.id) {
@@ -176,16 +156,16 @@ async function save() {
     }
     bsModal.hide()
     await fetchAll()
-  } catch (e) { alert('Error saving: ' + (e.message || e)) }
+  } catch (e) { alert(t('admin.testimonials_error_saving') + ' ' + (e.message || e)) }
   saving.value = false
 }
 
 async function deleteItem(id) {
-  if (!confirm('Delete this testimonial?')) return
+  if (!confirm(t('admin.testimonials_confirm_delete'))) return
   try {
     const { error } = await supabase.from('testimonials').delete().eq('id', id)
     if (error) throw error
     await fetchAll()
-  } catch (e) { alert('Error deleting.') }
+  } catch (e) { alert(t('admin.testimonials_error_deleting')) }
 }
 </script>

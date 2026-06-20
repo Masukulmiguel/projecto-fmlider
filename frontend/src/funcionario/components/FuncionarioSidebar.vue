@@ -1,101 +1,107 @@
 <template>
-  <div class="funcionario-sidebar" :class="{ show: isOpen }">
+  <div class="funcionario-sidebar" :class="{ show: isOpen, collapsed: collapsed }">
     <div class="sidebar-overlay" @click="$emit('close')"></div>
-    <div class="sidebar-logo">
-      <img :src="logoUrl" alt="FMLider" height="42">
-      <small class="d-block sidebar-subtitle">{{ t('sidebar.panel') }}</small>
-      <div class="sidebar-user" v-if="authStore.user">
-        <div class="sidebar-user-avatar">
-          <img v-if="authStore.user.photo" :src="authStore.user.photo" :alt="authStore.user.name">
-          <span v-else>{{ initials(authStore.user.name) }}</span>
+    <div class="sidebar-inner">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="brand-icon"><i class="bi bi-box-seam-fill"></i></div>
+          <span class="brand-text">FMLider</span>
         </div>
-        <div class="sidebar-user-info">
-          <strong>{{ authStore.user.name }}</strong>
-          <small v-if="authStore.user.position">
-            <i class="bi bi-person-badge"></i> {{ authStore.user.position }}
-          </small>
-        </div>
+        <button class="collapse-btn d-none d-lg-flex" @click="emit('toggle-collapse')" :title="collapsed ? 'Expandir' : 'Recolher'">
+          <i :class="collapsed ? 'bi bi-chevron-double-right' : 'bi bi-chevron-double-left'"></i>
+        </button>
+        <button class="close-btn d-lg-none" @click="$emit('close')">
+          <i class="bi bi-x-lg"></i>
+        </button>
       </div>
-    </div>
-    <nav class="sidebar-menu" @click="$emit('close')">
-      <div class="menu-section">{{ t('sidebar.general') }}</div>
-      <router-link to="/funcionario" class="menu-item" active-class="active">
-        <i class="bi bi-grid-1x2-fill menu-icon"></i>
-        <span class="menu-text">{{ t('sidebar.dashboard') }}</span>
-      </router-link>
-      <router-link to="/funcionario/mensagens" class="menu-item" active-class="active">
-        <i class="bi bi-chat-dots-fill menu-icon"></i>
-        <span class="menu-text">{{ t('sidebar.messages') }}</span>
-        <span v-if="chatUnread > 0" class="menu-badge">{{ chatUnread }}</span>
-      </router-link>
 
-      <template v-if="can('clients.view')">
-        <div class="menu-section">{{ t('sidebar.clients_section') }}</div>
-        <router-link to="/funcionario/clientes" class="menu-item" active-class="active">
-          <i class="bi bi-people-fill menu-icon"></i>
-          <span class="menu-text">{{ t('sidebar.clients_section') }}</span>
+      <nav class="sidebar-nav">
+        <div class="nav-section">{{ t('funcionario.sidebar_main') }}</div>
+        <router-link to="/funcionario" class="nav-item" active-class="active" :class="{ 'icon-only': collapsed }" :title="collapsed ? t('funcionario.sidebar_dashboard') : ''">
+          <i class="bi bi-grid-1x2-fill nav-icon"></i>
+          <span class="nav-text">{{ t('funcionario.sidebar_dashboard') }}</span>
         </router-link>
-      </template>
+        <router-link to="/funcionario/mensagens" class="nav-item" active-class="active" :class="{ 'icon-only': collapsed }" :title="collapsed ? t('funcionario.sidebar_messages') : ''">
+          <i class="bi bi-chat-dots-fill nav-icon"></i>
+          <span class="nav-text">{{ t('funcionario.sidebar_messages') }}</span>
+          <span v-if="chatUnread > 0" class="nav-badge">{{ chatUnread }}</span>
+        </router-link>
 
-      <template v-if="can('embarques.view') || can('cotacoes.view') || can('documentos.view') || can('contactos.view')">
-        <div class="menu-section">{{ t('sidebar.operations') }}</div>
-        <router-link v-if="can('embarques.view')" to="/funcionario/embarques" class="menu-item" active-class="active">
-          <i class="bi bi-box-seam-fill menu-icon"></i>
-          <span class="menu-text">{{ t('dashboard.shipments') }}</span>
-        </router-link>
-        <router-link v-if="can('cotacoes.view')" to="/funcionario/cotacoes" class="menu-item" active-class="active">
-          <i class="bi bi-receipt menu-icon"></i>
-          <span class="menu-text">{{ t('dashboard.quotes') }}</span>
-        </router-link>
-        <router-link v-if="can('documentos.view')" to="/funcionario/documentos" class="menu-item" active-class="active">
-          <i class="bi bi-file-earmark-text-fill menu-icon"></i>
-          <span class="menu-text">{{ t('dashboard.documents') }}</span>
-        </router-link>
-        <router-link v-if="can('contactos.view')" to="/funcionario/contactos" class="menu-item" active-class="active">
-          <i class="bi bi-person-rolodex menu-icon"></i>
-          <span class="menu-text">{{ t('dashboard.contacts') }}</span>
-        </router-link>
-      </template>
+        <template v-if="can('clients.view')">
+          <div class="nav-section">{{ t('funcionario.sidebar_clients') }}</div>
+          <router-link to="/funcionario/clientes" class="nav-item" active-class="active" :class="{ 'icon-only': collapsed }" :title="collapsed ? t('funcionario.sidebar_clients') : ''">
+            <i class="bi bi-people-fill nav-icon"></i>
+            <span class="nav-text">{{ t('funcionario.sidebar_clients') }}</span>
+          </router-link>
+        </template>
 
-      <div class="menu-section">{{ t('sidebar.account') }}</div>
-      <router-link to="/funcionario/perfil" class="menu-item" active-class="active">
-        <i class="bi bi-person-fill menu-icon"></i>
-        <span class="menu-text">{{ t('sidebar.profile') }}</span>
-      </router-link>
-      <router-link to="/mudar-senha" class="menu-item" active-class="active">
-        <i class="bi bi-shield-lock menu-icon"></i>
-        <span class="menu-text">{{ t('sidebar.change_password') }}</span>
-      </router-link>
-    </nav>
-    <div class="sidebar-footer">
-      <button class="logout-btn" @click="logout">
-        <i class="bi bi-box-arrow-right"></i>
-        <span>{{ t('sidebar.logout') }}</span>
-      </button>
+        <template v-if="can('embarques.view') || can('cotacoes.view') || can('documentos.view') || can('contactos.view')">
+          <div class="nav-section">{{ t('funcionario.sidebar_operations') }}</div>
+          <router-link v-if="can('embarques.view')" to="/funcionario/embarques" class="nav-item" active-class="active" :class="{ 'icon-only': collapsed }" :title="collapsed ? t('funcionario.sidebar_shipments') : ''">
+            <i class="bi bi-box-seam-fill nav-icon"></i>
+            <span class="nav-text">{{ t('funcionario.sidebar_shipments') }}</span>
+          </router-link>
+          <router-link v-if="can('cotacoes.view')" to="/funcionario/cotacoes" class="nav-item" active-class="active" :class="{ 'icon-only': collapsed }" :title="collapsed ? t('funcionario.sidebar_quotes') : ''">
+            <i class="bi bi-receipt-cutoff nav-icon"></i>
+            <span class="nav-text">{{ t('funcionario.sidebar_quotes') }}</span>
+          </router-link>
+          <router-link v-if="can('documentos.view')" to="/funcionario/documentos" class="nav-item" active-class="active" :class="{ 'icon-only': collapsed }" :title="collapsed ? t('funcionario.sidebar_documents') : ''">
+            <i class="bi bi-file-earmark-text-fill nav-icon"></i>
+            <span class="nav-text">{{ t('funcionario.sidebar_documents') }}</span>
+          </router-link>
+          <router-link v-if="can('contactos.view')" to="/funcionario/contactos" class="nav-item" active-class="active" :class="{ 'icon-only': collapsed }" :title="collapsed ? t('funcionario.sidebar_contacts') : ''">
+            <i class="bi bi-person-lines-fill nav-icon"></i>
+            <span class="nav-text">{{ t('funcionario.sidebar_contacts') }}</span>
+          </router-link>
+        </template>
+
+        <div class="nav-section">{{ t('funcionario.sidebar_account') }}</div>
+        <router-link to="/funcionario/perfil" class="nav-item" active-class="active" :class="{ 'icon-only': collapsed }" :title="collapsed ? t('funcionario.sidebar_profile') : ''">
+          <i class="bi bi-person nav-icon"></i>
+          <span class="nav-text">{{ t('funcionario.sidebar_profile') }}</span>
+        </router-link>
+        <router-link to="/mudar-senha" class="nav-item" active-class="active" :class="{ 'icon-only': collapsed }" :title="collapsed ? t('funcionario.sidebar_profile') : ''">
+          <i class="bi bi-shield-lock nav-icon"></i>
+          <span class="nav-text">{{ t('funcionario.sidebar_profile') }}</span>
+        </router-link>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="footer-user" v-if="authStore.user">
+          <div class="user-avatar">{{ initials(authStore.user.name) }}</div>
+          <div class="user-info" v-if="!collapsed">
+            <div class="user-name">{{ authStore.user.name }}</div>
+            <div class="user-role">{{ authStore.user.position || t('funcionario.profile_role') }}</div>
+          </div>
+        </div>
+        <button class="logout-btn" :class="{ 'icon-only': collapsed }" @click="logout" :title="collapsed ? t('funcionario.sidebar_logout') : ''">
+          <i class="bi bi-box-arrow-right"></i>
+          <span v-if="!collapsed">{{ t('funcionario.sidebar_logout') }}</span>
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
-import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
-import { useSiteImages } from '@/composables/useSiteImages'
-
-const { getImage, fetchAll } = useSiteImages()
-const logoUrl = ref('/assets/img/logo.png')
 import { useChatStore } from '@/stores/chatStore'
-import { useI18n } from '@/composables/useI18n.js'
+import { useI18n } from '@/composables/useI18n'
 
-defineProps({ isOpen: { type: Boolean, default: false } })
+const { t } = useI18n()
 
-defineEmits(['close'])
+const props = defineProps({
+  isOpen: { type: Boolean, default: false },
+  collapsed: { type: Boolean, default: false }
+})
+
+const emit = defineEmits(['close', 'toggle-collapse'])
 
 const authStore = useAuthStore()
 const chatStore = useChatStore()
 const router = useRouter()
-const { t } = useI18n()
 const chatUnread = ref(0)
 let pollInterval = null
 
@@ -115,9 +121,7 @@ const logout = () => {
   router.push('/login')
 }
 
-onMounted(async () => {
-  await fetchAll()
-  logoUrl.value = getImage('sidebar', 'funcionario_logo', '/assets/img/logo.png')
+onMounted(() => {
   fetchChatUnread()
   pollInterval = setInterval(fetchChatUnread, 30000)
 })
@@ -130,191 +134,349 @@ onBeforeUnmount(() => {
 <style scoped>
 .funcionario-sidebar {
   width: 260px;
-  background: var(--sidebar-bg);
-  color: var(--sidebar-text);
+  background: #ffffff;
+  color: #050505;
   position: fixed;
   left: 0;
   top: 0;
   height: 100vh;
-  overflow-y: auto;
-  padding: 1rem 0;
-  z-index: 1000;
-  transition: transform 0.3s ease, background 0.3s ease;
+  overflow: hidden;
+  z-index: 1100;
+  transition: width 0.2s ease;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--sidebar-divider);
+  border-right: 1px solid #e4e6eb;
 }
 
-.sidebar-logo {
-  padding: 1.75rem 1.5rem;
-  text-align: center;
-  border-bottom: 1px solid var(--sidebar-divider);
-  margin-bottom: 1rem;
-}
-.sidebar-logo img { filter: brightness(0) invert(1); margin-bottom: 0.5rem; }
-.sidebar-subtitle {
-  color: var(--sidebar-text-muted);
-  font-size: 0.72rem;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  font-weight: 500;
-}
-
-.sidebar-user {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 1rem;
-  padding: 0.75rem;
-  background: var(--sidebar-user-bg);
-  border-radius: 10px;
-  text-align: left;
-}
-.sidebar-user-avatar {
-  width: 42px; height: 42px;
-  border-radius: 50%;
-  background: var(--sidebar-avatar-bg);
-  color: var(--text-inverse);
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700;
-  font-size: 0.85rem;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-.sidebar-user-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.sidebar-user-info { display: flex; flex-direction: column; min-width: 0; flex: 1; }
-.sidebar-user-info strong {
-  color: var(--sidebar-text);
-  font-size: 0.85rem;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.sidebar-user-info small {
-  color: var(--sidebar-text-muted);
-  font-size: 0.72rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.sidebar-menu {
-  display: flex;
-  flex-direction: column;
-  padding: 0.5rem 0.75rem;
-  gap: 2px;
-  flex: 1;
-}
-
-.menu-section {
-  color: var(--sidebar-section);
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  padding: 1rem 1rem 0.5rem;
-  margin-top: 0.5rem;
-}
-.menu-section:first-child { margin-top: 0; padding-top: 0.5rem; }
-
-.menu-item {
-  padding: 0.7rem 1rem;
-  color: var(--sidebar-text);
-  text-decoration: none;
-  transition: all 0.2s ease;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  font-size: 0.92rem;
-  font-weight: 500;
-  position: relative;
-  border-left: 3px solid transparent;
-  margin-left: -3px;
-}
-.menu-item:hover { background: var(--sidebar-hover-bg); color: var(--sidebar-active-text); }
-.menu-item.active {
-  background: var(--sidebar-active-bg);
-  color: var(--sidebar-active-text);
-  border-left-color: var(--sidebar-active-border);
-}
-.menu-item.active .menu-icon { color: var(--sidebar-active-border); }
-.menu-icon {
-  font-size: 1.1rem;
-  width: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--sidebar-icon);
-  transition: color 0.2s ease;
-  flex-shrink: 0;
-}
-.menu-item:hover .menu-icon { color: var(--sidebar-text); }
-.menu-text { flex: 1; }
-
-.menu-badge {
-  background: var(--badge-bg);
-  color: var(--badge-text);
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 10px;
-  min-width: 22px;
-  text-align: center;
-  animation: badge-pulse 2s infinite;
-}
-
-.sidebar-footer {
-  padding: 1rem 0.75rem;
-  border-top: 1px solid var(--sidebar-divider);
-}
-.logout-btn {
-  width: 100%;
-  background: transparent;
-  border: 1px solid var(--sidebar-divider);
-  color: var(--sidebar-text);
-  padding: 0.7rem 1rem;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  font-size: 0.92rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.logout-btn:hover {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: #ef4444;
-  color: #fca5a5;
+.funcionario-sidebar.collapsed {
+  width: 72px;
 }
 
 .sidebar-overlay {
   display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
 }
 
-@media (max-width: 768px) {
+.sidebar-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  flex-shrink: 0;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1877f2, #0a5dc2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.brand-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1877f2;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+
+.collapsed .brand-text {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.collapse-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: #f0f2f5;
+  color: #65676b;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.collapse-btn:hover {
+  background: #e4e6eb;
+  color: #050505;
+}
+
+.collapsed .collapse-btn {
+  transform: rotate(180deg);
+}
+
+.close-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: #f0f2f5;
+  color: #65676b;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  background: #e4e6eb;
+}
+
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px;
+}
+
+.sidebar-nav::-webkit-scrollbar { width: 4px; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+
+.nav-section {
+  color: #65676b;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 12px 12px 6px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.collapsed .nav-section {
+  text-align: center;
+  padding: 12px 4px 6px;
+  font-size: 0;
+}
+
+.collapsed .nav-section::after {
+  content: '•••';
+  font-size: 0.6rem;
+  display: block;
+  text-align: center;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #050505;
+  text-decoration: none;
+  font-size: 0.938rem;
+  font-weight: 500;
+  transition: background 0.15s;
+  margin-bottom: 2px;
+  position: relative;
+}
+
+.nav-item:hover {
+  background: #f0f2f5;
+  color: #050505;
+  text-decoration: none;
+}
+
+.nav-item.active {
+  background: #e7f3ff;
+  color: #1877f2;
+  font-weight: 600;
+}
+
+.nav-item.active .nav-icon {
+  color: #1877f2;
+}
+
+.nav-item.icon-only {
+  justify-content: center;
+  padding: 10px;
+}
+
+.nav-icon {
+  font-size: 1.2rem;
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #65676b;
+  transition: color 0.15s;
+}
+
+.nav-item:hover .nav-icon {
+  color: #050505;
+}
+
+.nav-item.active .nav-icon {
+  color: #1877f2;
+}
+
+.nav-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  transition: opacity 0.2s;
+}
+
+.collapsed .nav-text {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.nav-badge {
+  background: #e41e3f;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+
+.collapsed .nav-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 1px 4px;
+  min-width: 14px;
+  font-size: 0.6rem;
+}
+
+.sidebar-footer {
+  padding: 12px;
+  border-top: 1px solid #e4e6eb;
+  flex-shrink: 0;
+}
+
+.footer-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1877f2, #0a5dc2);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.user-info {
+  overflow: hidden;
+  transition: opacity 0.2s;
+}
+
+.collapsed .user-info {
+  opacity: 0;
+  width: 0;
+}
+
+.user-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #050505;
+  white-space: nowrap;
+}
+
+.user-role {
+  font-size: 0.75rem;
+  color: #65676b;
+}
+
+.logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #65676b;
+  font-size: 0.938rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.logout-btn:hover {
+  background: #fee2e2;
+  color: #dc3545;
+}
+
+.logout-btn.icon-only {
+  justify-content: center;
+  padding: 10px;
+}
+
+@media (max-width: 1023px) {
   .funcionario-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 280px;
-    max-width: 85vw;
     transform: translateX(-100%);
     transition: transform 0.3s ease;
-    z-index: 1000;
-    overflow-y: auto;
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+    z-index: 1100;
   }
-  .funcionario-sidebar.show { transform: translateX(0); }
+
+  .funcionario-sidebar.show {
+    transform: translateX(0);
+  }
+
   .sidebar-overlay {
     display: block;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 999;
+  }
+
+  .collapse-btn {
+    display: none !important;
+  }
+
+  .close-btn {
+    display: flex;
   }
 }
 </style>

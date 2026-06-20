@@ -2,11 +2,11 @@
   <div class="crud-page">
     <div class="page-header">
       <div>
-        <h1 class="page-title">Contactos</h1>
-        <p class="text-muted mb-0">Gerencie a sua lista de contactos.</p>
+        <h1 class="page-title">{{ t('cliente.contactos_title') }}</h1>
+        <p class="text-muted mb-0">{{ t('cliente.contactos_subtitle') }}</p>
       </div>
       <button class="btn btn-primary" @click="openForm()">
-        <i class="bi bi-plus-lg me-1"></i> Novo contacto
+        <i class="bi bi-plus-lg me-1"></i> {{ t('cliente.contactos_new') }}
       </button>
     </div>
 
@@ -14,7 +14,7 @@
       <div class="card-header">
         <div class="search-box">
           <i class="bi bi-search"></i>
-          <input v-model="filters.q" type="text" placeholder="Pesquisar por nome, email, empresa..." @input="debounceSearch">
+          <input v-model="filters.q" type="text" :placeholder="t('cliente.contactos_search')" @input="debounceSearch">
         </div>
       </div>
       <div class="card-body p-0">
@@ -23,21 +23,21 @@
         </div>
         <div v-else-if="items.length === 0" class="empty-state">
           <i class="bi bi-person-rolodex"></i>
-          <p>Nenhum contacto encontrado.</p>
+          <p>{{ t('cliente.contactos_empty') }}</p>
           <button class="btn btn-primary btn-sm" @click="openForm()">
-            <i class="bi bi-plus-lg me-1"></i> Adicionar primeiro contacto
+            <i class="bi bi-plus-lg me-1"></i> {{ t('cliente.contactos_add_first') }}
           </button>
         </div>
         <div v-else class="table-responsive">
           <table class="table table-hover mb-0">
             <thead>
               <tr>
-                <th>Nome</th>
-                <th>Empresa</th>
-                <th>Email</th>
-                <th>Telefone</th>
-                <th>Cargo</th>
-                <th class="text-end">Ações</th>
+                <th>{{ t('cliente.contactos_col_name') }}</th>
+                <th>{{ t('cliente.contactos_col_company') }}</th>
+                <th>{{ t('cliente.contactos_col_email') }}</th>
+                <th>{{ t('cliente.contactos_col_phone') }}</th>
+                <th>{{ t('cliente.contactos_col_position') }}</th>
+                <th class="text-end">{{ t('cliente.contactos_col_actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -54,10 +54,10 @@
                 <td>{{ item.position || '—' }}</td>
                 <td class="text-end">
                   <div class="action-buttons">
-                    <button class="btn btn-sm btn-outline-secondary" @click="openForm(item)" title="Editar">
+                    <button class="btn btn-sm btn-outline-secondary" @click="openForm(item)" :title="t('cliente.contactos_edit')">
                       <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(item)" title="Eliminar">
+                    <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(item)" :title="t('cliente.contactos_delete')">
                       <i class="bi bi-trash"></i>
                     </button>
                   </div>
@@ -73,7 +73,7 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ editing ? 'Editar contacto' : 'Novo contacto' }}</h5>
+            <h5 class="modal-title">{{ editing ? t('cliente.contactos_edit_title') : t('cliente.contactos_new_title') }}</h5>
             <button type="button" class="btn-close" @click="closeForm"></button>
           </div>
           <form @submit.prevent="handleSubmit" novalidate>
@@ -81,42 +81,42 @@
               <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label">Nome *</label>
+                  <label class="form-label">{{ t('cliente.contactos_form_name') }} *</label>
                   <input v-model="form.name" type="text" class="form-control" :class="{'is-invalid': errors.name}" required>
                   <div class="invalid-feedback">{{ errors.name }}</div>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Empresa</label>
+                  <label class="form-label">{{ t('cliente.contactos_form_company') }}</label>
                   <input v-model="form.company" type="text" class="form-control">
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Email</label>
+                  <label class="form-label">{{ t('cliente.contactos_form_email') }}</label>
                   <input v-model="form.email" type="email" class="form-control" :class="{'is-invalid': errors.email}">
                   <div class="invalid-feedback">{{ errors.email }}</div>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Telefone</label>
+                  <label class="form-label">{{ t('cliente.contactos_form_phone') }}</label>
                   <input v-model="form.phone" type="text" class="form-control">
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Cargo</label>
+                  <label class="form-label">{{ t('cliente.contactos_form_position') }}</label>
                   <input v-model="form.position" type="text" class="form-control">
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Endereço</label>
+                  <label class="form-label">{{ t('cliente.contactos_form_address') }}</label>
                   <input v-model="form.address" type="text" class="form-control">
                 </div>
                 <div class="col-12">
-                  <label class="form-label">Notas</label>
+                  <label class="form-label">{{ t('cliente.contactos_form_notes') }}</label>
                   <textarea v-model="form.notes" rows="3" class="form-control"></textarea>
                 </div>
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-outline-secondary" @click="closeForm">Cancelar</button>
+              <button type="button" class="btn btn-outline-secondary" @click="closeForm">{{ t('cliente.contactos_cancel') }}</button>
               <button type="submit" class="btn btn-primary" :disabled="saving">
                 <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
-                {{ editing ? 'Atualizar' : 'Criar' }}
+                {{ editing ? t('cliente.contactos_update') : t('cliente.contactos_create') }}
               </button>
             </div>
           </form>
@@ -131,7 +131,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const items = ref([])
 const loading = ref(false)
@@ -193,19 +195,19 @@ const handleSubmit = async () => {
     closeForm()
     await fetchData()
   } catch (error) {
-    errorMessage.value = error.message || 'Erro ao guardar'
+    errorMessage.value = error.message || t('cliente.contactos_error_saving')
   } finally {
     saving.value = false
   }
 }
 
 const confirmDelete = async (item) => {
-  if (!confirm(`Eliminar "${item.name}"?`)) return
+  if (!confirm(`${t('cliente.contactos_confirm_delete')} "${item.name}"?`)) return
   try {
     const { error } = await supabase.from('contactos').delete().eq('id', item.id)
     if (error) throw error
     await fetchData()
-  } catch (e) { alert('Erro ao eliminar') }
+  } catch (e) { alert(t('cliente.contactos_error_deleting')) }
 }
 
 const initials = (name) => {

@@ -2,8 +2,8 @@
   <div class="crud-page">
     <div class="page-header">
       <div>
-        <h1 class="page-title">Contactos</h1>
-        <p class="text-muted mb-0">Contactos de todos os clientes.</p>
+        <h1 class="page-title">{{ t('funcionario.contacts_title') }}</h1>
+        <p class="text-muted mb-0">{{ t('funcionario.contacts_subtitle') }}</p>
       </div>
     </div>
     <div class="card">
@@ -11,17 +11,17 @@
         <div v-if="loading" class="text-center py-5"><div class="spinner-border text-primary"></div></div>
         <div v-else-if="items.length === 0" class="empty-state">
           <i class="bi bi-person-rolodex"></i>
-          <p>Sem contactos.</p>
+          <p>{{ t('funcionario.contacts_empty') }}</p>
         </div>
         <div v-else class="table-responsive">
           <table class="table table-hover mb-0">
             <thead>
               <tr>
-                <th>Nome</th>
-                <th>Empresa</th>
-                <th>Email</th>
-                <th>Telefone</th>
-                <th>Cargo</th>
+                <th>{{ t('funcionario.contacts_name') }}</th>
+                <th>{{ t('funcionario.contacts_company') }}</th>
+                <th>{{ t('funcionario.contacts_email') }}</th>
+                <th>{{ t('funcionario.contacts_phone') }}</th>
+                <th>{{ t('funcionario.contacts_position') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -49,7 +49,9 @@
 import { ref, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const items = ref([])
 const loading = ref(false)

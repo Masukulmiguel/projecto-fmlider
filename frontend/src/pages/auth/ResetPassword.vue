@@ -5,7 +5,7 @@
         <div class="col-md-6">
           <div class="card">
             <div class="card-body p-5">
-              <h1 class="text-center mb-4">Redefinir Senha</h1>
+              <h1 class="text-center mb-4">{{ t('auth.reset_title') }}</h1>
 
               <div v-if="errorMessage" class="alert alert-danger" role="alert">
                 {{ errorMessage }}
@@ -15,7 +15,7 @@
               </div>
 
               <div v-if="!sessionReady && !errorMessage">
-                <p class="text-center">A processar...</p>
+                <p class="text-center">{{ t('auth.reset_processing') }}</p>
                 <div class="text-center">
                   <div class="spinner-border" role="status"></div>
                 </div>
@@ -23,21 +23,21 @@
 
               <form v-if="sessionReady" @submit.prevent="handleResetPassword">
                 <div class="mb-3">
-                  <label for="password" class="form-label">Nova Senha</label>
+                  <label for="password" class="form-label">{{ t('auth.reset_new') }}</label>
                   <input type="password" class="form-control" id="password" v-model="form.password" required minlength="6">
                 </div>
                 <div class="mb-3">
-                  <label for="password_confirm" class="form-label">Confirmar Senha</label>
+                  <label for="password_confirm" class="form-label">{{ t('auth.reset_confirm') }}</label>
                   <input type="password" class="form-control" id="password_confirm" v-model="form.password_confirm" required>
                 </div>
                 <button type="submit" class="btn btn-primary w-100 mb-3" :disabled="loading">
                   <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
-                  Redefinir
+                  {{ t('auth.reset_submit') }}
                 </button>
               </form>
 
               <p class="text-center mt-3">
-                <router-link to="/login">Voltar ao login</router-link>
+                <router-link to="/login">{{ t('auth.reset_back') }}</router-link>
               </p>
             </div>
           </div>
@@ -51,9 +51,11 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { supabase } from '@/lib/supabase'
+import { useI18n } from '@/composables/useI18n'
 
 const router = useRouter()
 const route = useRoute()
+const { t } = useI18n()
 
 const form = ref({
   password: '',
@@ -70,12 +72,12 @@ onMounted(async () => {
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (error) {
-      errorMessage.value = 'Link de redefinição inválido ou expirado.'
+      errorMessage.value = t('auth.reset_invalid_link')
     } else {
       sessionReady.value = true
     }
   } else {
-    errorMessage.value = 'Link de redefinição inválido.'
+    errorMessage.value = t('auth.reset_invalid_link_2')
   }
 })
 
@@ -84,12 +86,12 @@ const handleResetPassword = async () => {
   successMessage.value = ''
 
   if (form.value.password !== form.value.password_confirm) {
-    errorMessage.value = 'As senhas não coincidem.'
+    errorMessage.value = t('auth.reset_mismatch')
     return
   }
 
   if (form.value.password.length < 6) {
-    errorMessage.value = 'A senha deve ter pelo menos 6 caracteres.'
+    errorMessage.value = t('auth.reset_min_chars')
     return
   }
 
@@ -102,7 +104,7 @@ const handleResetPassword = async () => {
   if (error) {
     errorMessage.value = error.message
   } else {
-    successMessage.value = 'Senha redefinida com sucesso!'
+    successMessage.value = t('auth.reset_success')
     setTimeout(() => router.push('/login'), 2000)
   }
 }

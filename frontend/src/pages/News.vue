@@ -5,10 +5,10 @@
       <div class="news-hero-bg" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(${heroBg})` }"></div>
       <div class="container position-relative">
         <div class="news-hero-content">
-          <span class="fml-eyebrow">Novidades</span>
-          <h1 class="news-hero-title">Notícias & Actualidades</h1>
+          <span class="fml-eyebrow">{{ t('news.hero_eyebrow') }}</span>
+          <h1 class="news-hero-title">{{ t('news.hero_title') }}</h1>
           <p class="news-hero-subtitle">
-            Fique por dentro das últimas novidades da FMLider e do sector da logística em Angola.
+            {{ t('news.hero_subtitle') }}
           </p>
         </div>
       </div>
@@ -24,7 +24,7 @@
             <div v-if="featured" class="news-featured" @click="goToDetail(featured.slug)">
               <div class="news-featured-image">
                 <img :src="featured.image" :alt="featured.title">
-                <span class="news-featured-badge">Destaque</span>
+                <span class="news-featured-badge">{{ t('news.featured_badge') }}</span>
               </div>
               <div class="news-featured-body">
                 <div class="news-meta">
@@ -33,7 +33,7 @@
                 </div>
                 <h2>{{ featured.title }}</h2>
                 <p>{{ featured.excerpt }}</p>
-                <span class="news-read-more">Ler mais <i class="bi bi-arrow-right"></i></span>
+                <span class="news-read-more">{{ t('news.read_more') }} <i class="bi bi-arrow-right"></i></span>
               </div>
             </div>
 
@@ -50,7 +50,7 @@
                   </div>
                   <h4>{{ item.title }}</h4>
                   <p>{{ item.excerpt }}</p>
-                  <span class="news-read-more">Ler mais <i class="bi bi-arrow-right"></i></span>
+                  <span class="news-read-more">{{ t('news.read_more') }} <i class="bi bi-arrow-right"></i></span>
                 </div>
               </div>
             </div>
@@ -78,7 +78,7 @@
             <div class="news-sidebar">
               <!-- Categories -->
               <div class="sidebar-box">
-                <h5><i class="bi bi-folder2"></i> Categorias</h5>
+                <h5><i class="bi bi-folder2"></i> {{ t('news.sidebar_categories') }}</h5>
                 <ul class="sidebar-categories">
                   <li v-for="cat in categories" :key="cat.name" :class="{ active: selectedCategory === cat.name }" @click="filterByCategory(cat.name)">
                     <span>{{ cat.name }}</span>
@@ -89,7 +89,7 @@
 
               <!-- Recent -->
               <div class="sidebar-box">
-                <h5><i class="bi bi-clock-history"></i> Mais Recentes</h5>
+                <h5><i class="bi bi-clock-history"></i> {{ t('news.sidebar_recent') }}</h5>
                 <div class="sidebar-recent" v-for="item in recentNews" :key="item.id" @click="goToDetail(item.slug)">
                   <img :src="item.image" :alt="item.title">
                   <div>
@@ -102,9 +102,9 @@
               <!-- CTA -->
               <div class="sidebar-cta">
                 <i class="bi bi-envelope-paper"></i>
-                <h5>Receba Novidades</h5>
-                <p>Subscreva para ficar a par de todas as novidades.</p>
-                <router-link to="/contacto" class="btn btn-light btn-sm w-100">Subscrever</router-link>
+                <h5>{{ t('news.sidebar_cta_title') }}</h5>
+                <p>{{ t('news.sidebar_cta_text') }}</p>
+                <router-link to="/contacto" class="btn btn-light btn-sm w-100">{{ t('news.sidebar_cta_button') }}</router-link>
               </div>
             </div>
           </div>
@@ -119,7 +119,9 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { useSiteImages } from '@/composables/useSiteImages'
+import { useI18n } from '@/composables/useI18n'
 
+const { t, locale } = useI18n()
 const { getImage, fetchAll } = useSiteImages()
 const heroBg = ref('/assets/img/construcao2020/image3.jpeg')
 
@@ -139,84 +141,84 @@ const fetchNews = async () => {
         id: n.id,
         title: n.title,
         slug: n.slug,
-        image: n.image ? (n.image.startsWith('/') ? n.image : '/assets/img/' + n.image) : '/assets/img/construcao2020/image1.jpeg',
+        image: n.image ? (n.image.startsWith('http') ? n.image : (n.image.startsWith('/') ? n.image : '/assets/img/' + n.image)) : '/assets/img/construcao2020/image1.jpeg',
         date: n.published_at || n.created_at,
         category: n.category || 'Geral',
         excerpt: n.description || n.content?.substring(0, 150) + '...',
         content: n.content,
       }))
     } else {
-      allNews.value = fallbackNews
+      allNews.value = fallbackNews.value
     }
   } catch {
-    allNews.value = fallbackNews
+    allNews.value = fallbackNews.value
   } finally {
     loading.value = false
   }
 }
 
-const fallbackNews = [
+const fallbackNews = computed(() => [
   {
     id: 1,
-    title: 'FMLider Investe em Novo Reachstacker Kalmar de 45 Toneladas',
+    title: t('news.fallback_title_1'),
     slug: 'investimento-reachstacker',
     image: '/assets/img/resachstacker/resachstacker1.jpeg',
     date: '2024-11-15',
-    category: 'Investimentos',
-    excerpt: 'A FMLider reforçou a sua capacidade operacional com a aquisição de um novo Reachstacker Kalmar de 45 toneladas, permitindo operações mais rápidas e seguras no manuseamento de contentores.',
-    content: 'A FMLider anunciou hoje a aquisição de um novo Reachstacker Kalmar de 45 toneladas, reforçando significativamente a sua capacidade de manuseamento de contentores e cargas especiais. Este investimento, realizado em 2022, representa um marco importante na história da empresa e demonstra o nosso compromisso com a excelência operacional. O novo equipamento permite-nos realizar até 30 operações por hora, elevando a produtividade do Porto de Luanda. Com operadores certificados pela Kalmar, garantimos a segurança e eficiência em todas as operações.',
+    category: t('news.fallback_category_1'),
+    excerpt: t('news.fallback_excerpt_1'),
+    content: t('news.fallback_content_1'),
   },
   {
     id: 2,
-    title: 'FMLider Alarga Cobertura para 30 Países na Região SADC',
+    title: t('news.fallback_title_2'),
     slug: 'expansao-sadc',
     image: '/assets/img/construcao2020/image2.jpeg',
     date: '2024-10-20',
-    category: 'Expansão',
-    excerpt: 'A FMLider agora oferece serviços logísticos completos em mais de 30 países, com foco na região SADC e em mercados estratégicos na África Austral.',
-    content: 'Com uma estratégia de expansão agressiva, a FMLider alargou a sua cobertura internacional para mais de 30 países. A empresa agora oferece serviços completos de logística, transporte e transitário em toda a região SADC, incluindo África do Sul, Moçambique, Zâmbia, Zimbabwe e Namíbia. Esta expansão permite-nos servir melhor os nossos clientes que operam em mercados internacionais.',
+    category: t('news.fallback_category_2'),
+    excerpt: t('news.fallback_excerpt_2'),
+    content: t('news.fallback_content_2'),
   },
   {
     id: 3,
-    title: 'Novo Armazém em Viana com 2.000m² de Área',
+    title: t('news.fallback_title_3'),
     slug: 'novo-armazem-viana',
     image: '/assets/img/servico/service-storage.jpg',
     date: '2024-09-10',
-    category: 'Infraestrutura',
-    excerpt: 'A FMLider inaugurou um novo armazém em Viana com 2.000m² de área, equipado com sistema de CCTV 24h e inventário digital.',
-    content: 'A FMLider expandiu a sua rede de armazéns com a inauguração de uma nova instalação em Viana, com 2.000m² de área de armazenagem. O novo armazém conta com sistema de CCTV 24/7, inventário digital em tempo real e condições ideais para armazenagem de mercadorias de alto valor.',
+    category: t('news.fallback_category_3'),
+    excerpt: t('news.fallback_excerpt_3'),
+    content: t('news.fallback_content_3'),
   },
   {
     id: 4,
-    title: 'Parceria com Linhas Marítimas Internacionais',
+    title: t('news.fallback_title_4'),
     slug: 'parceria-maritima',
     image: '/assets/img/servico/Logística Marítima-1.jpg',
     date: '2024-08-05',
-    category: 'Parcerias',
-    excerpt: 'A FMLider firmou parcerias com as principais linhas marítimas internacionais, garantindo rotas competitivas para Europa, América e Ásia.',
-    content: 'A FMLider anunciou a firma de parcerias estratégicas com as principais linhas marítimas internacionais. Estas parcerias garantem aos nossos clientes condições competitivas e rotas optimizadas para destinos na Europa, América e Ásia.',
+    category: t('news.fallback_category_4'),
+    excerpt: t('news.fallback_excerpt_4'),
+    content: t('news.fallback_content_4'),
   },
   {
     id: 5,
-    title: 'Certificação ISO 9001:2015 Renovada',
+    title: t('news.fallback_title_5'),
     slug: 'certificacao-iso',
     image: '/assets/img/pessoal/partner1.webp',
     date: '2024-07-01',
-    category: 'Qualidade',
-    excerpt: 'A FMLider renovou com sucesso a sua certificação ISO 9001:2015, confirmando o compromisso com a qualidade e excelência nos serviços.',
-    content: 'A FMLider renovou com sucesso a sua certificação ISO 9001:2015, após auditoria realizada por entidade certificadora internacional. Esta certificação confirma que os nossos processos cumprem os mais altos padrões de qualidade e segurança.',
+    category: t('news.fallback_category_5'),
+    excerpt: t('news.fallback_excerpt_5'),
+    content: t('news.fallback_content_5'),
   },
   {
     id: 6,
-    title: 'Campanha de Segurança Rodoviária',
+    title: t('news.fallback_title_6'),
     slug: 'campanha-seguranca',
     image: '/assets/img/construcao2020/image5.jpeg',
     date: '2024-06-15',
-    category: 'Segurança',
-    excerpt: 'A FMLider lançou uma campanha de segurança rodoviária para todos os seus colaboradores e condutores, reforçando o compromisso com a segurança.',
-    content: 'No âmbito do Dia Mundial da Segurança Rodoviária, a FMLider lançou uma campanha de sensibilização para todos os seus colaboradores e condutores. A campanha inclui formações, palestras e distribuição de materiais educativos.',
+    category: t('news.fallback_category_6'),
+    excerpt: t('news.fallback_excerpt_6'),
+    content: t('news.fallback_content_6'),
   },
-]
+])
 
 const filteredNews = computed(() => {
   if (selectedCategory.value === 'Todos') return allNews.value
@@ -240,9 +242,11 @@ const categories = computed(() => {
   return Object.entries(cats).map(([name, count]) => ({ name, count }))
 })
 
+const dateLocale = computed(() => locale.value === 'pt' ? 'pt-PT' : locale.value === 'en' ? 'en-GB' : 'fr-FR')
+
 const formatDate = (date) => {
   if (!date) return ''
-  return new Date(date).toLocaleDateString('pt-PT', { year: 'numeric', month: 'long', day: 'numeric' })
+  return new Date(date).toLocaleDateString(dateLocale.value, { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
 const filterByCategory = (cat) => {

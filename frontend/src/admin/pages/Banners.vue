@@ -1,8 +1,8 @@
 <template>
   <div class="admin-page p-4 p-md-5">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-      <h2 class="mb-0">Banners</h2>
-      <button class="btn btn-primary" @click="openCreateModal">+ Novo Banner</button>
+      <h2 class="mb-0">{{ t('admin.banners_title') }}</h2>
+      <button class="btn btn-primary" @click="openCreateModal">+ {{ t('admin.banners_new') }}</button>
     </div>
 
     <div class="card">
@@ -38,7 +38,7 @@
                   :alt="banner.title"
                   class="banner-thumb"
                 />
-                <span v-else class="text-muted">Sem imagem</span>
+                <span v-else class="text-muted">{{ t('admin.banners_no_image') }}</span>
               </td>
               <td class="align-middle">
                 <span
@@ -80,7 +80,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">
-              {{ editing ? 'Editar Banner' : 'Novo Banner' }}
+                  {{ editing ? t('admin.banners_title') : t('admin.banners_new') }}
             </h5>
             <button
               type="button"
@@ -205,7 +205,7 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Confirmar Exclusão</h5>
+            <h5 class="modal-title">{{ t('common.confirm') }}</h5>
             <button
               type="button"
               class="btn-close"
@@ -248,6 +248,9 @@
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const banners = ref([])
 const loading = ref(false)

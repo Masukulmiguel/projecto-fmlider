@@ -1,6 +1,6 @@
 <template>
   <div class="cliente-profile p-4 p-md-5">
-    <h2 class="mb-4">Meu Perfil</h2>
+    <h2 class="mb-4">{{ t('cliente.profile_title') }}</h2>
 
     <div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
     <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
@@ -9,7 +9,7 @@
       <div class="col-lg-6">
         <div class="card mb-4">
           <div class="card-header">
-            <h5 class="mb-0">Foto de perfil</h5>
+            <h5 class="mb-0">{{ t('cliente.profile_photo') }}</h5>
           </div>
           <div class="card-body">
             <div class="profile-photo-section">
@@ -21,7 +21,7 @@
               </div>
               <div class="profile-photo-actions">
                 <label class="btn btn-outline-primary btn-sm mb-2">
-                  <i class="bi bi-camera-fill"></i> Alterar foto
+                  <i class="bi bi-camera-fill"></i> {{ t('cliente.profile_change_photo') }}
                   <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" @change="onPhotoChange" hidden>
                 </label>
                 <small class="text-muted d-block">JPG, PNG, WEBP ou GIF · máx 3MB</small>
@@ -35,7 +35,7 @@
 
         <div class="card">
           <div class="card-header">
-            <h5 class="mb-0">Dados pessoais</h5>
+            <h5 class="mb-0">{{ t('cliente.profile_personal') }}</h5>
           </div>
           <div class="card-body">
             <form @submit.prevent="saveProfile">
@@ -150,6 +150,9 @@ import { reactive, ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useCompanyStore } from '@/stores/companyStore'
 import axios from 'axios'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const authStore = useAuthStore()
 const companyStore = useCompanyStore()

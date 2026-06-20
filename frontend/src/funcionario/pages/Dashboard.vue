@@ -142,7 +142,7 @@
               <i class="bi bi-check2"></i> {{ p.label }}
             </span>
             <span v-if="permissionLabels.length === 0" class="empty-text">
-              Sem permissões atribuídas.
+              {{ t('dashboard.no_permissions') }}
             </span>
           </div>
         </div>
@@ -244,9 +244,9 @@ const load = async () => {
   await Promise.all(tasks)
 
   const acts = []
-  if (counts.embarques_pendente > 0) acts.push({ title: `${counts.embarques_pendente} ${t('dashboard.shipments').toLowerCase()} ${t('dashboard.pending')}`, subtitle: 'Necessitam atenção', icon: 'bi-box-seam-fill', color: 'blue', time: 'agora' })
-  if (counts.cotacoes_pendente > 0) acts.push({ title: `${counts.cotacoes_pendente} ${t('dashboard.quotes').toLowerCase()} ${t('dashboard.pending')}`, subtitle: 'Aguardam resposta', icon: 'bi-receipt', color: 'green', time: 'agora' })
-  if (counts.clientes_pendente > 0) acts.push({ title: `${counts.clientes_pendente} ${t('dashboard.clients').toLowerCase()} ${t('dashboard.pending_approval')}`, subtitle: 'Aguardam aprovação do admin', icon: 'bi-person-plus-fill', color: 'cyan', time: 'hoje' })
+  if (counts.embarques_pendente > 0) acts.push({ title: `${counts.embarques_pendente} ${t('dashboard.shipments').toLowerCase()} ${t('dashboard.pending')}`, subtitle: t('dashboard.needs_attention'), icon: 'bi-box-seam-fill', color: 'blue', time: t('dashboard.now') })
+  if (counts.cotacoes_pendente > 0) acts.push({ title: `${counts.cotacoes_pendente} ${t('dashboard.quotes').toLowerCase()} ${t('dashboard.pending')}`, subtitle: t('dashboard.awaits_response'), icon: 'bi-receipt', color: 'green', time: t('dashboard.now') })
+  if (counts.clientes_pendente > 0) acts.push({ title: `${counts.clientes_pendente} ${t('dashboard.clients').toLowerCase()} ${t('dashboard.pending_approval')}`, subtitle: t('dashboard.awaits_admin'), icon: 'bi-person-plus-fill', color: 'cyan', time: t('dashboard.today') })
   recentActivity.value = acts
 }
 

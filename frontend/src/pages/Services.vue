@@ -5,11 +5,10 @@
       <div class="srv-hero-bg" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(${heroBg})` }"></div>
       <div class="container position-relative">
         <div class="srv-hero-content">
-          <span class="fml-eyebrow">O Que Fazemos</span>
-          <h1 class="srv-hero-title">Serviços Integrados</h1>
+          <span class="fml-eyebrow">{{ t('services.hero_eyebrow') }}</span>
+          <h1 class="srv-hero-title">{{ t('services.hero_title') }}</h1>
           <p class="srv-hero-subtitle">
-            Soluções completas de logística, transporte e transitário.
-            Do desembaraço aduaneiro à entrega final — tudo num só lugar.
+            {{ t('services.hero_subtitle') }}
           </p>
         </div>
       </div>
@@ -19,20 +18,20 @@
     <section class="srv-grid-section fml-section">
       <div class="container">
         <div class="text-center mb-5" v-reveal="'up'">
-          <span class="fml-eyebrow">Os Nossos Serviços</span>
-          <h2 class="section-title">Soluções para Cada Necessidade</h2>
-          <p class="section-subtitle text-muted">Oferecemos uma gama completa de serviços logísticos para empresas de todos os portes.</p>
+          <span class="fml-eyebrow">{{ t('services.grid_eyebrow') }}</span>
+          <h2 class="section-title">{{ t('services.grid_title') }}</h2>
+          <p class="section-subtitle text-muted">{{ t('services.grid_subtitle') }}</p>
         </div>
 
         <div v-if="loading" class="text-center py-5">
           <div class="spinner-border text-warning" role="status">
-            <span class="visually-hidden">A carregar...</span>
+            <span class="visually-hidden">{{ t('services.loading') }}</span>
           </div>
         </div>
 
         <div v-else-if="services.length === 0" class="text-center py-5 text-muted">
           <i class="bi bi-inbox" style="font-size: 3rem;"></i>
-          <p class="mt-3">Nenhum serviço disponível de momento.</p>
+          <p class="mt-3">{{ t('services.empty') }}</p>
         </div>
 
         <div v-else class="srv-cards">
@@ -57,7 +56,7 @@
               <h3>{{ service.title }}</h3>
               <p class="srv-card-desc">{{ service.description }}</p>
               <span class="srv-card-link">
-                Saber Mais <i class="bi bi-arrow-right ms-1"></i>
+                {{ t('services.card_link') }} <i class="bi bi-arrow-right ms-1"></i>
               </span>
             </div>
           </router-link>
@@ -69,9 +68,9 @@
     <section class="srv-process fml-section bg-fml-navy text-white">
       <div class="container">
         <div class="text-center mb-5" v-reveal="'up'">
-          <span class="fml-eyebrow">Como Trabalhamos</span>
-          <h2 class="section-title text-white">Do Pedido à Entrega</h2>
-          <p class="text-white">Processo simples, rápido e transparente.</p>
+          <span class="fml-eyebrow">{{ t('services.process_eyebrow') }}</span>
+          <h2 class="section-title text-white">{{ t('services.process_title') }}</h2>
+          <p class="text-white">{{ t('services.process_subtitle') }}</p>
         </div>
         <div class="process-steps">
           <div class="process-step" v-for="(step, i) in processSteps" :key="i">
@@ -93,11 +92,10 @@
       <div class="container">
         <div class="row align-items-center g-5">
           <div class="col-lg-6" v-reveal="'right'">
-            <span class="fml-eyebrow">Porquê a FMLider</span>
-            <h2 class="section-title">A Vantagem de Trabalhar Connosco</h2>
+            <span class="fml-eyebrow">{{ t('services.why_eyebrow') }}</span>
+            <h2 class="section-title">{{ t('services.why_title') }}</h2>
             <p class="text-muted mb-4">
-              Não somos apenas um prestador de serviços — somos o seu parceiro logístico.
-              Combinamos experiência, infraestrutura e compromisso para entregar resultados.
+              {{ t('services.why_text') }}
             </p>
             <div class="why-features">
               <div class="why-feature" v-for="feat in whyFeatures" :key="feat.title">
@@ -111,7 +109,7 @@
           </div>
           <div class="col-lg-6" v-reveal="'scale'">
             <div class="why-image">
-              <img :src="whyImage" alt="FMLider Equipa" class="img-fluid rounded shadow-lg">
+              <img :src="whyImage" :alt="t('services.why_img_alt')" class="img-fluid rounded shadow-lg">
             </div>
           </div>
         </div>
@@ -121,11 +119,11 @@
     <!-- CTA -->
     <section class="srv-cta fml-section-gold">
       <div class="container text-center">
-        <h2 class="display-5 fw-bold mb-3">Precisa de uma Solução Logística?</h2>
-        <p class="lead mb-4">Fale com a nossa equipa e receba uma proposta personalizada em 24h.</p>
+        <h2 class="display-5 fw-bold mb-3">{{ t('services.cta_title') }}</h2>
+        <p class="lead mb-4">{{ t('services.cta_subtitle') }}</p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
           <router-link to="/contacto" class="btn btn-dark btn-lg">
-            <i class="bi bi-envelope me-2"></i> Contactar Agora
+            <i class="bi bi-envelope me-2"></i> {{ t('services.cta_button') }}
           </router-link>
           <a href="tel:+244935141747" class="btn btn-outline-dark btn-lg">
             <i class="bi bi-telephone me-2"></i> +244 935 141 747
@@ -137,10 +135,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
+import { useI18n } from '@/composables/useI18n'
 import { useSiteImages } from '@/composables/useSiteImages'
 
+const { t } = useI18n()
 const { getImage, fetchAll } = useSiteImages()
 const heroBg = ref('/assets/img/construcao2020/image4.jpeg')
 const whyImage = ref('/assets/img/pessoal/partner1.webp')
@@ -173,21 +173,21 @@ onMounted(async () => {
   fetchServices()
 })
 
-const processSteps = [
-  { title: 'Contacto', desc: 'Solicite orçamento online, por telefone ou email.' },
-  { title: 'Análise', desc: 'A nossa equipa analisa as necessidades e propõe a melhor solução.' },
-  { title: 'Execução', desc: 'Executamos o serviço com rigor, transparência e prazo definido.' },
-  { title: 'Entrega', desc: 'Entrega com documentação completa e acompanhamento até ao fim.' },
-]
+const processSteps = computed(() => [
+  { title: t('services.process_step_1_title'), desc: t('services.process_step_1_desc') },
+  { title: t('services.process_step_2_title'), desc: t('services.process_step_2_desc') },
+  { title: t('services.process_step_3_title'), desc: t('services.process_step_3_desc') },
+  { title: t('services.process_step_4_title'), desc: t('services.process_step_4_desc') },
+])
 
-const whyFeatures = [
-  { icon: 'bi bi-shield-check', title: 'Segurança Garantida', desc: 'Cobertura All Risks em todas as operações e armazéns com CCTV 24h.' },
-  { icon: 'bi bi-speedometer', title: 'Rastreamento Tempo Real', desc: 'Saiba onde está a sua carga a qualquer momento com GPS integrado.' },
-  { icon: 'bi bi-people', title: 'Equipas Especializadas', desc: 'Colaboradores certificados e com anos de experiência no sector.' },
-  { icon: 'bi bi-graph-up-arrow', title: 'Custos Competitivos', desc: 'Relação preço-qualidade imbatível sem comprometer o serviço.' },
-  { icon: 'bi bi-clock-history', title: 'Pontualidade', desc: 'Cumprimos prazos porque sabemos que o tempo do cliente vale dinheiro.' },
-  { icon: 'bi bi-globe', title: 'Cobertura Global', desc: 'Presença em Angola e operações em mais de 30 países.' },
-]
+const whyFeatures = computed(() => [
+  { icon: 'bi bi-shield-check', title: t('services.why_feat_1_title'), desc: t('services.why_feat_1_desc') },
+  { icon: 'bi bi-speedometer', title: t('services.why_feat_2_title'), desc: t('services.why_feat_2_desc') },
+  { icon: 'bi bi-people', title: t('services.why_feat_3_title'), desc: t('services.why_feat_3_desc') },
+  { icon: 'bi bi-graph-up-arrow', title: t('services.why_feat_4_title'), desc: t('services.why_feat_4_desc') },
+  { icon: 'bi bi-clock-history', title: t('services.why_feat_5_title'), desc: t('services.why_feat_5_desc') },
+  { icon: 'bi bi-globe', title: t('services.why_feat_6_title'), desc: t('services.why_feat_6_desc') },
+])
 </script>
 
 <style scoped>

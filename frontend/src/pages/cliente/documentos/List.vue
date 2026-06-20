@@ -2,11 +2,11 @@
   <div class="crud-page">
     <div class="page-header">
       <div>
-        <h1 class="page-title">Documentos</h1>
-        <p class="text-muted mb-0">Gerencie os documentos do embarque.</p>
+        <h1 class="page-title">{{ t('cliente.documentos_title') }}</h1>
+        <p class="text-muted mb-0">{{ t('cliente.documentos_subtitle') }}</p>
       </div>
       <button class="btn btn-primary" @click="openForm()">
-        <i class="bi bi-upload me-1"></i> Enviar documento
+        <i class="bi bi-upload me-1"></i> {{ t('cliente.documentos_upload') }}
       </button>
     </div>
 
@@ -15,15 +15,15 @@
         <div class="filters">
           <div class="search-box">
             <i class="bi bi-search"></i>
-            <input v-model="filters.q" type="text" placeholder="Pesquisar por nome..." @input="debounceSearch">
+            <input v-model="filters.q" type="text" :placeholder="t('cliente.documentos_search')" @input="debounceSearch">
           </div>
           <select v-model="filters.type" class="form-select" @change="fetchData">
-            <option value="">Todos os tipos</option>
-            <option value="fatura">Fatura</option>
-            <option value="conhecimento_carga">Conhecimento de carga</option>
-            <option value="certificado">Certificado</option>
-            <option value="contrato">Contrato</option>
-            <option value="outro">Outro</option>
+            <option value="">{{ t('cliente.documentos_all_types') }}</option>
+            <option value="fatura">{{ t('cliente.documentos_type_fatura') }}</option>
+            <option value="conhecimento_carga">{{ t('cliente.documentos_type_conhecimento_carga') }}</option>
+            <option value="certificado">{{ t('cliente.documentos_type_certificado') }}</option>
+            <option value="contrato">{{ t('cliente.documentos_type_contrato') }}</option>
+            <option value="outro">{{ t('cliente.documentos_type_outro') }}</option>
           </select>
         </div>
       </div>
@@ -33,21 +33,21 @@
         </div>
         <div v-else-if="items.length === 0" class="empty-state">
           <i class="bi bi-file-earmark"></i>
-          <p>Nenhum documento encontrado.</p>
+          <p>{{ t('cliente.documentos_empty') }}</p>
           <button class="btn btn-primary btn-sm" @click="openForm()">
-            <i class="bi bi-upload me-1"></i> Enviar primeiro documento
+            <i class="bi bi-upload me-1"></i> {{ t('cliente.documentos_upload_first') }}
           </button>
         </div>
         <div v-else class="table-responsive">
           <table class="table table-hover mb-0">
             <thead>
               <tr>
-                <th>Documento</th>
-                <th>Tipo</th>
-                <th>Embarque</th>
-                <th>Tamanho</th>
-                <th>Data</th>
-                <th class="text-end">Ações</th>
+                <th>{{ t('cliente.documentos_col_document') }}</th>
+                <th>{{ t('cliente.documentos_col_type') }}</th>
+                <th>{{ t('cliente.documentos_col_shipment') }}</th>
+                <th>{{ t('cliente.documentos_col_size') }}</th>
+                <th>{{ t('cliente.documentos_col_date') }}</th>
+                <th class="text-end">{{ t('cliente.documentos_col_actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -70,13 +70,13 @@
                 <td><small class="text-muted">{{ formatDate(item.created_at) }}</small></td>
                 <td class="text-end">
                   <div class="action-buttons">
-                    <a :href="item.file_path" target="_blank" class="btn btn-sm btn-outline-primary" title="Descarregar">
+                    <a :href="item.file_path" target="_blank" class="btn btn-sm btn-outline-primary" :title="t('cliente.documentos_download')">
                       <i class="bi bi-download"></i>
                     </a>
-                    <button class="btn btn-sm btn-outline-secondary" @click="openForm(item)" title="Editar">
+                    <button class="btn btn-sm btn-outline-secondary" @click="openForm(item)" :title="t('cliente.documentos_edit')">
                       <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(item)" title="Eliminar">
+                    <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(item)" :title="t('cliente.documentos_delete')">
                       <i class="bi bi-trash"></i>
                     </button>
                   </div>
@@ -92,57 +92,57 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ editing ? 'Editar documento' : 'Enviar documento' }}</h5>
+            <h5 class="modal-title">{{ editing ? t('cliente.documentos_edit_title') : t('cliente.documentos_upload_title') }}</h5>
             <button type="button" class="btn-close" @click="closeForm"></button>
           </div>
           <form @submit.prevent="handleSubmit" novalidate>
             <div class="modal-body">
               <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
               <div v-if="editing" class="mb-3">
-                <label class="form-label">Nome *</label>
+                <label class="form-label">{{ t('cliente.documentos_form_name') }} *</label>
                 <input v-model="form.name" type="text" class="form-control" :class="{'is-invalid': errors.name}" required>
                 <div class="invalid-feedback">{{ errors.name }}</div>
               </div>
               <div v-else>
                 <div class="mb-3">
-                  <label class="form-label">Ficheiro *</label>
+                  <label class="form-label">{{ t('cliente.documentos_form_file') }} *</label>
                   <input ref="fileInput" type="file" class="form-control" :class="{'is-invalid': errors.file}" required>
                   <div class="invalid-feedback">{{ errors.file }}</div>
-                  <small class="text-muted">Máx 20MB</small>
+                  <small class="text-muted">{{ t('cliente.documentos_form_max_size') }}</small>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label">Nome do documento *</label>
+                  <label class="form-label">{{ t('cliente.documentos_form_file_name') }} *</label>
                   <input v-model="form.name" type="text" class="form-control" :class="{'is-invalid': errors.name}" required>
                   <div class="invalid-feedback">{{ errors.name }}</div>
                 </div>
               </div>
               <div class="mb-3">
-                <label class="form-label">Tipo</label>
+                <label class="form-label">{{ t('cliente.documentos_form_type') }}</label>
                 <select v-model="form.type" class="form-select">
-                  <option value="fatura">Fatura</option>
-                  <option value="conhecimento_carga">Conhecimento de carga</option>
-                  <option value="certificado">Certificado</option>
-                  <option value="contrato">Contrato</option>
-                  <option value="outro">Outro</option>
+                  <option value="fatura">{{ t('cliente.documentos_type_fatura') }}</option>
+                  <option value="conhecimento_carga">{{ t('cliente.documentos_type_conhecimento_carga') }}</option>
+                  <option value="certificado">{{ t('cliente.documentos_type_certificado') }}</option>
+                  <option value="contrato">{{ t('cliente.documentos_type_contrato') }}</option>
+                  <option value="outro">{{ t('cliente.documentos_type_outro') }}</option>
                 </select>
               </div>
               <div class="mb-3" v-if="!editing && embarques.length">
-                <label class="form-label">Embarque (opcional)</label>
+                <label class="form-label">{{ t('cliente.documentos_form_shipment') }}</label>
                 <select v-model="form.embarque_id" class="form-select">
-                  <option value="">— Sem embarque —</option>
+                  <option value="">— {{ t('cliente.documentos_form_no_shipment') }} —</option>
                   <option v-for="e in embarques" :key="e.id" :value="e.id">{{ e.tracking_number }} — {{ e.origin }} → {{ e.destination }}</option>
                 </select>
               </div>
               <div class="mb-3">
-                <label class="form-label">Descrição</label>
+                <label class="form-label">{{ t('cliente.documentos_form_description') }}</label>
                 <textarea v-model="form.description" rows="2" class="form-control"></textarea>
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-outline-secondary" @click="closeForm">Cancelar</button>
+              <button type="button" class="btn btn-outline-secondary" @click="closeForm">{{ t('cliente.documentos_cancel') }}</button>
               <button type="submit" class="btn btn-primary" :disabled="saving">
                 <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
-                {{ editing ? 'Atualizar' : 'Enviar' }}
+                {{ editing ? t('cliente.documentos_update') : t('cliente.documentos_send') }}
               </button>
             </div>
           </form>
@@ -157,7 +157,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const items = ref([])
 const embarques = ref([])
@@ -234,7 +236,7 @@ const handleSubmit = async () => {
       await fetchData()
     } else {
       if (!fileInput.value?.files[0]) {
-        errors.value.file = 'Selecione um ficheiro'
+        errors.value.file = t('cliente.documentos_select_file')
         saving.value = false
         return
       }
@@ -264,22 +266,22 @@ const handleSubmit = async () => {
       await fetchData()
     }
   } catch (error) {
-    errorMessage.value = error.message || 'Erro ao guardar'
+    errorMessage.value = error.message || t('cliente.documentos_error_saving')
   } finally {
     saving.value = false
   }
 }
 
 const confirmDelete = async (item) => {
-  if (!confirm(`Eliminar "${item.name}"?`)) return
+  if (!confirm(`${t('cliente.documentos_confirm_delete')} "${item.name}"?`)) return
   try {
     const { error } = await supabase.from('documentos').delete().eq('id', item.id)
     if (error) throw error
     await fetchData()
-  } catch (e) { alert('Erro ao eliminar') }
+  } catch (e) { alert(t('cliente.documentos_error_deleting')) }
 }
 
-const typeLabel = (t) => ({ fatura: 'Fatura', conhecimento_carga: 'B/L', certificado: 'Certificado', contrato: 'Contrato', outro: 'Outro' }[t] || t)
+const typeLabel = (type) => ({ fatura: t('cliente.documentos_type_fatura'), conhecimento_carga: 'B/L', certificado: t('cliente.documentos_type_certificado'), contrato: t('cliente.documentos_type_contrato'), outro: t('cliente.documentos_type_outro') }[type] || type)
 const fileIcon = (m) => {
   if (!m) return 'bi bi-file-earmark'
   if (m.includes('pdf')) return 'bi bi-file-earmark-pdf text-danger'

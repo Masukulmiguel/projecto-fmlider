@@ -1,11 +1,11 @@
 <template>
   <div>
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h4 class="mb-0"><i class="bi bi-gear-fill me-2"></i>Configurações</h4>
+      <h4 class="mb-0"><i class="bi bi-gear-fill me-2"></i>{{ t('admin.settings_title') }}</h4>
       <button class="btn btn-primary" @click="saveSettings" :disabled="saving">
         <i class="bi bi-check-lg me-1" v-if="!saving"></i>
         <span class="spinner-border spinner-border-sm me-1" v-else></span>
-        {{ saving ? 'A guardar...' : 'Guardar Alterações' }}
+        {{ saving ? t('common.loading') : t('admin.settings_save') }}
       </button>
     </div>
 
@@ -18,20 +18,20 @@
       <div class="col-lg-6">
         <div class="card border-0 shadow-sm">
           <div class="card-header bg-white">
-            <h6 class="mb-0"><i class="bi bi-building me-2"></i>Empresa</h6>
+            <h6 class="mb-0"><i class="bi bi-building me-2"></i>{{ t('admin.settings_company') }}</h6>
           </div>
           <div class="card-body">
             <div class="mb-3">
-              <label class="form-label">Nome da Empresa</label>
-              <input v-model="form.company_name" type="text" class="form-control" placeholder="Nome da empresa">
+              <label class="form-label">{{ t('admin.settings_company_name') }}</label>
+              <input v-model="form.company_name" type="text" class="form-control" :placeholder="t('admin.settings_name_placeholder')">
             </div>
             <div class="mb-3">
-              <label class="form-label">Descrição</label>
-              <textarea v-model="form.company_description" class="form-control" rows="3" placeholder="Descrição da empresa"></textarea>
+              <label class="form-label">{{ t('admin.settings_description') }}</label>
+              <textarea v-model="form.company_description" class="form-control" rows="3" :placeholder="t('admin.settings_desc_placeholder')"></textarea>
             </div>
             <div class="mb-0">
               <label class="form-label">NIF</label>
-              <input v-model="form.nif" type="text" class="form-control" placeholder="NIF da empresa">
+              <input v-model="form.nif" type="text" class="form-control" :placeholder="t('admin.settings_nif_placeholder')">
             </div>
           </div>
         </div>
@@ -40,23 +40,23 @@
       <div class="col-lg-6">
         <div class="card border-0 shadow-sm">
           <div class="card-header bg-white">
-            <h6 class="mb-0"><i class="bi bi-telephone me-2"></i>Contacto</h6>
+            <h6 class="mb-0"><i class="bi bi-telephone me-2"></i>{{ t('admin.settings_contacts') }}</h6>
           </div>
           <div class="card-body">
             <div class="mb-3">
-              <label class="form-label">Telefone</label>
+              <label class="form-label">{{ t('admin.settings_phone') }}</label>
               <input v-model="form.phone" type="text" class="form-control" placeholder="+244 9XX XXX XXX">
             </div>
             <div class="mb-3">
-              <label class="form-label">Email</label>
+              <label class="form-label">{{ t('admin.settings_email') }}</label>
               <input v-model="form.email" type="email" class="form-control" placeholder="email@exemplo.com">
             </div>
             <div class="mb-3">
-              <label class="form-label">Morada</label>
-              <input v-model="form.address" type="text" class="form-control" placeholder="Morada completa">
+              <label class="form-label">{{ t('admin.settings_address') }}</label>
+              <input v-model="form.address" type="text" class="form-control" :placeholder="t('admin.settings_address_placeholder')">
             </div>
             <div class="mb-0">
-              <label class="form-label">Horário de Funcionamento</label>
+              <label class="form-label">{{ t('admin.settings_working_hours') }}</label>
               <input v-model="form.working_hours" type="text" class="form-control" placeholder="Seg–Sex 08:00–18:00">
             </div>
           </div>
@@ -66,7 +66,7 @@
       <div class="col-lg-6">
         <div class="card border-0 shadow-sm">
           <div class="card-header bg-white">
-            <h6 class="mb-0"><i class="bi bi-share me-2"></i>Redes Sociais</h6>
+            <h6 class="mb-0"><i class="bi bi-share me-2"></i>{{ t('admin.settings_social') }}</h6>
           </div>
           <div class="card-body">
             <div class="mb-3">
@@ -92,16 +92,16 @@
       <div class="col-lg-6">
         <div class="card border-0 shadow-sm">
           <div class="card-header bg-white">
-            <h6 class="mb-0"><i class="bi bi-search me-2"></i>SEO</h6>
+            <h6 class="mb-0"><i class="bi bi-search me-2"></i>{{ t('admin.settings_seo') }}</h6>
           </div>
           <div class="card-body">
             <div class="mb-3">
-              <label class="form-label">Meta Title</label>
-              <input v-model="form.meta_title" type="text" class="form-control" placeholder="Título para motores de busca">
+              <label class="form-label">{{ t('admin.settings_meta_title') }}</label>
+              <input v-model="form.meta_title" type="text" class="form-control" :placeholder="t('admin.settings_meta_title_placeholder')">
             </div>
             <div class="mb-0">
-              <label class="form-label">Meta Description</label>
-              <textarea v-model="form.meta_description" class="form-control" rows="3" placeholder="Descrição para motores de busca"></textarea>
+              <label class="form-label">{{ t('admin.settings_meta_description') }}</label>
+              <textarea v-model="form.meta_description" class="form-control" rows="3" :placeholder="t('admin.settings_meta_desc_placeholder')"></textarea>
             </div>
           </div>
         </div>
@@ -110,7 +110,7 @@
 
     <div v-else class="text-center py-5">
       <div class="spinner-border text-primary"></div>
-      <p class="mt-3 text-muted">A carregar configurações...</p>
+      <p class="mt-3 text-muted">{{ t('common.loading') }}</p>
     </div>
   </div>
 </template>
@@ -118,6 +118,9 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const loading = ref(true)
 const saving = ref(false)
@@ -151,7 +154,7 @@ const fetchSettings = async () => {
       })
     }
   } catch (e) {
-    message.value = { type: 'danger', text: 'Erro ao carregar configurações.' }
+    message.value = { type: 'danger', text: t('admin.settings_error_loading') }
   } finally {
     loading.value = false
   }
@@ -164,9 +167,9 @@ const saveSettings = async () => {
     const rows = Object.entries(form).map(([key, value]) => ({ key, value }))
     const { error } = await supabase.from('settings').upsert(rows)
     if (error) throw error
-    message.value = { type: 'success', text: 'Configurações guardadas com sucesso!' }
+    message.value = { type: 'success', text: t('admin.settings_saved') }
   } catch (e) {
-    message.value = { type: 'danger', text: e.message || 'Erro ao guardar configurações.' }
+    message.value = { type: 'danger', text: e.message || t('admin.settings_error_saving') }
   } finally {
     saving.value = false
   }

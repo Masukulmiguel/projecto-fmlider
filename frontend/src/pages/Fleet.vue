@@ -5,11 +5,10 @@
       <div class="fleet-hero-bg" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(${heroBg})` }"></div>
       <div class="container position-relative">
         <div class="fleet-hero-content">
-          <span class="fml-eyebrow">Frota & Equipamentos</span>
-          <h1 class="fleet-hero-title">A Nossa Frota</h1>
+          <span class="fml-eyebrow">{{ t('fleet.hero_eyebrow') }}</span>
+          <h1 class="fleet-hero-title">{{ t('fleet.hero_title') }}</h1>
           <p class="fleet-hero-subtitle">
-            Frota própria moderna e equipamentos de última geração para garantir
-            operações seguras, rápidas e eficientes.
+            {{ t('fleet.hero_subtitle') }}
           </p>
         </div>
       </div>
@@ -32,9 +31,9 @@
     <section class="fleet-main fml-section">
       <div class="container">
         <div class="text-center mb-5">
-          <span class="fml-eyebrow">Os Nossos Equipamentos</span>
-          <h2 class="section-title">Frota & Equipamentos</h2>
-          <p class="section-subtitle text-muted">Invista na melhor infraestrutura logística de Angola.</p>
+          <span class="fml-eyebrow">{{ t('fleet.section_eyebrow') }}</span>
+          <h2 class="section-title">{{ t('fleet.section_title') }}</h2>
+          <p class="section-subtitle text-muted">{{ t('fleet.section_subtitle') }}</p>
         </div>
 
         <!-- Category Tabs -->
@@ -77,12 +76,10 @@
       <div class="container">
         <div class="row align-items-center g-5">
           <div class="col-lg-6" v-reveal="'right'">
-            <span class="fml-eyebrow">Destaque</span>
-            <h2 class="section-title text-white">Reachstacker Kalmar</h2>
+            <span class="fml-eyebrow">{{ t('fleet.highlight_eyebrow') }}</span>
+            <h2 class="section-title text-white">{{ t('fleet.highlight_title') }}</h2>
             <p class="mb-4 text-white">
-              O nosso <strong>Reachstacker Kalmar de 45 toneladas</strong> é a peça central da nossa
-              operação de manuseamento de contentores. Adquirido em 2022, este equipamento de última
-              geração permite-nos oferecer serviços de carga e descarga mais rápidos, seguros e eficientes.
+              {{ t('fleet.highlight_text') }}
             </p>
             <div class="highlight-specs">
               <div class="highlight-spec" v-for="spec in reachstackerSpecs" :key="spec.label">
@@ -107,8 +104,8 @@
     <section class="fleet-gallery fml-section">
       <div class="container">
         <div class="text-center mb-5" v-reveal="'up'">
-          <span class="fml-eyebrow">Galeria</span>
-          <h2 class="section-title">A Nossa Frota em Acção</h2>
+          <span class="fml-eyebrow">{{ t('fleet.gallery_eyebrow') }}</span>
+          <h2 class="section-title">{{ t('fleet.gallery_title') }}</h2>
         </div>
         <div class="gallery-grid">
           <div class="gallery-item" v-for="(img, i) in galleryImages" :key="i" @click="openLightbox(i)" v-reveal="'scale'">
@@ -135,14 +132,14 @@
     <!-- CTA -->
     <section class="fleet-cta fml-section-gold">
       <div class="container text-center">
-        <h2 class="display-5 fw-bold mb-3">Precisa de Transporte ou Armazenagem?</h2>
-        <p class="lead mb-4">A nossa frota está pronta para servir o seu negócio.</p>
+        <h2 class="display-5 fw-bold mb-3">{{ t('fleet.cta_title') }}</h2>
+        <p class="lead mb-4">{{ t('fleet.cta_subtitle') }}</p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
           <router-link to="/contacto" class="btn btn-dark btn-lg">
-            <i class="bi bi-envelope me-2"></i> Contactar
+            <i class="bi bi-envelope me-2"></i> {{ t('fleet.cta_contact') }}
           </router-link>
           <router-link to="/cotacoes/novo" class="btn btn-outline-dark btn-lg">
-            <i class="bi bi-receipt me-2"></i> Pedir Cotação
+            <i class="bi bi-receipt me-2"></i> {{ t('fleet.cta_quote') }}
           </router-link>
         </div>
       </div>
@@ -153,7 +150,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useSiteImages } from '@/composables/useSiteImages'
+import { useI18n } from '@/composables/useI18n'
 
+const { t } = useI18n()
 const { getImage, fetchAll } = useSiteImages()
 const heroBg = ref('/assets/img/resachstacker/resachstacker1.jpeg')
 const highlightImage = ref('/assets/img/resachstacker/resachstacker1.jpeg')
@@ -162,131 +161,131 @@ const selectedCategory = ref('all')
 const lightboxOpen = ref(false)
 const lightboxIndex = ref(0)
 
-const categories = [
-  { key: 'all', label: 'Todos', icon: 'bi bi-grid' },
-  { key: 'trucks', label: 'Camiões', icon: 'bi bi-truck' },
-  { key: 'containers', label: 'Contentores', icon: 'bi bi-box-seam' },
-  { key: 'equipment', label: 'Equipamentos', icon: 'bi bi-tools' },
-]
+const categories = computed(() => [
+  { key: 'all', label: t('fleet.category_all'), icon: 'bi bi-grid' },
+  { key: 'trucks', label: t('fleet.category_trucks'), icon: 'bi bi-truck' },
+  { key: 'containers', label: t('fleet.category_containers'), icon: 'bi bi-box-seam' },
+  { key: 'equipment', label: t('fleet.category_equipment'), icon: 'bi bi-tools' },
+])
 
-const fleetItems = [
+const fleetItems = computed(() => [
   {
     id: 1,
-    title: 'Camião Tanque',
+    title: t('fleet.truck_tanker'),
     category: 'trucks',
-    categoryLabel: 'Camião',
+    categoryLabel: t('fleet.category_label_truck'),
     image: '/assets/img/resachstacker/resachstacker3.jpeg',
-    description: 'Camião tanque para transporte de combustíveis, líquidos e gases. Certificado para operações de alto risco.',
+    description: t('fleet.truck_tanker_desc'),
     specs: [
-      { label: 'Capacidade', value: '30.000L' },
-      { label: 'Tipo', value: 'Tanque' },
-      { label: 'Certificação', value: 'ATEX' },
+      { label: t('fleet.spec_capacity'), value: '30.000L' },
+      { label: t('fleet.spec_type'), value: 'Tanque' },
+      { label: t('fleet.spec_certification'), value: 'ATEX' },
     ]
   },
   {
     id: 2,
-    title: 'Camião Frigorífico',
+    title: t('fleet.truck_frigorific'),
     category: 'trucks',
-    categoryLabel: 'Camião',
+    categoryLabel: t('fleet.category_label_truck'),
     image: '/assets/img/resachstacker/resachstacker4.jpeg',
-    description: 'Transporte de cargas que requerem controlo de temperatura. Ideal para produtos alimentares e farmacêuticos.',
+    description: t('fleet.truck_frigorific_desc'),
     specs: [
-      { label: 'Temperatura', value: '-20°C a +30°C' },
-      { label: 'Capacidade', value: '20t' },
-      { label: 'Zonas', value: '2 independently' },
+      { label: t('fleet.spec_temperature'), value: '-20°C a +30°C' },
+      { label: t('fleet.spec_capacity'), value: '20t' },
+      { label: t('fleet.spec_type'), value: '2 independently' },
     ]
   },
   {
     id: 3,
-    title: 'Camião Plataforma',
+    title: t('fleet.truck_platform'),
     category: 'trucks',
-    categoryLabel: 'Camião',
+    categoryLabel: t('fleet.category_label_truck'),
     image: '/assets/img/resachstacker/resachstacker5.jpeg',
-    description: 'Transporte de cargas especiais, máquinas pesadas e project cargo. Plataforma reforçada para cargas excepcionais.',
+    description: t('fleet.truck_platform_desc'),
     specs: [
-      { label: 'Capacidade', value: '40t' },
-      { label: 'Comprimento', value: '13.6m' },
-      { label: 'Tipo', value: 'Plataforma baixa' },
+      { label: t('fleet.spec_capacity'), value: '40t' },
+      { label: t('fleet.spec_length'), value: '13.6m' },
+      { label: t('fleet.spec_type'), value: 'Plataforma baixa' },
     ]
   },
   {
     id: 4,
-    title: 'Contentor 20"',
+    title: t('fleet.container_20'),
     category: 'containers',
-    categoryLabel: 'Contentor',
+    categoryLabel: t('fleet.category_label_container'),
     image: '/assets/img/resachstacker/resachstacker6.jpeg',
-    description: 'Contentor standard de 20 pés para transporte marítimo e terrestre. Disponível seco ou frigorífico.',
+    description: t('fleet.container_20_desc'),
     specs: [
-      { label: 'Tamanho', value: '20 pés' },
-      { label: 'Capacidade', value: '28t' },
-      { label: 'Volume', value: '33m³' },
+      { label: t('fleet.spec_size'), value: '20 pés' },
+      { label: t('fleet.spec_capacity'), value: '28t' },
+      { label: t('fleet.spec_volume'), value: '33m³' },
     ]
   },
   {
     id: 5,
-    title: 'Contentor 40"',
+    title: t('fleet.container_40'),
     category: 'containers',
-    categoryLabel: 'Contentor',
+    categoryLabel: t('fleet.category_label_container'),
     image: '/assets/img/resachstacker/resachstacker7.jpeg',
-    description: 'Contentor standard de 40 pés para grandes volumes. Ideal para cargas longas e volumosas.',
+    description: t('fleet.container_40_desc'),
     specs: [
-      { label: 'Tamanho', value: '40 pés' },
-      { label: 'Capacidade', value: '28t' },
-      { label: 'Volume', value: '67m³' },
+      { label: t('fleet.spec_size'), value: '40 pés' },
+      { label: t('fleet.spec_capacity'), value: '28t' },
+      { label: t('fleet.spec_volume'), value: '67m³' },
     ]
   },
   {
     id: 6,
-    title: 'Reachstacker Kalmar',
+    title: t('fleet.reachstacker'),
     category: 'equipment',
-    categoryLabel: 'Equipamento',
+    categoryLabel: t('fleet.category_label_equipment'),
     image: '/assets/img/resachstacker/resachstacker8.jpeg',
-    description: 'Reachstacker de 45 toneladas para manuseamento de contentores. Equipamento de última geração para operações portuárias.',
+    description: t('fleet.reachstacker_desc'),
     specs: [
-      { label: 'Capacidade', value: '45t' },
-      { label: 'Marca', value: 'Kalmar' },
-      { label: 'Stack', value: '4 contentores' },
+      { label: t('fleet.spec_capacity'), value: '45t' },
+      { label: t('fleet.spec_brand'), value: 'Kalmar' },
+      { label: t('fleet.spec_stack'), value: '4 contentores' },
     ]
   },
-]
+])
 
 const filteredItems = computed(() => {
-  if (selectedCategory.value === 'all') return fleetItems
-  return fleetItems.filter(item => item.category === selectedCategory.value)
+  if (selectedCategory.value === 'all') return fleetItems.value
+  return fleetItems.value.filter(item => item.category === selectedCategory.value)
 })
 
-const fleetStats = [
-  { value: '+15', label: 'Camiões Próprios', icon: 'bi bi-truck' },
-  { value: '45t', label: 'Reachstacker', icon: 'bi bi-tools' },
-  { value: '+50', label: 'Contentores', icon: 'bi bi-box-seam' },
-  { value: '24/7', label: 'Operação Contínua', icon: 'bi bi-clock-history' },
-]
+const fleetStats = computed(() => [
+  { value: '+15', label: t('fleet.stat_trucks'), icon: 'bi bi-truck' },
+  { value: '45t', label: t('fleet.stat_reachstacker'), icon: 'bi bi-tools' },
+  { value: '+50', label: t('fleet.stat_containers'), icon: 'bi bi-box-seam' },
+  { value: '24/7', label: t('fleet.stat_operations'), icon: 'bi bi-clock-history' },
+])
 
-const reachstackerSpecs = [
-  { icon: 'bi bi-speedometer', label: 'Capacidade', value: '45 toneladas' },
-  { icon: 'bi bi-box-seam', label: 'Contentores', value: '20" e 40"' },
-  { icon: 'bi bi-layout-stack', label: 'Elevação', value: 'Até 4 contentores' },
-  { icon: 'bi bi-award', label: 'Operadores', value: 'Certificados Kalmar' },
-  { icon: 'bi bi-shield-check', label: 'Manutenção', value: 'Preventiva garantida' },
-  { icon: 'bi bi-lightning', label: 'Produtividade', value: '+30 operações/hora' },
-]
+const reachstackerSpecs = computed(() => [
+  { icon: 'bi bi-speedometer', label: t('fleet.reachstacker_spec_capacity_label'), value: t('fleet.reachstacker_spec_capacity_value') },
+  { icon: 'bi bi-box-seam', label: t('fleet.reachstacker_spec_containers_label'), value: t('fleet.reachstacker_spec_containers_value') },
+  { icon: 'bi bi-layout-stack', label: t('fleet.reachstacker_spec_lift_label'), value: t('fleet.reachstacker_spec_lift_value') },
+  { icon: 'bi bi-award', label: t('fleet.reachstacker_spec_operators_label'), value: t('fleet.reachstacker_spec_operators_value') },
+  { icon: 'bi bi-shield-check', label: t('fleet.reachstacker_spec_maintenance_label'), value: t('fleet.reachstacker_spec_maintenance_value') },
+  { icon: 'bi bi-lightning', label: t('fleet.reachstacker_spec_productivity_label'), value: t('fleet.reachstacker_spec_productivity_value') },
+])
 
-const galleryImages = [
-  { src: '/assets/img/resachstacker/resachstacker1.jpeg', caption: 'Reachstacker Kalmar — Visão Geral' },
-  { src: '/assets/img/resachstacker/resachstacker2.jpeg', caption: 'Manuseamento de Contentores' },
-  { src: '/assets/img/resachstacker/resachstacker9.jpeg', caption: 'Operação de Carga — Contentores 20" e 40"' },
-  { src: '/assets/img/resachstacker/resachstacker10.jpeg', caption: 'Reachstacker em Acção — Porto de Luanda' },
-]
+const galleryImages = computed(() => [
+  { src: '/assets/img/resachstacker/resachstacker1.jpeg', caption: t('fleet.gallery_img_1') },
+  { src: '/assets/img/resachstacker/resachstacker2.jpeg', caption: t('fleet.gallery_img_2') },
+  { src: '/assets/img/resachstacker/resachstacker9.jpeg', caption: t('fleet.gallery_img_3') },
+  { src: '/assets/img/resachstacker/resachstacker10.jpeg', caption: t('fleet.gallery_img_4') },
+])
 
 const openLightbox = (index) => {
   lightboxIndex.value = index
   lightboxOpen.value = true
 }
 const prevImage = () => {
-  lightboxIndex.value = (lightboxIndex.value - 1 + galleryImages.length) % galleryImages.length
+  lightboxIndex.value = (lightboxIndex.value - 1 + galleryImages.value.length) % galleryImages.value.length
 }
 const nextImage = () => {
-  lightboxIndex.value = (lightboxIndex.value + 1) % galleryImages.length
+  lightboxIndex.value = (lightboxIndex.value + 1) % galleryImages.value.length
 }
 
 onMounted(async () => {

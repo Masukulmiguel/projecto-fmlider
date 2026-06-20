@@ -1,8 +1,8 @@
 <template>
   <div class="cliente-dashboard p-4 p-md-5">
     <div class="welcome-card mb-4">
-      <h2 class="mb-1">Olá, {{ authStore.user?.name }} 👋</h2>
-      <p class="text-muted mb-0">Bem-vindo ao seu dashboard. Aqui pode gerir os embarques, cotações, documentos e contactos.</p>
+      <h2 class="mb-1">{{ t('cliente.dashboard_greeting') }}, {{ authStore.user?.name }} 👋</h2>
+      <p class="text-muted mb-0">{{ t('cliente.dashboard_welcome') }}</p>
     </div>
 
     <div v-if="companyStore.company" class="card company-card mb-4">
@@ -10,17 +10,17 @@
         <div class="d-flex align-items-center gap-3 flex-wrap">
           <div class="logo-box">
             <img v-if="companyStore.company.logo" :src="companyStore.company.logo" alt="Logo">
-            <span v-else class="text-muted small">Sem logo</span>
+            <span v-else class="text-muted small">{{ t('cliente.dashboard_no_logo') }}</span>
           </div>
           <div class="flex-grow-1">
             <h4 class="mb-1">{{ companyStore.company.company_name }}</h4>
             <p class="mb-1 text-muted"><i class="bi bi-geo-alt"></i> {{ companyStore.company.address }}</p>
             <p class="mb-0">
               <span class="badge bg-primary me-2">{{ companyStore.company.service }}</span>
-              <span v-if="companyStore.company.nif" class="text-muted small">NIF: {{ companyStore.company.nif }}</span>
+              <span v-if="companyStore.company.nif" class="text-muted small">{{ t('cliente.dashboard_nif') }}: {{ companyStore.company.nif }}</span>
             </p>
           </div>
-          <router-link to="/perfil" class="btn btn-outline-primary">Editar dados</router-link>
+          <router-link to="/perfil" class="btn btn-outline-primary">{{ t('cliente.dashboard_edit') }}</router-link>
         </div>
       </div>
     </div>
@@ -31,10 +31,10 @@
           <div class="stat-tile">
             <div class="stat-tile-icon bg-primary-soft"><i class="bi bi-box-seam-fill"></i></div>
             <div>
-              <div class="stat-tile-label">Embarques</div>
+              <div class="stat-tile-label">{{ t('cliente.dashboard_shipments') }}</div>
               <div class="stat-tile-value">{{ counts.embarques }}</div>
               <div class="stat-tile-meta">
-                <span class="text-warning">{{ counts.embarques_pendente || 0 }} pendentes</span>
+                <span class="text-warning">{{ counts.embarques_pendente || 0 }} {{ t('cliente.dashboard_pending') }}</span>
               </div>
             </div>
           </div>
@@ -45,10 +45,10 @@
           <div class="stat-tile">
             <div class="stat-tile-icon bg-success-soft"><i class="bi bi-receipt"></i></div>
             <div>
-              <div class="stat-tile-label">Cotações</div>
+              <div class="stat-tile-label">{{ t('cliente.dashboard_quotes') }}</div>
               <div class="stat-tile-value">{{ counts.cotacoes }}</div>
               <div class="stat-tile-meta">
-                <span class="text-success">{{ counts.cotacoes_aprovada || 0 }} aprovadas</span>
+                <span class="text-success">{{ counts.cotacoes_aprovada || 0 }} {{ t('cliente.dashboard_approved') }}</span>
               </div>
             </div>
           </div>
@@ -59,9 +59,9 @@
           <div class="stat-tile">
             <div class="stat-tile-icon bg-info-soft"><i class="bi bi-file-earmark-text-fill"></i></div>
             <div>
-              <div class="stat-tile-label">Documentos</div>
+              <div class="stat-tile-label">{{ t('cliente.dashboard_documents') }}</div>
               <div class="stat-tile-value">{{ counts.documentos }}</div>
-              <div class="stat-tile-meta">arquivos carregados</div>
+              <div class="stat-tile-meta">{{ t('cliente.dashboard_files') }}</div>
             </div>
           </div>
         </router-link>
@@ -71,9 +71,9 @@
           <div class="stat-tile">
             <div class="stat-tile-icon bg-warning-soft"><i class="bi bi-person-rolodex"></i></div>
             <div>
-              <div class="stat-tile-label">Contactos</div>
+              <div class="stat-tile-label">{{ t('cliente.dashboard_contacts') }}</div>
               <div class="stat-tile-value">{{ counts.contactos }}</div>
-              <div class="stat-tile-meta">na sua lista</div>
+              <div class="stat-tile-meta">{{ t('cliente.dashboard_list') }}</div>
             </div>
           </div>
         </router-link>
@@ -84,7 +84,7 @@
       <div class="col-lg-7">
         <div class="card chart-card">
           <div class="card-header">
-            <h6 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Embarques vs Cotações (últimos 6 meses)</h6>
+            <h6 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>{{ t('cliente.dashboard_chart_shipments') }}</h6>
           </div>
           <div class="card-body">
             <Bar :data="monthlyData" :options="monthlyOptions" style="height: 280px" />
@@ -94,13 +94,13 @@
       <div class="col-lg-5">
         <div class="card chart-card h-100">
           <div class="card-header">
-            <h6 class="mb-0"><i class="bi bi-pie-chart-fill me-2"></i>Estado dos embarques</h6>
+            <h6 class="mb-0"><i class="bi bi-pie-chart-fill me-2"></i>{{ t('cliente.dashboard_chart_status') }}</h6>
           </div>
           <div class="card-body">
             <Doughnut v-if="statusData.datasets[0].data.some(v => v > 0)" :data="statusData" :options="statusOptions" style="height: 280px" />
             <div v-else class="text-center text-muted py-5">
               <i class="bi bi-inbox"></i>
-              <p class="mb-0 mt-2 small">Sem embarques para mostrar.</p>
+              <p class="mb-0 mt-2 small">{{ t('cliente.dashboard_no_shipments') }}</p>
             </div>
           </div>
         </div>
@@ -111,13 +111,13 @@
       <div class="col-lg-7">
         <div class="card h-100">
           <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Embarques recentes</h5>
-            <router-link to="/embarques" class="btn btn-sm btn-outline-primary">Ver todos</router-link>
+            <h5 class="mb-0">{{ t('cliente.dashboard_recent_shipments') }}</h5>
+            <router-link to="/embarques" class="btn btn-sm btn-outline-primary">{{ t('cliente.dashboard_view_all') }}</router-link>
           </div>
           <div class="card-body">
             <div v-if="recentEmbarques.length === 0" class="empty-mini">
               <i class="bi bi-inbox"></i>
-              <p class="mb-0">Sem embarques ainda.</p>
+              <p class="mb-0">{{ t('cliente.dashboard_no_shipments_yet') }}</p>
             </div>
             <ul v-else class="recent-list">
               <li v-for="e in recentEmbarques" :key="e.id">
@@ -136,25 +136,25 @@
       <div class="col-lg-5">
         <div class="card h-100">
           <div class="card-header">
-            <h5 class="mb-0">Acesso rápido</h5>
+            <h5 class="mb-0">{{ t('cliente.dashboard_quick_access') }}</h5>
           </div>
           <div class="card-body">
             <div class="quick-actions">
               <router-link to="/embarques/novo" class="quick-action">
                 <i class="bi bi-plus-circle-fill"></i>
-                <span>Novo embarque</span>
+                <span>{{ t('cliente.dashboard_new_shipment') }}</span>
               </router-link>
               <router-link to="/cotacoes/novo" class="quick-action">
                 <i class="bi bi-plus-circle-fill"></i>
-                <span>Nova cotação</span>
+                <span>{{ t('cliente.dashboard_new_quote') }}</span>
               </router-link>
               <button class="quick-action" @click="goToDocumentos">
                 <i class="bi bi-upload"></i>
-                <span>Enviar documento</span>
+                <span>{{ t('cliente.dashboard_send_doc') }}</span>
               </button>
               <router-link to="/mensagens" class="quick-action">
                 <i class="bi bi-chat-dots-fill"></i>
-                <span>Falar com a equipa</span>
+                <span>{{ t('cliente.dashboard_talk_team') }}</span>
               </router-link>
             </div>
           </div>
@@ -175,6 +175,9 @@ import {
   Chart, BarElement, CategoryScale, LinearScale, Tooltip, Legend,
   ArcElement, DoughnutController, BarController
 } from 'chart.js'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend, ArcElement, DoughnutController, BarController)
 

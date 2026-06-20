@@ -1,34 +1,34 @@
 <template>
   <div class="admin-page p-5">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-      <h2 class="mb-0">Clientes</h2>
+      <h2 class="mb-0">{{ t('admin.users_title') }}</h2>
       <div class="d-flex gap-2 flex-wrap">
-        <button class="btn btn-sm" :class="filter === 'all' ? 'btn-primary' : 'btn-outline-primary'" @click="filter = 'all'">Todos</button>
+        <button class="btn btn-sm" :class="filter === 'all' ? 'btn-primary' : 'btn-outline-primary'" @click="filter = 'all'">{{ t('admin.users_all') }}</button>
         <button class="btn btn-sm" :class="filter === 'pending' ? 'btn-warning' : 'btn-outline-warning'" @click="filter = 'pending'">
-          Pendentes <span v-if="pendingCount > 0" class="badge bg-light text-dark ms-1">{{ pendingCount }}</span>
+          {{ t('admin.users_pending') }} <span v-if="pendingCount > 0" class="badge bg-light text-dark ms-1">{{ pendingCount }}</span>
         </button>
-        <button class="btn btn-sm" :class="filter === 'approved' ? 'btn-success' : 'btn-outline-success'" @click="filter = 'approved'">Aprovados</button>
-        <button class="btn btn-sm" :class="filter === 'rejected' ? 'btn-danger' : 'btn-outline-danger'" @click="filter = 'rejected'">Rejeitados</button>
+        <button class="btn btn-sm" :class="filter === 'approved' ? 'btn-success' : 'btn-outline-success'" @click="filter = 'approved'">{{ t('admin.users_approved') }}</button>
+        <button class="btn btn-sm" :class="filter === 'rejected' ? 'btn-danger' : 'btn-outline-danger'" @click="filter = 'rejected'">{{ t('admin.users_rejected') }}</button>
       </div>
     </div>
 
-    <div v-if="loading" class="text-center py-5">A carregar...</div>
+    <div v-if="loading" class="text-center py-5">{{ t('common.loading') }}</div>
     <div v-else-if="filteredUsers.length === 0" class="text-center py-5 text-muted">
-      Nenhum cliente encontrado.
+      {{ t('admin.users_empty') }}
     </div>
     <div v-else class="card">
       <div class="card-body">
         <table class="table align-middle">
           <thead>
             <tr>
-              <th>Utilizador</th>
+              <th>{{ t('admin.user_col') }}</th>
               <th>Email</th>
-              <th>Telefone</th>
-              <th>Aprovação</th>
-              <th>Status</th>
-              <th>Último Login</th>
-              <th>Senha</th>
-              <th class="text-end">Ações</th>
+              <th>{{ t('admin.users_phone') }}</th>
+              <th>{{ t('admin.approval_col') }}</th>
+              <th>{{ t('admin.users_status') }}</th>
+              <th>{{ t('admin.last_login') }}</th>
+              <th>{{ t('admin.users_password') }}</th>
+              <th class="text-end">{{ t('admin.actions_col') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -47,23 +47,23 @@
               </td>
               <td><small class="text-muted">{{ formatDate(user.last_login) }}</small></td>
               <td>
-                <span v-if="user.password_must_change" class="badge bg-warning text-dark">Trocar senha</span>
-                <span v-else-if="user.password_changed_at" class="badge bg-info text-dark">Alterada {{ formatDateOnly(user.password_changed_at) }}</span>
-                <span v-else class="badge bg-secondary">Não alterada</span>
+                <span v-if="user.password_must_change" class="badge bg-warning text-dark">{{ t('admin.users_change_password') }}</span>
+                <span v-else-if="user.password_changed_at" class="badge bg-info text-dark">{{ t('admin.users_password_changed') }} {{ formatDateOnly(user.password_changed_at) }}</span>
+                <span v-else class="badge bg-secondary">{{ t('admin.users_password_not_changed') }}</span>
               </td>
               <td class="text-end">
                 <div class="btn-group btn-group-sm" v-if="user.approval_status === 'pending'">
-                  <button class="btn btn-success" @click="approve(user)">Aprovar</button>
-                  <button class="btn btn-outline-danger" @click="reject(user)">Rejeitar</button>
+                  <button class="btn btn-success" @click="approve(user)">{{ t('admin.approve') }}</button>
+                  <button class="btn btn-outline-danger" @click="reject(user)">{{ t('admin.reject') }}</button>
                 </div>
                 <div class="btn-group btn-group-sm" v-else-if="user.approval_status === 'rejected'">
-                  <button class="btn btn-success" @click="approve(user)">Reativar</button>
-                  <button class="btn btn-outline-danger" @click="destroy(user)">Eliminar</button>
+                  <button class="btn btn-success" @click="approve(user)">{{ t('admin.users_reactivate') }}</button>
+                  <button class="btn btn-outline-danger" @click="destroy(user)">{{ t('common.delete') }}</button>
                 </div>
                 <div class="btn-group btn-group-sm" v-else>
                   <button class="btn btn-outline-primary" @click="openEdit(user)"><i class="bi bi-pencil"></i></button>
                   <button class="btn btn-outline-info" @click="openDetail(user)"><i class="bi bi-eye"></i></button>
-                  <button class="btn btn-outline-danger" @click="destroy(user)">Eliminar</button>
+                  <button class="btn btn-outline-danger" @click="destroy(user)">{{ t('common.delete') }}</button>
                 </div>
               </td>
             </tr>
@@ -76,19 +76,19 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Rejeitar cliente</h5>
+            <h5 class="modal-title">{{ t('admin.reject') }}</h5>
             <button type="button" class="btn-close" @click="showRejectModal = false"></button>
           </div>
           <div class="modal-body">
-            <p>Tem a certeza que pretende rejeitar <strong>{{ rejectingUser?.name }}</strong>?</p>
+            <p>{{ t('admin.users_confirm_reject_text') }} <strong>{{ rejectingUser?.name }}</strong>?</p>
             <div class="mb-2">
-              <label class="form-label">Motivo (opcional)</label>
+              <label class="form-label">{{ t('admin.users_reject_reason') }}</label>
               <textarea class="form-control" rows="3" v-model="rejectReason"></textarea>
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-secondary" @click="showRejectModal = false">Cancelar</button>
-            <button class="btn btn-danger" @click="confirmReject">Confirmar rejeição</button>
+            <button class="btn btn-secondary" @click="showRejectModal = false">{{ t('common.cancel') }}</button>
+            <button class="btn btn-danger" @click="confirmReject">{{ t('admin.users_confirm_reject') }}</button>
           </div>
         </div>
       </div>
@@ -98,53 +98,53 @@
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Detalhes do Cliente</h5>
+            <h5 class="modal-title">{{ t('admin.users_title') }}</h5>
             <button type="button" class="btn-close" @click="showDetailModal = false"></button>
           </div>
           <div class="modal-body" v-if="!detailLoading">
             <div class="row">
               <div class="col-md-6">
-                <h6>Dados do Utilizador</h6>
+                <h6>{{ t('admin.users_user_data') }}</h6>
                 <table class="table table-sm table-borderless">
-                  <tr><th>Nome</th><td>{{ detailUser?.name }}</td></tr>
+                  <tr><th>{{ t('admin.users_full_name') }}</th><td>{{ detailUser?.name }}</td></tr>
                   <tr><th>Username</th><td>@{{ detailUser?.username }}</td></tr>
                   <tr><th>Email</th><td>{{ detailUser?.email }}</td></tr>
-                  <tr><th>Telefone</th><td>{{ detailUser?.phone || '—' }}</td></tr>
+                  <tr><th>{{ t('admin.users_phone') }}</th><td>{{ detailUser?.phone || '—' }}</td></tr>
                   <tr><th>Role</th><td><span class="badge bg-info text-dark">{{ detailUser?.role }}</span></td></tr>
-                  <tr><th>Aprovação</th><td><span :class="getStatusBadge(detailUser).class">{{ getStatusBadge(detailUser).text }}</span></td></tr>
-                  <tr><th>Status</th><td><span :class="getLockStatus(detailUser).class">{{ getLockStatus(detailUser).text }}</span></td></tr>
-                  <tr><th>Último Login</th><td>{{ formatDate(detailUser?.last_login) }}</td></tr>
-                  <tr><th>Senha</th><td>
-                    <span v-if="detailUser?.password_must_change" class="badge bg-warning text-dark">Trocar senha</span>
-                    <span v-else-if="detailUser?.password_changed_at" class="badge bg-info text-dark">Alterada {{ formatDateOnly(detailUser.password_changed_at) }}</span>
-                    <span v-else class="badge bg-secondary">Não alterada</span>
+                  <tr><th>{{ t('admin.users_approval') }}</th><td><span :class="getStatusBadge(detailUser).class">{{ getStatusBadge(detailUser).text }}</span></td></tr>
+                  <tr><th>{{ t('admin.users_status') }}</th><td><span :class="getLockStatus(detailUser).class">{{ getLockStatus(detailUser).text }}</span></td></tr>
+                  <tr><th>{{ t('admin.users_last_login') }}</th><td>{{ formatDate(detailUser?.last_login) }}</td></tr>
+                  <tr><th>{{ t('admin.users_password') }}</th><td>
+                    <span v-if="detailUser?.password_must_change" class="badge bg-warning text-dark">{{ t('admin.users_change_password') }}</span>
+                    <span v-else-if="detailUser?.password_changed_at" class="badge bg-info text-dark">{{ t('admin.users_password_changed') }} {{ formatDateOnly(detailUser.password_changed_at) }}</span>
+                    <span v-else class="badge bg-secondary">{{ t('admin.users_password_not_changed') }}</span>
                   </td></tr>
-                  <tr><th>Bloqueio</th><td v-if="detailUser?.locked_at">Até {{ formatDate(detailUser.locked_at) }} - {{ detailUser?.locked_reason || 'Sem motivo' }}</td><td v-else>—</td></tr>
-                  <tr><th>Registado em</th><td>{{ formatDate(detailUser?.created_at) }}</td></tr>
+                  <tr><th>{{ t('admin.lock_title') }}</th><td v-if="detailUser?.locked_at">Até {{ formatDate(detailUser.locked_at) }} - {{ detailUser?.locked_reason || t('admin.users_no_reason') }}</td><td v-else>—</td></tr>
+                  <tr><th>{{ t('admin.users_registered_at') }}</th><td>{{ formatDate(detailUser?.created_at) }}</td></tr>
                 </table>
               </div>
               <div class="col-md-6">
-                <h6>Dados da Empresa</h6>
+                <h6>{{ t('admin.users_company_data') }}</h6>
                 <table class="table table-sm table-borderless" v-if="detailCompany">
-                  <tr><th>Nome da Empresa</th><td>{{ detailCompany?.company_name }}</td></tr>
+                  <tr><th>{{ t('admin.users_company_name') }}</th><td>{{ detailCompany?.company_name }}</td></tr>
                   <tr><th>NIF</th><td>{{ detailCompany?.nif || '—' }}</td></tr>
-                  <tr><th>Endereço</th><td>{{ detailCompany?.address }}</td></tr>
-                  <tr><th>Telefone</th><td>{{ detailCompany?.phone }}</td></tr>
+                  <tr><th>{{ t('admin.users_address') }}</th><td>{{ detailCompany?.address }}</td></tr>
+                  <tr><th>{{ t('admin.users_phone') }}</th><td>{{ detailCompany?.phone }}</td></tr>
                   <tr><th>Email</th><td>{{ detailCompany?.email }}</td></tr>
-                  <tr><th>Serviço</th><td>{{ detailCompany?.service }}</td></tr>
-                  <tr><th>Descrição do Caso</th><td>{{ detailCompany?.case_description }}</td></tr>
+                  <tr><th>{{ t('admin.users_service') }}</th><td>{{ detailCompany?.service }}</td></tr>
+                  <tr><th>{{ t('admin.users_case_description') }}</th><td>{{ detailCompany?.case_description }}</td></tr>
                   <tr><th>Logo</th><td v-if="detailCompany?.logo"><img :src="detailCompany.logo" alt="Logo" style="max-height: 60px;"></td><td v-else>—</td></tr>
-                  <tr><th>Publicado no site</th><td><span :class="detailCompany?.is_published ? 'badge bg-success' : 'badge bg-secondary'">{{ detailCompany?.is_published ? 'Sim' : 'Não' }}</span></td></tr>
+                  <tr><th>{{ t('admin.users_published') }}</th><td><span :class="detailCompany?.is_published ? 'badge bg-success' : 'badge bg-secondary'">{{ detailCompany?.is_published ? t('admin.users_yes') : t('admin.users_no') }}</span></td></tr>
                 </table>
-                <div v-if="!detailCompany" class="text-muted">Sem dados de empresa configurados</div>
+                <div v-if="!detailCompany" class="text-muted">{{ t('admin.users_no_company') }}</div>
               </div>
             </div>
           </div>
           <div class="modal-body text-center" v-if="detailLoading">
-            <div class="spinner-border text-primary" role="status"><span class="visually-hidden">A carregar...</span></div>
+            <div class="spinner-border text-primary" role="status"><span class="visually-hidden">{{ t('common.loading') }}</span></div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-secondary" @click="showDetailModal = false">Fechar</button>
+            <button class="btn btn-secondary" @click="showDetailModal = false">{{ t('common.close') }}</button>
           </div>
         </div>
       </div>
@@ -154,25 +154,25 @@
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Editar Cliente</h5>
+            <h5 class="modal-title">{{ t('admin.users_title') }}</h5>
             <button type="button" class="btn-close" @click="showEditModal = false"></button>
           </div>
           <div class="modal-body">
             <div class="row">
               <div class="col-md-4 text-center mb-3">
                 <div class="edit-photo-preview mx-auto mb-2">
-                  <img v-if="editForm.photo" :src="editForm.photo" alt="Foto">
+                  <img v-if="editForm.photo" :src="editForm.photo" :alt="t('admin.users_photo')">
                   <div v-else class="photo-placeholder"><i class="bi bi-person-fill"></i></div>
                 </div>
                 <label class="btn btn-outline-primary btn-sm">
-                  <i class="bi bi-camera-fill"></i> Alterar foto
+                  <i class="bi bi-camera-fill"></i> {{ t('admin.profile_change_photo') }}
                   <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" @change="onEditPhotoChange" hidden>
                 </label>
                 <div v-if="editPhotoMsg" class="small mt-1" :class="editPhotoError ? 'text-danger' : 'text-success'">{{ editPhotoMsg }}</div>
               </div>
               <div class="col-md-8">
                 <div class="mb-3">
-                  <label class="form-label">Nome completo *</label>
+                  <label class="form-label">{{ t('admin.users_full_name') }} *</label>
                   <input type="text" class="form-control" v-model="editForm.name" required>
                 </div>
                 <div class="mb-3">
@@ -180,23 +180,23 @@
                   <input type="email" class="form-control" :value="editForm.email" disabled>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label">Telefone</label>
+                  <label class="form-label">{{ t('admin.users_phone') }}</label>
                   <input type="tel" class="form-control" v-model="editForm.phone">
                 </div>
                 <div class="row">
                   <div class="col-md-6 mb-3">
-                    <label class="form-label">Estado da conta</label>
+                    <label class="form-label">{{ t('admin.users_account_status') }}</label>
                     <select class="form-select" v-model="editForm.approval_status">
-                      <option value="approved">Aprovado</option>
-                      <option value="pending">Pendente</option>
-                      <option value="rejected">Rejeitado</option>
+                      <option value="approved">{{ t('admin.users_approved') }}</option>
+                      <option value="pending">{{ t('admin.users_pending') }}</option>
+                      <option value="rejected">{{ t('admin.users_rejected') }}</option>
                     </select>
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label class="form-label">Status</label>
+                    <label class="form-label">{{ t('admin.users_status') }}</label>
                     <select class="form-select" v-model="editForm.status">
-                      <option :value="1">Ativo</option>
-                      <option :value="0">Inativo</option>
+                      <option :value="1">{{ t('admin.services_active') }}</option>
+                      <option :value="0">{{ t('admin.services_inactive') }}</option>
                     </select>
                   </div>
                 </div>
@@ -205,10 +205,10 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-secondary" @click="showEditModal = false">Cancelar</button>
+            <button class="btn btn-secondary" @click="showEditModal = false">{{ t('common.cancel') }}</button>
             <button class="btn btn-primary" :disabled="editSaving" @click="saveEdit">
               <span v-if="editSaving" class="spinner-border spinner-border-sm me-1"></span>
-              {{ editSaving ? 'A guardar...' : 'Guardar alterações' }}
+              {{ editSaving ? t('admin.settings_save') : t('admin.settings_save') }}
             </button>
           </div>
         </div>
@@ -220,6 +220,9 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { supabase } from '@/lib/supabase'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const users = ref([])
 const loading = ref(false)
@@ -274,7 +277,7 @@ const openDetail = async (user) => {
     if (!error) detailCompany.value = company
     showDetailModal.value = true
   } catch (error) {
-    alert('Erro ao carregar detalhes')
+    alert(t('admin.users_error_loading'))
   } finally {
     detailLoading.value = false
   }
@@ -291,19 +294,19 @@ const formatDateOnly = (date) => {
 }
 
 const getStatusBadge = (user) => {
-  if (user.approval_status === 'pending') return { class: 'badge bg-warning text-dark', text: 'Pendente' }
-  if (user.approval_status === 'approved') return { class: 'badge bg-success', text: 'Aprovado' }
-  return { class: 'badge bg-danger', text: 'Rejeitado' }
+  if (user.approval_status === 'pending') return { class: 'badge bg-warning text-dark', text: t('admin.users_pending') }
+  if (user.approval_status === 'approved') return { class: 'badge bg-success', text: t('admin.users_approved') }
+  return { class: 'badge bg-danger', text: t('admin.users_rejected') }
 }
 
 const getLockStatus = (user) => {
-  if (user.locked_at) return { class: 'badge bg-danger', text: 'Bloqueado' }
-  if (user.status === 0) return { class: 'badge bg-secondary', text: 'Inativo' }
-  return { class: 'badge bg-success', text: 'Ativo' }
+  if (user.locked_at) return { class: 'badge bg-danger', text: t('admin.lock_title') }
+  if (user.status === 0) return { class: 'badge bg-secondary', text: t('admin.services_inactive') }
+  return { class: 'badge bg-success', text: t('admin.services_active') }
 }
 
 const approve = async (user) => {
-  if (!confirm(`Aprovar a conta de ${user.name}?`)) return
+  if (!confirm(`${t('admin.users_confirm_approve')} ${user.name}?`)) return
   try {
     const { error } = await supabase.from('users').update({ approval_status: 'approved', approved_at: new Date() }).eq('id', user.id)
     if (!error) {
@@ -311,7 +314,7 @@ const approve = async (user) => {
       await loadPendingCount()
     }
   } catch (error) {
-    alert(error.message || 'Erro ao aprovar')
+    alert(error.message || t('admin.error_approve'))
   }
 }
 
@@ -331,19 +334,19 @@ const confirmReject = async () => {
       await loadPendingCount()
     }
   } catch (error) {
-    alert(error.message || 'Erro ao rejeitar')
+    alert(error.message || t('admin.error_reject'))
   }
 }
 
 const destroy = async (user) => {
-  if (!confirm(`Eliminar definitivamente ${user.name}?`)) return
+  if (!confirm(`${t('admin.users_confirm_delete')} ${user.name}?`)) return
   try {
     const { error } = await supabase.from('users').delete().eq('id', user.id)
     if (!error) {
       await loadUsers()
     }
   } catch (error) {
-    alert(error.message || 'Erro ao eliminar')
+    alert(error.message || t('admin.error_delete'))
   }
 }
 
@@ -379,7 +382,7 @@ const saveEdit = async () => {
       await loadUsers()
     }
   } catch (error) {
-    editError.value = error.message || 'Erro ao guardar'
+    editError.value = error.message || t('admin.error_save')
   } finally {
     editSaving.value = false
   }
@@ -399,12 +402,12 @@ const onEditPhotoChange = async (e) => {
     const { error: updateError } = await supabase.from('users').update({ photo: urlData.publicUrl }).eq('id', editingUser.value.id)
     if (!updateError) {
       editPhotoError.value = false
-      editPhotoMsg.value = 'Foto atualizada.'
+      editPhotoMsg.value = t('admin.users_photo_updated')
       await loadUsers()
     }
   } else {
     editPhotoError.value = true
-    editPhotoMsg.value = uploadError?.message || 'Erro ao carregar foto'
+    editPhotoMsg.value = uploadError?.message || t('admin.error_upload_photo')
   }
   e.target.value = ''
 }

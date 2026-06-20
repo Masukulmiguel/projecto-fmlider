@@ -2,7 +2,7 @@
   <div class="admin-page p-5">
     <div class="page-header mb-4">
       <div>
-        <h2>Embarques</h2>
+        <h2>{{ t('admin.embarques_title') }}</h2>
         <p class="text-muted mb-0">Todos os embarques de todos os clientes.</p>
       </div>
     </div>
@@ -12,14 +12,14 @@
         <div class="filters mb-3">
           <div class="search-box">
             <i class="bi bi-search"></i>
-            <input v-model="filters.q" type="text" placeholder="Pesquisar..." @input="debounceSearch">
+            <input v-model="filters.q" type="text" :placeholder="t('admin.embarques_search')" @input="debounceSearch">
           </div>
           <select v-model="filters.status" class="form-select" @change="fetchData">
-            <option value="">Todos os estados</option>
-            <option value="pendente">Pendente</option>
-            <option value="em_transito">Em trânsito</option>
-            <option value="entregue">Entregue</option>
-            <option value="cancelado">Cancelado</option>
+            <option value="">{{ t('admin.embarques_all') }}</option>
+            <option value="pendente">{{ t('admin.embarques_pending') }}</option>
+            <option value="em_transito">{{ t('admin.embarques_transit') }}</option>
+            <option value="entregue">{{ t('admin.embarques_delivered') }}</option>
+            <option value="cancelado">{{ t('admin.embarques_cancelled') }}</option>
           </select>
         </div>
 
@@ -33,14 +33,14 @@
           <table class="table align-middle">
             <thead>
               <tr>
-                <th>Tracking</th>
+                <th>{{ t('admin.embarques_tracking') }}</th>
                 <th>Cliente</th>
-                <th>Rota</th>
+                <th>{{ t('admin.embarques_route') }}</th>
                 <th>Tipo</th>
                 <th>Estado</th>
-                <th>Valor</th>
+                <th>{{ t('admin.embarques_value') }}</th>
                 <th>Data</th>
-                <th>Ações</th>
+                <th>{{ t('admin.actions_col') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -81,7 +81,7 @@
     <div v-if="showEditModal" class="modal-overlay" @click.self="closeEdit">
       <div class="modal-content">
         <div class="modal-header">
-          <h5>Editar Embarque</h5>
+          <h5>{{ t('admin.embarques_title') }}</h5>
           <button class="btn-close" @click="closeEdit"></button>
         </div>
         <div class="modal-body">
@@ -112,10 +112,10 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" @click="closeEdit">Cancelar</button>
+          <button class="btn btn-secondary" @click="closeEdit">{{ t('common.cancel') }}</button>
           <button class="btn btn-primary" @click="submitEdit" :disabled="saving">
             <span v-if="saving" class="spinner-border spinner-border-sm me-1"></span>
-            Guardar
+            {{ t('common.save') }}
           </button>
         </div>
       </div>
@@ -124,7 +124,7 @@
     <div v-if="showDeleteModal" class="modal-overlay" @click.self="closeDelete">
       <div class="modal-content modal-sm">
         <div class="modal-header">
-          <h5>Confirmar Eliminação</h5>
+          <h5>{{ t('common.confirm') }}</h5>
           <button class="btn-close" @click="closeDelete"></button>
         </div>
         <div class="modal-body">
@@ -132,10 +132,10 @@
           <p class="text-muted small mb-0">Esta ação não pode ser desfeita.</p>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" @click="closeDelete">Cancelar</button>
+          <button class="btn btn-secondary" @click="closeDelete">{{ t('common.cancel') }}</button>
           <button class="btn btn-danger" @click="submitDelete" :disabled="deleting">
             <span v-if="deleting" class="spinner-border spinner-border-sm me-1"></span>
-            Eliminar
+            {{ t('common.delete') }}
           </button>
         </div>
       </div>
@@ -151,6 +151,9 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const items = ref([])
 const loading = ref(false)

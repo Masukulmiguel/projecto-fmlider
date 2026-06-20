@@ -1,13 +1,13 @@
 <template>
-  <div id="app" class="app">
+  <div id="app" class="app" :class="{ 'sidebar-collapsed': sidebarCollapsed }">
     <InactivityClock :timeout="600000" />
-    <AdminSidebar v-if="isAdminRoute" :isOpen="sidebarOpen" @close="sidebarOpen = false" />
-    <FuncionarioSidebar v-else-if="isFuncionarioRoute" :isOpen="sidebarOpen" @close="sidebarOpen = false" />
-    <ClienteSidebar v-else-if="isClienteRoute" :isOpen="sidebarOpen" @close="sidebarOpen = false" />
+    <AdminSidebar v-if="isAdminRoute" :isOpen="sidebarOpen" :collapsed="sidebarCollapsed" @close="sidebarOpen = false" @toggle-collapse="sidebarCollapsed = !sidebarCollapsed" />
+    <FuncionarioSidebar v-else-if="isFuncionarioRoute" :isOpen="sidebarOpen" :collapsed="sidebarCollapsed" @close="sidebarOpen = false" @toggle-collapse="sidebarCollapsed = !sidebarCollapsed" />
+    <ClienteSidebar v-else-if="isClienteRoute" :isOpen="sidebarOpen" :collapsed="sidebarCollapsed" @close="sidebarOpen = false" @toggle-collapse="sidebarCollapsed = !sidebarCollapsed" />
     <div :class="layoutClass">
-      <AdminNavbar v-if="isAdminRoute" @toggle-sidebar="sidebarOpen = !sidebarOpen" />
-      <FuncionarioNavbar v-else-if="isFuncionarioRoute" @toggle-sidebar="sidebarOpen = !sidebarOpen" />
-      <ClienteNavbar v-else-if="isClienteRoute" @toggle-sidebar="sidebarOpen = !sidebarOpen" />
+      <AdminNavbar v-if="isAdminRoute" @toggle-sidebar="sidebarOpen = !sidebarOpen" @toggle-collapse="sidebarCollapsed = !sidebarCollapsed" :collapsed="sidebarCollapsed" />
+      <FuncionarioNavbar v-else-if="isFuncionarioRoute" @toggle-sidebar="sidebarOpen = !sidebarOpen" :collapsed="sidebarCollapsed" />
+      <ClienteNavbar v-else-if="isClienteRoute" @toggle-sidebar="sidebarOpen = !sidebarOpen" :collapsed="sidebarCollapsed" />
       <PublicHeader v-else />
 
       <main>
@@ -22,7 +22,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
@@ -43,6 +43,7 @@ const route = useRoute()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
 const sidebarOpen = ref(false)
+const sidebarCollapsed = ref(false)
 
 const isAdminRoute = computed(() => route.meta?.layout === 'admin')
 const isClienteRoute = computed(() => route.meta?.layout === 'cliente')
@@ -55,14 +56,33 @@ const layoutClass = computed(() => {
   return 'main-content'
 })
 
+const checkWidth = () => {
+  if (window.innerWidth < 768) {
+    sidebarCollapsed.value = false
+    sidebarOpen.value = false
+  } else if (window.innerWidth < 1024) {
+    sidebarCollapsed.value = true
+    sidebarOpen.value = false
+  } else {
+    sidebarCollapsed.value = false
+  }
+}
+
 onMounted(() => {
   themeStore.applyTheme()
+  checkWidth()
+  window.addEventListener('resize', checkWidth)
   if (!isAdminRoute.value && !isClienteRoute.value && !isFuncionarioRoute.value) {
     trackVisitor()
   }
 })
 
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', checkWidth)
+})
+
 watch(() => route.fullPath, () => {
+  sidebarOpen.value = false
   if (!isAdminRoute.value && !isClienteRoute.value && !isFuncionarioRoute.value) {
     trackVisitor()
   }
@@ -73,6 +93,7 @@ watch(() => route.fullPath, () => {
 .app {
   display: flex;
   min-height: 100vh;
+  background: var(--content-bg, #f0f2f5);
 }
 
 .main-content {
@@ -84,15 +105,31 @@ watch(() => route.fullPath, () => {
 .cliente-content,
 .funcionario-content {
   flex: 1;
-  margin-left: 250px;
+  margin-left: 260px;
   min-height: 100vh;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-collapsed .admin-content,
+.sidebar-collapsed .cliente-content,
+.sidebar-collapsed .funcionario-content {
+  margin-left: 72px;
 }
 
 main {
-  min-height: calc(100vh - 70px);
+  min-height: calc(100vh - 64px);
+  padding: 0;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
+  .admin-content,
+  .cliente-content,
+  .funcionario-content {
+    margin-left: 72px;
+  }
+}
+
+@media (max-width: 767px) {
   .admin-content,
   .cliente-content,
   .funcionario-content {

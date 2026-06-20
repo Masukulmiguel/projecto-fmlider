@@ -5,17 +5,17 @@
         <div class="col-md-6">
           <div class="card">
             <div class="card-body p-5">
-              <h1 class="text-center mb-4">Esqueci a Senha</h1>
+              <h1 class="text-center mb-4">{{ t('auth.forgot_title') }}</h1>
               <form @submit.prevent="handleReset">
-                <p class="mb-3">Insira o seu email para receber instruções de redefinição de senha.</p>
+                <p class="mb-3">{{ t('auth.forgot_subtitle') }}</p>
                 <div class="mb-3">
-                  <label for="email" class="form-label">Email</label>
+                  <label for="email" class="form-label">{{ t('auth.login_email') }}</label>
                   <input type="email" class="form-control" id="email" v-model="form.email" required>
                 </div>
-                <button type="submit" class="btn btn-primary w-100 mb-3">Enviar</button>
+                <button type="submit" class="btn btn-primary w-100 mb-3">{{ t('auth.forgot_submit') }}</button>
               </form>
               <p class="text-center">
-                <router-link to="/login">Voltar ao login</router-link>
+                <router-link to="/login">{{ t('auth.forgot_back') }}</router-link>
               </p>
             </div>
           </div>
@@ -29,9 +29,11 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from '@/composables/useI18n'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 const form = ref({
   email: ''
@@ -40,10 +42,10 @@ const form = ref({
 const handleReset = async () => {
   const result = await authStore.resetPassword(form.value.email)
   if (result.success) {
-    alert('Email enviado com sucesso!')
+    alert(t('auth.forgot_success'))
     router.push('/login')
   } else {
-    alert('Erro ao enviar email')
+    alert(t('auth.forgot_error'))
   }
 }
 </script>

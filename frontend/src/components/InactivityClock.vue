@@ -20,7 +20,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from '@/composables/useI18n.js'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const props = defineProps({
   timeout: { type: Number, default: 600000 },
@@ -39,16 +39,19 @@ let lastActivity = Date.now()
 const days = {
   pt: ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'],
   en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+  fr: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
 }
 const months = {
   pt: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
   en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+  fr: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
 }
 
 const updateClock = () => {
   const now = new Date()
-  const lang = localStorage.getItem('fmlider_locale') || 'pt'
-  time.value = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
+  const lang = locale.value
+  const localeMap = { pt: 'pt-BR', en: 'en-US', fr: 'fr-FR' }
+  time.value = now.toLocaleTimeString(localeMap[lang] || 'pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
   date.value = `${now.getDate()} ${months[lang][now.getMonth()]} ${now.getFullYear()}`
   day.value = days[lang][now.getDay()]
 }

@@ -15,11 +15,11 @@
                 <div class="icon-circle">
                   <i class="bi bi-shield-lock-fill"></i>
                 </div>
-                <h1 class="form-title mt-3">Alterar Senha</h1>
+                <h1 class="form-title mt-3">{{ t('auth.change_title') }}</h1>
                 <p class="form-subtitle">
                   {{ isForced
-                    ? 'Por segurança, defina uma nova senha para continuar.'
-                    : 'Atualize a sua senha de acesso.' }}
+                    ? t('auth.change_forced_subtitle')
+                    : t('auth.change_subtitle') }}
                 </p>
               </div>
 
@@ -37,10 +37,10 @@
                     type="password"
                     class="form-control"
                     id="current_password"
-                    placeholder="Senha atual"
+                    :placeholder="t('auth.change_current')"
                     required
                   >
-                  <label for="current_password">Senha atual</label>
+                  <label for="current_password">{{ t('auth.change_current') }}</label>
                 </div>
 
                 <div class="form-floating mb-3 animate-fade-up delay-2">
@@ -49,11 +49,11 @@
                     type="password"
                     class="form-control"
                     id="new_password"
-                    placeholder="Nova senha"
+                    :placeholder="t('auth.change_new')"
                     minlength="6"
                     required
                   >
-                  <label for="new_password">Nova senha (mín. 6 caracteres)</label>
+                  <label for="new_password">{{ t('auth.change_new') }} (mín. 6 caracteres)</label>
                 </div>
 
                 <div class="form-floating mb-4 animate-fade-up delay-3">
@@ -62,11 +62,11 @@
                     type="password"
                     class="form-control"
                     id="new_password_confirmation"
-                    placeholder="Confirmar nova senha"
+                    :placeholder="t('auth.change_confirm')"
                     minlength="6"
                     required
                   >
-                  <label for="new_password_confirmation">Confirmar nova senha</label>
+                  <label for="new_password_confirmation">{{ t('auth.change_confirm') }}</label>
                 </div>
 
                 <button
@@ -76,17 +76,17 @@
                 >
                   <span v-if="loading" class="d-flex align-items-center justify-content-center gap-2">
                     <span class="spinner-border spinner-border-sm" role="status"></span>
-                    A guardar...
+                    {{ t('auth.change_loading') }}
                   </span>
                   <span v-else class="d-flex align-items-center justify-content-center gap-2">
                     <i class="bi bi-check2-circle"></i>
-                    Guardar nova senha
+                    {{ t('auth.change_save_new') }}
                   </span>
                 </button>
 
                 <div v-if="!isForced" class="text-center mt-3">
                   <button type="button" class="btn btn-link link-muted" @click="goBack">
-                    <i class="bi bi-arrow-left me-1"></i> Voltar
+                    <i class="bi bi-arrow-left me-1"></i> {{ t('auth.change_back') }}
                   </button>
                 </div>
               </form>
@@ -105,9 +105,11 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from '@/composables/useI18n'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 const form = ref({
   current_password: '',
@@ -138,11 +140,11 @@ const handleSubmit = async () => {
   successMessage.value = ''
 
   if (form.value.new_password.length < 6) {
-    errorMessage.value = 'A nova senha deve ter pelo menos 6 caracteres.'
+    errorMessage.value = t('auth.change_min_chars')
     return
   }
   if (form.value.new_password !== form.value.new_password_confirmation) {
-    errorMessage.value = 'A confirmação da nova senha não coincide.'
+    errorMessage.value = t('auth.change_confirm_mismatch')
     return
   }
 
@@ -159,11 +161,11 @@ const handleSubmit = async () => {
   loading.value = false
 
   if (!result.success) {
-    errorMessage.value = result.error || 'Não foi possível alterar a senha.'
+    errorMessage.value = result.error || t('auth.change_generic_error')
     return
   }
 
-  successMessage.value = 'Senha alterada com sucesso!'
+  successMessage.value = t('auth.change_success')
   form.value.current_password = ''
   form.value.new_password = ''
   form.value.new_password_confirmation = ''

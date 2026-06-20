@@ -3,9 +3,9 @@
     <div class="page-header">
       <div>
         <router-link to="/cotacoes" class="back-link">
-          <i class="bi bi-arrow-left"></i> Voltar
+          <i class="bi bi-arrow-left"></i> {{ t('cliente.cotacoes_back') }}
         </router-link>
-        <h1 class="page-title">{{ isEdit ? 'Editar Cotação' : 'Nova Cotação' }}</h1>
+        <h1 class="page-title">{{ isEdit ? t('cliente.cotacoes_edit_title') : t('cliente.cotacoes_new_title') }}</h1>
       </div>
     </div>
 
@@ -15,44 +15,44 @@
       <div class="card-body">
         <div class="row g-3">
           <div class="col-md-6">
-            <label class="form-label">Origem *</label>
+            <label class="form-label">{{ t('cliente.cotacoes_origin') }} *</label>
             <input v-model="form.origin" type="text" class="form-control" :class="{'is-invalid': errors.origin}" required>
             <div class="invalid-feedback">{{ errors.origin }}</div>
           </div>
           <div class="col-md-6">
-            <label class="form-label">Destino *</label>
+            <label class="form-label">{{ t('cliente.cotacoes_destination') }} *</label>
             <input v-model="form.destination" type="text" class="form-control" :class="{'is-invalid': errors.destination}" required>
             <div class="invalid-feedback">{{ errors.destination }}</div>
           </div>
           <div class="col-md-6">
-            <label class="form-label">Tipo</label>
+            <label class="form-label">{{ t('cliente.cotacoes_type') }}</label>
             <select v-model="form.type" class="form-select">
-              <option value="maritimo">Marítimo</option>
-              <option value="aereo">Aéreo</option>
-              <option value="terrestre">Terrestre</option>
-              <option value="ferroviario">Ferroviário</option>
-              <option value="multimodal">Multimodal</option>
+              <option value="maritimo">{{ t('cliente.cotacoes_type_maritimo') }}</option>
+              <option value="aereo">{{ t('cliente.cotacoes_type_aereo') }}</option>
+              <option value="terrestre">{{ t('cliente.cotacoes_type_terrestre') }}</option>
+              <option value="ferroviario">{{ t('cliente.cotacoes_type_ferroviario') }}</option>
+              <option value="multimodal">{{ t('cliente.cotacoes_type_multimodal') }}</option>
             </select>
           </div>
           <div class="col-md-6">
-            <label class="form-label">Estado</label>
+            <label class="form-label">{{ t('cliente.cotacoes_status') }}</label>
             <select v-model="form.status" class="form-select">
-              <option value="pendente">Pendente</option>
-              <option value="aprovada">Aprovada</option>
-              <option value="rejeitada">Rejeitada</option>
-              <option value="expirada">Expirada</option>
+              <option value="pendente">{{ t('cliente.cotacoes_status_pendente') }}</option>
+              <option value="aprovada">{{ t('cliente.cotacoes_status_aprovada') }}</option>
+              <option value="rejeitada">{{ t('cliente.cotacoes_status_rejeitada') }}</option>
+              <option value="expirada">{{ t('cliente.cotacoes_status_expirada') }}</option>
             </select>
           </div>
           <div class="col-md-4">
-            <label class="form-label">Peso (kg)</label>
+            <label class="form-label">{{ t('cliente.cotacoes_weight_kg') }}</label>
             <input v-model="form.weight" type="number" step="0.01" class="form-control">
           </div>
           <div class="col-md-4">
-            <label class="form-label">Valor estimado</label>
+            <label class="form-label">{{ t('cliente.cotacoes_value') }}</label>
             <input v-model="form.estimated_value" type="number" step="0.01" class="form-control">
           </div>
           <div class="col-md-4">
-            <label class="form-label">Moeda</label>
+            <label class="form-label">{{ t('cliente.cotacoes_currency') }}</label>
             <select v-model="form.currency" class="form-select">
               <option value="AOA">AOA</option>
               <option value="USD">USD</option>
@@ -60,28 +60,28 @@
             </select>
           </div>
           <div class="col-md-6">
-            <label class="form-label">Válido até</label>
+            <label class="form-label">{{ t('cliente.cotacoes_valid_until') }}</label>
             <input v-model="form.valid_until" type="date" class="form-control">
           </div>
           <div class="col-md-6">
-            <label class="form-label">Referência</label>
-            <input :value="form.reference || 'Gerada automaticamente'" type="text" class="form-control" disabled>
+            <label class="form-label">{{ t('cliente.cotacoes_reference_label') }}</label>
+            <input :value="form.reference || t('cliente.cotacoes_auto_ref')" type="text" class="form-control" disabled>
           </div>
           <div class="col-12">
-            <label class="form-label">Descrição</label>
+            <label class="form-label">{{ t('cliente.cotacoes_description') }}</label>
             <textarea v-model="form.description" rows="3" class="form-control"></textarea>
           </div>
           <div class="col-12">
-            <label class="form-label">Notas</label>
+            <label class="form-label">{{ t('cliente.cotacoes_notes') }}</label>
             <textarea v-model="form.notes" rows="2" class="form-control"></textarea>
           </div>
         </div>
       </div>
       <div class="card-footer">
-        <router-link to="/cotacoes" class="btn btn-outline-secondary">Cancelar</router-link>
+        <router-link to="/cotacoes" class="btn btn-outline-secondary">{{ t('cliente.cotacoes_cancel') }}</router-link>
         <button type="submit" class="btn btn-primary" :disabled="saving">
           <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
-          {{ isEdit ? 'Atualizar' : 'Criar cotação' }}
+          {{ isEdit ? t('cliente.cotacoes_update') : t('cliente.cotacoes_create') }}
         </button>
       </div>
     </form>
@@ -93,10 +93,12 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from '@/composables/useI18n'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 const isEdit = computed(() => !!route.params.id)
 const form = reactive({ reference: '', origin: '', destination: '', type: 'maritimo', status: 'pendente', weight: 0, estimated_value: 0, currency: 'AOA', valid_until: '', description: '', notes: '' })
@@ -110,7 +112,7 @@ onMounted(async () => {
       const { data, error } = await supabase.from('cotacoes').select('*').eq('id', route.params.id).single()
       if (error) throw error
       if (data) Object.assign(form, data)
-    } catch (e) { errorMessage.value = 'Erro ao carregar' }
+    } catch (e) { errorMessage.value = t('cliente.cotacoes_error_loading') }
   }
 })
 
@@ -129,7 +131,7 @@ const handleSubmit = async () => {
     }
     router.push('/cotacoes')
   } catch (error) {
-    errorMessage.value = error.message || 'Erro ao guardar'
+    errorMessage.value = error.message || t('cliente.cotacoes_error_saving')
   } finally { saving.value = false }
 }
 </script>

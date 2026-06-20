@@ -1,32 +1,32 @@
 <template>
   <div class="admin-page p-4 p-md-5">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-      <h2 class="mb-0">Parceiros</h2>
-      <button class="btn btn-primary" @click="openCreateModal">+ Novo Parceiro</button>
+      <h2 class="mb-0">{{ t('admin.partners_title') }}</h2>
+      <button class="btn btn-primary" @click="openCreateModal">+ {{ t('admin.partners_new') }}</button>
     </div>
 
     <div class="card">
       <div class="card-body p-0">
         <div v-if="loading" class="text-center py-5">
           <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Carregando...</span>
+            <span class="visually-hidden">{{ t('admin.partners_loading') }}</span>
           </div>
         </div>
 
         <div v-else-if="partners.length === 0" class="text-center py-5 text-muted">
-          Nenhum parceiro encontrado.
+          {{ t('admin.partners_empty') }}
         </div>
 
         <div v-else class="table-responsive">
         <table class="table table-hover mb-0">
           <thead class="table-light">
             <tr>
-              <th>Logo</th>
-              <th>Nome</th>
-              <th>Website</th>
-              <th>Status</th>
-              <th>Ordem</th>
-              <th class="text-end">Ações</th>
+              <th>{{ t('admin.partners_logo') }}</th>
+              <th>{{ t('admin.partners_name') }}</th>
+                <th>{{ t('admin.partners_website') }}</th>
+              <th>{{ t('admin.partners_status') }}</th>
+                <th>{{ t('admin.partners_order') }}</th>
+              <th class="text-end">{{ t('admin.partners_actions') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -38,7 +38,7 @@
                   :alt="partner.name"
                   class="partner-thumb"
                 />
-                <span v-else class="text-muted">Sem logo</span>
+                <span v-else class="text-muted">{{ t('admin.partners_no_logo') }}</span>
               </td>
               <td class="align-middle">{{ partner.name }}</td>
               <td class="align-middle">
@@ -56,7 +56,7 @@
                 <span
                   :class="partner.status ? 'badge bg-success' : 'badge bg-secondary'"
                 >
-                  {{ partner.status ? 'Ativo' : 'Inativo' }}
+                  {{ partner.status ? t('admin.partners_active') : t('admin.partners_inactive') }}
                 </span>
               </td>
               <td class="align-middle">{{ partner.order_by }}</td>
@@ -65,13 +65,13 @@
                   class="btn btn-sm btn-outline-primary me-2"
                   @click="openEditModal(partner)"
                 >
-                  Editar
+                  {{ t('admin.partners_edit') }}
                 </button>
                 <button
                   class="btn btn-sm btn-outline-danger"
                   @click="confirmDelete(partner)"
                 >
-                  Deletar
+                  {{ t('admin.partners_delete') }}
                 </button>
               </td>
             </tr>
@@ -92,7 +92,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">
-              {{ editing ? 'Editar Parceiro' : 'Novo Parceiro' }}
+                  {{ editing ? t('admin.partners_title') : t('admin.partners_new') }}
             </h5>
             <button
               type="button"
@@ -104,7 +104,7 @@
           <div class="modal-body">
             <form @submit.prevent="submitForm">
               <div class="mb-3">
-                <label for="partnerName" class="form-label">Nome *</label>
+                <label for="partnerName" class="form-label">{{ t('admin.partners_name_label') }} *</label>
                 <input
                   id="partnerName"
                   v-model="form.name"
@@ -115,7 +115,7 @@
               </div>
 
               <div class="mb-3">
-                <label for="partnerWebsite" class="form-label">Website</label>
+                <label for="partnerWebsite" class="form-label">{{ t('admin.partners_website_label') }}</label>
                 <input
                   id="partnerWebsite"
                   v-model="form.website"
@@ -126,7 +126,7 @@
               </div>
 
               <div class="mb-3">
-                <label for="partnerDescription" class="form-label">Descrição</label>
+                <label for="partnerDescription" class="form-label">{{ t('admin.partners_description') }}</label>
                 <textarea
                   id="partnerDescription"
                   v-model="form.description"
@@ -156,7 +156,7 @@
 
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label for="partnerOrder" class="form-label">Ordem</label>
+                  <label for="partnerOrder" class="form-label">{{ t('admin.partners_order') }}</label>
                   <input
                     id="partnerOrder"
                     v-model.number="form.order_by"
@@ -166,7 +166,7 @@
                   />
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Status</label>
+                  <label class="form-label">{{ t('admin.partners_status_label') }}</label>
                   <div class="form-check form-switch mt-2">
                     <input
                       id="partnerStatus"
@@ -175,7 +175,7 @@
                       type="checkbox"
                     />
                     <label class="form-check-label" for="partnerStatus">
-                      {{ form.status ? 'Ativo' : 'Inativo' }}
+                      {{ form.status ? t('admin.partners_active') : t('admin.partners_inactive') }}
                     </label>
                   </div>
                 </div>
@@ -188,7 +188,7 @@
               class="btn btn-secondary"
               data-bs-dismiss="modal"
             >
-              Cancelar
+              {{ t('admin.partners_cancel') }}
             </button>
             <button
               type="button"
@@ -200,7 +200,7 @@
                 v-if="submitting"
                 class="spinner-border spinner-border-sm me-1"
               ></span>
-              {{ editing ? 'Salvar' : 'Criar' }}
+              {{ editing ? t('admin.partners_save') : t('admin.partners_create') }}
             </button>
           </div>
         </div>
@@ -217,7 +217,7 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Confirmar Exclusão</h5>
+            <h5 class="modal-title">{{ t('common.confirm') }}</h5>
             <button
               type="button"
               class="btn-close"
@@ -226,7 +226,7 @@
             ></button>
           </div>
           <div class="modal-body">
-            Tem certeza que deseja deletar o parceiro
+            {{ t('admin.partners_confirm_delete') }}
             <strong>{{ partnerToDelete?.name }}</strong>?
           </div>
           <div class="modal-footer">
@@ -235,7 +235,7 @@
               class="btn btn-secondary"
               data-bs-dismiss="modal"
             >
-              Cancelar
+              {{ t('admin.partners_cancel') }}
             </button>
             <button
               type="button"
@@ -247,7 +247,7 @@
                 v-if="deleting"
                 class="spinner-border spinner-border-sm me-1"
               ></span>
-              Deletar
+              {{ t('admin.partners_delete') }}
             </button>
           </div>
         </div>
@@ -260,6 +260,9 @@
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const partners = ref([])
 const loading = ref(false)
@@ -283,7 +286,7 @@ const form = reactive({
   logo: '',
   website: '',
   description: '',
-  status: true,
+  status: 1,
   order_by: 0,
 })
 
@@ -294,7 +297,7 @@ async function fetchPartners() {
     if (!error) partners.value = data
   } catch (err) {
     console.error('Erro ao buscar parceiros:', err)
-    alert('Erro ao carregar parceiros.')
+    alert(t('admin.partners_error_loading'))
   } finally {
     loading.value = false
   }
@@ -305,7 +308,7 @@ function resetForm() {
   form.logo = ''
   form.website = ''
   form.description = ''
-  form.status = true
+  form.status = 1
   form.order_by = 0
   imageFile.value = null
   imagePreview.value = null
@@ -325,7 +328,7 @@ function openEditModal(partner) {
   form.logo = partner.logo || ''
   form.website = partner.website || ''
   form.description = partner.description || ''
-  form.status = partner.status ?? true
+  form.status = partner.status ?? 1
   form.order_by = partner.order_by || 0
   imageFile.value = null
   imagePreview.value = null
@@ -356,7 +359,7 @@ async function uploadImage() {
 
 async function submitForm() {
   if (!form.name.trim()) {
-    alert('O nome é obrigatório.')
+    alert(t('admin.partners_name_required'))
     return
   }
   submitting.value = true
@@ -370,7 +373,7 @@ async function submitForm() {
       logo: logoPath,
       website: form.website,
       description: form.description,
-      status: form.status,
+      status: form.status ? 1 : 0,
       order_by: form.order_by,
     }
     if (editing.value) {
@@ -384,7 +387,7 @@ async function submitForm() {
     await fetchPartners()
   } catch (err) {
     console.error('Erro ao salvar parceiro:', err)
-    alert('Erro ao salvar parceiro:\n' + (err?.message || err?.error?.message || JSON.stringify(err)))
+    alert(t('admin.partners_error_saving') + '\n' + (err?.message || err?.error?.message || JSON.stringify(err)))
   } finally {
     submitting.value = false
   }
@@ -405,7 +408,7 @@ async function deletePartner() {
     await fetchPartners()
   } catch (err) {
     console.error('Erro ao deletar parceiro:', err)
-    alert('Erro ao deletar parceiro. Tente novamente.')
+    alert(t('admin.partners_error_deleting'))
   } finally {
     deleting.value = false
   }

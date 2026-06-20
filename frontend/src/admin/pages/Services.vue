@@ -2,11 +2,11 @@
   <div class="admin-page p-4 p-md-5">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
       <div>
-        <h1 class="page-title"><i class="bi bi-gear-wide-connected me-2"></i>Serviços</h1>
-        <p class="text-muted mb-0">Gere os serviços apresentados no site.</p>
+        <h1 class="page-title"><i class="bi bi-gear-wide-connected me-2"></i>{{ t('admin.services_title') }}</h1>
+        <p class="text-muted mb-0">{{ t('admin.services_description_text') }}</p>
       </div>
       <button class="btn btn-primary" @click="openForm()">
-        <i class="bi bi-plus-lg me-1"></i> Novo Serviço
+          <i class="bi bi-plus-lg me-1"></i> {{ t('admin.services_new') }}
       </button>
     </div>
 
@@ -17,10 +17,10 @@
     <div v-else-if="items.length === 0" class="card empty-card">
       <div class="card-body text-center py-5">
         <i class="bi bi-gear" style="font-size: 3rem; color: #0f766e;"></i>
-        <h5 class="mt-3">Sem serviços</h5>
-        <p class="text-muted mb-3">Adicione o primeiro serviço para começar.</p>
+        <h5 class="mt-3">{{ t('admin.services_empty') }}</h5>
+        <p class="text-muted mb-3">{{ t('admin.services_add_first') }}</p>
         <button class="btn btn-primary" @click="openForm()">
-          <i class="bi bi-plus-lg me-1"></i> Criar serviço
+          <i class="bi bi-plus-lg me-1"></i> {{ t('admin.services_create_service') }}
         </button>
       </div>
     </div>
@@ -31,12 +31,12 @@
           <table class="table table-hover mb-0 align-middle">
             <thead>
               <tr>
-                <th>Imagem</th>
-                <th>Título</th>
+                <th>{{ t('admin.services_image') }}</th>
+                <th>{{ t('admin.services_title_col') }}</th>
                 <th>Slug</th>
-                <th>Estado</th>
-                <th>Ordem</th>
-                <th class="text-end">Ações</th>
+                <th>{{ t('admin.services_status') }}</th>
+                <th>{{ t('admin.services_order') }}</th>
+                <th class="text-end">{{ t('admin.services_actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -53,19 +53,19 @@
                 <td><code>{{ s.slug }}</code></td>
                 <td>
                   <span v-if="s.status == 1" class="badge bg-success">
-                    <i class="bi bi-check-circle me-1"></i>Ativo
+                    <i class="bi bi-check-circle me-1"></i>{{ t('admin.services_active') }}
                   </span>
                   <span v-else class="badge bg-secondary">
-                    <i class="bi bi-slash-circle me-1"></i>Inativo
+                    <i class="bi bi-slash-circle me-1"></i>{{ t('admin.services_inactive') }}
                   </span>
                 </td>
                 <td>{{ s.order_by ?? 0 }}</td>
                 <td class="text-end">
                   <div class="action-buttons">
-                    <button class="btn btn-sm btn-outline-secondary" @click="openForm(s)" title="Editar">
+                    <button class="btn btn-sm btn-outline-secondary" @click="openForm(s)" :title="t('common.edit')">
                       <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(s)" title="Eliminar">
+                    <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(s)" :title="t('common.delete')">
                       <i class="bi bi-trash"></i>
                     </button>
                   </div>
@@ -82,7 +82,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">
-              <i class="bi bi-gear-wide-connected me-2"></i>{{ editing ? 'Editar serviço' : 'Novo serviço' }}
+              <i class="bi bi-gear-wide-connected me-2"></i>{{ editing ? t('admin.services_edit_service') : t('admin.services_new_service') }}
             </h5>
             <button type="button" class="btn-close" @click="closeForm"></button>
           </div>
@@ -91,7 +91,7 @@
               <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
               <div class="row g-3">
                 <div class="col-md-8">
-                  <label class="form-label">Título *</label>
+                  <label class="form-label">{{ t('admin.services_title_label') }} *</label>
                   <input v-model="form.title" type="text" class="form-control" required
                     @input="autoSlug">
                 </div>
@@ -100,47 +100,47 @@
                   <input v-model="form.slug" type="text" class="form-control" required>
                 </div>
                 <div class="col-12">
-                  <label class="form-label">Descrição curta</label>
+                  <label class="form-label">{{ t('admin.services_short_description') }}</label>
                   <input v-model="form.description" type="text" class="form-control"
-                    placeholder="Breve descrição do serviço">
+                    :placeholder="t('admin.services_desc_placeholder')">
                 </div>
                 <div class="col-12">
-                  <label class="form-label">Conteúdo</label>
+                  <label class="form-label">{{ t('admin.services_content') }}</label>
                   <textarea v-model="form.content" class="form-control" rows="5"
-                    placeholder="Descrição detalhada do serviço"></textarea>
+                    :placeholder="t('admin.services_content_placeholder')"></textarea>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Imagem</label>
+                  <label class="form-label">{{ t('admin.services_image') }}</label>
                   <input type="file" class="form-control" accept="image/*" @change="onFileChange" ref="fileInput">
                   <div v-if="form.image" class="mt-2 position-relative d-inline-block">
                     <img :src="form.image" class="img-thumbnail preview-img" alt="Preview">
                     <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0"
-                      @click="removeImage" title="Remover imagem">
+                      @click="removeImage" :title="t('admin.services_remove_image')">
                       <i class="bi bi-x"></i>
                     </button>
                   </div>
                 </div>
                 <div class="col-md-3">
-                  <label class="form-label">Ordem</label>
+                  <label class="form-label">{{ t('admin.services_order') }}</label>
                   <input v-model.number="form.order_by" type="number" class="form-control" min="0">
                 </div>
                 <div class="col-md-3">
-                  <label class="form-label">Estado</label>
+                  <label class="form-label">{{ t('admin.services_status_label') }}</label>
                   <div class="form-check form-switch mt-2">
                     <input class="form-check-input" type="checkbox" id="statusToggle"
                       :checked="form.status == 1" @change="form.status = $event.target.checked ? 1 : 0">
                     <label class="form-check-label" for="statusToggle">
-                      {{ form.status == 1 ? 'Ativo' : 'Inativo' }}
+                      {{ form.status == 1 ? t('admin.services_active') : t('admin.services_inactive') }}
                     </label>
                   </div>
                 </div>
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-outline-secondary" @click="closeForm">Cancelar</button>
+              <button type="button" class="btn btn-outline-secondary" @click="closeForm">{{ t('common.cancel') }}</button>
               <button type="submit" class="btn btn-primary" :disabled="saving">
                 <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
-                {{ editing ? 'Atualizar' : 'Criar serviço' }}
+                {{ editing ? t('common.edit') : t('admin.services_new') }}
               </button>
             </div>
           </form>
@@ -154,6 +154,9 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const items = ref([])
 const loading = ref(false)
@@ -253,7 +256,7 @@ const uploadImage = async (file) => {
 const handleSubmit = async () => {
   errorMessage.value = ''
   if (!form.title.trim()) {
-    errorMessage.value = 'O título é obrigatório.'
+    errorMessage.value = t('admin.services_title_required')
     return
   }
   saving.value = true
@@ -281,20 +284,20 @@ const handleSubmit = async () => {
     closeForm()
     await fetchList()
   } catch (e) {
-    errorMessage.value = e.message || 'Erro ao guardar.'
+    errorMessage.value = e.message || t('admin.services_error_saving')
   } finally {
     saving.value = false
   }
 }
 
 const confirmDelete = async (item) => {
-  if (!confirm(`Eliminar o serviço "${item.title}"? Esta acção é irreversível.`)) return
+  if (!confirm(t('admin.services_confirm_delete') + ' "' + item.title + '"? ' + t('admin.services_confirm_delete_text'))) return
   try {
     const { error } = await supabase.from('services').delete().eq('id', item.id)
     if (error) throw error
     await fetchList()
   } catch (e) {
-    alert(e.message || 'Erro ao eliminar')
+    alert(e.message || t('admin.services_error_deleting'))
   }
 }
 

@@ -1,64 +1,80 @@
 <template>
-  <nav class="funcionario-navbar">
-    <div class="navbar-content">
-      <div class="d-flex align-items-center gap-3">
-        <button class="btn btn-sm btn-outline-secondary d-md-none" @click="$emit('toggle-sidebar')">
-          <i class="bi bi-list"></i>
-        </button>
-        <h2 class="page-title">{{ pageTitle }}</h2>
-      </div>
-      <div class="navbar-center d-none d-md-block">
-        <div class="search-bar">
-          <i class="bi bi-search search-icon"></i>
-          <input
-            type="text"
-            class="search-input"
-            placeholder="Pesquisar..."
-            v-model="searchQuery"
-            @keyup.enter="handleSearch"
-          />
-        </div>
-      </div>
-      <div class="navbar-actions">
-        <NotificationBell />
+  <header class="funcionario-navbar">
+    <div class="navbar-left">
+      <button class="hamburger-btn" @click="$emit('toggle-sidebar')">
+        <i class="bi bi-list"></i>
+      </button>
+      <h1 class="page-title">{{ pageTitle }}</h1>
+    </div>
 
-        <button class="nav-action-btn" @click="toggleLocale" :title="locale === 'pt' ? 'English' : 'Português'">
-          <span class="lang-flag">{{ locale === 'pt' ? '🇦🇴' : '🇬🇧' }}</span>
-        </button>
-
-        <button class="nav-action-btn" @click="themeStore.cycleTheme()" :title="themeStore.themeLabel()">
-          <i :class="['bi', themeStore.themeIcon()]"></i>
-        </button>
-
-        <div class="user-dropdown d-flex align-items-center gap-2">
-          <div class="user-avatar">
-            <img v-if="authStore.user?.photo" :src="authStore.user.photo" :alt="authStore.user.name">
-            <span v-else>{{ initials(authStore.user?.name) }}</span>
-          </div>
-          <button class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
-            <span class="d-none d-md-inline">{{ authStore.user?.name || 'Funcionário' }}</span>
-            <span class="d-md-none">Menu</span>
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end">
-            <li><router-link to="/funcionario/perfil" class="dropdown-item">
-              <i class="bi bi-person-fill me-1"></i> {{ t('sidebar.profile') }}
-            </router-link></li>
-            <li><router-link to="/mudar-senha" class="dropdown-item">
-              <i class="bi bi-shield-lock me-1"></i> {{ t('sidebar.change_password') }}
-            </router-link></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a href="#" class="dropdown-item" @click.prevent="logout">
-              <i class="bi bi-box-arrow-right me-1"></i> {{ t('sidebar.logout') }}
-            </a></li>
-          </ul>
+    <div class="navbar-center">
+      <div class="search-box" :class="{ focused: searchFocused }">
+        <i class="bi bi-search search-icon"></i>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Pesquisar..."
+          v-model="searchQuery"
+          @focus="searchFocused = true"
+          @blur="handleSearchBlur"
+          @input="handleSearch"
+        >
+        <div v-if="showResults && filteredPages.length" class="search-dropdown">
+          <router-link
+            v-for="page in filteredPages"
+            :key="page.route"
+            :to="page.route"
+            class="search-result"
+            @click="clearSearch"
+          >
+            <i :class="page.icon" class="result-icon"></i>
+            <span>{{ page.label }}</span>
+          </router-link>
         </div>
       </div>
     </div>
-  </nav>
+
+    <div class="navbar-right">
+      <button class="nav-icon-btn" @click="cycleLocale" :title="locale === 'pt' ? 'English' : locale === 'en' ? 'Français' : 'Português'">
+        <span class="lang-flag">{{ locale === 'pt' ? '🇦🇴' : locale === 'en' ? '🇬🇧' : '🇫🇷' }}</span>
+      </button>
+      <button class="nav-icon-btn" @click="themeStore.cycleTheme()" :title="themeStore.themeLabel()">
+        <i :class="['bi', themeStore.themeIcon()]"></i>
+      </button>
+      <NotificationBell />
+      <div class="user-section" @click="toggleDropdown" ref="dropdownRef">
+        <div class="user-avatar-sm">{{ userInitials }}</div>
+        <span class="user-name-sm">{{ authStore.user?.name || 'Funcionário' }}</span>
+        <i class="bi bi-chevron-down chevron"></i>
+        <Transition name="dropdown">
+          <div v-if="showDropdown" class="user-dropdown">
+            <div class="dropdown-header">
+              <div class="dropdown-avatar">{{ userInitials }}</div>
+              <div>
+                <div class="dropdown-name">{{ authStore.user?.name }}</div>
+                <div class="dropdown-role">{{ authStore.user?.position || 'Funcionário' }}</div>
+              </div>
+            </div>
+            <div class="dropdown-divider"></div>
+            <router-link to="/funcionario/perfil" class="dropdown-item" @click="showDropdown = false">
+              <i class="bi bi-person"></i> Perfil
+            </router-link>
+            <router-link to="/mudar-senha" class="dropdown-item" @click="showDropdown = false">
+              <i class="bi bi-shield-lock"></i> Alterar Senha
+            </router-link>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item danger" @click="handleLogout">
+              <i class="bi bi-box-arrow-right"></i> Sair
+            </button>
+          </div>
+        </Transition>
+      </div>
+    </div>
+  </header>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
@@ -71,123 +87,436 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
-const { t, locale, toggleLocale } = useI18n()
+const { t, locale, cycleLocale } = useI18n()
 
 const searchQuery = ref('')
+const searchFocused = ref(false)
+const showDropdown = ref(false)
+const showResults = ref(false)
+const dropdownRef = ref(null)
 
-const searchPages = [
-  { keyword: 'embarque', route: '/funcionario/embarques', label: 'Embarques' },
-  { keyword: 'cotação', route: '/funcionario/cotacoes', label: 'Cotações' },
-  { keyword: 'cotacao', route: '/funcionario/cotacoes', label: 'Cotações' },
-  { keyword: 'documento', route: '/funcionario/documentos', label: 'Documentos' },
-  { keyword: 'contacto', route: '/funcionario/contactos', label: 'Contactos' },
-  { keyword: 'cliente', route: '/funcionario/clientes', label: 'Clientes' },
-  { keyword: 'mensagem', route: '/funcionario/mensagens', label: 'Mensagens' },
-  { keyword: 'chat', route: '/funcionario/mensagens', label: 'Mensagens' },
-  { keyword: 'perfil', route: '/funcionario/perfil', label: 'Perfil' },
-]
-
-const handleSearch = () => {
-  const q = searchQuery.value.trim().toLowerCase()
-  if (!q) return
-  const match = searchPages.find(p => q.includes(p.keyword))
-  if (match) {
-    router.push(match.route)
-    searchQuery.value = ''
-  }
-}
-
-const pageTitle = computed(() => {
-  const titles = {
-    'FuncionarioDashboard': t('sidebar.dashboard'),
-    'FuncionarioMessages': t('sidebar.messages'),
-    'FuncionarioProfile': t('sidebar.profile'),
-    'FuncionarioEmbarques': t('dashboard.shipments'),
-    'FuncionarioCotacoes': t('dashboard.quotes'),
-    'FuncionarioDocumentos': t('dashboard.documents'),
-    'FuncionarioContactos': t('dashboard.contacts'),
-    'FuncionarioClientes': t('sidebar.clients_section'),
-  }
-  return titles[route.name] || 'Funcionário'
+const userInitials = computed(() => {
+  const name = authStore.user?.name || 'F'
+  return name.split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()
 })
 
-const logout = () => {
+const pageTitle = computed(() => {
+  const map = {
+    'FuncionarioDashboard': 'Dashboard',
+    'FuncionarioMessages': 'Mensagens',
+    'FuncionarioProfile': 'Perfil',
+    'FuncionarioEmbarques': 'Embarques',
+    'FuncionarioCotacoes': 'Cotações',
+    'FuncionarioDocumentos': 'Documentos',
+    'FuncionarioContactos': 'Contactos',
+    'FuncionarioClientes': 'Clientes',
+  }
+  return map[route.name] || 'Funcionário'
+})
+
+const searchPages = [
+  { label: 'Dashboard', route: '/funcionario', icon: 'bi bi-grid-1x2-fill', keywords: ['dashboard', 'inicio'] },
+  { label: 'Mensagens', route: '/funcionario/mensagens', icon: 'bi bi-chat-dots-fill', keywords: ['mensagens', 'chat'] },
+  { label: 'Clientes', route: '/funcionario/clientes', icon: 'bi bi-people-fill', keywords: ['clientes'] },
+  { label: 'Embarques', route: '/funcionario/embarques', icon: 'bi bi-box-seam-fill', keywords: ['embarques', 'shipments'] },
+  { label: 'Cotações', route: '/funcionario/cotacoes', icon: 'bi bi-receipt-cutoff', keywords: ['cotacoes', 'quotes'] },
+  { label: 'Documentos', route: '/funcionario/documentos', icon: 'bi bi-file-earmark-text-fill', keywords: ['documentos', 'docs'] },
+  { label: 'Contactos', route: '/funcionario/contactos', icon: 'bi bi-person-lines-fill', keywords: ['contactos'] },
+  { label: 'Perfil', route: '/funcionario/perfil', icon: 'bi bi-person', keywords: ['perfil'] },
+]
+
+const filteredPages = computed(() => {
+  if (!searchQuery.value) return []
+  const q = searchQuery.value.toLowerCase()
+  return searchPages.filter(p =>
+    p.label.toLowerCase().includes(q) ||
+    p.keywords.some(k => k.includes(q))
+  ).slice(0, 8)
+})
+
+const handleSearch = () => {
+  showResults.value = searchQuery.value.length > 0
+}
+
+const handleSearchBlur = () => {
+  setTimeout(() => {
+    searchFocused.value = false
+    showResults.value = false
+  }, 200)
+}
+
+const clearSearch = () => {
+  searchQuery.value = ''
+  showResults.value = false
+}
+
+const toggleDropdown = (e) => {
+  e.stopPropagation()
+  showDropdown.value = !showDropdown.value
+}
+
+const handleLogout = () => {
+  showDropdown.value = false
   authStore.logout()
   router.push('/login')
 }
 
-const initials = (n) => (n || '?').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()
+const handleClickOutside = (e) => {
+  if (dropdownRef.value && !dropdownRef.value.contains(e.target)) {
+    showDropdown.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>
 
 <style scoped>
 .funcionario-navbar {
-  background: var(--navbar-bg);
-  border-bottom: 1px solid var(--navbar-border);
-  padding: 1rem 1.5rem;
   position: sticky;
   top: 0;
   z-index: 100;
-  margin-left: 250px;
-  transition: background 0.3s ease, border-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  padding: 0 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #e4e6eb;
+  gap: 12px;
 }
-.navbar-content { display: flex; justify-content: space-between; align-items: center; }
-.page-title { font-size: 1.4rem; margin: 0; color: var(--navbar-text); font-weight: 700; }
-.navbar-center { flex: 1; max-width: 400px; margin: 0 1.5rem; }
-.search-bar { position: relative; }
-.search-icon { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.85rem; }
-.search-input {
-  width: 100%;
-  padding: 0.5rem 0.75rem 0.5rem 2.25rem;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  outline: none;
-  background: var(--navbar-bg);
-  color: var(--navbar-text);
-  transition: border-color 0.2s;
-}
-.search-input:focus { border-color: #1877f2; }
-.navbar-actions { display: flex; gap: 0.5rem; align-items: center; }
 
-.nav-action-btn {
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.hamburger-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: 12px;
-  border: 1px solid var(--card-border);
-  background: var(--card-bg);
-  color: var(--text-primary);
+  border: none;
+  border-radius: 50%;
+  background: #f0f2f5;
+  color: #050505;
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.hamburger-btn:hover {
+  background: #e4e6eb;
+}
+
+.page-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #050505;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.navbar-center {
+  flex: 1;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #f0f2f5;
+  border-radius: 50px;
+  padding: 0 14px;
+  height: 40px;
+  transition: all 0.2s;
+}
+
+.search-box.focused {
+  background: #fff;
+  box-shadow: 0 0 0 2px #1877f2;
+}
+
+.search-icon {
+  color: #65676b;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 0 10px;
+  font-size: 0.938rem;
+  color: #050505;
+}
+
+.search-input::placeholder {
+  color: #65676b;
+}
+
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  padding: 6px;
+  z-index: 200;
+}
+
+.search-result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: #050505;
+  text-decoration: none;
+  font-size: 0.938rem;
+  transition: background 0.15s;
+}
+
+.search-result:hover {
+  background: #f0f2f5;
+  color: #050505;
+  text-decoration: none;
+}
+
+.result-icon {
+  color: #1877f2;
+  font-size: 1.1rem;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.nav-icon-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: #f0f2f5;
+  color: #050505;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.2s;
   font-size: 1.1rem;
 }
-.nav-action-btn:hover {
-  background: var(--accent-light);
-  border-color: var(--accent);
-  color: var(--accent);
-  transform: translateY(-1px);
+
+.nav-icon-btn:hover {
+  background: #e4e6eb;
 }
 
 .lang-flag {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   line-height: 1;
 }
 
-.user-avatar {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  background: var(--sidebar-avatar-bg);
-  color: white;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.8rem; font-weight: 700;
-  overflow: hidden;
-  flex-shrink: 0;
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px 4px 4px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background 0.2s;
+  position: relative;
 }
-.user-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-@media (max-width: 768px) {
-  .funcionario-navbar { margin-left: 0; padding: 0.75rem 1rem; }
+.user-section:hover {
+  background: #f0f2f5;
+}
+
+.user-avatar-sm {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1877f2, #0a5dc2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.user-name-sm {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #050505;
+}
+
+.chevron {
+  font-size: 0.7rem;
+  color: #65676b;
+  transition: transform 0.2s;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 280px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2);
+  padding: 8px;
+  z-index: 300;
+}
+
+.dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.dropdown-header:hover {
+  background: #f0f2f5;
+}
+
+.dropdown-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1877f2, #0a5dc2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.dropdown-name {
+  font-size: 0.938rem;
+  font-weight: 600;
+  color: #050505;
+}
+
+.dropdown-role {
+  font-size: 0.8rem;
+  color: #65676b;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: #e4e6eb;
+  margin: 4px 0;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: #050505;
+  text-decoration: none;
+  font-size: 0.938rem;
+  font-weight: 500;
+  border: none;
+  background: none;
+  width: 100%;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.dropdown-item:hover {
+  background: #f0f2f5;
+  color: #050505;
+  text-decoration: none;
+}
+
+.dropdown-item.danger {
+  color: #dc3545;
+}
+
+.dropdown-item.danger:hover {
+  background: #fee2e2;
+  color: #dc3545;
+}
+
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: all 0.2s ease;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.96);
+}
+
+@media (max-width: 767px) {
+  .hamburger-btn {
+    display: flex;
+  }
+
+  .page-title {
+    font-size: 1rem;
+  }
+
+  .navbar-center {
+    display: none;
+  }
+
+  .user-name-sm {
+    display: none;
+  }
+
+  .chevron {
+    display: none;
+  }
+
+  .nav-icon-btn:not(:first-child) {
+    display: none;
+  }
+
+  .user-dropdown {
+    right: -8px;
+    width: calc(100vw - 16px);
+    max-width: 300px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .page-title {
+    font-size: 1rem;
+  }
+
+  .navbar-center {
+    max-width: 280px;
+  }
+
+  .user-name-sm {
+    display: none;
+  }
+
+  .chevron {
+    display: none;
+  }
 }
 </style>

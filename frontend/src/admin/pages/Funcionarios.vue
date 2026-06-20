@@ -2,7 +2,7 @@
   <div class="admin-page p-4 p-md-5">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
       <div>
-        <h1 class="page-title"><i class="bi bi-person-badge-fill me-2"></i>Funcionários</h1>
+        <h1 class="page-title"><i class="bi bi-person-badge-fill me-2"></i>{{ t('admin.employees_title') }}</h1>
         <p class="text-muted mb-0">Gere as contas dos teus funcionários e define as suas permissões.</p>
       </div>
       <button class="btn btn-primary" @click="openForm()">
@@ -14,10 +14,10 @@
     <div v-else-if="items.length === 0" class="card empty-card">
       <div class="card-body text-center py-5">
         <i class="bi bi-person-badge" style="font-size: 3rem; color: #0f766e;"></i>
-        <h5 class="mt-3">Sem funcionários</h5>
+        <h5 class="mt-3">{{ t('admin.employees_empty') }}</h5>
         <p class="text-muted mb-3">Cria a primeira conta de funcionário para começar.</p>
         <button class="btn btn-primary" @click="openForm()">
-          <i class="bi bi-plus-lg me-1"></i> Criar funcionário
+          <i class="bi bi-plus-lg me-1"></i> {{ t('admin.employees_new') }}
         </button>
       </div>
     </div>
@@ -28,11 +28,11 @@
             <thead>
               <tr>
                 <th>Funcionário</th>
-                <th>Cargo</th>
+                <th>{{ t('admin.employees_position') }}</th>
                 <th>Email</th>
-                <th>Estado</th>
-                <th>Permissões</th>
-                <th>Último login</th>
+                <th>{{ t('admin.services_status') }}</th>
+                <th>{{ t('admin.employees_permissions') }}</th>
+                <th>{{ t('admin.last_login') }}</th>
                 <th class="text-end">Ações</th>
               </tr>
             </thead>
@@ -151,10 +151,10 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-outline-secondary" @click="closeForm">Cancelar</button>
+              <button type="button" class="btn btn-outline-secondary" @click="closeForm">{{ t('common.cancel') }}</button>
               <button type="submit" class="btn btn-primary" :disabled="saving">
                 <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
-                {{ editing ? 'Atualizar' : 'Criar funcionário' }}
+                {{ editing ? t('common.edit') : t('admin.employees_new') }}
               </button>
             </div>
           </form>
@@ -176,11 +176,10 @@
             <div class="modal-body">
               <div v-if="lockError" class="alert alert-danger">{{ lockError }}</div>
               <p class="text-muted small">
-                Bloquear <strong>{{ lockTarget.name }}</strong> ({{ lockTarget.email }}) impedirá o
-                acesso ao painel durante o período definido.
+                {{ t('admin.lock_title') }} <strong>{{ lockTarget.name }}</strong> ({{ lockTarget.email }}) {{ t('admin.lock_will_prevent') }}
               </p>
               <div class="mb-3">
-                <label class="form-label">Duração do bloqueio</label>
+                <label class="form-label">{{ t('admin.lock_duration') }}</label>
                 <select v-model.number="lockForm.duration_hours" class="form-select">
                   <option :value="1">1 hora</option>
                   <option :value="6">6 horas</option>
@@ -192,15 +191,15 @@
               </div>
               <div class="mb-3">
                 <label class="form-label">Motivo</label>
-                <textarea v-model="lockForm.reason" class="form-control" rows="3" required placeholder="Ex: Atividade suspeita, solicitação do utilizador, etc."></textarea>
+                <textarea v-model="lockForm.reason" class="form-control" rows="3" :placeholder="t('admin.lock_reason_placeholder')"></textarea>
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-outline-secondary" @click="closeLockModal">Cancelar</button>
+              <button type="button" class="btn btn-outline-secondary" @click="closeLockModal">{{ t('common.cancel') }}</button>
               <button type="submit" class="btn btn-warning" :disabled="locking">
                 <span v-if="locking" class="spinner-border spinner-border-sm me-2"></span>
                 <i v-else class="bi bi-lock-fill me-1"></i>
-                Bloquear
+                {{ t('admin.lock_title') }}
               </button>
             </div>
           </form>
@@ -214,6 +213,9 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const items = ref([])
 const allPermissions = ref([])
@@ -289,7 +291,7 @@ const submitLock = async () => {
   const { error } = await supabase.from('users').update({ locked_at: lockUntil, locked_reason: lockForm.reason.trim() }).eq('id', lockTarget.value.id)
   locking.value = false
   if (error) {
-    lockError.value = error.message || 'Erro ao bloquear.'
+    lockError.value = error.message || t('admin.lock_error')
     return
   }
   closeLockModal()
@@ -299,7 +301,7 @@ const unlockUser = async (u) => {
   if (!confirm(`Desbloquear o funcionário "${u.name}"?`)) return
   const { error } = await supabase.from('users').update({ locked_at: null, locked_reason: null }).eq('id', u.id)
   if (error) {
-    alert(error.message || 'Erro ao desbloquear.')
+    alert(error.message || t('admin.unlock_error'))
     return
   }
   await fetchList()
@@ -345,11 +347,11 @@ const closeForm = () => { showForm.value = false; editing.value = null }
 const handleSubmit = async () => {
   errorMessage.value = ''
   if (!editing.value && form.permissions.length === 0) {
-    errorMessage.value = 'Selecione pelo menos uma permissão.'
+    errorMessage.value = t('admin.employees_select_permissions')
     return
   }
   if (!editing.value && !form.password) {
-    errorMessage.value = 'A senha é obrigatória.'
+    errorMessage.value = t('admin.employees_password_required')
     return
   }
   saving.value = true
@@ -381,12 +383,12 @@ const handleSubmit = async () => {
     } else {
       const { data: existing } = await supabase.from('users').select('id, email').eq('email', form.email).maybeSingle()
       if (existing) {
-        throw new Error('Já existe um utilizador com este email.')
+        throw new Error(t('admin.employees_email_exists'))
       }
 
       const { data: existingUser } = await supabase.from('users').select('id, username').eq('username', form.username).maybeSingle()
       if (existingUser) {
-        throw new Error('Já existe um utilizador com este nome de usuário.')
+        throw new Error(t('admin.employees_username_exists'))
       }
 
       let authUserId = null
@@ -453,7 +455,7 @@ const handleSubmit = async () => {
     closeForm()
     await fetchList()
   } catch (e) {
-    errorMessage.value = e.message || 'Erro ao guardar.'
+    errorMessage.value = e.message || t('admin.employees_create_error')
   } finally { saving.value = false }
 }
 
@@ -464,7 +466,7 @@ const confirmDelete = async (item) => {
     if (error) throw error
     await fetchList()
   } catch (e) {
-    alert(e.message || 'Erro ao eliminar')
+    alert(e.message || t('admin.error_delete'))
   }
 }
 
