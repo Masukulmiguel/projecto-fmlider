@@ -81,7 +81,7 @@
                 <h5><i class="bi bi-folder2"></i> {{ t('news.sidebar_categories') }}</h5>
                 <ul class="sidebar-categories">
                   <li v-for="cat in categories" :key="cat.name" :class="{ active: selectedCategory === cat.name }" @click="filterByCategory(cat.name)">
-                    <span>{{ cat.name }}</span>
+                    <span>{{ cat.label }}</span>
                     <span class="cat-count">{{ cat.count }}</span>
                   </li>
                 </ul>
@@ -129,7 +129,8 @@ const router = useRouter()
 const allNews = ref([])
 const loading = ref(true)
 const currentPage = ref(1)
-const selectedCategory = ref('Todos')
+const ALL_CATEGORY = '__all__'
+const selectedCategory = ref(ALL_CATEGORY)
 const perPage = 6
 
 const fetchNews = async () => {
@@ -221,7 +222,7 @@ const fallbackNews = computed(() => [
 ])
 
 const filteredNews = computed(() => {
-  if (selectedCategory.value === 'Todos') return allNews.value
+  if (selectedCategory.value === ALL_CATEGORY) return allNews.value
   return allNews.value.filter(n => n.category === selectedCategory.value)
 })
 
@@ -235,11 +236,15 @@ const paginatedNews = computed(() => {
 const recentNews = computed(() => allNews.value.slice(0, 4))
 
 const categories = computed(() => {
-  const cats = { 'Todos': allNews.value.length }
+  const cats = { [ALL_CATEGORY]: allNews.value.length }
   allNews.value.forEach(n => {
     cats[n.category] = (cats[n.category] || 0) + 1
   })
-  return Object.entries(cats).map(([name, count]) => ({ name, count }))
+  return Object.entries(cats).map(([name, count]) => ({
+    name,
+    label: name === ALL_CATEGORY ? t('news.category_all') : name,
+    count
+  }))
 })
 
 const dateLocale = computed(() => locale.value === 'pt' ? 'pt-PT' : locale.value === 'en' ? 'en-GB' : 'fr-FR')

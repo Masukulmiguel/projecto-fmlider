@@ -2,8 +2,8 @@
   <div class="legal-page">
     <div class="legal-hero">
       <div class="container">
-        <h1>Termos e Condições</h1>
-        <p>Última actualização: {{ today }}</p>
+        <h1>{{ t('legal.terms_title') }}</h1>
+        <p>{{ t('legal.terms_subtitle') }}: {{ today }}</p>
       </div>
     </div>
 
@@ -11,7 +11,7 @@
       <div class="row">
         <aside class="col-lg-3 d-none d-lg-block">
           <nav class="legal-toc sticky-top">
-            <h6 class="text-uppercase text-muted small fw-bold">Nesta página</h6>
+            <h6 class="text-uppercase text-muted small fw-bold">{{ t('legal.terms_toc') }}</h6>
             <ul class="list-unstyled">
               <li v-for="(s, i) in sections" :key="i"><a :href="`#s${i+1}`">{{ i+1 }}. {{ s.title }}</a></li>
             </ul>
@@ -24,7 +24,7 @@
           </section>
 
           <div class="alert alert-info mt-4">
-            <strong>Contacto:</strong> Para questões sobre estes Termos, contacte-nos em
+            <strong>{{ t('legal.terms_contact') }}</strong> {{ t('legal.terms_contact_text') }}
             <a href="mailto:geral@fmlider.co.ao">geral@fmlider.co.ao</a> ou
             <a href="tel:+244935141747">+244 935 141 747</a>.
           </div>
@@ -35,55 +35,27 @@
 </template>
 
 <script setup>
-const today = new Date().toLocaleDateString('pt-PT', { year: 'numeric', month: 'long', day: 'numeric' })
-const sections = [
-  { title: 'Aceitação dos Termos', body: [
-    'Ao aceder e utilizar o website <strong>fmlider.co.ao</strong> e os serviços da FMLider — Logística, Transporte e Serviços, Lda. (adiante designada por "FMLider", "nós" ou "nosso"), o utilizador concorda em cumprir e estar vinculado aos presentes Termos e Condições. Se não concordar com qualquer parte destes termos, não deverá utilizar o nosso website ou contratar os nossos serviços.',
-    'A FMLider reserva-se o direito de modificar estes Termos a qualquer momento, mediante publicação da versão actualizada no website. A continuação de utilização após alterações constitui aceitação dos novos termos.'
-  ]},
-  { title: 'Descrição dos Serviços', body: [
-    'A FMLider é uma empresa angolana especializada em soluções integradas de logística, transporte de mercadorias, serviços de transitário, desalfandegamento, armazenagem e mudanças. Operamos em Luanda, com cobertura nacional e internacional.',
-    'Os serviços específicos contratados serão detalhados em proposta comercial, conhecimento de embarque (B/L), conhecimento de transporte aéreo (AWB) ou contrato de prestação de serviços celebrado entre as partes.'
-  ]},
-  { title: 'Cadastro e Conta de Utilizador', body: [
-    'Para aceder à área de cliente, o utilizador deve criar uma conta fornecendo informações verdadeiras, exactas e completas. O utilizador é responsável por manter a confidencialidade das suas credenciais de acesso (username e password) e por todas as actividades realizadas na sua conta.',
-    'A FMLider reserva-se o direito de suspender ou encerrar contas que violem estes Termos, apresentem informações falsas ou permaneçam inactivas por mais de 12 meses. A aprovação de novos cadastros de clientes está sujeita à análise interna da FMLider.'
-  ]},
-  { title: 'Orçamentos e Pagamentos', body: [
-    'Todos os orçamentos apresentados pela FMLider têm validade de <strong>30 dias</strong> a contar da data de emissão, salvo indicação em contrário. Os preços podem ser expressos em Kwanzas (AOA), Dólares Americanos (USD) ou Euros (EUR) e estão sujeitos às condições de pagamento acordadas.',
-    'O pagamento pode ser realizado por transferência bancária, Multicaixa Express, TPA ou numerário (dentro dos limites legais). Para clientes com contrato, podem ser acordados prazos de pagamento a 15 ou 30 dias. A FMLider pode suspender a prestação de serviços em caso de atraso de pagamento superior a 30 dias.'
-  ]},
-  { title: 'Obrigações do Cliente', body: [
-    'O cliente compromete-se a:<ul><li>Fornecer informações verdadeiras e completas sobre a mercadoria (natureza, peso, dimensões, valor);</li><li>Declarar correctamente a mercadoria junto das autoridades aduaneiras;</li><li>Embalar adequadamente a mercadoria para transporte;</li><li>Não expedir mercadorias proibidas por lei ou que violem regulamentos internacionais;</li><li>Proceder ao pagamento nos prazos acordados.</li></ul>',
-    'A FMLider reserva-se o direito de recusar mercadorias que considere perigosas, mal embaladas, com declaração inadequada ou que violem qualquer lei aplicável.'
-  ]},
-  { title: 'Responsabilidade e Seguro', body: [
-    'A FMLider actua com a diligência de um bom profissional e em conformidade com os usos e costumes do sector. A nossa responsabilidade está limitada aos termos da Convenção de Bruxelas, Convenção de Montreal, Convenção de Hamburgo ou outras convenções internacionais aplicáveis, bem como aos limites estabelecidos no contrato de transporte.',
-    'Recomendamos vivamente a contratação de <strong>seguro de carga All Risks</strong> para cobrir o valor total da mercadoria durante o transporte. A FMLider pode intermediar a contratação do seguro junto de seguradoras parceiras, mediante solicitação do cliente.'
-  ]},
-  { title: 'Força Maior', body: [
-    'A FMLider não será responsável por atrasos ou incumplimentos causados por eventos de força maior, incluindo mas não se limitando a: condições climatéricas adversas, guerras, greves, perturbações da ordem pública, decisões governamentais, pandemias, falhas de fornecedores de serviços (portos, companhias aéreas, transportadores), ou qualquer outro evento fora do nosso controlo razoável.'
-  ]},
-  { title: 'Propriedade Intelectual', body: [
-    'Todo o conteúdo do website — incluindo textos, gráficos, logótipos, imagens, fotografias, vídeos, ícones, código-fonte e design — é propriedade da FMLider ou dos seus licenciadores e está protegido pelas leis angolanas e internacionais de direitos de autor e propriedade intelectual.',
-    'É proibida a reprodução, distribuição, modificação ou uso comercial do conteúdo sem autorização prévia por escrito da FMLider.'
-  ]},
-  { title: 'Limitação de Responsabilidade do Website', body: [
-    'O website e o seu conteúdo são fornecidos "tal como estão" e "conforme disponibilidade". A FMLider não garante que o website estará sempre disponível, livre de erros, vírus ou outros componentes nocivos.',
-    'A FMLider não se responsabiliza por danos directos, indirectos, incidentais ou consequenciais resultantes da utilização ou impossibilidade de utilização do website, incluindo perda de dados, lucros ou oportunidades de negócio.'
-  ]},
-  { title: 'Links para Terceiros', body: [
-    'O website pode conter links para websites de terceiros (parceiros, transportadoras, seguradoras, portos, etc.). A FMLider não controla nem se responsabiliza pelo conteúdo, políticas de privacidade ou práticas desses websites. A inclusão de qualquer link não implica endosso ou garantia.'
-  ]},
-  { title: 'Lei Aplicável e Foro', body: [
-    'Os presentes Termos são regidos pela <strong>Lei Angolana</strong>. Para a resolução de qualquer litígio emergente da interpretação ou execução destes Termos ou dos serviços prestados pela FMLider, é competente o <strong>Tribunal Provincial de Luanda</strong>, com renúncia expressa a qualquer outro.',
-    'Em caso de conflito entre a versão portuguesa e qualquer tradução, prevalece a versão em português.'
-  ]},
-  { title: 'Disposições Finais', body: [
-    'Se alguma disposição destes Termos for considerada inválida ou inaplicável por um tribunal competente, as restantes disposições permanecerão em pleno vigor. A falha da FMLider em exercer qualquer direito previsto nestes Termos não constitui renúncia a esse direito.',
-    'Para questões, reclamações ou pedidos de informação, contacte-nos:'
-  ]}
-]
+import { computed } from 'vue'
+import { useI18n } from '@/composables/useI18n'
+
+const { t, locale } = useI18n()
+
+const today = computed(() => new Date().toLocaleDateString(locale.value === 'pt' ? 'pt-PT' : locale.value === 'fr' ? 'fr-FR' : 'en-GB', { year: 'numeric', month: 'long', day: 'numeric' }))
+
+const sections = computed(() => [
+  { title: t('legal.terms_s1_title'), body: [t('legal.terms_s1_p1'), t('legal.terms_s1_p2')] },
+  { title: t('legal.terms_s2_title'), body: [t('legal.terms_s2_p1'), t('legal.terms_s2_p2')] },
+  { title: t('legal.terms_s3_title'), body: [t('legal.terms_s3_p1'), t('legal.terms_s3_p2')] },
+  { title: t('legal.terms_s4_title'), body: [t('legal.terms_s4_p1'), t('legal.terms_s4_p2')] },
+  { title: t('legal.terms_s5_title'), body: [t('legal.terms_s5_p1'), t('legal.terms_s5_p2')] },
+  { title: t('legal.terms_s6_title'), body: [t('legal.terms_s6_p1'), t('legal.terms_s6_p2')] },
+  { title: t('legal.terms_s7_title'), body: [t('legal.terms_s7_p1')] },
+  { title: t('legal.terms_s8_title'), body: [t('legal.terms_s8_p1'), t('legal.terms_s8_p2')] },
+  { title: t('legal.terms_s9_title'), body: [t('legal.terms_s9_p1'), t('legal.terms_s9_p2')] },
+  { title: t('legal.terms_s10_title'), body: [t('legal.terms_s10_p1')] },
+  { title: t('legal.terms_s11_title'), body: [t('legal.terms_s11_p1'), t('legal.terms_s11_p2')] },
+  { title: t('legal.terms_s12_title'), body: [t('legal.terms_s12_p1'), t('legal.terms_s12_p2')] },
+])
 </script>
 
 <style scoped>

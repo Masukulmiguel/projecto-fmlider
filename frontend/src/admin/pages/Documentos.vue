@@ -3,7 +3,7 @@
     <div class="page-header mb-4">
       <div>
         <h2>{{ t('admin.documentos_title') }}</h2>
-        <p class="text-muted mb-0">Todos os documentos carregados pelos clientes.</p>
+        <p class="text-muted mb-0">{{ t('admin.documentos_description') }}</p>
       </div>
     </div>
 
@@ -20,19 +20,19 @@
           <div class="spinner-border text-primary" role="status"></div>
         </div>
         <div v-else-if="items.length === 0" class="text-center py-5 text-muted">
-          Nenhum documento encontrado.
+          {{ t('admin.documentos_no_results') }}
         </div>
         <div v-else class="table-responsive">
           <table class="table align-middle">
             <thead>
               <tr>
-                <th>Documento</th>
-                <th>Cliente</th>
-                <th>Tipo</th>
-                <th>Embarque</th>
+                <th>{{ t('admin.documentos_col_document') }}</th>
+                <th>{{ t('admin.documentos_col_client') }}</th>
+                <th>{{ t('admin.documentos_col_type') }}</th>
+                <th>{{ t('admin.documentos_col_shipment') }}</th>
                 <th>{{ t('admin.documentos_size') }}</th>
-                <th>Data</th>
-                <th>Ações</th>
+                <th>{{ t('admin.documentos_col_date') }}</th>
+                <th>{{ t('admin.documentos_col_actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -53,7 +53,7 @@
                     <a :href="'/api/documentos/' + item.id + '/download'" target="_blank" class="btn btn-sm btn-outline-success" title="Download">
                       <i class="bi bi-download"></i>
                     </a>
-                    <button class="btn btn-sm btn-outline-danger" @click="openDelete(item)" title="Eliminar">
+                    <button class="btn btn-sm btn-outline-danger" @click="openDelete(item)" :title="t('admin.documentos_delete')">
                       <i class="bi bi-trash"></i>
                     </button>
                   </div>
@@ -72,8 +72,8 @@
           <button class="btn-close" @click="closeDelete"></button>
         </div>
         <div class="modal-body">
-          <p>Tem certeza que deseja eliminar o documento <strong>{{ deleteItem?.name }}</strong>?</p>
-          <p class="text-muted small mb-0">Esta ação não pode ser desfeita.</p>
+          <p>{{ t('admin.documentos_delete_confirm') }} <strong>{{ deleteItem?.name }}</strong>?</p>
+          <p class="text-muted small mb-0">{{ t('admin.documentos_delete_warning') }}</p>
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" @click="closeDelete">{{ t('common.cancel') }}</button>
@@ -116,7 +116,13 @@ const fetchData = async () => {
 
 const debounceSearch = () => { clearTimeout(searchTimer); searchTimer = setTimeout(fetchData, 300) }
 
-const typeLabel = (t) => ({ fatura: 'Fatura', conhecimento_carga: 'B/L', certificado: 'Certificado', contrato: 'Contrato', outro: 'Outro' }[t] || t)
+const typeLabel = (type) => ({
+  fatura: t('admin.documentos_type_fatura'),
+  conhecimento_carga: t('admin.documentos_type_bl'),
+  certificado: t('admin.documentos_type_certificado'),
+  contrato: t('admin.documentos_type_contrato'),
+  outro: t('admin.documentos_type_outro'),
+}[type] || type)
 const fileIcon = (m) => {
   if (!m) return 'bi bi-file-earmark'
   if (m.includes('pdf')) return 'bi bi-file-earmark-pdf text-danger'
@@ -124,7 +130,11 @@ const fileIcon = (m) => {
   return 'bi bi-file-earmark'
 }
 const formatSize = (b) => !b ? '—' : b < 1024 * 1024 ? (b/1024).toFixed(1)+' KB' : (b/1024/1024).toFixed(2)+' MB'
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
+const formatDate = (d) => {
+  if (!d) return '—'
+  const localeMap = { pt: 'pt-PT', en: 'en-GB', fr: 'fr-FR' }
+  return new Date(d).toLocaleDateString(localeMap[useI18n().locale.value] || 'pt-PT')
+}
 
 const showDeleteModal = ref(false)
 const deleting = ref(false)
@@ -145,11 +155,11 @@ const submitDelete = async () => {
   try {
     const { error } = await supabase.from('documentos').delete().eq('id', deleteItem.value.id)
     if (error) throw error
-    showToast('success', 'Documento eliminado com sucesso.')
+    showToast('success', t('admin.documentos_delete_success'))
     closeDelete()
     fetchData()
   } catch (e) {
-    showToast('error', 'Erro ao eliminar documento.')
+    showToast('error', t('admin.documentos_delete_error'))
   } finally { deleting.value = false }
 }
 

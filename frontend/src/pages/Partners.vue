@@ -75,7 +75,7 @@
         <div class="text-center mb-5" v-reveal="'fade'">
           <span class="fml-eyebrow">{{ t('partners.section_network') }}</span>
           <h2 class="section-title">{{ t('partners.title_partners') }}</h2>
-          <p class="text-muted mx-auto" style="max-width: 600px;">Empresas e operadores que confiam na FMLider e que fazem parte da nossa rede logística internacional.</p>
+          <p class="text-muted mx-auto" style="max-width: 600px;">{{ t('partners.network_description') }}</p>
         </div>
         <div class="row g-4">
           <div class="col-md-6 col-lg-4" v-for="partner in partners" :key="partner.id" v-reveal="'fade'">
