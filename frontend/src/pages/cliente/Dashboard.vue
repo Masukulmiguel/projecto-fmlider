@@ -401,4 +401,21 @@ onMounted(async () => {
 
 .empty-mini { text-align: center; color: #94a3b8; padding: 2rem 1rem; }
 .empty-mini i { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+
+@media (max-width: 576px) {
+  .welcome-card { padding: 1rem; }
+  .welcome-card h2 { font-size: 1.1rem; }
+  .stat-tile { padding: 1rem; gap: 0.75rem; }
+  .stat-tile-icon { width: 42px; height: 42px; border-radius: 10px; font-size: 1.15rem; }
+  .stat-tile-label { font-size: 0.72rem; }
+  .stat-tile-value { font-size: 1.4rem; }
+  .stat-tile-meta { font-size: 0.7rem; }
+  .card { border-radius: 10px; }
+  .quick-actions { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+  .quick-action { padding: 1rem 0.75rem; font-size: 0.78rem; }
+  .quick-action i { font-size: 1.2rem; }
+  .recent-list li { padding: 0.65rem 0; gap: 0.5rem; }
+  .tracking-code { font-size: 0.72rem; }
+  .route-mini { font-size: 0.8rem; }
+}
 </style>

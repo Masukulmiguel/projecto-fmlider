@@ -1110,4 +1110,13 @@ onUnmounted(() => {
     font-size: 1.25rem;
   }
 }
+
+@media (max-width: 576px) {
+  .stat-card { padding: 1rem; gap: 0.75rem; }
+  .stat-icon { width: 42px; height: 42px; border-radius: 10px; font-size: 1.15rem; }
+  .stat-label { font-size: 0.72rem; }
+  .stat-value { font-size: 1.4rem; }
+  .admin-dashboard { padding: 12px; }
+  .welcome-title { font-size: 1.1rem; }
+}
 </style>

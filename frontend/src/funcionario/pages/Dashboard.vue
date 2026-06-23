@@ -439,4 +439,15 @@ onMounted(load)
   .welcome-content { flex-direction: column; text-align: center; gap: 1rem; }
   .welcome-text h1 { font-size: 1.4rem; }
 }
+
+@media (max-width: 576px) {
+  .stat-card { padding: 1rem; gap: 0.75rem; }
+  .stat-icon { width: 42px; height: 42px; border-radius: 10px; font-size: 1.15rem; }
+  .stat-label { font-size: 0.72rem; }
+  .stat-value { font-size: 1.4rem; }
+  .stat-meta { font-size: 0.7rem; }
+  .welcome-banner { padding: 1rem; }
+  .welcome-text h1 { font-size: 1.2rem; }
+  .content-card { border-radius: 12px; }
+}
 </style>
