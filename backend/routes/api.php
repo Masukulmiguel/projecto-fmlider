@@ -69,6 +69,9 @@ $router->post('/auth/login', 'App\Controllers\AuthController', 'login');
 $router->post('/auth/register', 'App\Controllers\AuthController', 'register');
 $router->post('/auth/forgot-password', 'App\Controllers\AuthController', 'resetPassword');
 
+// NIF Lookup (public)
+$router->get('/nif-lookup/{nif}', 'App\Controllers\NifController', 'lookup');
+
 // Public API routes
 $router->get('/services', 'App\Controllers\ServiceController', 'index');
 $router->get('/services/{id}', 'App\Controllers\ServiceController', 'show');

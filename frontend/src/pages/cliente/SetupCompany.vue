@@ -21,7 +21,22 @@
                   </div>
                   <div class="col-md-6 mb-3">
                     <label for="nif" class="form-label">NIF</label>
-                    <input type="text" id="nif" class="form-control" v-model="form.nif" :placeholder="t('cliente.setup_nif_optional')">
+                    <div class="input-group">
+                      <input type="text" id="nif" class="form-control" v-model="form.nif" :placeholder="t('cliente.setup_nif_placeholder')" maxlength="10" @input="onNifInput">
+                      <span v-if="nifLookup.loading.value" class="input-group-text bg-white">
+                        <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
+                      </span>
+                      <span v-else-if="nifLookup.result.value" class="input-group-text bg-white text-success">
+                        <i class="bi bi-check-circle-fill"></i>
+                      </span>
+                      <span v-else-if="nifLookup.error.value && form.nif.length === 10" class="input-group-text bg-white text-danger">
+                        <i class="bi bi-x-circle-fill"></i>
+                      </span>
+                    </div>
+                    <div v-if="nifLookup.error.value && form.nif.length === 10" class="text-danger small mt-1">{{ nifLookup.error.value }}</div>
+                    <div v-if="nifLookup.lookupMessage.value" class="text-success small mt-1">
+                      <i class="bi bi-check2"></i> {{ nifLookup.lookupMessage.value }}
+                    </div>
                   </div>
                 </div>
 
@@ -98,12 +113,14 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useCompanyStore } from '@/stores/companyStore'
 import { useI18n } from '@/composables/useI18n'
+import { useNifLookup } from '@/composables/useNifLookup'
 import axios from 'axios'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const companyStore = useCompanyStore()
 const { t } = useI18n()
+const nifLookup = useNifLookup()
 
 const resolveLogo = (logo) => {
   if (!logo) return ''
@@ -193,6 +210,22 @@ const handleLogout = () => {
   authStore.logout()
   companyStore.clear()
   router.push('/login')
+}
+
+const onNifInput = async () => {
+  const nif = form.nif.replace(/\D/g, '')
+  form.nif = nif
+
+  if (nif.length === 10) {
+    const data = await nifLookup.lookupNif(nif)
+    if (data) {
+      if (!form.company_name || form.company_name === '') {
+        form.company_name = data.nome || ''
+      }
+    }
+  } else {
+    nifLookup.clearLookup()
+  }
 }
 </script>
 

@@ -102,7 +102,22 @@
               </div>
               <div class="mb-3">
                 <label class="form-label">{{ t('cliente.dashboard_nif') }}</label>
-                <input type="text" class="form-control" v-model="company.nif">
+                <div class="input-group">
+                  <input type="text" class="form-control" v-model="company.nif" maxlength="10" @input="onNifInput">
+                  <span v-if="nifLookup.loading.value" class="input-group-text bg-white">
+                    <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
+                  </span>
+                  <span v-else-if="nifLookup.result.value" class="input-group-text bg-white text-success">
+                    <i class="bi bi-check-circle-fill"></i>
+                  </span>
+                  <span v-else-if="nifLookup.error.value && company.nif && company.nif.length === 10" class="input-group-text bg-white text-danger">
+                    <i class="bi bi-x-circle-fill"></i>
+                  </span>
+                </div>
+                <div v-if="nifLookup.error.value && company.nif && company.nif.length === 10" class="text-danger small mt-1">{{ nifLookup.error.value }}</div>
+                <div v-if="nifLookup.lookupMessage.value" class="text-success small mt-1">
+                  <i class="bi bi-check2"></i> {{ nifLookup.lookupMessage.value }}
+                </div>
               </div>
               <div class="mb-3">
                 <label class="form-label">{{ t('cliente.setup_address') }} *</label>
@@ -151,11 +166,13 @@ import { useAuthStore } from '@/stores/authStore'
 import { useCompanyStore } from '@/stores/companyStore'
 import axios from 'axios'
 import { useI18n } from '@/composables/useI18n'
+import { useNifLookup } from '@/composables/useNifLookup'
 
 const { t } = useI18n()
 
 const authStore = useAuthStore()
 const companyStore = useCompanyStore()
+const nifLookup = useNifLookup()
 
 const resolveLogo = (logo) => {
   if (!logo) return ''
@@ -278,6 +295,22 @@ const onPhotoChange = async (e) => {
   } else {
     photoError.value = true
     photoMessage.value = result.error
+  }
+}
+
+const onNifInput = async () => {
+  const nif = (company.nif || '').replace(/\D/g, '')
+  company.nif = nif
+
+  if (nif.length === 10) {
+    const data = await nifLookup.lookupNif(nif)
+    if (data) {
+      if (!company.company_name || company.company_name === '') {
+        company.company_name = data.nome || ''
+      }
+    }
+  } else {
+    nifLookup.clearLookup()
   }
 }
 </script>
