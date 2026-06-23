@@ -16,7 +16,7 @@
               <img :src="resolveLogo(item.logo)" :alt="item.company_name" class="client-logo">
             </div>
             <div class="client-info">
-              <span class="client-name">{{ item.company_name }}</span>
+              <span class="client-name" :title="item.company_name">{{ item.company_name }}</span>
             </div>
           </div>
         </div>
@@ -130,6 +130,8 @@ onBeforeUnmount(() => {
 
 .client-card {
   flex: 0 0 200px;
+  min-width: 0;
+  overflow: hidden;
   position: relative;
   display: flex;
   flex-direction: column;
