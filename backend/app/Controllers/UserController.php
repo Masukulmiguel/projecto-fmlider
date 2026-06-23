@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Config\Database;
 use App\Helpers\Jwt;
+use App\Helpers\MailHelper;
 use App\Helpers\Response;
 
 class UserController
@@ -245,10 +246,28 @@ class UserController
     {
         $auth = $this->requireAdmin();
         $db = Database::connection();
+
+        // Fetch user info before update
+        $stmt = $db->prepare("SELECT name, email FROM users WHERE id = ?");
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $user = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$user) {
+            Response::error('Utilizador não encontrado', 404);
+        }
+
         $stmt = $db->prepare("UPDATE users SET approval_status = 'approved', approved_at = NOW(), approved_by = ?, rejection_reason = NULL WHERE id = ?");
         $stmt->bind_param('ii', $auth['user_id'], $id);
         $stmt->execute();
         $stmt->close();
+
+        // Send approval email
+        $frontendUrl = getenv('FRONTEND_URL') ?: 'https://fmlider.co.ao';
+        $loginUrl = $frontendUrl . '/login';
+        MailHelper::sendApprovalEmail($user['email'], $user['name'], $loginUrl);
+
         Response::success([], 'Conta aprovada');
     }
 
@@ -258,11 +277,57 @@ class UserController
         $data = Response::input();
         $reason = trim($data['reason'] ?? 'Conta rejeitada pelo administrador');
         $db = Database::connection();
+
+        // Fetch user info before update
+        $stmt = $db->prepare("SELECT name, email FROM users WHERE id = ?");
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $user = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$user) {
+            Response::error('Utilizador não encontrado', 404);
+        }
+
         $stmt = $db->prepare("UPDATE users SET approval_status = 'rejected', approved_by = ?, rejection_reason = ? WHERE id = ?");
         $stmt->bind_param('isi', $auth['user_id'], $reason, $id);
         $stmt->execute();
         $stmt->close();
+
+        // Send rejection email
+        MailHelper::sendRejectionEmail($user['email'], $user['name'], $reason);
+
         Response::success([], 'Conta rejeitada');
+    }
+
+    public function sendEmail($id)
+    {
+        $this->requireAdmin();
+        $data = Response::input();
+        $type = $data['type'] ?? 'approval';
+        $reason = trim($data['reason'] ?? '');
+
+        $db = Database::connection();
+        $stmt = $db->prepare("SELECT name, email FROM users WHERE id = ?");
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $user = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$user || empty($user['email'])) {
+            Response::error('Utilizador não encontrado ou sem email', 404);
+        }
+
+        $frontendUrl = getenv('FRONTEND_URL') ?: 'https://fmlider.co.ao';
+        $loginUrl = $frontendUrl . '/login';
+
+        if ($type === 'rejection') {
+            MailHelper::sendRejectionEmail($user['email'], $user['name'], $reason);
+        } else {
+            MailHelper::sendApprovalEmail($user['email'], $user['name'], $loginUrl);
+        }
+
+        Response::success([], 'Email enviado');
     }
 
     public function pendingCount()

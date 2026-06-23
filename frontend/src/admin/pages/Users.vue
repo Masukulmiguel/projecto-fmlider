@@ -223,6 +223,7 @@ import { supabase } from '@/lib/supabase'
 import { useI18n } from '@/composables/useI18n'
 
 const { t } = useI18n()
+const API_URL = import.meta.env.VITE_API_URL || ''
 
 const users = ref([])
 const loading = ref(false)
@@ -310,6 +311,13 @@ const approve = async (user) => {
   try {
     const { error } = await supabase.from('users').update({ approval_status: 'approved', approved_at: new Date() }).eq('id', user.id)
     if (!error) {
+      if (API_URL) {
+        fetch(`${API_URL}/admin/users/${user.id}/send-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'approval' })
+        }).catch(() => {})
+      }
       await loadUsers()
       await loadPendingCount()
     }
@@ -329,6 +337,13 @@ const confirmReject = async () => {
   try {
     const { error } = await supabase.from('users').update({ approval_status: 'rejected', rejection_reason: rejectReason.value }).eq('id', rejectingUser.value.id)
     if (!error) {
+      if (API_URL) {
+        fetch(`${API_URL}/admin/users/${rejectingUser.value.id}/send-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'rejection', reason: rejectReason.value })
+        }).catch(() => {})
+      }
       showRejectModal.value = false
       await loadUsers()
       await loadPendingCount()

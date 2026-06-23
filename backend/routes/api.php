@@ -104,6 +104,7 @@ $router->put('/admin/users/{id}', 'App\Controllers\UserController', 'update');
 $router->delete('/admin/users/{id}', 'App\Controllers\UserController', 'destroy');
 $router->post('/admin/users/{id}/approve', 'App\Controllers\UserController', 'approve');
 $router->post('/admin/users/{id}/reject', 'App\Controllers\UserController', 'reject');
+$router->post('/admin/users/{id}/send-email', 'App\Controllers\UserController', 'sendEmail');
 $router->post('/admin/users/{id}/lock', 'App\Controllers\UserController', 'lock');
 $router->post('/admin/users/{id}/unlock', 'App\Controllers\UserController', 'unlock');
 $router->get('/admin/users/permissions/list', 'App\Controllers\UserController', 'permissions');
