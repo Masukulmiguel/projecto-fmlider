@@ -213,7 +213,9 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .hamburger-btn {
@@ -241,6 +243,8 @@ onBeforeUnmount(() => {
   color: #050505;
   margin: 0;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .navbar-center {
