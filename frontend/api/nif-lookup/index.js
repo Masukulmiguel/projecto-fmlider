@@ -1,6 +1,55 @@
+import https from 'https';
+
 const PORTAL_URL = 'https://portaldocontribuinte.minfin.gov.ao';
 const LOOKUP_PATH = '/consultar-nif-do-contribuinte';
 const AJAX_PATH = '/consultar-headNifId-do-contribuinte';
+
+function httpsFetch(urlStr, options = {}) {
+  return new Promise((resolve, reject) => {
+    const url = new URL(urlStr);
+    const reqOptions = {
+      hostname: url.hostname,
+      port: 443,
+      path: url.pathname + url.search,
+      method: options.method || 'GET',
+      headers: options.headers || {},
+      rejectUnauthorized: false,
+    };
+    const req = https.request(reqOptions, (res) => {
+      let body = '';
+      res.on('data', (chunk) => { body += chunk; });
+      res.on('end', () => {
+        resolve({
+          ok: res.statusCode >= 200 && res.statusCode < 300,
+          status: res.statusCode,
+          url: urlStr,
+          text: () => Promise.resolve(body),
+          headers: res.headers,
+        });
+      });
+    });
+    req.on('error', reject);
+    if (options.body) req.write(options.body);
+    req.end();
+  });
+}
+
+function parseCookies(headers) {
+  const raw = headers['set-cookie'];
+  if (!raw) return {};
+  const cookies = {};
+  const arr = Array.isArray(raw) ? raw : [raw];
+  for (const c of arr) {
+    const [kv] = c.split(';');
+    const [k, v] = kv.split('=');
+    if (k && v) cookies[k.trim()] = v.trim();
+  }
+  return cookies;
+}
+
+function cookieHeader(cookies) {
+  return Object.entries(cookies).map(([k, v]) => `${k}=${v}`).join('; ');
+}
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -16,12 +65,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    const viewState = await getViewState();
+    const cookies = {};
+    const viewState = await getViewState(cookies);
     if (!viewState) {
       return res.status(502).json({ success: false, message: 'Não foi possível aceder ao portal da AGT.' });
     }
 
-    const result = await postNifLookup(nif, viewState);
+    const result = await postNifLookup(nif, viewState, cookies);
     if (!result) {
       return res.status(404).json({ success: false, message: 'NIF não encontrado no portal da AGT.' });
     }
@@ -33,24 +83,29 @@ export default async function handler(req, res) {
   }
 }
 
-async function getViewState() {
-  const res = await fetch(PORTAL_URL + LOOKUP_PATH, {
+async function getViewState(cookies) {
+  const res = await httpsFetch(PORTAL_URL + LOOKUP_PATH, {
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept-Language': 'pt-BR,pt;q=0.9',
     },
-    redirect: 'follow',
   });
 
   if (!res.ok) return null;
+  Object.assign(cookies, parseCookies(res.headers));
   const html = await res.text();
 
   const m = html.match(/name="javax\.faces\.ViewState"[^>]*value="([^"]+)"/);
   if (m) return m[1];
 
+  const m2 = html.match(/name='javax\.faces\.ViewState'[^>]*value='([^']+)'/);
+  if (m2) return m2[1];
+
   return null;
 }
 
-async function postNifLookup(nif, viewState) {
+async function postNifLookup(nif, viewState, cookies) {
   const params = new URLSearchParams({
     'javax.faces.partial.ajax': 'true',
     'javax.faces.source': 'j_id_2x:j_id_34',
@@ -62,16 +117,22 @@ async function postNifLookup(nif, viewState) {
     'javax.faces.ViewState': viewState,
   });
 
-  const res = await fetch(PORTAL_URL + AJAX_PATH, {
+  const headers = {
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    'Faces-Request': 'partial/ajax',
+    'X-Requested-With': 'XMLHttpRequest',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    'Accept': '*/*',
+    'Origin': PORTAL_URL,
+    'Referer': PORTAL_URL + LOOKUP_PATH,
+  };
+  const cookieStr = cookieHeader(cookies);
+  if (cookieStr) headers['Cookie'] = cookieStr;
+
+  const res = await httpsFetch(PORTAL_URL + AJAX_PATH, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-      'Faces-Request': 'partial/ajax',
-      'X-Requested-With': 'XMLHttpRequest',
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-    },
+    headers,
     body: params.toString(),
-    redirect: 'follow',
   });
 
   if (!res.ok) return null;
