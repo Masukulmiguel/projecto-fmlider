@@ -173,7 +173,7 @@ const typeLabel = (type) => ({ maritimo: t('cliente.cotacoes_type_maritimo'), ae
 const statusLabel = (status) => ({ pendente: t('cliente.cotacoes_status_pendente'), aprovada: t('cliente.cotacoes_status_aprovada'), rejeitada: t('cliente.cotacoes_status_rejeitada'), expirada: t('cliente.cotacoes_status_expirada') }[status] || status)
 const formatCurrency = (v, c) => v ? new Intl.NumberFormat('pt-AO', { style: 'currency', currency: c || 'AOA', maximumFractionDigits: 0 }).format(v) : '—'
 
-onMounted(() => { fetchData(); fetchStats() })
+onMounted(fetchData)
 </script>
 
 <style scoped>

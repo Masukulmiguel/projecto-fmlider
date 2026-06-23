@@ -214,7 +214,7 @@ const formatCurrency = (v, c) => {
 
 const formatDate = (d) => d ? new Date(d).toLocaleDateString(locale.value === 'pt' ? 'pt-PT' : locale.value === 'en' ? 'en-US' : 'fr-FR') : '—'
 
-onMounted(() => { fetchData(); fetchStats() })
+onMounted(fetchData)
 </script>
 
 <style scoped>
