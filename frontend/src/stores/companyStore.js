@@ -48,7 +48,7 @@ export const useCompanyStore = defineStore('company', () => {
           .eq('user_id', auth.user.id)
         if (error) throw error
       } else {
-        const insertData = { ...payload, user_id: auth.user.id, is_completed: 1, is_published: 0 }
+        const insertData = { ...payload, user_id: auth.user.id, is_completed: 1, is_published: 1 }
         const { error } = await supabase
           .from('companies')
           .insert(insertData)

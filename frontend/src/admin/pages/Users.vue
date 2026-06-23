@@ -311,6 +311,7 @@ const approve = async (user) => {
   try {
     const { error } = await supabase.from('users').update({ approval_status: 'approved', approved_at: new Date() }).eq('id', user.id)
     if (!error) {
+      await supabase.from('companies').update({ is_published: true }).eq('user_id', user.id)
       if (API_URL) {
         fetch(`${API_URL}/admin/users/${user.id}/send-email`, {
           method: 'POST',

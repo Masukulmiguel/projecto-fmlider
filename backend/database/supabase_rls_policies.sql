@@ -148,6 +148,10 @@ DO $$ BEGIN DROP POLICY IF EXISTS "funcionario_all_companies" ON public.companie
 DO $$ BEGIN DROP POLICY IF EXISTS "client_select_own_company" ON public.companies; EXCEPTION WHEN OTHERS THEN NULL; END $$;
 DO $$ BEGIN DROP POLICY IF EXISTS "client_insert_own_company" ON public.companies; EXCEPTION WHEN OTHERS THEN NULL; END $$;
 DO $$ BEGIN DROP POLICY IF EXISTS "client_update_own_company" ON public.companies; EXCEPTION WHEN OTHERS THEN NULL; END $$;
+DO $$ BEGIN DROP POLICY IF EXISTS "public_select_published_companies" ON public.companies; EXCEPTION WHEN OTHERS THEN NULL; END $$;
+
+CREATE POLICY "public_select_published_companies" ON public.companies
+  FOR SELECT USING (is_published = true);
 
 CREATE POLICY "admin_all_companies" ON public.companies
   FOR ALL USING (public.get_user_role() = 'admin');
