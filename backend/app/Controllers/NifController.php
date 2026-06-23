@@ -21,6 +21,23 @@ class NifController
             Response::error('NIF inválido. Deve conter exactamente 10 dígitos.', 422);
         }
 
+        return $this->doLookup($nif);
+    }
+
+    public function lookupByQuery()
+    {
+        $nif = trim($_GET['nif'] ?? '');
+
+        if ($nif === '' || !preg_match('/^\d{10}$/', $nif)) {
+            Response::error('NIF inválido. Deve conter exactamente 10 dígitos.', 422);
+        }
+
+        return $this->doLookup($nif);
+    }
+
+    private function doLookup($nif)
+    {
+
         $cacheKey = 'nif_' . $nif;
         if (isset(self::$cache[$cacheKey]) && self::$cache[$cacheKey]['expires'] > time()) {
             Response::success(self::$cache[$cacheKey]['data']);

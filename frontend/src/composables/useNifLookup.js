@@ -39,7 +39,8 @@ export function useNifLookup() {
         lookupMessage.value = ''
 
         try {
-          const { data } = await axios.get(`/api/nif-lookup/${nif}`, {
+          const { data } = await axios.get(`/api/nif-lookup`, {
+            params: { nif },
             signal: abortController.signal,
             timeout: 20000,
           })
