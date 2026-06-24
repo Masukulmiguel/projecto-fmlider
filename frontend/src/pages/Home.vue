@@ -214,26 +214,6 @@
       </div>
     </section>
 
-    <!-- News -->
-    <section class="news-section fml-section">
-      <div class="container">
-        <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-2" v-reveal="'up'">
-          <div>
-            <span class="fml-eyebrow">{{ t('home.news_eyebrow') }}</span>
-            <h2 class="section-title mb-0">{{ t('home.news_title') }}</h2>
-          </div>
-          <router-link to="/noticias" class="btn btn-outline-primary">
-            {{ t('home.news_view_all') }} <i class="bi bi-arrow-right ms-1"></i>
-          </router-link>
-        </div>
-        <div class="row g-4">
-          <div class="col-lg-4" v-for="newsItem in latestNews" :key="newsItem.id" v-reveal="'up'">
-            <NewsCard :news="newsItem" />
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Testimonials -->
     <section v-if="testimonials.length" class="testimonials-section fml-section bg-fml-navy text-white">
       <div class="container">
@@ -354,7 +334,6 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import NewsCard from '@/components/NewsCard.vue'
 import ClientsCarousel from '@/components/ClientsCarousel.vue'
 import { supabase } from '@/lib/supabase'
 import { useSiteImages } from '@/composables/useSiteImages'
@@ -370,12 +349,10 @@ let interval = null
 
 const slides = ref([])
 const services = ref([])
-const latestNews = ref([])
 const testimonials = ref([])
 
 const loadingBanners = ref(true)
 const loadingServices = ref(true)
-const loadingNews = ref(true)
 const loadingTestimonials = ref(true)
 
 const defaultSlideStyle = computed(() => ({
@@ -432,11 +409,10 @@ function getServiceIcon(title) {
 
   const fetchBanners = supabase.from('banners').select('*').order('order_by')
   const fetchServices = supabase.from('services').select('*').order('order_by')
-  const fetchNews = supabase.from('news').select('*').eq('status', 'published').order('published_at', { ascending: false })
   const fetchTestimonials = supabase.from('testimonials').select('*').order('order_by')
 
-  const [bannersRes, servicesRes, newsRes, testsRes] = await Promise.all([
-    fetchBanners, fetchServices, fetchNews, fetchTestimonials
+  const [bannersRes, servicesRes, testsRes] = await Promise.all([
+    fetchBanners, fetchServices, fetchTestimonials
   ])
 
   if (!bannersRes.error && bannersRes.data) {
@@ -453,11 +429,6 @@ function getServiceIcon(title) {
     services.value = (servicesRes.data || []).filter(s => s.status === true || s.status === 1 || s.status === 'published')
   }
   loadingServices.value = false
-
-  if (!newsRes.error && newsRes.data) {
-    latestNews.value = (newsRes.data || []).slice(0, 3)
-  }
-  loadingNews.value = false
 
   if (!testsRes.error && testsRes.data) {
     testimonials.value = (testsRes.data || []).filter(t => t.status === true || t.status === 1 || t.status === 'published')
