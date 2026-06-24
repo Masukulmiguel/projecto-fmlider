@@ -152,6 +152,7 @@ const fetchChatUnread = async () => {
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
   z-index: 999;
+  -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
 }
 

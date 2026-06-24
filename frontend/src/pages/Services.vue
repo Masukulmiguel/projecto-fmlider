@@ -268,6 +268,7 @@ const whyFeatures = computed(() => [
   top: 1rem;
   right: 1rem;
   background: rgba(15, 23, 42, 0.7);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   color: var(--fml-gold, #f59e0b);
   width: 44px;

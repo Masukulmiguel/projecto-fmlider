@@ -282,6 +282,7 @@ onMounted(load)
   width: 70px; height: 70px;
   border-radius: 50%;
   background: rgba(255,255,255,0.2);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   display: flex; align-items: center; justify-content: center;
   font-size: 1.5rem; font-weight: 700; color: #ffffff;

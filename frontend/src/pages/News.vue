@@ -431,6 +431,7 @@ onMounted(async () => {
   top: 0.75rem;
   left: 0.75rem;
   background: rgba(15, 23, 42, 0.75);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   color: #fff;
   padding: 0.25rem 0.75rem;
