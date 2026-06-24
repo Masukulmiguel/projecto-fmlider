@@ -24,8 +24,8 @@
     </div>
 
     <template v-if="loading && !data">
-      <div class="row g-4 mb-4">
-        <div v-for="n in 5" :key="n" class="col-xl-2 col-lg-4 col-md-6">
+      <div class="stats-grid mb-4">
+        <div v-for="n in 5" :key="n" class="stat-card skeleton">
           <div class="stat-card skeleton">
             <div class="skeleton-icon"></div>
             <div class="skeleton-content">
@@ -39,8 +39,7 @@
     </template>
 
     <template v-else-if="data">
-      <div class="row g-4 mb-4">
-        <div class="col-xl-2 col-lg-4 col-md-6">
+      <div class="stats-grid mb-4">
           <div class="stat-card">
             <div class="stat-icon stat-icon-clients">
               <i class="bi bi-people-fill"></i>
@@ -53,8 +52,6 @@
               </div>
             </div>
           </div>
-        </div>
-        <div class="col-xl-2 col-lg-4 col-md-6">
           <div class="stat-card">
             <div class="stat-icon stat-icon-employees">
               <i class="bi bi-person-badge-fill"></i>
@@ -67,8 +64,6 @@
               </div>
             </div>
           </div>
-        </div>
-        <div class="col-xl-2 col-lg-4 col-md-6">
           <div class="stat-card">
             <div class="stat-icon stat-icon-visitors">
               <i class="bi bi-globe"></i>
@@ -81,8 +76,6 @@
               </div>
             </div>
           </div>
-        </div>
-        <div class="col-xl-3 col-lg-4 col-md-6">
           <div class="stat-card">
             <div class="stat-icon stat-icon-messages">
               <i class="bi bi-chat-dots-fill"></i>
@@ -98,8 +91,6 @@
               </div>
             </div>
           </div>
-        </div>
-        <div class="col-xl-3 col-lg-4 col-md-6">
           <div class="stat-card">
             <div class="stat-icon stat-icon-operations">
               <i class="bi bi-box-seam-fill"></i>
@@ -112,7 +103,6 @@
               </div>
             </div>
           </div>
-        </div>
       </div>
 
       <div class="row g-4 mb-4">
@@ -610,6 +600,30 @@ onUnmounted(() => {
   background: #ffffff;
   min-height: 100vh;
   padding: 24px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .dashboard-header {
