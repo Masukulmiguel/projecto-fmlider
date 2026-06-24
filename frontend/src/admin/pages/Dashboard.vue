@@ -48,7 +48,7 @@
               <div class="stat-label">Clientes</div>
               <div class="stat-value">{{ data.clients.total }}</div>
               <div class="stat-trend">
-                <span class="trend-info">{{ data.clients.active }} {{ t('admin.dashboard_active') }}</span>
+                <span class="trend-info">{{ data.clients.active }} activos</span>
               </div>
             </div>
           </div>
@@ -60,7 +60,7 @@
               <div class="stat-label">Funcionários</div>
               <div class="stat-value">{{ data.employees.total }}</div>
               <div class="stat-trend">
-                <span class="trend-info">{{ data.employees.active }} {{ t('admin.dashboard_active') }}</span>
+                <span class="trend-info">{{ data.employees.active }} activos</span>
               </div>
             </div>
           </div>
