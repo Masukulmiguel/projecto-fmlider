@@ -25,7 +25,7 @@
 
     <template v-if="loading && !data">
       <div class="row g-4 mb-4">
-        <div v-for="n in 4" :key="n" class="col-lg-3 col-md-6">
+        <div v-for="n in 5" :key="n" class="col-xl-2 col-lg-4 col-md-6">
           <div class="stat-card skeleton">
             <div class="skeleton-icon"></div>
             <div class="skeleton-content">
@@ -40,23 +40,35 @@
 
     <template v-else-if="data">
       <div class="row g-4 mb-4">
-        <div class="col-lg-3 col-md-6">
+        <div class="col-xl-2 col-lg-4 col-md-6">
           <div class="stat-card">
             <div class="stat-icon stat-icon-clients">
               <i class="bi bi-people-fill"></i>
             </div>
             <div class="stat-content">
-              <div class="stat-label">{{ t('admin.total_clients') }}</div>
+              <div class="stat-label">Clientes</div>
               <div class="stat-value">{{ data.clients.total }}</div>
-              <div class="stat-trend" :class="trendClass(data.clients.trend)">
-                <i class="bi" :class="trendIcon(data.clients.trend)"></i>
-                <span>{{ Math.abs(data.clients.trend || 0) }}%</span>
-                <span class="trend-period">{{ t('admin.dashboard_vs_previous') }}</span>
+              <div class="stat-trend">
+                <span class="trend-info">{{ data.clients.active }} {{ t('admin.dashboard_active') }}</span>
               </div>
             </div>
           </div>
         </div>
-        <div class="col-lg-3 col-md-6">
+        <div class="col-xl-2 col-lg-4 col-md-6">
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-employees">
+              <i class="bi bi-person-badge-fill"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Funcionários</div>
+              <div class="stat-value">{{ data.employees.total }}</div>
+              <div class="stat-trend">
+                <span class="trend-info">{{ data.employees.active }} {{ t('admin.dashboard_active') }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-6">
           <div class="stat-card">
             <div class="stat-icon stat-icon-visitors">
               <i class="bi bi-globe"></i>
@@ -70,7 +82,7 @@
             </div>
           </div>
         </div>
-        <div class="col-lg-3 col-md-6">
+        <div class="col-xl-3 col-lg-4 col-md-6">
           <div class="stat-card">
             <div class="stat-icon stat-icon-messages">
               <i class="bi bi-chat-dots-fill"></i>
@@ -87,7 +99,7 @@
             </div>
           </div>
         </div>
-        <div class="col-lg-3 col-md-6">
+        <div class="col-xl-3 col-lg-4 col-md-6">
           <div class="stat-card">
             <div class="stat-icon stat-icon-operations">
               <i class="bi bi-box-seam-fill"></i>
@@ -297,9 +309,9 @@ const loadStats = async () => {
     since.setDate(since.getDate() - statsDays.value)
     const sinceISO = since.toISOString()
 
-    const [allClientsRes, clientsRes, visitorsRes, messagesRes, embarquesRes, cotacoesRes, documentosRes] = await Promise.all([
+    const [allClientsRes, employeesRes, visitorsRes, messagesRes, embarquesRes, cotacoesRes, documentosRes] = await Promise.all([
       supabase.from('users').select('id, created_at, approval_status, name, email, photo').eq('role', 'cliente'),
-      supabase.from('users').select('id, created_at, approval_status, name, email, photo').eq('role', 'cliente').gte('created_at', sinceISO),
+      supabase.from('users').select('id, created_at, approval_status, name, email, photo').eq('role', 'funcionario'),
       supabase.from('visitors').select('id, visited_at, country').gte('visited_at', sinceISO),
       supabase.from('chat_messages').select('id, created_at, message, is_read, sender_id, users:sender_id(name)'),
       supabase.from('embarques').select('id, created_at'),
@@ -308,7 +320,7 @@ const loadStats = async () => {
     ])
 
     const allClients = allClientsRes.data || []
-    const clients = clientsRes.data || []
+    const employees = employeesRes.data || []
     const visitors = visitorsRes.data || []
     const messages = messagesRes.data || []
     const embarques = embarquesRes.data || []
@@ -336,7 +348,7 @@ const loadStats = async () => {
     })
 
     const clientsByDay = {}
-    clients.forEach(c => {
+    allClients.forEach(c => {
       if (c.created_at) {
         const day = c.created_at.slice(0, 10)
         clientsByDay[day] = (clientsByDay[day] || 0) + 1
@@ -351,14 +363,22 @@ const loadStats = async () => {
     })
 
     data.value = {
-      clients: { total: allClients.length, trend: 0 },
+      clients: {
+        total: allClients.length,
+        active: allClients.filter(c => c.approval_status === 'approved').length,
+        trend: 0
+      },
+      employees: {
+        total: employees.length,
+        active: employees.filter(e => e.approval_status === 'approved').length
+      },
       visitors: { total: visitors.length, today: todayVisitors },
       messages: { total: messages.length, unread: unreadMessages },
       embarques: embarques.length,
       cotacoes: cotacoes.length,
       documentos: documentos.length,
       recent: {
-        clients: clients.slice(0, 5),
+        clients: [...allClients].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5),
         messages: messages.slice(0, 5)
       },
       charts: {
@@ -717,6 +737,11 @@ onUnmounted(() => {
 .stat-icon-clients {
   background: #e7f3ff;
   color: #1877f2;
+}
+
+.stat-icon-employees {
+  background: #f3e8ff;
+  color: #8b5cf6;
 }
 
 .stat-icon-visitors {
