@@ -297,8 +297,9 @@ const loadStats = async () => {
     since.setDate(since.getDate() - statsDays.value)
     const sinceISO = since.toISOString()
 
-    const [clientsRes, visitorsRes, messagesRes, embarquesRes, cotacoesRes, documentosRes] = await Promise.all([
-      supabase.from('users').select('id, created_at, approval_status, name, email, photo').gte('created_at', sinceISO),
+    const [allClientsRes, clientsRes, visitorsRes, messagesRes, embarquesRes, cotacoesRes, documentosRes] = await Promise.all([
+      supabase.from('users').select('id, created_at, approval_status, name, email, photo').eq('role', 'cliente'),
+      supabase.from('users').select('id, created_at, approval_status, name, email, photo').eq('role', 'cliente').gte('created_at', sinceISO),
       supabase.from('visitors').select('id, visited_at, country').gte('visited_at', sinceISO),
       supabase.from('chat_messages').select('id, created_at, message, is_read, sender_id, users:sender_id(name)'),
       supabase.from('embarques').select('id, created_at'),
@@ -306,6 +307,7 @@ const loadStats = async () => {
       supabase.from('documentos').select('id, created_at'),
     ])
 
+    const allClients = allClientsRes.data || []
     const clients = clientsRes.data || []
     const visitors = visitorsRes.data || []
     const messages = messagesRes.data || []
@@ -349,7 +351,7 @@ const loadStats = async () => {
     })
 
     data.value = {
-      clients: { total: clients.length, trend: 0 },
+      clients: { total: allClients.length, trend: 0 },
       visitors: { total: visitors.length, today: todayVisitors },
       messages: { total: messages.length, unread: unreadMessages },
       embarques: embarques.length,
