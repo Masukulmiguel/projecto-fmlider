@@ -389,6 +389,37 @@ class UserController
         Response::success(['permissions' => self::PERMISSIONS]);
     }
 
+    public function resetPassword($id)
+    {
+        $this->requireAdmin();
+        $db = Database::connection();
+
+        $stmt = $db->prepare('SELECT name, email, role FROM users WHERE id = ? LIMIT 1');
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $user = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$user) Response::error('Utilizador não encontrado', 404);
+        if ($user['role'] === 'admin') Response::error('Não é possível repor senha de um administrador', 403);
+
+        $chars = 'abcdefghijkmnpqrstuvwxyz23456789';
+        $newPassword = '';
+        for ($i = 0; $i < 8; $i++) {
+            $newPassword .= $chars[random_int(0, strlen($chars) - 1)];
+        }
+
+        $hash = password_hash($newPassword, PASSWORD_BCRYPT);
+        $stmt = $db->prepare('UPDATE users SET password = ?, password_must_change = 1, password_changed_at = NULL WHERE id = ?');
+        $stmt->bind_param('si', $hash, $id);
+        $stmt->execute();
+        $stmt->close();
+
+        MailHelper::sendPasswordResetEmail($user['email'], $user['name'], $newPassword);
+
+        Response::success(['password' => $newPassword], 'Senha reposta e email enviado');
+    }
+
     private function requireAdmin()
     {
         $header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';

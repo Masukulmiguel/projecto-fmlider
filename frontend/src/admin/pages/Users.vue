@@ -63,6 +63,7 @@
                 <div class="btn-group btn-group-sm" v-else>
                   <button class="btn btn-outline-primary" @click="openEdit(user)"><i class="bi bi-pencil"></i></button>
                   <button class="btn btn-outline-info" @click="openDetail(user)"><i class="bi bi-eye"></i></button>
+                  <button class="btn btn-outline-warning" @click="openResetPassword(user)" title="Repor senha"><i class="bi bi-key-fill"></i></button>
                   <button class="btn btn-outline-danger" @click="destroy(user)">{{ t('common.delete') }}</button>
                 </div>
               </td>
@@ -214,6 +215,48 @@
         </div>
       </div>
     </div>
+
+    <div class="modal" v-if="showResetPwdModal" @click.self="showResetPwdModal = false">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title"><i class="bi bi-key-fill me-2"></i>Repor Senha</h5>
+            <button type="button" class="btn-close" @click="showResetPwdModal = false"></button>
+          </div>
+          <div class="modal-body">
+            <p v-if="!resetPwdResult">Vai gerar uma nova senha para <strong>{{ resetPwdUser?.name }}</strong>. O cliente receberá a nova senha por email.</p>
+
+            <div v-if="!resetPwdResult && !resetPwdLoading" class="text-center py-3">
+              <button class="btn btn-warning btn-lg" @click="confirmResetPassword">
+                <i class="bi bi-key-fill me-2"></i>Gerar Nova Senha
+              </button>
+            </div>
+
+            <div v-if="resetPwdLoading" class="text-center py-4">
+              <div class="spinner-border text-primary" role="status"></div>
+              <p class="mt-2 text-muted">A gerar senha e enviar email...</p>
+            </div>
+
+            <div v-if="resetPwdResult" class="alert alert-success">
+              <h6 class="alert-heading mb-2"><i class="bi bi-check-circle-fill me-1"></i>Senha gerada e enviada!</h6>
+              <p class="mb-2">A nova senha foi enviada para <strong>{{ resetPwdUser?.email }}</strong></p>
+              <div class="d-flex align-items-center gap-2 p-2 bg-light rounded">
+                <code class="fs-5 flex-grow-1 text-center" style="letter-spacing:2px;font-family:monospace;">{{ resetPwdResult }}</code>
+                <button class="btn btn-sm btn-outline-primary" @click="copyPassword" title="Copiar">
+                  <i class="bi bi-clipboard"></i>
+                </button>
+              </div>
+              <small class="text-muted d-block mt-2">O cliente deverá alterar a senha após iniciar sessão.</small>
+            </div>
+
+            <div v-if="resetPwdError" class="alert alert-danger py-2">{{ resetPwdError }}</div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" @click="showResetPwdModal = false">{{ resetPwdResult ? 'Fechar' : t('common.cancel') }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -221,8 +264,10 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useI18n } from '@/composables/useI18n'
+import { useAuthStore } from '@/stores/authStore'
 
 const { t } = useI18n()
+const authStore = useAuthStore()
 const API_URL = import.meta.env.VITE_API_URL || ''
 
 const users = ref([])
@@ -243,6 +288,11 @@ const editSaving = ref(false)
 const editError = ref('')
 const editPhotoMsg = ref('')
 const editPhotoError = ref(false)
+const showResetPwdModal = ref(false)
+const resetPwdUser = ref(null)
+const resetPwdLoading = ref(false)
+const resetPwdResult = ref(null)
+const resetPwdError = ref('')
 
 const filteredUsers = computed(() => {
   if (filter.value === 'all') return users.value
@@ -252,7 +302,7 @@ const filteredUsers = computed(() => {
 const loadUsers = async () => {
   loading.value = true
   try {
-    const { data, error } = await supabase.from('users').select('id, auth_id, created_at, updated_at, name, email, username, phone, role, position, permissions, approval_status, status, photo, password_must_change, password_changed_at, locked_at, locked_reason').order('created_at', { ascending: false })
+    const { data, error } = await supabase.from('users').select('id, auth_id, created_at, updated_at, name, email, username, phone, role, position, permissions, approval_status, status, photo, password_must_change, password_changed_at, locked_at, locked_reason').eq('role', 'cliente').order('created_at', { ascending: false })
     if (!error) users.value = data
   } catch (error) {
     console.error(error)
@@ -263,7 +313,7 @@ const loadUsers = async () => {
 
 const loadPendingCount = async () => {
   try {
-    const { count, error } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('approval_status', 'pending')
+    const { count, error } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'cliente').eq('approval_status', 'pending')
     if (!error) pendingCount.value = count || 0
   } catch (error) {
     pendingCount.value = 0
@@ -401,6 +451,47 @@ const saveEdit = async () => {
     editError.value = error.message || t('admin.error_save')
   } finally {
     editSaving.value = false
+  }
+}
+
+const openResetPassword = (user) => {
+  resetPwdUser.value = user
+  resetPwdResult.value = null
+  resetPwdError.value = ''
+  showResetPwdModal.value = true
+}
+
+const confirmResetPassword = async () => {
+  if (!resetPwdUser.value) return
+  resetPwdLoading.value = true
+  resetPwdError.value = ''
+  resetPwdResult.value = null
+  try {
+    const token = supabase.auth.getSession ? (await supabase.auth.getSession()).data?.session?.access_token : ''
+    const res = await fetch(`${API_URL}/admin/users/${resetPwdUser.value.id}/reset-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authStore.token}`
+      }
+    })
+    const data = await res.json()
+    if (res.ok && data.success) {
+      resetPwdResult.value = data.data.password
+      await loadUsers()
+    } else {
+      resetPwdError.value = data.message || 'Erro ao repor senha'
+    }
+  } catch (e) {
+    resetPwdError.value = 'Erro de conexão'
+  } finally {
+    resetPwdLoading.value = false
+  }
+}
+
+const copyPassword = () => {
+  if (resetPwdResult.value) {
+    navigator.clipboard.writeText(resetPwdResult.value)
   }
 }
 

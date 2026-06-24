@@ -107,6 +107,7 @@ $router->post('/admin/users/{id}/reject', 'App\Controllers\UserController', 'rej
 $router->post('/admin/users/{id}/send-email', 'App\Controllers\UserController', 'sendEmail');
 $router->post('/admin/users/{id}/lock', 'App\Controllers\UserController', 'lock');
 $router->post('/admin/users/{id}/unlock', 'App\Controllers\UserController', 'unlock');
+$router->post('/admin/users/{id}/reset-password', 'App\Controllers\UserController', 'resetPassword');
 $router->get('/admin/users/permissions/list', 'App\Controllers\UserController', 'permissions');
 
 // Company (cliente) routes
