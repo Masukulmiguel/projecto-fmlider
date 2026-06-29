@@ -27,7 +27,7 @@
             <td @click.stop>
               <button v-if="!item.is_read" class="btn btn-sm btn-outline-success me-1" @click="markRead(item.id)" :title="t('admin.contacts_mark_read')"><i class="bi bi-check-lg"></i></button>
               <button class="btn btn-sm btn-outline-primary me-1" @click="openReply(item)" :title="t('admin.contacts_reply')"><i class="bi bi-reply"></i></button>
-              <button class="btn btn-sm btn-outline-danger" @click="deleteItem(item.id)" :title="t('admin.contacts_delete')"><i class="bi bi-trash"></i></button>
+              <button class="btn-icon btn-delete" @click="deleteItem(item.id)" :title="t('admin.contacts_delete')"><i class="bi bi-trash3"></i></button>
             </td>
           </tr>
           <tr v-if="!contacts.length"><td colspan="7" class="text-center text-muted py-4">{{ t('admin.contacts_empty') }}</td></tr>
@@ -103,8 +103,12 @@ import { ref, computed, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
 import { useI18n } from '@/composables/useI18n'
+import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 
 const { t } = useI18n()
+const { confirm } = useConfirm()
+const toast = useToast()
 
 const contacts = ref([])
 const loading = ref(true)
@@ -164,24 +168,24 @@ function openReply(item) {
 }
 
 async function sendReply() {
-  if (!replyMessage.value.trim()) return alert(t('admin.contacts_enter_message'))
+  if (!replyMessage.value.trim()) { toast.warning(t('admin.contacts_enter_message')); return }
   sendingReply.value = true
   try {
     const { error } = await supabase.from('contacts').update({ is_replied: true, reply_message: replyMessage.value }).eq('id', replying.value.id)
     if (error) throw error
     bsReplyModal.hide()
-    alert(t('admin.contacts_reply_sent'))
-  } catch (e) { alert(t('admin.contacts_error_sending') + ' ' + (e.message || e)) }
+    toast.success(t('admin.contacts_reply_sent'))
+  } catch (e) { toast.error(t('admin.contacts_error_sending') + ' ' + (e.message || e)) }
   sendingReply.value = false
 }
 
 async function deleteItem(id) {
-  if (!confirm(t('admin.contacts_confirm_delete'))) return
+  if (!await confirm({ title: 'Confirmar eliminação', message: t('admin.contacts_confirm_delete'), type: 'danger', confirmText: 'Eliminar', cancelText: 'Cancelar' })) return
   try {
     const { error } = await supabase.from('contacts').delete().eq('id', id)
     if (error) throw error
     await fetchAll()
-  } catch (e) { alert(t('admin.contacts_error_deleting')) }
+  } catch (e) { toast.error(t('admin.contacts_error_deleting')) }
 }
 </script>
 

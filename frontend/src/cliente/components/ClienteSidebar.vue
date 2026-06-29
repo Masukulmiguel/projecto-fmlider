@@ -34,6 +34,10 @@
               <i class="bi bi-file-earmark-text-fill menu-icon"></i>
               <span class="menu-text" v-show="!collapsed">{{ t('cliente.sidebar_documents') }}</span>
             </router-link>
+            <router-link to="/licenciamentos" class="menu-item" :class="{ active: $route.path.startsWith('/licenciamentos') }" :title="collapsed ? t('cliente.sidebar_licenciamentos') : ''">
+              <i class="bi bi-file-earmark-medical menu-icon"></i>
+              <span class="menu-text" v-show="!collapsed">{{ t('cliente.sidebar_licenciamentos') }}</span>
+            </router-link>
             <router-link to="/mensagens" class="menu-item" :class="{ active: $route.path === '/mensagens' }" :title="collapsed ? t('cliente.sidebar_messages') : ''">
               <i class="bi bi-chat-dots-fill menu-icon"></i>
               <span class="menu-text" v-show="!collapsed">{{ t('cliente.sidebar_messages') }}</span>
@@ -150,10 +154,8 @@ const fetchChatUnread = async () => {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: transparent;
   z-index: 999;
-  -webkit-backdrop-filter: blur(2px);
-  backdrop-filter: blur(2px);
 }
 
 .cliente-sidebar {

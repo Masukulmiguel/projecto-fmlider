@@ -30,9 +30,9 @@
           <p class="card-text small text-muted mb-1 text-truncate-2">{{ item.description }}</p>
           <small class="text-muted">{{ t('admin.gallery_order') }}: {{ item.order_by || 0 }}</small>
         </div>
-        <div class="card-footer bg-transparent border-0 p-2 pt-0">
-          <button class="btn btn-sm btn-outline-danger w-100" @click="confirmDelete(item)">
-            <i class="bi bi-trash me-1"></i> {{ t('admin.gallery_delete') }}
+        <div class="card-footer bg-transparent border-0 p-2 pt-0 d-flex gap-2">
+          <button class="btn-icon btn-delete" @click="confirmDelete(item)" :title="t('common.delete')">
+            <i class="bi bi-trash3"></i>
           </button>
         </div>
       </div>
@@ -156,8 +156,10 @@ import { ref, computed, onMounted, nextTick } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
 import { useI18n } from '@/composables/useI18n'
+import { useToast } from '@/composables/useToast'
 
 const { t } = useI18n()
+const toast = useToast()
 
 const gallery = ref([])
 const loading = ref(true)
@@ -237,7 +239,7 @@ function handleDrop(e) {
 
 function processFile(file) {
   if (file.size > 5 * 1024 * 1024) {
-    alert(t('admin.file_too_large'))
+    toast.warning(t('admin.file_too_large'))
     return
   }
   selectedFile.value = file
@@ -281,7 +283,7 @@ async function saveItem() {
     await fetchGallery()
   } catch (err) {
     console.error('Erro ao salvar:', err)
-    alert(err.message || t('admin.gallery_error_saving'))
+    toast.error(err.message || t('admin.gallery_error_saving'))
   } finally {
     saving.value = false
   }
@@ -303,7 +305,7 @@ async function deleteItem() {
     deletingItem.value = null
   } catch (err) {
     console.error('Erro ao deletar:', err)
-    alert(t('admin.error_deleting_item'))
+    toast.error(t('admin.error_deleting_item'))
   } finally {
     deleting.value = false
   }

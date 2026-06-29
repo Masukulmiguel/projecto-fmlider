@@ -97,11 +97,11 @@
                 <td><span class="status-badge" :class="`status-${item.status}`">{{ statusLabel(item.status) }}</span></td>
                 <td class="text-end">
                   <div class="action-buttons">
-                    <router-link :to="`/cotacoes/${item.id}/editar`" class="btn btn-sm btn-outline-primary" :title="t('cliente.cotacoes_edit')">
-                      <i class="bi bi-pencil"></i>
+                    <router-link :to="`/cotacoes/${item.id}/editar`" class="btn-icon btn-edit" :title="t('cliente.cotacoes_edit')">
+                      <i class="bi bi-pencil-square"></i>
                     </router-link>
-                    <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(item)" :title="t('cliente.cotacoes_delete')">
-                      <i class="bi bi-trash"></i>
+                    <button class="btn-icon btn-delete" @click="confirmDelete(item)" :title="t('cliente.cotacoes_delete')">
+                      <i class="bi bi-trash3"></i>
                     </button>
                   </div>
                 </td>
@@ -119,9 +119,13 @@ import { ref, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 import { useI18n } from '@/composables/useI18n'
+import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
+const toast = useToast()
+const { confirm } = useConfirm()
 const items = ref([])
 const stats = ref({})
 const loading = ref(false)
@@ -161,12 +165,12 @@ const fetchData = async () => {
 const debounceSearch = () => { clearTimeout(searchTimer); searchTimer = setTimeout(fetchData, 300) }
 
 const confirmDelete = async (item) => {
-  if (!confirm(`${t('cliente.cotacoes_confirm_delete')} ${item.reference}?`)) return
+  if (!await confirm({ title: 'Confirmar eliminação', message: `${t('cliente.cotacoes_confirm_delete')} ${item.reference}?`, type: 'danger', confirmText: 'Eliminar', cancelText: 'Cancelar' })) return
   try {
     const { error } = await supabase.from('cotacoes').delete().eq('id', item.id)
     if (error) throw error
     await fetchData()
-  } catch (e) { alert(t('cliente.cotacoes_error_deleting')) }
+  } catch (e) { toast.error(t('cliente.cotacoes_error_deleting')) }
 }
 
 const typeLabel = (type) => ({ maritimo: t('cliente.cotacoes_type_maritimo'), aereo: t('cliente.cotacoes_type_aereo'), terrestre: t('cliente.cotacoes_type_terrestre'), ferroviario: t('cliente.cotacoes_type_ferroviario'), multimodal: t('cliente.cotacoes_type_multimodal') }[type] || type)

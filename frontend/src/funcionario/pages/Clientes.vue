@@ -31,7 +31,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="u in filtered" :key="u.id">
+              <tr v-for="u in paginatedItems" :key="u.id">
                 <td>
                   <div class="d-flex align-items-center gap-2">
                     <div class="avatar-sm">{{ initials(u.name) }}</div>
@@ -52,6 +52,17 @@
               </tr>
             </tbody>
           </table>
+          <div v-if="totalPages > 1" class="pagination-bar">
+            <span class="page-info">{{ currentPage }} / {{ totalPages }}</span>
+            <div class="page-btns">
+              <button class="page-btn" :disabled="currentPage === 1" @click="currentPage--">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+              <button class="page-btn" :disabled="currentPage === totalPages" @click="currentPage++">
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -59,7 +70,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 import { useI18n } from '@/composables/useI18n'
@@ -69,6 +80,8 @@ const authStore = useAuthStore()
 const items = ref([])
 const loading = ref(false)
 const search = ref('')
+const currentPage = ref(1)
+const perPage = 20
 
 const initials = (n) => (n || '?').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
@@ -83,6 +96,13 @@ const filtered = computed(() => {
   )
 })
 
+const totalPages = computed(() => Math.ceil(filtered.value.length / perPage))
+
+const paginatedItems = computed(() => {
+  const start = (currentPage.value - 1) * perPage
+  return filtered.value.slice(start, start + perPage)
+})
+
 const load = async () => {
   loading.value = true
   try {
@@ -91,6 +111,8 @@ const load = async () => {
   } catch (e) { console.error(e) }
   finally { loading.value = false }
 }
+
+watch(search, () => { currentPage.value = 1 })
 
 onMounted(load)
 </script>
@@ -116,4 +138,35 @@ onMounted(load)
   font-size: 0.78rem; font-weight: 600;
   flex-shrink: 0;
 }
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid #f1f5f9;
+}
+.page-info {
+  font-size: 0.82rem;
+  color: #64748b;
+  font-weight: 500;
+}
+.page-btns {
+  display: flex;
+  gap: 6px;
+}
+.page-btn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.page-btn:hover:not(:disabled) { border-color: #0f766e; color: #0f766e; background: #f0fdfa; }
+.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>

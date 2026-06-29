@@ -11,16 +11,6 @@
     </div>
 
     <div v-if="loading" class="text-center py-5"><div class="spinner-border text-primary"></div></div>
-    <div v-else-if="items.length === 0" class="card empty-card">
-      <div class="card-body text-center py-5">
-        <i class="bi bi-person-badge" style="font-size: 3rem; color: #0f766e;"></i>
-        <h5 class="mt-3">{{ t('admin.employees_empty') }}</h5>
-        <p class="text-muted mb-3">{{ t('admin.employees_add_first') }}</p>
-        <button class="btn btn-primary" @click="openForm()">
-          <i class="bi bi-plus-lg me-1"></i> {{ t('admin.employees_new') }}
-        </button>
-      </div>
-    </div>
     <div v-else class="card">
       <div class="card-body p-0">
         <div class="table-responsive">
@@ -28,6 +18,7 @@
             <thead>
               <tr>
                 <th>{{ t('admin.employees_col_employee') }}</th>
+                <th>Departamento</th>
                 <th>{{ t('admin.employees_position') }}</th>
                 <th>Email</th>
                 <th>{{ t('admin.services_status') }}</th>
@@ -37,6 +28,11 @@
               </tr>
             </thead>
             <tbody>
+              <tr v-if="items.length === 0">
+                <td colspan="8" class="text-center py-4 text-muted">
+                  <i class="bi bi-person-badge me-2" style="font-size: 1.5rem; opacity: 0.4;"></i>Nenhum funcionário registado
+                </td>
+              </tr>
               <tr v-for="f in items" :key="f.id">
                 <td>
                   <div class="d-flex align-items-center gap-2">
@@ -51,6 +47,7 @@
                   </div>
                 </td>
                 <td><span class="badge bg-info">{{ f.position || '—' }}</span></td>
+                <td><span class="badge bg-secondary"><i class="bi bi-building me-1"></i>{{ deptLabels[f.departamento] || '—' }}</span></td>
                 <td>{{ f.email }}</td>
                 <td>
                   <span v-if="isLocked(f)" class="badge bg-danger" :title="lockTooltip(f)">
@@ -78,11 +75,11 @@
                     <button v-else class="btn btn-sm btn-outline-warning" @click="openLockModal(f)" :title="t('admin.employees_action_lock')">
                       <i class="bi bi-lock-fill"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary" @click="openForm(f)" :title="t('admin.employees_action_edit')">
-                      <i class="bi bi-pencil"></i>
+                    <button class="btn-icon btn-edit" @click="openForm(f)" :title="t('admin.employees_action_edit')">
+                      <i class="bi bi-pencil-square"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(f)" :title="t('admin.employees_action_delete')">
-                      <i class="bi bi-trash"></i>
+                    <button class="btn-icon btn-delete" @click="confirmDelete(f)" :title="t('admin.employees_action_delete')">
+                      <i class="bi bi-trash3"></i>
                     </button>
                   </div>
                 </td>
@@ -127,6 +124,17 @@
                   <input v-model="form.position" type="text" class="form-control" :placeholder="t('admin.employees_position_placeholder')">
                 </div>
                 <div class="col-md-6">
+                  <label class="form-label fw-bold">Departamento *</label>
+                  <select v-model="form.departamento" class="form-select" @change="onDepartamentoChange" required>
+                    <option value="">Selecione o departamento</option>
+                    <option value="certificacao">Certificação</option>
+                    <option value="documentacao">Documentação</option>
+                    <option value="licenciamentos">Licenciamentos</option>
+                    <option value="facturacao">Facturação</option>
+                    <option value="administracao">Administração</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
                   <label class="form-label">
                     {{ editing ? t('admin.employees_new_password') : t('admin.employees_password_label') }}
                   </label>
@@ -134,6 +142,9 @@
                 </div>
                 <div class="col-12">
                   <label class="form-label fw-bold">{{ t('admin.employees_access_permissions') }}</label>
+                  <div class="perm-dept-info mb-2" v-if="form.departamento">
+                    <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Permissões atribuídas automaticamente pelo departamento: <strong>{{ deptLabels[form.departamento] }}</strong></small>
+                  </div>
                   <div class="perm-grid">
                     <label v-for="group in permissionGroups" :key="group.label" class="perm-group">
                       <div class="perm-group-title">
@@ -214,8 +225,12 @@
 import { ref, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useI18n } from '@/composables/useI18n'
+import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 
 const { t } = useI18n()
+const toast = useToast()
+const { confirm } = useConfirm()
 
 const items = ref([])
 const allPermissions = ref([])
@@ -224,7 +239,29 @@ const saving = ref(false)
 const showForm = ref(false)
 const editing = ref(null)
 const errorMessage = ref('')
-const form = reactive({ name: '', username: '', email: '', phone: '', position: '', password: '', permissions: [] })
+const form = reactive({ name: '', username: '', email: '', phone: '', position: '', departamento: '', password: '', permissions: [] })
+
+const deptLabels = {
+  certificacao: 'Certificação',
+  documentacao: 'Documentação',
+  licenciamentos: 'Licenciamentos',
+  facturacao: 'Facturação',
+  administracao: 'Administração'
+}
+
+const deptPermissions = {
+  certificacao: ['dashboard.view', 'embarques.view', 'embarques.manage', 'clients.view', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply'],
+  documentacao: ['dashboard.view', 'documentos.view', 'documentos.manage', 'clients.view', 'contactos.view', 'chat.view'],
+  licenciamentos: ['dashboard.view', 'licenciamentos.view', 'licenciamentos.manage', 'clients.view', 'contactos.view', 'chat.view'],
+  facturacao: ['dashboard.view', 'cotacoes.view', 'cotacoes.manage', 'clients.view', 'clients.manage', 'contactos.view', 'chat.view'],
+  administracao: ['dashboard.view', 'clients.view', 'clients.manage', 'embarques.view', 'embarques.manage', 'cotacoes.view', 'cotacoes.manage', 'documentos.view', 'documentos.manage', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply', 'licenciamentos.view', 'licenciamentos.manage', 'visitors.view', 'content.manage']
+}
+
+const onDepartamentoChange = () => {
+  if (form.departamento && deptPermissions[form.departamento]) {
+    form.permissions = [...deptPermissions[form.departamento]]
+  }
+}
 const lockTarget = ref(null)
 const lockForm = reactive({ duration_hours: 24, reason: '' })
 const locking = ref(false)
@@ -238,15 +275,17 @@ const PERM_LABELS = {
   'documentos.view': t('admin.perm_view_documents'), 'documentos.manage': t('admin.perm_manage_documents'),
   'contactos.view': t('admin.perm_view_contacts'), 'contactos.manage': t('admin.perm_manage_contacts'),
   'chat.view': t('admin.perm_view_chat'), 'chat.reply': t('admin.perm_reply_chat'),
+  'licenciamentos.view': 'Ver Licenciamentos', 'licenciamentos.manage': 'Gerir Licenciamentos',
   'visitors.view': t('admin.perm_view_visitors'),
   'content.manage': t('admin.perm_manage_content'),
 }
 
 const permissionGroups = [
+  { label: 'Certificação', icon: 'bi-patch-check-fill', perms: ['embarques.view', 'embarques.manage'] },
+  { label: 'Documentação', icon: 'bi-file-earmark-text-fill', perms: ['documentos.view', 'documentos.manage'] },
+  { label: 'Licenciamentos', icon: 'bi-sticky-fill', perms: ['licenciamentos.view', 'licenciamentos.manage'] },
+  { label: 'Facturação', icon: 'bi-receipt', perms: ['cotacoes.view', 'cotacoes.manage'] },
   { label: t('admin.perm_group_clients'), icon: 'bi-people-fill', perms: ['clients.view', 'clients.manage'] },
-  { label: t('admin.perm_group_shipments'), icon: 'bi-box-seam-fill', perms: ['embarques.view', 'embarques.manage'] },
-  { label: t('admin.perm_group_quotes'), icon: 'bi-receipt', perms: ['cotacoes.view', 'cotacoes.manage'] },
-  { label: t('admin.perm_group_documents'), icon: 'bi-file-earmark-text-fill', perms: ['documentos.view', 'documentos.manage'] },
   { label: t('admin.perm_group_contacts'), icon: 'bi-person-rolodex', perms: ['contactos.view', 'contactos.manage'] },
   { label: t('admin.perm_group_chat'), icon: 'bi-chat-dots-fill', perms: ['chat.view', 'chat.reply'] },
   { label: t('admin.perm_group_others'), icon: 'bi-three-dots', perms: ['dashboard.view', 'visitors.view', 'content.manage'] },
@@ -298,10 +337,10 @@ const submitLock = async () => {
   await fetchList()
 }
 const unlockUser = async (u) => {
-  if (!confirm(`${t('admin.employees_lock_confirm')} "${u.name}"?`)) return
+  if (!await confirm({ title: 'Desbloquear funcionário', message: `${t('admin.employees_lock_confirm')} "${u.name}"?`, type: 'info', confirmText: 'Desbloquear', cancelText: 'Cancelar' })) return
   const { error } = await supabase.from('users').update({ locked_at: null, locked_reason: null }).eq('id', u.id)
   if (error) {
-    alert(error.message || t('admin.unlock_error'))
+    toast.error(error.message || t('admin.unlock_error'))
     return
   }
   await fetchList()
@@ -310,7 +349,7 @@ const unlockUser = async (u) => {
 const fetchList = async () => {
   loading.value = true
   try {
-    const { data, error } = await supabase.from('users').select('id, auth_id, created_at, updated_at, name, email, username, phone, role, position, permissions, approval_status, status, photo, password_must_change, password_changed_at, locked_at, locked_reason').eq('role', 'funcionario').order('created_at', { ascending: false })
+    const { data, error } = await supabase.from('users').select('id, auth_id, created_at, updated_at, name, email, username, phone, role, position, departamento, permissions, approval_status, status, photo, password_must_change, password_changed_at, locked_at, locked_reason').eq('role', 'funcionario').order('created_at', { ascending: false })
     if (!error) items.value = data
   } finally { loading.value = false }
 }
@@ -327,6 +366,7 @@ const openForm = (item = null) => {
     form.email = item.email
     form.phone = item.phone || ''
     form.position = item.position || ''
+    form.departamento = item.departamento || ''
     form.password = ''
     form.permissions = Array.isArray(item.permissions) ? [...item.permissions] : []
   } else {
@@ -335,6 +375,7 @@ const openForm = (item = null) => {
     form.email = ''
     form.phone = ''
     form.position = ''
+    form.departamento = ''
     form.password = ''
     form.permissions = []
   }
@@ -362,6 +403,7 @@ const handleSubmit = async () => {
         username: form.username,
         phone: form.phone,
         position: form.position,
+        departamento: form.departamento,
         permissions: form.permissions,
       }
       const { error } = await supabase.from('users').update(payload).eq('id', editing.value.id)
@@ -402,6 +444,7 @@ const handleSubmit = async () => {
           name: form.name,
           phone: form.phone || '',
           position: form.position || '',
+          departamento: form.departamento || '',
           role: 'funcionario',
           approval_status: 'approved',
           permissions: form.permissions,
@@ -420,6 +463,7 @@ const handleSubmit = async () => {
               name: form.name,
               phone: form.phone || '',
               position: form.position || '',
+              departamento: form.departamento || '',
               role: 'funcionario',
               approval_status: 'approved',
               permissions: form.permissions,
@@ -442,6 +486,7 @@ const handleSubmit = async () => {
           email: form.email,
           phone: form.phone || '',
           position: form.position || '',
+          departamento: form.departamento || '',
           role: 'funcionario',
           approval_status: 'approved',
           status: 1,
@@ -460,13 +505,13 @@ const handleSubmit = async () => {
 }
 
 const confirmDelete = async (item) => {
-  if (!confirm(`${t('admin.employees_delete_confirm')} "${item.name}"? ${t('admin.employees_delete_warning')}`)) return
+  if (!await confirm({ title: 'Eliminar funcionário', message: `${t('admin.employees_delete_confirm')} "${item.name}"? ${t('admin.employees_delete_warning')}`, type: 'danger', confirmText: 'Eliminar', cancelText: 'Cancelar' })) return
   try {
     const { error } = await supabase.from('users').delete().eq('id', item.id)
     if (error) throw error
     await fetchList()
   } catch (e) {
-    alert(e.message || t('admin.error_delete'))
+    toast.error(e.message || t('admin.error_delete'))
   }
 }
 

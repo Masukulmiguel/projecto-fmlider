@@ -109,11 +109,11 @@
                 <td><small class="text-muted">{{ formatDate(item.created_at) }}</small></td>
                 <td class="text-end">
                   <div class="action-buttons">
-                    <router-link :to="`/embarques/${item.id}/editar`" class="btn btn-sm btn-outline-primary" :title="t('cliente.embarques_edit')">
-                      <i class="bi bi-pencil"></i>
+                    <router-link :to="`/embarques/${item.id}/editar`" class="btn-icon btn-edit" :title="t('cliente.embarques_edit')">
+                      <i class="bi bi-pencil-square"></i>
                     </router-link>
-                    <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(item)" :title="t('cliente.embarques_delete')">
-                      <i class="bi bi-trash"></i>
+                    <button class="btn-icon btn-delete" @click="confirmDelete(item)" :title="t('cliente.embarques_delete')">
+                      <i class="bi bi-trash3"></i>
                     </button>
                   </div>
                 </td>
@@ -131,9 +131,13 @@ import { ref, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 import { useI18n } from '@/composables/useI18n'
+import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 
 const { t, locale } = useI18n()
 const authStore = useAuthStore()
+const toast = useToast()
+const { confirm } = useConfirm()
 const items = ref([])
 const stats = ref({})
 const loading = ref(false)
@@ -181,13 +185,13 @@ const debounceSearch = () => {
 }
 
 const confirmDelete = async (item) => {
-  if (!confirm(`${t('cliente.embarques_confirm_delete')} ${item.tracking_number}?`)) return
+  if (!await confirm({ title: 'Confirmar eliminação', message: `${t('cliente.embarques_confirm_delete')} ${item.tracking_number}?`, type: 'danger', confirmText: 'Eliminar', cancelText: 'Cancelar' })) return
   try {
     const { error } = await supabase.from('embarques').delete().eq('id', item.id)
     if (error) throw error
     await fetchData()
   } catch (error) {
-    alert(error.message || t('cliente.embarques_error_deleting'))
+    toast.error(error.message || t('cliente.embarques_error_deleting'))
   }
 }
 

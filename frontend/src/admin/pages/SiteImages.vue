@@ -161,8 +161,10 @@ import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
 import { useI18n } from '@/composables/useI18n'
+import { useToast } from '@/composables/useToast'
 
 const { t } = useI18n()
+const toast = useToast()
 
 const images = ref([])
 const loading = ref(false)
@@ -271,7 +273,7 @@ async function uploadImage() {
 
 async function submitForm() {
   if (!form.section || !form.key.trim()) {
-    alert(t('admin.site_images_section_key_required'))
+    toast.warning(t('admin.site_images_section_key_required'))
     return
   }
   submitting.value = true
@@ -298,7 +300,7 @@ async function submitForm() {
     await fetchImages()
   } catch (err) {
     console.error('Erro ao salvar imagem:', err)
-    alert(t('admin.site_images_error_saving') + (err?.message || JSON.stringify(err)))
+    toast.error(t('admin.site_images_error_saving') + (err?.message || JSON.stringify(err)))
   } finally {
     submitting.value = false
   }
@@ -319,7 +321,7 @@ async function deleteImage() {
     await fetchImages()
   } catch (err) {
     console.error('Erro ao deletar:', err)
-    alert(t('admin.site_images_error_deleting'))
+    toast.error(t('admin.site_images_error_deleting'))
   } finally {
     deleting.value = false
   }

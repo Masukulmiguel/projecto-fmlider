@@ -54,11 +54,11 @@
                 <td>{{ item.position || '—' }}</td>
                 <td class="text-end">
                   <div class="action-buttons">
-                    <button class="btn btn-sm btn-outline-secondary" @click="openForm(item)" :title="t('cliente.contactos_edit')">
-                      <i class="bi bi-pencil"></i>
+                    <button class="btn-icon btn-edit" @click="openForm(item)" :title="t('cliente.contactos_edit')">
+                      <i class="bi bi-pencil-square"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(item)" :title="t('cliente.contactos_delete')">
-                      <i class="bi bi-trash"></i>
+                    <button class="btn-icon btn-delete" @click="confirmDelete(item)" :title="t('cliente.contactos_delete')">
+                      <i class="bi bi-trash3"></i>
                     </button>
                   </div>
                 </td>
@@ -132,9 +132,13 @@ import { ref, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 import { useI18n } from '@/composables/useI18n'
+import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
+const toast = useToast()
+const { confirm } = useConfirm()
 const items = ref([])
 const loading = ref(false)
 const saving = ref(false)
@@ -202,12 +206,12 @@ const handleSubmit = async () => {
 }
 
 const confirmDelete = async (item) => {
-  if (!confirm(`${t('cliente.contactos_confirm_delete')} "${item.name}"?`)) return
+  if (!await confirm({ title: 'Confirmar eliminação', message: `${t('cliente.contactos_confirm_delete')} "${item.name}"?`, type: 'danger', confirmText: 'Eliminar', cancelText: 'Cancelar' })) return
   try {
     const { error } = await supabase.from('contactos').delete().eq('id', item.id)
     if (error) throw error
     await fetchData()
-  } catch (e) { alert(t('cliente.contactos_error_deleting')) }
+  } catch (e) { toast.error(t('cliente.contactos_error_deleting')) }
 }
 
 const initials = (name) => {

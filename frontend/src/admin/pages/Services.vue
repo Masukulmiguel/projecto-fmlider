@@ -62,11 +62,11 @@
                 <td>{{ s.order_by ?? 0 }}</td>
                 <td class="text-end">
                   <div class="action-buttons">
-                    <button class="btn btn-sm btn-outline-secondary" @click="openForm(s)" :title="t('common.edit')">
-                      <i class="bi bi-pencil"></i>
+                    <button class="btn-icon btn-edit" @click="openForm(s)" :title="t('common.edit')">
+                      <i class="bi bi-pencil-square"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(s)" :title="t('common.delete')">
-                      <i class="bi bi-trash"></i>
+                    <button class="btn-icon btn-delete" @click="confirmDelete(s)" :title="t('common.delete')">
+                      <i class="bi bi-trash3"></i>
                     </button>
                   </div>
                 </td>
@@ -155,8 +155,12 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useI18n } from '@/composables/useI18n'
+import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 
 const { t } = useI18n()
+const toast = useToast()
+const { confirm } = useConfirm()
 
 const items = ref([])
 const loading = ref(false)
@@ -291,13 +295,13 @@ const handleSubmit = async () => {
 }
 
 const confirmDelete = async (item) => {
-  if (!confirm(t('admin.services_confirm_delete') + ' "' + item.title + '"? ' + t('admin.services_confirm_delete_text'))) return
+  if (!await confirm({ title: 'Confirmar eliminação', message: `${t('admin.services_confirm_delete')} "${item.title}"? ${t('admin.services_confirm_delete_text')}`, type: 'danger', confirmText: 'Eliminar', cancelText: 'Cancelar' })) return
   try {
     const { error } = await supabase.from('services').delete().eq('id', item.id)
     if (error) throw error
     await fetchList()
   } catch (e) {
-    alert(e.message || t('admin.services_error_deleting'))
+    toast.error(e.message || t('admin.services_error_deleting'))
   }
 }
 

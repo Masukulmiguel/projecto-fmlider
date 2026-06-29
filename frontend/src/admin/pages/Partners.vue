@@ -261,8 +261,10 @@ import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
 import { useI18n } from '@/composables/useI18n'
+import { useToast } from '@/composables/useToast'
 
 const { t } = useI18n()
+const toast = useToast()
 
 const partners = ref([])
 const loading = ref(false)
@@ -297,7 +299,7 @@ async function fetchPartners() {
     if (!error) partners.value = data
   } catch (err) {
     console.error('Erro ao buscar parceiros:', err)
-    alert(t('admin.partners_error_loading'))
+    toast.error(t('admin.partners_error_loading'))
   } finally {
     loading.value = false
   }
@@ -359,7 +361,7 @@ async function uploadImage() {
 
 async function submitForm() {
   if (!form.name.trim()) {
-    alert(t('admin.partners_name_required'))
+    toast.warning(t('admin.partners_name_required'))
     return
   }
   submitting.value = true
@@ -387,7 +389,7 @@ async function submitForm() {
     await fetchPartners()
   } catch (err) {
     console.error('Erro ao salvar parceiro:', err)
-    alert(t('admin.partners_error_saving') + '\n' + (err?.message || err?.error?.message || JSON.stringify(err)))
+    toast.error(t('admin.partners_error_saving') + '\n' + (err?.message || err?.error?.message || JSON.stringify(err)))
   } finally {
     submitting.value = false
   }
@@ -408,7 +410,7 @@ async function deletePartner() {
     await fetchPartners()
   } catch (err) {
     console.error('Erro ao deletar parceiro:', err)
-    alert(t('admin.partners_error_deleting'))
+    toast.error(t('admin.partners_error_deleting'))
   } finally {
     deleting.value = false
   }

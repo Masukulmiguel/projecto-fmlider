@@ -72,6 +72,20 @@
           </div>
         </router-link>
       </div>
+      <div class="col-md-6 col-xl-3">
+        <router-link to="/funcionario/licenciamentos" class="stat-card-link">
+          <div class="stat-card fml-fade-up stagger-4 hover-lift">
+            <div class="stat-icon stat-purple">
+              <i class="bi bi-sticky-fill"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">Licenciamentos</span>
+              <span class="stat-value">{{ counts.licenciamentos }}</span>
+              <span class="stat-meta">{{ counts.licenciamentos_pendente || 0 }} pendente(s)</span>
+            </div>
+          </div>
+        </router-link>
+      </div>
     </div>
 
     <!-- Activity + Quick Actions -->
@@ -124,6 +138,10 @@
             <router-link v-if="can('chat.view')" to="/funcionario/mensagens" class="action-btn">
               <div class="action-icon stat-purple"><i class="bi bi-chat-dots"></i></div>
               <span>{{ t('dashboard.view_messages') }}</span>
+            </router-link>
+            <router-link to="/funcionario/licenciamentos" class="action-btn">
+              <div class="action-icon stat-purple"><i class="bi bi-sticky-fill"></i></div>
+              <span>Licenciamentos</span>
             </router-link>
           </div>
         </div>
@@ -188,7 +206,7 @@ import { useI18n } from '@/composables/useI18n.js'
 
 const authStore = useAuthStore()
 const { t } = useI18n()
-const counts = reactive({ embarques: 0, embarques_pendente: 0, cotacoes: 0, cotacoes_pendente: 0, clientes: 0, clientes_pendente: 0, documentos: 0 })
+const counts = reactive({ embarques: 0, embarques_pendente: 0, cotacoes: 0, cotacoes_pendente: 0, clientes: 0, clientes_pendente: 0, documentos: 0, licenciamentos: 0, licenciamentos_pendente: 0 })
 const recentActivity = ref([])
 
 const greeting = computed(() => {
@@ -216,7 +234,24 @@ const permissionLabels = computed(() => {
   return (authStore.permissions || []).map(code => ({ code, label: PERM_LABELS.value[code] || code }))
 })
 
-const can = (perm) => authStore.can(perm)
+const can = (perm) => {
+  if (authStore.isAdmin) return true
+  const dept = authStore.user?.departamento
+  if (!dept) {
+    const perms = authStore.user?.permissions
+    if (!perms || perms.length === 0) return true
+    return perms.includes(perm)
+  }
+  return deptPermissions[dept]?.includes(perm) || false
+}
+
+const deptPermissions = {
+  certificacao: ['dashboard.view', 'embarques.view', 'embarques.manage', 'clients.view', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply'],
+  documentacao: ['dashboard.view', 'documentos.view', 'documentos.manage', 'clients.view', 'contactos.view', 'chat.view'],
+  licenciamentos: ['dashboard.view', 'licenciamentos.view', 'licenciamentos.manage', 'clients.view', 'contactos.view', 'chat.view'],
+  facturacao: ['dashboard.view', 'cotacoes.view', 'cotacoes.manage', 'clients.view', 'clients.manage', 'contactos.view', 'chat.view'],
+  administracao: ['dashboard.view', 'clients.view', 'clients.manage', 'embarques.view', 'embarques.manage', 'cotacoes.view', 'cotacoes.manage', 'documentos.view', 'documentos.manage', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply', 'licenciamentos.view', 'licenciamentos.manage', 'visitors.view', 'content.manage']
+}
 
 const load = async () => {
   const tasks = []
@@ -240,6 +275,23 @@ const load = async () => {
       if (!error && data) { counts.clientes = data.length; counts.clientes_pendente = data.filter(u => u.approval_status === 'pending').length }
     })
   )
+  tasks.push(
+    supabase.from('licenciamentos').select('*').then(({ data, error }) => {
+      if (!error && data) {
+        counts.licenciamentos = data.length
+        counts.licenciamentos_pendente = data.filter(l => l.estado === 'submetido' || l.estado === 'pendente_cliente' || l.estado === 'em_analise').length
+      }
+    })
+  )
+
+  tasks.push(
+    supabase.from('licenciamentos').select('*').then(({ data, error }) => {
+      if (!error && data) {
+        counts.licenciamentos = data.length
+        counts.licenciamentos_pendente = data.filter(l => l.estado === 'submetido' || l.estado === 'pendente_cliente' || l.estado === 'em_analise').length
+      }
+    })
+  )
 
   await Promise.all(tasks)
 
@@ -247,6 +299,7 @@ const load = async () => {
   if (counts.embarques_pendente > 0) acts.push({ title: `${counts.embarques_pendente} ${t('dashboard.shipments').toLowerCase()} ${t('dashboard.pending')}`, subtitle: t('dashboard.needs_attention'), icon: 'bi-box-seam-fill', color: 'blue', time: t('dashboard.now') })
   if (counts.cotacoes_pendente > 0) acts.push({ title: `${counts.cotacoes_pendente} ${t('dashboard.quotes').toLowerCase()} ${t('dashboard.pending')}`, subtitle: t('dashboard.awaits_response'), icon: 'bi-receipt', color: 'green', time: t('dashboard.now') })
   if (counts.clientes_pendente > 0) acts.push({ title: `${counts.clientes_pendente} ${t('dashboard.clients').toLowerCase()} ${t('dashboard.pending_approval')}`, subtitle: t('dashboard.awaits_admin'), icon: 'bi-person-plus-fill', color: 'cyan', time: t('dashboard.today') })
+  if (counts.licenciamentos_pendente > 0) acts.push({ title: `${counts.licenciamentos_pendente} licenciamento(s) pendente(s)`, subtitle: 'Requer atenção', icon: 'bi-sticky-fill', color: 'purple', time: t('dashboard.now') })
   recentActivity.value = acts
 }
 

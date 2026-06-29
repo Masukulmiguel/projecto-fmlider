@@ -71,9 +71,6 @@
             <div class="stat-content">
               <div class="stat-label">{{ t('admin.visitors_title') }}</div>
               <div class="stat-value">{{ data.visitors.total }}</div>
-              <div class="stat-trend">
-                <span class="trend-info">{{ data.visitors.today }} {{ t('admin.dashboard_today') }}</span>
-              </div>
             </div>
           </div>
           <div class="stat-card">
@@ -391,6 +388,10 @@ const openResetModal = () => {
 
 const executeReset = async () => {
   if (!resetSecretKey.value) return
+  if (resetSecretKey.value !== '191925Pmg@') {
+    resetError.value = 'Chave secreta incorrecta'
+    return
+  }
   resetLoading.value = true
   resetError.value = ''
   resetSuccess.value = ''

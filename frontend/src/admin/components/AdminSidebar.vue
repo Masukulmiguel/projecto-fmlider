@@ -47,6 +47,10 @@
               <i class="bi bi-person-lines-fill menu-icon"></i>
               <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.contacts') }}</span>
             </router-link>
+            <router-link to="/admin/licenciamentos" class="menu-item" :class="{ active: $route.path.startsWith('/admin/licenciamentos') }" :title="collapsed ? t('admin_sidebar.licenciamentos') : ''">
+              <i class="bi bi-file-earmark-medical menu-icon"></i>
+              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.licenciamentos') }}</span>
+            </router-link>
           </div>
 
           <div class="menu-section">
@@ -218,10 +222,8 @@ const fetchChatUnread = async () => {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: transparent;
   z-index: 999;
-  -webkit-backdrop-filter: blur(2px);
-  backdrop-filter: blur(2px);
 }
 
 .admin-sidebar {

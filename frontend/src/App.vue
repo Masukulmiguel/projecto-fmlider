@@ -1,5 +1,7 @@
 <template>
   <div id="app" class="app" :class="{ 'sidebar-collapsed': sidebarCollapsed }">
+    <ToastNotification />
+    <ConfirmModal />
     <InactivityClock :timeout="600000" />
     <AdminSidebar v-if="isAdminRoute" :isOpen="sidebarOpen" :collapsed="sidebarCollapsed" @close="sidebarOpen = false" @toggle-collapse="sidebarCollapsed = !sidebarCollapsed" />
     <FuncionarioSidebar v-else-if="isFuncionarioRoute" :isOpen="sidebarOpen" :collapsed="sidebarCollapsed" @close="sidebarOpen = false" @toggle-collapse="sidebarCollapsed = !sidebarCollapsed" />
@@ -36,6 +38,8 @@ import FuncionarioSidebar from '@/funcionario/components/FuncionarioSidebar.vue'
 import FuncionarioNavbar from '@/funcionario/components/FuncionarioNavbar.vue'
 import ChatbotWidget from '@/components/ChatbotWidget.vue'
 import InactivityClock from '@/components/InactivityClock.vue'
+import ToastNotification from '@/components/ToastNotification.vue'
+import ConfirmModal from '@/components/ConfirmModal.vue'
 import { RouterView } from 'vue-router'
 import { trackVisitor } from '@/utils/visitor'
 
@@ -119,6 +123,7 @@ watch(() => route.fullPath, () => {
 main {
   min-height: calc(100vh - 64px);
   padding: 0;
+  padding-top: 60px;
 }
 
 @media (max-width: 1023px) {
@@ -134,6 +139,28 @@ main {
   .cliente-content,
   .funcionario-content {
     margin-left: 0;
+  }
+}
+
+.sidebar-collapsed .admin-content .admin-navbar,
+.sidebar-collapsed .funcionario-content .funcionario-navbar,
+.sidebar-collapsed .cliente-content .cliente-navbar {
+  left: 72px;
+}
+
+@media (max-width: 1023px) {
+  .sidebar-collapsed .admin-content .admin-navbar,
+  .sidebar-collapsed .funcionario-content .funcionario-navbar,
+  .sidebar-collapsed .cliente-content .cliente-navbar {
+    left: 72px;
+  }
+}
+
+@media (max-width: 767px) {
+  .sidebar-collapsed .admin-content .admin-navbar,
+  .sidebar-collapsed .funcionario-content .funcionario-navbar,
+  .sidebar-collapsed .cliente-content .cliente-navbar {
+    left: 0;
   }
 }
 </style>

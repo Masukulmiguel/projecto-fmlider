@@ -77,8 +77,10 @@
 <script setup>
 import { ref } from 'vue'
 import { useI18n } from '@/composables/useI18n'
+import { useToast } from '@/composables/useToast'
 
 const { t } = useI18n()
+const toast = useToast()
 
 const form = ref({
   name: '',
@@ -99,11 +101,11 @@ const submitForm = async () => {
     })
     
     if (response.ok) {
-      alert(t('contact.form_success'))
+      toast.success(t('contact.form_success'))
       form.value = { name: '', company: '', phone: '', email: '', subject: '', message: '' }
     }
   } catch (error) {
-    alert(t('contact.form_error'))
+    toast.error(t('contact.form_error'))
   }
 }
 </script>

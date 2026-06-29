@@ -264,8 +264,10 @@ import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
 import { useI18n } from '@/composables/useI18n'
+import { useToast } from '@/composables/useToast'
 
 const { t } = useI18n()
+const toast = useToast()
 
 const news = ref([])
 const loading = ref(false)
@@ -319,7 +321,7 @@ async function fetchNews() {
     if (!error) news.value = data
   } catch (err) {
     console.error('Erro ao buscar notícias:', err)
-    alert(t('admin.error_loading_news'))
+    toast.error(t('admin.error_loading_news'))
   } finally {
     loading.value = false
   }
@@ -378,7 +380,7 @@ async function uploadImage() {
 
 async function submitForm() {
   if (!form.title.trim()) {
-    alert(t('admin.news_title_required'))
+    toast.warning(t('admin.news_title_required'))
     return
   }
   submitting.value = true
@@ -407,7 +409,7 @@ async function submitForm() {
     await fetchNews()
   } catch (err) {
     console.error('Erro ao salvar notícia:', err)
-    alert(t('admin.error_saving_news'))
+    toast.error(t('admin.error_saving_news'))
   } finally {
     submitting.value = false
   }
@@ -428,7 +430,7 @@ async function deleteNews() {
     await fetchNews()
   } catch (err) {
     console.error('Erro ao deletar notícia:', err)
-    alert(t('admin.error_deleting_news'))
+    toast.error(t('admin.error_deleting_news'))
   } finally {
     deleting.value = false
   }

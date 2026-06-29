@@ -19,17 +19,34 @@
           @blur="handleSearchBlur"
           @input="handleSearch"
         >
-        <div v-if="showResults && filteredPages.length" class="search-dropdown">
-          <router-link
-            v-for="page in filteredPages"
-            :key="page.route"
-            :to="page.route"
-            class="search-result"
-            @click="clearSearch"
-          >
-            <i :class="page.icon" class="result-icon"></i>
-            <span>{{ page.label }}</span>
-          </router-link>
+        <div v-if="showResults && (filteredPages.length || dataResults.length)" class="search-dropdown">
+          <div v-if="filteredPages.length" class="search-section">
+            <div class="search-section-title">Páginas</div>
+            <router-link
+              v-for="page in filteredPages"
+              :key="page.route"
+              :to="page.route"
+              class="search-result"
+              @click="clearSearch"
+            >
+              <i :class="page.icon" class="result-icon"></i>
+              <span>{{ page.label }}</span>
+            </router-link>
+          </div>
+          <div v-if="dataResults.length" class="search-section">
+            <div class="search-section-title">Dados</div>
+            <router-link
+              v-for="item in dataResults"
+              :key="item.id"
+              :to="item.link"
+              class="search-result"
+              @click="clearSearch"
+            >
+              <i :class="item.icon" class="result-icon"></i>
+              <span class="result-label">{{ item.label }}</span>
+              <span class="result-meta">{{ item.meta }}</span>
+            </router-link>
+          </div>
         </div>
       </div>
     </div>
@@ -78,6 +95,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
+import { supabase } from '@/lib/supabase'
 import { useI18n } from '@/composables/useI18n.js'
 import NotificationBell from '@/components/NotificationBell.vue'
 
@@ -94,6 +112,8 @@ const searchFocused = ref(false)
 const showDropdown = ref(false)
 const showResults = ref(false)
 const dropdownRef = ref(null)
+const dataResults = ref([])
+let searchTimeout = null
 
 const userInitials = computed(() => {
   const name = authStore.user?.name || 'F'
@@ -136,6 +156,28 @@ const filteredPages = computed(() => {
 
 const handleSearch = () => {
   showResults.value = searchQuery.value.length > 0
+  clearTimeout(searchTimeout)
+  if (searchQuery.value.length < 2) { dataResults.value = []; return }
+  searchTimeout = setTimeout(async () => {
+    const q = searchQuery.value.trim()
+    const results = []
+    try {
+      const { data: users } = await supabase.from('users').select('id, name, email, role').or(`name.ilike.%${q}%,email.ilike.%${q}%`).limit(5)
+      ;(users || []).forEach(u => {
+        const roleLabel = u.role === 'cliente' ? 'Cliente' : u.role === 'funcionario' ? 'Funcionário' : 'Admin'
+        results.push({ id: 'u-' + u.id, label: u.name, meta: roleLabel, icon: 'bi bi-person-fill', link: '/funcionario/clientes' })
+      })
+      const { data: lic } = await supabase.from('licenciamentos').select('id, referencia, cliente_nome, empresa, estado').or(`referencia.ilike.%${q}%,cliente_nome.ilike.%${q}%,empresa.ilike.%${q}%`).limit(5)
+      ;(lic || []).forEach(l => {
+        results.push({ id: 'l-' + l.id, label: l.referencia || 'Sem referência', meta: (l.cliente_nome || '') + (l.empresa ? ' · ' + l.empresa : ''), icon: 'bi bi-file-earmark-check', link: `/funcionario/licenciamentos` })
+      })
+      const { data: emb } = await supabase.from('embarques').select('id, tracking_number, client_name, company_name').or(`tracking_number.ilike.%${q}%,client_name.ilike.%${q}%`).limit(5)
+      ;(emb || []).forEach(e => {
+        results.push({ id: 'e-' + e.id, label: e.tracking_number || 'Sem tracking', meta: e.client_name || '', icon: 'bi bi-box-seam', link: '/funcionario/embarques' })
+      })
+    } catch (e) { console.error('Search error:', e) }
+    dataResults.value = results.slice(0, 8)
+  }, 300)
 }
 
 const handleSearchBlur = () => {
@@ -148,6 +190,7 @@ const handleSearchBlur = () => {
 const clearSearch = () => {
   searchQuery.value = ''
   showResults.value = false
+  dataResults.value = []
 }
 
 const toggleDropdown = (e) => {
@@ -178,17 +221,23 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .funcionario-navbar {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 260px;
+  right: 0;
   z-index: 100;
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 60px;
   padding: 0 16px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid #e4e6eb;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
   gap: 12px;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .navbar-left {
@@ -281,6 +330,21 @@ onBeforeUnmount(() => {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
   padding: 6px;
   z-index: 200;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.search-section {
+  margin-bottom: 4px;
+}
+
+.search-section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #65676b;
+  padding: 4px 12px 2px;
+  letter-spacing: 0.5px;
 }
 
 .search-result {
@@ -304,6 +368,19 @@ onBeforeUnmount(() => {
 .result-icon {
   color: #1877f2;
   font-size: 1.1rem;
+}
+
+.result-label {
+  flex: 1;
+}
+
+.result-meta {
+  font-size: 0.8rem;
+  color: #65676b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
 }
 
 .navbar-right {
@@ -475,6 +552,10 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 767px) {
+  .funcionario-navbar {
+    left: 0;
+  }
+
   .hamburger-btn {
     display: flex;
   }
@@ -503,6 +584,10 @@ onBeforeUnmount(() => {
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
+  .funcionario-navbar {
+    left: 72px;
+  }
+
   .page-title {
     font-size: 1rem;
   }

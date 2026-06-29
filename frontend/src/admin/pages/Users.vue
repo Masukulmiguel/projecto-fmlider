@@ -61,10 +61,10 @@
                   <button class="btn btn-outline-danger" @click="destroy(user)">{{ t('common.delete') }}</button>
                 </div>
                 <div class="btn-group btn-group-sm" v-else>
-                  <button class="btn btn-outline-primary" @click="openEdit(user)"><i class="bi bi-pencil"></i></button>
-                  <button class="btn btn-outline-info" @click="openDetail(user)"><i class="bi bi-eye"></i></button>
-                  <button class="btn btn-outline-warning" @click="openResetPassword(user)" title="Repor senha"><i class="bi bi-key-fill"></i></button>
-                  <button class="btn btn-outline-danger" @click="destroy(user)">{{ t('common.delete') }}</button>
+                  <button class="btn-icon btn-edit" @click="openEdit(user)" :title="t('common.edit')"><i class="bi bi-pencil-square"></i></button>
+                  <button class="btn-icon btn-view" @click="openDetail(user)" :title="t('common.view')"><i class="bi bi-eye"></i></button>
+                  <button class="btn-icon" @click="openResetPassword(user)" title="Repor senha"><i class="bi bi-key-fill"></i></button>
+                  <button class="btn-icon btn-delete" @click="destroy(user)" :title="t('common.delete')"><i class="bi bi-trash3"></i></button>
                 </div>
               </td>
             </tr>
@@ -265,8 +265,12 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useI18n } from '@/composables/useI18n'
 import { useAuthStore } from '@/stores/authStore'
+import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 
 const { t } = useI18n()
+const toast = useToast()
+const { confirm } = useConfirm()
 const authStore = useAuthStore()
 const API_URL = import.meta.env.VITE_API_URL || ''
 
@@ -328,7 +332,7 @@ const openDetail = async (user) => {
     if (!error) detailCompany.value = company
     showDetailModal.value = true
   } catch (error) {
-    alert(t('admin.users_error_loading'))
+    toast.error(t('admin.users_error_loading'))
   } finally {
     detailLoading.value = false
   }
@@ -357,7 +361,7 @@ const getLockStatus = (user) => {
 }
 
 const approve = async (user) => {
-  if (!confirm(`${t('admin.users_confirm_approve')} ${user.name}?`)) return
+  if (!await confirm({ title: 'Aprovar utilizador', message: `${t('admin.users_confirm_approve')} ${user.name}?`, type: 'info', confirmText: 'Aprovar', cancelText: 'Cancelar' })) return
   try {
     const { error } = await supabase.from('users').update({ approval_status: 'approved', approved_at: new Date() }).eq('id', user.id)
     if (!error) {
@@ -373,7 +377,7 @@ const approve = async (user) => {
       await loadPendingCount()
     }
   } catch (error) {
-    alert(error.message || t('admin.error_approve'))
+    toast.error(error.message || t('admin.error_approve'))
   }
 }
 
@@ -400,19 +404,19 @@ const confirmReject = async () => {
       await loadPendingCount()
     }
   } catch (error) {
-    alert(error.message || t('admin.error_reject'))
+    toast.error(error.message || t('admin.error_reject'))
   }
 }
 
 const destroy = async (user) => {
-  if (!confirm(`${t('admin.users_confirm_delete')} ${user.name}?`)) return
+  if (!await confirm({ title: 'Eliminar utilizador', message: `${t('admin.users_confirm_delete')} ${user.name}?`, type: 'danger', confirmText: 'Eliminar', cancelText: 'Cancelar' })) return
   try {
     const { error } = await supabase.from('users').delete().eq('id', user.id)
     if (!error) {
       await loadUsers()
     }
   } catch (error) {
-    alert(error.message || t('admin.error_delete'))
+    toast.error(error.message || t('admin.error_delete'))
   }
 }
 

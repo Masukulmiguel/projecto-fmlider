@@ -49,18 +49,14 @@
               </td>
               <td class="align-middle">{{ banner.order_by }}</td>
               <td class="align-middle text-end">
-                <button
-                  class="btn btn-sm btn-outline-primary me-2"
-                  @click="openEditModal(banner)"
-                >
-                  {{ t('common.edit') }}
-                </button>
-                <button
-                  class="btn btn-sm btn-outline-danger"
-                  @click="confirmDelete(banner)"
-                >
-                  {{ t('common.delete') }}
-                </button>
+                <div class="action-buttons">
+                  <button class="btn-icon btn-edit" @click="openEditModal(banner)" :title="t('common.edit')">
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+                  <button class="btn-icon btn-delete" @click="confirmDelete(banner)" :title="t('common.delete')">
+                    <i class="bi bi-trash3"></i>
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -249,8 +245,10 @@ import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
 import { useI18n } from '@/composables/useI18n'
+import { useToast } from '@/composables/useToast'
 
 const { t } = useI18n()
+const toast = useToast()
 
 const banners = ref([])
 const loading = ref(false)
@@ -285,7 +283,7 @@ async function fetchBanners() {
     if (!error) banners.value = data
   } catch (err) {
     console.error('Erro ao buscar banners:', err)
-    alert(t('admin.error_loading_banners'))
+    toast.error(t('admin.error_loading_banners'))
   } finally {
     loading.value = false
   }
@@ -347,7 +345,7 @@ async function uploadImage() {
 
 async function submitForm() {
   if (!form.title.trim()) {
-    alert(t('admin.banners_title_required'))
+    toast.warning(t('admin.banners_title_required'))
     return
   }
   submitting.value = true
@@ -375,7 +373,7 @@ async function submitForm() {
     await fetchBanners()
   } catch (err) {
     console.error('Erro ao salvar banner:', err)
-    alert(t('admin.error_saving_banner') + '\n' + (err?.message || err?.error?.message || JSON.stringify(err)))
+    toast.error(t('admin.error_saving_banner') + '\n' + (err?.message || err?.error?.message || JSON.stringify(err)))
   } finally {
     submitting.value = false
   }
@@ -396,7 +394,7 @@ async function deleteBanner() {
     await fetchBanners()
   } catch (err) {
     console.error('Erro ao deletar banner:', err)
-    alert(t('admin.error_deleting_banner'))
+    toast.error(t('admin.error_deleting_banner'))
   } finally {
     deleting.value = false
   }

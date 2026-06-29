@@ -209,6 +209,16 @@ $router->post('/notifications/{id}/read', 'App\Controllers\NotificationControlle
 $router->post('/visitors/track', 'App\Controllers\VisitorController', 'track');
 $router->get('/admin/visitors/stats', 'App\Controllers\VisitorController', 'stats');
 
+// Licenciamentos
+$router->get('/licenciamentos', 'App\Controllers\LicenciamentoController', 'index');
+$router->get('/licenciamentos/stats', 'App\Controllers\LicenciamentoController', 'stats');
+$router->post('/licenciamentos', 'App\Controllers\LicenciamentoController', 'store');
+$router->get('/licenciamentos/{id}', 'App\Controllers\LicenciamentoController', 'show');
+$router->put('/licenciamentos/{id}', 'App\Controllers\LicenciamentoController', 'update');
+$router->delete('/licenciamentos/{id}', 'App\Controllers\LicenciamentoController', 'destroy');
+$router->post('/licenciamentos/import', 'App\Controllers\LicenciamentoController', 'importExcel');
+$router->put('/licenciamentos/{id}/estado', 'App\Controllers\LicenciamentoController', 'updateEstado');
+
 // Secret reset (admin only)
 $router->post('/admin/secret-reset', 'App\Controllers\SecretResetController', 'reset');
 

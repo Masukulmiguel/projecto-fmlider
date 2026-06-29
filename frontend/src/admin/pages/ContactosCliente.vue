@@ -46,9 +46,9 @@
                     <button class="btn btn-sm btn-outline-info" @click="openDetail(item)" :title="t('admin.contactos_cliente_detail')">
                       <i class="bi bi-eye"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" @click="openDelete(item)" :title="t('common.delete')">
-                      <i class="bi bi-trash"></i>
-                    </button>
+              <button class="btn-icon btn-delete" @click="openDelete(item)" :title="t('common.delete')">
+                <i class="bi bi-trash3"></i>
+              </button>
                   </div>
                 </td>
               </tr>

@@ -53,9 +53,9 @@
                     <a :href="'/api/documentos/' + item.id + '/download'" target="_blank" class="btn btn-sm btn-outline-success" title="Download">
                       <i class="bi bi-download"></i>
                     </a>
-                    <button class="btn btn-sm btn-outline-danger" @click="openDelete(item)" :title="t('admin.documentos_delete')">
-                      <i class="bi bi-trash"></i>
-                    </button>
+              <button class="btn-icon btn-delete" @click="openDelete(item)" :title="t('admin.documentos_delete')">
+                <i class="bi bi-trash3"></i>
+              </button>
                   </div>
                 </td>
               </tr>

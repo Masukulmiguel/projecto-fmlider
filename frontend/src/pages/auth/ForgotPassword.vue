@@ -30,10 +30,12 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useI18n } from '@/composables/useI18n'
+import { useToast } from '@/composables/useToast'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const { t } = useI18n()
+const toast = useToast()
 
 const form = ref({
   email: ''
@@ -42,10 +44,10 @@ const form = ref({
 const handleReset = async () => {
   const result = await authStore.resetPassword(form.value.email)
   if (result.success) {
-    alert(t('auth.forgot_success'))
+    toast.success(t('auth.forgot_success'))
     router.push('/login')
   } else {
-    alert(t('auth.forgot_error'))
+    toast.error(t('auth.forgot_error'))
   }
 }
 </script>

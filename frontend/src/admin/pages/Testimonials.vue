@@ -26,8 +26,8 @@
             <td><span class="badge" :class="item.status === 'published' ? 'bg-success' : 'bg-secondary'">{{ item.status }}</span></td>
             <td>{{ item.order_by }}</td>
             <td>
-              <button class="btn btn-sm btn-outline-primary me-1" @click="openModal(item)"><i class="bi bi-pencil"></i></button>
-              <button class="btn btn-sm btn-outline-danger" @click="deleteItem(item.id)"><i class="bi bi-trash"></i></button>
+        <button class="btn-icon btn-edit" @click="openModal(item)" :title="t('common.edit')"><i class="bi bi-pencil-square"></i></button>
+        <button class="btn-icon btn-delete" @click="deleteItem(item.id)" :title="t('common.delete')"><i class="bi bi-trash3"></i></button>
             </td>
           </tr>
           <tr v-if="!testimonials.length"><td colspan="8" class="text-center text-muted py-4">{{ t('admin.testimonials_empty') }}</td></tr>
@@ -98,8 +98,12 @@ import { ref, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
 import { useI18n } from '@/composables/useI18n'
+import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 
 const { t } = useI18n()
+const toast = useToast()
+const { confirm } = useConfirm()
 
 const testimonials = ref([])
 const loading = ref(true)
@@ -134,7 +138,7 @@ function openModal(item = null) {
 }
 
 async function save() {
-  if (!form.name || !form.message) return alert(t('admin.testimonials_required'))
+  if (!form.name || !form.message) { toast.warning(t('admin.testimonials_required')); return }
   saving.value = true
   try {
     const payload = {
@@ -156,16 +160,16 @@ async function save() {
     }
     bsModal.hide()
     await fetchAll()
-  } catch (e) { alert(t('admin.testimonials_error_saving') + ' ' + (e.message || e)) }
+  } catch (e) { toast.error(t('admin.testimonials_error_saving') + ' ' + (e.message || e)) }
   saving.value = false
 }
 
 async function deleteItem(id) {
-  if (!confirm(t('admin.testimonials_confirm_delete'))) return
+  if (!await confirm({ title: 'Confirmar eliminação', message: t('admin.testimonials_confirm_delete'), type: 'danger', confirmText: 'Eliminar', cancelText: 'Cancelar' })) return
   try {
     const { error } = await supabase.from('testimonials').delete().eq('id', id)
     if (error) throw error
     await fetchAll()
-  } catch (e) { alert(t('admin.testimonials_error_deleting')) }
+  } catch (e) { toast.error(t('admin.testimonials_error_deleting')) }
 }
 </script>

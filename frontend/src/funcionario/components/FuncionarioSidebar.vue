@@ -53,6 +53,10 @@
             <i class="bi bi-person-lines-fill nav-icon"></i>
             <span class="nav-text">{{ t('funcionario.sidebar_contacts') }}</span>
           </router-link>
+          <router-link v-if="can('licenciamentos.view')" to="/funcionario/licenciamentos" class="nav-item" active-class="active" :class="{ 'icon-only': collapsed }" :title="collapsed ? t('funcionario.sidebar_licenciamentos') : ''">
+            <i class="bi bi-sticky-fill nav-icon"></i>
+            <span class="nav-text">{{ t('funcionario.sidebar_licenciamentos') }}</span>
+          </router-link>
         </template>
 
         <div class="nav-section">{{ t('funcionario.sidebar_account') }}</div>
@@ -71,7 +75,8 @@
           <div class="user-avatar">{{ initials(authStore.user.name) }}</div>
           <div class="user-info" v-if="!collapsed">
             <div class="user-name">{{ authStore.user.name }}</div>
-            <div class="user-role">{{ authStore.user.position || t('funcionario.profile_role') }}</div>
+            <div class="user-dept" v-if="authStore.user.departamento">{{ deptLabels[authStore.user.departamento] || authStore.user.position }}</div>
+            <div class="user-role" v-else>{{ authStore.user.position || t('funcionario.profile_role') }}</div>
           </div>
         </div>
         <button class="logout-btn" :class="{ 'icon-only': collapsed }" @click="logout" :title="collapsed ? t('funcionario.sidebar_logout') : ''">
@@ -100,12 +105,37 @@ const props = defineProps({
 const emit = defineEmits(['close', 'toggle-collapse'])
 
 const authStore = useAuthStore()
+
+const deptLabels = {
+  certificacao: 'Certificação',
+  documentacao: 'Documentação',
+  licenciamentos: 'Licenciamentos',
+  facturacao: 'Facturação',
+  administracao: 'Administração'
+}
 const chatStore = useChatStore()
 const router = useRouter()
 const chatUnread = ref(0)
 let pollInterval = null
 
-const can = (perm) => authStore.can(perm)
+const deptPermissions = {
+  certificacao: ['dashboard.view', 'embarques.view', 'embarques.manage', 'clients.view', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply'],
+  documentacao: ['dashboard.view', 'documentos.view', 'documentos.manage', 'clients.view', 'contactos.view', 'chat.view'],
+  licenciamentos: ['dashboard.view', 'licenciamentos.view', 'licenciamentos.manage', 'clients.view', 'contactos.view', 'chat.view'],
+  facturacao: ['dashboard.view', 'cotacoes.view', 'cotacoes.manage', 'clients.view', 'clients.manage', 'contactos.view', 'chat.view'],
+  administracao: ['dashboard.view', 'clients.view', 'clients.manage', 'embarques.view', 'embarques.manage', 'cotacoes.view', 'cotacoes.manage', 'documentos.view', 'documentos.manage', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply', 'licenciamentos.view', 'licenciamentos.manage', 'visitors.view', 'content.manage']
+}
+
+const can = (perm) => {
+  if (authStore.isAdmin) return true
+  const dept = authStore.user?.departamento
+  if (!dept) {
+    const perms = authStore.user?.permissions
+    if (!perms || perms.length === 0) return true
+    return perms.includes(perm)
+  }
+  return deptPermissions[dept]?.includes(perm) || false
+}
 const initials = (n) => (n || '?').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()
 
 const fetchChatUnread = async () => {
@@ -156,7 +186,7 @@ onBeforeUnmount(() => {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: transparent;
   z-index: 999;
 }
 
@@ -426,6 +456,17 @@ onBeforeUnmount(() => {
 .user-role {
   font-size: 0.75rem;
   color: #65676b;
+}
+
+.user-dept {
+  font-size: 0.7rem;
+  color: #1a365d;
+  font-weight: 600;
+  background: #e8f0fe;
+  padding: 1px 6px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 2px;
 }
 
 .logout-btn {

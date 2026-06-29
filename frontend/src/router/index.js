@@ -55,6 +55,8 @@ const AdminMessages = () => import('@/admin/pages/Messages.vue')
 const AdminVisitors = () => import('@/admin/pages/Visitors.vue')
 const AdminFuncionarios = () => import('@/admin/pages/Funcionarios.vue')
 const AdminSiteImages = () => import('@/admin/pages/SiteImages.vue')
+const AdminLicenciamentos = () => import('@/admin/pages/Licenciamentos.vue')
+const AdminLicenciamentoDetail = () => import('@/admin/pages/LicenciamentoDetail.vue')
 
 const FuncionarioDashboard = () => import('@/funcionario/pages/Dashboard.vue')
 const FuncionarioMessages = () => import('@/funcionario/pages/Messages.vue')
@@ -64,8 +66,13 @@ const FuncionarioCotacoes = () => import('@/funcionario/pages/Cotacoes.vue')
 const FuncionarioDocumentos = () => import('@/funcionario/pages/Documentos.vue')
 const FuncionarioContactos = () => import('@/funcionario/pages/Contactos.vue')
 const FuncionarioClientes = () => import('@/funcionario/pages/Clientes.vue')
+const FuncionarioLicenciamentos = () => import('@/funcionario/pages/Licenciamentos.vue')
 
 const ClienteMessages = () => import('@/pages/cliente/Messages.vue')
+const ClienteLicenciamentosList = () => import('@/pages/cliente/licenciamentos/List.vue')
+const ClienteLicenciamentoDetail = () => import('@/pages/cliente/licenciamentos/Detail.vue')
+const LicenciamentosList = () => import('@/pages/cliente/licenciamentos/List.vue')
+const LicenciamentoDetail = () => import('@/pages/cliente/licenciamentos/Detail.vue')
 
 const routes = [
   { path: '/', name: 'Home', component: Home, meta: { layout: 'public' } },
@@ -86,7 +93,7 @@ const routes = [
   { path: '/login', name: 'Login', component: Login, meta: { layout: 'public' } },
   { path: '/registro', name: 'Register', component: Register, meta: { layout: 'public' } },
   { path: '/esqueci-senha', name: 'ForgotPassword', component: ForgotPassword, meta: { layout: 'public' } },
-  { path: '/redefinir-senha/:token', name: 'ResetPassword', component: ResetPassword, meta: { layout: 'public' } },
+  { path: '/redefinir-senha', name: 'ResetPassword', component: ResetPassword, meta: { layout: 'public' } },
   { path: '/mudar-senha', name: 'ChangePassword', component: ChangePassword, meta: { layout: 'public', requiresAuth: true } },
 
   { path: '/admin', name: 'AdminDashboard', component: AdminDashboard, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
@@ -109,6 +116,8 @@ const routes = [
   { path: '/admin/funcionarios', name: 'AdminFuncionarios', component: AdminFuncionarios, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
   { path: '/admin/definicoes', name: 'AdminSettings', component: AdminSettings, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
   { path: '/admin/imagens', name: 'AdminSiteImages', component: AdminSiteImages, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
+  { path: '/admin/licenciamentos', name: 'AdminLicenciamentos', component: AdminLicenciamentos, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
+  { path: '/admin/licenciamentos/:id', name: 'AdminLicenciamentoDetail', component: AdminLicenciamentoDetail, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
 
   { path: '/funcionario', name: 'FuncionarioDashboard', component: FuncionarioDashboard, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
   { path: '/funcionario/mensagens', name: 'FuncionarioMessages', component: FuncionarioMessages, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
@@ -118,6 +127,7 @@ const routes = [
   { path: '/funcionario/documentos', name: 'FuncionarioDocumentos', component: FuncionarioDocumentos, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
   { path: '/funcionario/contactos', name: 'FuncionarioContactos', component: FuncionarioContactos, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
   { path: '/funcionario/clientes', name: 'FuncionarioClientes', component: FuncionarioClientes, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
+  { path: '/funcionario/licenciamentos', name: 'FuncionarioLicenciamentos', component: FuncionarioLicenciamentos, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
 
   { path: '/dashboard', name: 'ClienteDashboard', component: ClienteDashboard, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
   { path: '/perfil', name: 'ClienteProfile', component: ClienteProfile, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
@@ -135,6 +145,12 @@ const routes = [
   { path: '/cotacoes', name: 'CotacoesList', component: CotacoesList, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
   { path: '/cotacoes/novo', name: 'CotacaoNew', component: CotacaoForm, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
   { path: '/cotacoes/:id/editar', name: 'CotacaoEdit', component: CotacaoForm, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
+
+  { path: '/licenciamentos', name: 'ClienteLicenciamentosList', component: ClienteLicenciamentosList, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
+  { path: '/licenciamentos/:id', name: 'ClienteLicenciamentoDetail', component: ClienteLicenciamentoDetail, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
+
+  { path: '/licenciamentos', name: 'LicenciamentosList', component: LicenciamentosList, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
+  { path: '/licenciamentos/:id', name: 'LicenciamentoDetail', component: LicenciamentoDetail, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
 ]
 
 const router = createRouter({

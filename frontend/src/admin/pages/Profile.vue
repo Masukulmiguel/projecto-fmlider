@@ -115,8 +115,10 @@ import { ref, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 import { useI18n } from '@/composables/useI18n'
+import { useConfirm } from '@/composables/useConfirm'
 
 const { t } = useI18n()
+const { confirm } = useConfirm()
 
 const authStore = useAuthStore()
 const form = reactive({ name: '', phone: '' })
@@ -193,7 +195,7 @@ const onPhotoChange = async (event) => {
 
 const restorePhoto = async (p) => {
   if (p.is_current) return
-  if (!confirm(t('admin.profile_restore_confirm'))) return
+  if (!await confirm({ title: 'Restaurar foto', message: t('admin.profile_restore_confirm'), type: 'warning', confirmText: 'Restaurar', cancelText: 'Cancelar' })) return
   photoError.value = true
   photoMessage.value = t('admin.profile_restore_not_available')
 }

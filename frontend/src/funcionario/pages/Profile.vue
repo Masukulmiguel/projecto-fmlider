@@ -114,8 +114,10 @@ import { ref, reactive, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { supabase } from '@/lib/supabase'
 import { useI18n } from '@/composables/useI18n'
+import { useConfirm } from '@/composables/useConfirm'
 
 const { t } = useI18n()
+const { confirm } = useConfirm()
 const authStore = useAuthStore()
 const form = reactive({ name: '', phone: '' })
 const pwd = reactive({ current: '', new: '', confirm: '' })
@@ -196,7 +198,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT', { day: '2-
 
 const restorePhoto = async (p) => {
   if (p.is_current) return
-  if (!confirm(t('funcionario.profile_restore_confirm'))) return
+  if (!await confirm({ title: 'Restaurar foto', message: t('funcionario.profile_restore_confirm'), type: 'warning', confirmText: 'Restaurar', cancelText: 'Cancelar' })) return
   photoError.value = true
   photoMessage.value = t('funcionario.profile_restore_not_available')
 }

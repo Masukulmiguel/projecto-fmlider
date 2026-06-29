@@ -62,12 +62,12 @@
                 <td>{{ formatCurrency(item.declared_value, item.currency) }}</td>
                 <td><small class="text-muted">{{ formatDate(item.created_at) }}</small></td>
                 <td>
-                  <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-primary" @click="openEdit(item)" :title="t('common.edit')">
-                      <i class="bi bi-pencil"></i>
+                  <div class="action-buttons">
+                    <button class="btn-icon btn-edit" @click="openEdit(item)" :title="t('common.edit')">
+                      <i class="bi bi-pencil-square"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" @click="openDelete(item)" :title="t('common.delete')">
-                      <i class="bi bi-trash"></i>
+                    <button class="btn-icon btn-delete" @click="openDelete(item)" :title="t('common.delete')">
+                      <i class="bi bi-trash3"></i>
                     </button>
                   </div>
                 </td>
