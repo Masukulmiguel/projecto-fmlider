@@ -318,7 +318,7 @@
               </div>
             </div>
             <div v-else>
-              <p class="text-muted mb-3">O sistema irá validar se o <strong>cliente</strong>, <strong>funcionário</strong> e <strong>empresa</strong> existem no sistema. Só pode importar se todos existirem.</p>
+              <p class="text-muted mb-3">O sistema irá validar se o <strong>funcionário</strong> existe no sistema. A validação do cliente/empresa é opcional.</p>
               <div class="upload-area" @dragover.prevent @drop.prevent="handleDrop">
                 <i class="bi bi-cloud-upload"></i>
                 <p>Arraste um ficheiro Excel ou clique para selecionar</p>
@@ -886,9 +886,9 @@ const processImport = async () => {
 
       const { entry: cliEntry, matchType: cliMatch } = findClientFunc(clienteNome, nifExcel, cliMap, cliNifMap)
       if (!clienteNome) {
-        errors.push('Nome do cliente em branco — obrigatório')
+        warnings.push('Nome do cliente/em empresa em branco')
       } else if (!cliEntry) {
-        errors.push(`Cliente "${clienteNome}" não existe no sistema — registe o cliente primeiro`)
+        warnings.push(`Cliente "${clienteNome}" não encontrado no sistema — user_id será null`)
       } else if (cliMatch !== 'exact') {
         warnings.push(`Cliente "${clienteNome}" identificado como "${cliEntry.name}" (${cliMatch})`)
       }
@@ -1017,7 +1017,7 @@ const processImport = async () => {
         failCount++
       }
 
-      results.push({ idx: idx + 1, referencia, clienteNome, empresaNome, success: errors.length === 0, errors, warnings, action })
+      results.push({ idx: idx + 1, referencia, clienteNome, empresaNome: clienteNome, success: errors.length === 0, errors, warnings, action })
     }
 
     importResults.value = results

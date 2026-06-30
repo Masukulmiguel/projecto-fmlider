@@ -299,9 +299,8 @@
             <div v-else-if="!excelData.length">
               <p class="text-muted mb-3">Selecione um ficheiro Excel (.xlsx, .xls ou .csv). O sistema irá validar:</p>
               <ul class="text-muted small mb-3">
-                <li><strong>Cliente</strong> — deve existir na base de dados</li>
+                <li><strong>Cliente/Empresa</strong> — será validado mas não bloqueia a importação</li>
                 <li><strong>Funcionário (User)</strong> — deve existir na base de dados</li>
-                <li><strong>Empresa</strong> — deve estar preenchida</li>
               </ul>
               <input ref="excelFileInput" type="file" accept=".xlsx,.xls,.csv" class="d-none" @change="handleExcelFile">
               <button class="btn btn-outline-primary" @click="$refs.excelFileInput.click()">
@@ -776,9 +775,9 @@ const submitExcelImport = async () => {
 
       const { entry: cliEntry, matchType: cliMatch } = findClient(clienteNome, nifExcel, cliMap, cliNifMap)
       if (!clienteNome) {
-        errors.push('Nome do cliente em branco — obrigatório')
+        warnings.push('Nome do cliente/em empresa em branco')
       } else if (!cliEntry) {
-        errors.push(`Cliente "${clienteNome}" não existe no sistema — registe o cliente primeiro`)
+        warnings.push(`Cliente "${clienteNome}" não encontrado no sistema — user_id será null`)
       } else if (cliMatch !== 'exact') {
         warnings.push(`Cliente "${clienteNome}" identificado como "${cliEntry.name}" (${cliMatch})`)
       }
@@ -907,7 +906,7 @@ const submitExcelImport = async () => {
         failCount++
       }
 
-      results.push({ idx: idx + 1, referencia, clienteNome, empresaNome, success: errors.length === 0, errors, warnings, action })
+      results.push({ idx: idx + 1, referencia, clienteNome, empresaNome: clienteNome, success: errors.length === 0, errors, warnings, action })
     }
 
     importValidationResults.value = results
