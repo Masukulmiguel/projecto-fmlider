@@ -941,8 +941,14 @@ const processImport = async () => {
       }
       usedRefs.add(referencia)
 
+      const { entry: cliEntry, matchType: cliMatch } = findClientFunc(clienteNome, nifExcel, cliMap, cliNifMap)
+
       if (!clienteNome) {
-        warnings.push('Nome do cliente/em empresa em branco')
+        errors.push('Nome do cliente em branco — obrigatório')
+      } else if (!cliEntry) {
+        errors.push(`Cliente "${clienteNome}" não existe no sistema — registe o cliente primeiro`)
+      } else if (cliMatch !== 'exact') {
+        warnings.push(`Cliente "${clienteNome}" identificado como "${cliEntry.name}" (${cliMatch})`)
       }
 
       let funcEntry = null
@@ -977,7 +983,7 @@ const processImport = async () => {
               cliente_nome: clienteNome,
               empresa: clienteNome,
               shipper: shipper,
-              user_id: existing.user_id,
+              user_id: cliEntry?.id || existing.user_id,
               funcionario_id: funcEntry?.id || existing.funcionario_id,
               funcionario_responsavel: funcEntry ? funcEntry.name : (funcName || existing.funcionario_responsavel),
               estado: item.estado || existing.estado,
@@ -1001,7 +1007,7 @@ const processImport = async () => {
         }
 
         if (action === 'insert') {
-          const finalUserId = authStore.user?.id || null
+          const finalUserId = cliEntry?.id || authStore.user?.id
           const record = {
             referencia,
             user_id: finalUserId,
@@ -1072,6 +1078,7 @@ const processImport = async () => {
 
     if (funcExcelObservations.value.length > 0 && successCount > 0) {
       let obsImported = 0
+      let obsSkipped = 0
       const { data: allLics } = await supabase.from('licenciamentos').select('id, numero_processo')
       const licMap = {}
       ;(allLics || []).forEach(l => {
@@ -1081,7 +1088,20 @@ const processImport = async () => {
       for (const obs of funcExcelObservations.value) {
         const procNum = String(obs.numero_processo || '').trim()
         const licId = licMap[procNum]
-        if (!licId) continue
+        if (!licId) { obsSkipped++; continue }
+
+        const userFieldName = (obs.user || '').toLowerCase().trim()
+        let obsUserId = null
+        if (userFieldName && funcMap[userFieldName]) {
+          obsUserId = funcMap[userFieldName].id
+        } else if (userFieldName) {
+          const words = userFieldName.split(/[.\s]+/).filter(w => w.length > 2)
+          const matches = Object.keys(funcMap).filter(k =>
+            words.some(w => k.includes(w)) || k.split(/[.\s]+/).some(w => userFieldName.includes(w))
+          )
+          if (matches.length === 1) obsUserId = funcMap[matches[0]].id
+          else { obsSkipped++; continue }
+        }
 
         const userText = obs.user ? ` [${obs.user}]` : ''
         const dateText = obs.data ? `${obs.data} ` : ''
@@ -1089,7 +1109,7 @@ const processImport = async () => {
 
         const { error } = await supabase.from('licenciamento_historico').insert({
           licenciamento_id: licId,
-          user_id: null,
+          user_id: obsUserId,
           campo: 'observacao_excel',
           valor_antigo: null,
           valor_novo: obsText
@@ -1098,6 +1118,9 @@ const processImport = async () => {
       }
       if (obsImported > 0) {
         showToast(`${obsImported} observação(ões) importada(s)!`)
+      }
+      if (obsSkipped > 0) {
+        showToast(`${obsSkipped} observação(ões) ignorada(s) — utilizador não encontrado ou processo não existe`, 'error')
       }
     }
 
