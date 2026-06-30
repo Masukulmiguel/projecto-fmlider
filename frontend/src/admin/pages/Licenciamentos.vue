@@ -383,7 +383,7 @@ const columnMap = {
   'referência': 'referencia',
   'referencia': 'referencia',
   'ref': 'referencia',
-  'refª fmlider': 'referencia',
+  'refª fmlider': 'numero_processo',
   'refª cliente': 'ref_cliente',
   'nº processo': 'numero_processo',
   'no processo': 'numero_processo',
@@ -391,8 +391,9 @@ const columnMap = {
   'processo': 'numero_processo',
   'número processo': 'numero_processo',
   'nº registo': 'numero_processo',
-  'nº pedido': 'numero_processo',
-  'nº pfi': 'numero_processo',
+  'nº pedido': 'pedido',
+  'nº pfi': 'pfi',
+  'nº licenciamento': 'num_licenciamento',
   'cliente': 'empresa',
   'cliente_nome': 'empresa',
   'nome cliente': 'empresa',
@@ -584,11 +585,13 @@ const excelHeaders = ref([])
 const excelFileInput = ref(null)
 const importError = ref('')
 const updateMode = ref(false)
+const excelObservations = ref([])
 
 const closeExcelImport = () => {
   showExcelImport.value = false
   excelData.value = []
   excelHeaders.value = []
+  excelObservations.value = []
   importError.value = ''
   showValidation.value = false
   importValidationResults.value = []
@@ -611,7 +614,15 @@ const handleExcelFile = (event) => {
       const workbook = XLSX.read(e.target.result, { type: 'array' })
       excelSheets.value = workbook.SheetNames
 
-      if (workbook.SheetNames.length === 1) {
+      const licSheet = workbook.SheetNames.find(s => /licenciamento/i.test(s))
+      const obsSheet = workbook.SheetNames.find(s => /observa/i.test(s))
+
+      if (licSheet) {
+        parseSheet(workbook, licSheet)
+        if (obsSheet) {
+          excelObservations.value = parseObsSheet(workbook, obsSheet)
+        }
+      } else if (workbook.SheetNames.length === 1) {
         parseSheet(workbook, workbook.SheetNames[0])
       } else {
         selectedSheet.value = ''
@@ -692,6 +703,53 @@ const onSheetSelect = () => {
   if (selectedSheet.value && window._workbook) {
     parseSheet(window._workbook, selectedSheet.value)
   }
+}
+
+const parseObsSheet = (workbook, sheetName) => {
+  const worksheet = workbook.Sheets[sheetName]
+  const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' })
+  if (rawData.length < 2) return []
+
+  let headers = rawData[0]
+  let dataStart = 1
+  if (rawData.length > 1) {
+    const row0Vals = rawData[0].filter(v => v !== '' && v !== null)
+    const row1Vals = rawData[1].filter(v => v !== '' && v !== null)
+    if (row0Vals.length < row1Vals.length && row1Vals.length > 3) {
+      headers = rawData[1]
+      dataStart = 2
+    }
+  }
+
+  const obsColMap = {
+    'nº registo': 'numero_processo',
+    'data': 'data',
+    'observações': 'observacao',
+    'observacoes': 'observacao',
+    'user': 'user'
+  }
+
+  const observations = []
+  for (let i = dataStart; i < rawData.length; i++) {
+    const row = rawData[i]
+    if (!row || row.every(v => v === '' || v === null)) continue
+    const obs = {}
+    headers.forEach((h, idx) => {
+      if (h !== '' && h !== null && row[idx] !== undefined) {
+        const key = obsColMap[h.toLowerCase().trim()] || h.toLowerCase().trim()
+        let val = row[idx]
+        if (typeof val === 'number' && val > 40000 && val < 50000 && key === 'data') {
+          try {
+            const d = new Date(1899, 11, 30)
+            val = new Date(d.getTime() + val * 86400000).toISOString().slice(0, 10)
+          } catch {}
+        }
+        obs[key] = val
+      }
+    })
+    if (obs.numero_processo || obs.observacao) observations.push(obs)
+  }
+  return observations
 }
 
 const importValidationResults = ref([])
@@ -901,6 +959,37 @@ const submitExcelImport = async () => {
 
     importValidationResults.value = results
     showValidation.value = true
+
+    if (excelObservations.value.length > 0 && successCount > 0) {
+      let obsImported = 0
+      const { data: allLics } = await supabase.from('licenciamentos').select('id, numero_processo')
+      const licMap = {}
+      ;(allLics || []).forEach(l => {
+        if (l.numero_processo) licMap[String(l.numero_processo).trim()] = l.id
+      })
+
+      for (const obs of excelObservations.value) {
+        const procNum = String(obs.numero_processo || '').trim()
+        const licId = licMap[procNum]
+        if (!licId) continue
+
+        const userText = obs.user ? ` [${obs.user}]` : ''
+        const dateText = obs.data ? `${obs.data} ` : ''
+        const obsText = `${dateText}${obs.observacao || ''}${userText}`
+
+        const { error } = await supabase.from('licenciamento_historico').insert({
+          licenciamento_id: licId,
+          user_id: null,
+          campo: 'observacao_excel',
+          valor_antigo: null,
+          valor_novo: obsText
+        })
+        if (!error) obsImported++
+      }
+      if (obsImported > 0) {
+        showToast('success', `${obsImported} observação(ões) importada(s)!`)
+      }
+    }
 
     if (successCount > 0) {
       showToast('success', `${successCount} licenciamento(s) importado(s) com sucesso!`)

@@ -48,3 +48,5 @@ config/local.php
 
 # Vercel
 .vercel/
+
+.vercel
