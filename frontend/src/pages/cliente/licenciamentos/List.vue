@@ -89,7 +89,7 @@
             </div>
             <div class="info-row">
               <i class="bi bi-building"></i>
-              <span class="info-label">Empresa</span>
+              <span class="info-label">Cliente</span>
               <span class="info-value">{{ item.empresa || '—' }}</span>
             </div>
             <div class="info-row">
@@ -152,7 +152,7 @@ const fetchData = async () => {
 
     let extra = []
     if (userName && userName.length >= 3) {
-      let nameQuery = supabase.from('licenciamentos').select('*').neq('user_id', userId).ilike('cliente_nome', `%${userName}%`)
+      let nameQuery = supabase.from('licenciamentos').select('*').neq('user_id', userId).ilike('empresa', `%${userName}%`)
       if (filters.status) nameQuery = nameQuery.eq('estado', filters.status)
       const { data: byName } = await nameQuery
       extra = byName || []

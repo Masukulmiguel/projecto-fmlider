@@ -955,6 +955,7 @@ export default {
     dashboard_reset_all_documents: 'All documents',
     dashboard_reset_all_quotes: 'All quotes',
     dashboard_reset_all_contacts: 'All contacts',
+    dashboard_reset_all_licenciamentos: 'All licenses',
     dashboard_admin_kept: 'The admin account will be kept.',
     dashboard_secret_key: 'Secret key:',
     dashboard_enter_key: 'Enter the secret key',

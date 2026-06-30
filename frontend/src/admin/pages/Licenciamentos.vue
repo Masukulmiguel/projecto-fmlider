@@ -85,7 +85,7 @@
                 <th>Referência</th>
                 <th>Processo</th>
                 <th>Cliente</th>
-                <th>Empresa</th>
+                <th>Shipper</th>
                 <th>Tipo</th>
                 <th>Estado</th>
                 <th>Data Submissão</th>
@@ -97,9 +97,9 @@
                 <td><code class="tracking-code">{{ item.referencia }}</code></td>
                 <td>{{ item.numero_processo || '—' }}</td>
                 <td>
-                  <div class="fw-medium">{{ item.cliente_nome }}</div>
+                  <div class="fw-medium">{{ item.empresa }}</div>
                 </td>
-                <td>{{ item.empresa || '—' }}</td>
+                <td>{{ item.shipper || '—' }}</td>
                 <td>{{ tipoLabel(item.tipo) }}</td>
                 <td><span class="status-badge" :class="'status-' + item.estado">{{ estadoLabel(item.estado) }}</span></td>
                 <td><small class="text-muted">{{ formatDate(item.data_submissao) }}</small></td>
@@ -394,13 +394,13 @@ const columnMap = {
   'nº registo': 'numero_processo',
   'nº pedido': 'numero_processo',
   'nº pfi': 'numero_processo',
-  'cliente': 'cliente_nome',
-  'cliente_nome': 'cliente_nome',
-  'nome cliente': 'cliente_nome',
-  'nome do cliente': 'cliente_nome',
+  'cliente': 'empresa',
+  'cliente_nome': 'empresa',
+  'nome cliente': 'empresa',
+  'nome do cliente': 'empresa',
   'empresa': 'empresa',
   'nome empresa': 'empresa',
-  'shipper': 'empresa',
+  'shipper': 'shipper',
   'grupo': 'grupo',
   'tipo': 'tipo',
   'tipo licenciamento': 'tipo',
@@ -445,7 +445,7 @@ const fetchData = async () => {
     let query = supabase.from('licenciamentos').select('*', { count: 'exact' })
     if (filters.estado) query = query.eq('estado', filters.estado)
     if (filters.tipo) query = query.eq('tipo', filters.tipo)
-    if (filters.q) query = query.or(`referencia.ilike.%${filters.q}%,numero_processo.ilike.%${filters.q}%,cliente_nome.ilike.%${filters.q}%,empresa.ilike.%${filters.q}%`)
+      if (filters.q) query = query.or(`referencia.ilike.%${filters.q}%,numero_processo.ilike.%${filters.q}%,empresa.ilike.%${filters.q}%,shipper.ilike.%${filters.q}%`)
     const from = (currentPage.value - 1) * pageSize
     const to = from + pageSize - 1
     const { data, error, count } = await query.order('created_at', { ascending: false }).range(from, to)
@@ -763,8 +763,8 @@ const submitExcelImport = async () => {
       const errors = []
       const warnings = []
 
-      const clienteNome = (row.cliente_nome || row.cliente || '').trim()
-      const empresaNome = (row.empresa || '').trim()
+      const clienteNome = (row.empresa || '').trim()
+      const shipper = (row.shipper || '').trim()
       const funcName = (row.funcionario_responsavel || '').trim()
       const nifExcel = (row.nif_empresa || row.nif || '').trim()
 
@@ -781,10 +781,6 @@ const submitExcelImport = async () => {
         errors.push(`Cliente "${clienteNome}" não existe no sistema — registe o cliente primeiro`)
       } else if (cliMatch !== 'exact') {
         warnings.push(`Cliente "${clienteNome}" identificado como "${cliEntry.name}" (${cliMatch})`)
-      }
-
-      if (!empresaNome) {
-        errors.push('Empresa em branco — obrigatória')
       }
 
       let funcEntry = null
@@ -822,7 +818,8 @@ const submitExcelImport = async () => {
             const existing = existingItems[matchIdx]
             const updateData = {
               cliente_nome: clienteNome,
-              empresa: empresaNome,
+              empresa: clienteNome,
+              shipper: shipper,
               user_id: cliEntry?.id || existing.user_id,
               funcionario_id: funcEntry?.id || existing.funcionario_id,
               funcionario_responsavel: funcEntry ? funcEntry.name : funcName,
@@ -853,7 +850,8 @@ const submitExcelImport = async () => {
             user_id: finalUserId,
             numero_processo: row.numero_processo || null,
             cliente_nome: clienteNome,
-            empresa: empresaNome,
+            empresa: clienteNome,
+            shipper: shipper,
             tipo_licenciamento: tipo,
             tipo: tipo,
             estado: row.estado || 'submetido',

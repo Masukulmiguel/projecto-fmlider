@@ -120,7 +120,7 @@
             <th>Referência</th>
             <th>Nº Processo</th>
             <th>Cliente</th>
-            <th>Empresa</th>
+            <th>Shipper</th>
             <th>Tipo</th>
             <th>Estado</th>
             <th>Data Submissão</th>
@@ -141,8 +141,8 @@
           <tr v-for="item in licenciamentos" :key="item.id">
             <td>{{ item.referencia }}</td>
             <td>{{ item.numero_processo }}</td>
-            <td>{{ item.cliente_nome || '-' }}</td>
             <td>{{ item.empresa || '-' }}</td>
+            <td>{{ item.shipper || '-' }}</td>
             <td>{{ formatTipo(item.tipo) }}</td>
             <td>
               <span :class="['status-badge', `status-${item.estado}`]">
@@ -394,7 +394,7 @@
             </div>
             <div class="detail-item">
               <label>Cliente</label>
-              <span>{{ selectedItem.cliente_nome || '-' }}</span>
+              <span>{{ selectedItem.empresa || '-' }}</span>
             </div>
             <div class="detail-item">
               <label>Empresa</label>
@@ -689,9 +689,9 @@ const handleDrop = (event) => {
 const funcColumnMap = {
   'referência': 'referencia', 'referencia': 'referencia', 'ref': 'referencia',
   'refª fmlider': 'referencia', 'refª cliente': 'ref_cliente',
-  'cliente': 'cliente', 'cliente_nome': 'cliente', 'nome cliente': 'cliente', 'nome do cliente': 'cliente',
+  'cliente': 'empresa', 'cliente_nome': 'empresa', 'nome cliente': 'empresa', 'nome do cliente': 'empresa',
   'tipo': 'tipo', 'tipo licenciamento': 'tipo', 'tipo_licenciamento': 'tipo',
-  'empresa': 'empresa', 'nome empresa': 'empresa', 'shipper': 'empresa', 'grupo': 'grupo',
+  'empresa': 'empresa', 'nome empresa': 'empresa', 'shipper': 'shipper', 'grupo': 'grupo',
   'nº processo': 'numero_processo', 'no processo': 'numero_processo', 'numero processo': 'numero_processo', 'processo': 'numero_processo',
   'nº registo': 'numero_processo', 'nº pedido': 'numero_processo', 'nº pfi': 'numero_processo',
   'funcionário responsável': 'funcionario_responsavel', 'funcionario responsavel': 'funcionario_responsavel', 'funcionario': 'funcionario_responsavel',
@@ -873,8 +873,8 @@ const processImport = async () => {
       const errors = []
       const warnings = []
 
-      const clienteNome = (item.cliente || item.cliente_nome || '').trim()
-      const empresaNome = (item.empresa || '').trim()
+      const clienteNome = (item.empresa || '').trim()
+      const shipper = (item.shipper || '').trim()
       const funcName = (item.funcionario_responsavel || '').trim()
       const nifExcel = (item.nif_empresa || item.nif || '').trim()
 
@@ -891,10 +891,6 @@ const processImport = async () => {
         errors.push(`Cliente "${clienteNome}" não existe no sistema — registe o cliente primeiro`)
       } else if (cliMatch !== 'exact') {
         warnings.push(`Cliente "${clienteNome}" identificado como "${cliEntry.name}" (${cliMatch})`)
-      }
-
-      if (!empresaNome) {
-        errors.push('Empresa em branco — obrigatória')
       }
 
       let funcEntry = null
@@ -932,7 +928,8 @@ const processImport = async () => {
             const existing = existingItems[matchIdx]
             const updateData = {
               cliente_nome: clienteNome,
-              empresa: empresaNome,
+              empresa: clienteNome,
+              shipper: shipper,
               user_id: cliEntry?.id || existing.user_id,
               funcionario_id: funcEntry?.id || existing.funcionario_id,
               funcionario_responsavel: funcEntry ? funcEntry.name : funcName,
@@ -963,7 +960,8 @@ const processImport = async () => {
             user_id: finalUserId,
             numero_processo: item.numero_processo || null,
             cliente_nome: clienteNome,
-            empresa: empresaNome,
+            empresa: clienteNome,
+            shipper: shipper,
             tipo_licenciamento: tipo,
             tipo: tipo,
             estado: item.estado || 'submetido',

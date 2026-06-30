@@ -167,9 +167,9 @@ const handleSearch = () => {
         const roleLabel = u.role === 'cliente' ? 'Cliente' : u.role === 'funcionario' ? 'Funcionário' : 'Admin'
         results.push({ id: 'u-' + u.id, label: u.name, meta: roleLabel, icon: 'bi bi-person-fill', link: '/funcionario/clientes' })
       })
-      const { data: lic } = await supabase.from('licenciamentos').select('id, referencia, cliente_nome, empresa, estado').or(`referencia.ilike.%${q}%,cliente_nome.ilike.%${q}%,empresa.ilike.%${q}%`).limit(5)
+      const { data: lic } = await supabase.from('licenciamentos').select('id, referencia, empresa, shipper, estado').or(`referencia.ilike.%${q}%,empresa.ilike.%${q}%,shipper.ilike.%${q}%`).limit(5)
       ;(lic || []).forEach(l => {
-        results.push({ id: 'l-' + l.id, label: l.referencia || 'Sem referência', meta: (l.cliente_nome || '') + (l.empresa ? ' · ' + l.empresa : ''), icon: 'bi bi-file-earmark-check', link: `/funcionario/licenciamentos` })
+        results.push({ id: 'l-' + l.id, label: l.referencia || 'Sem referência', meta: (l.empresa || '') + (l.shipper ? ' · ' + l.shipper : ''), icon: 'bi bi-file-earmark-check', link: `/funcionario/licenciamentos` })
       })
       const { data: emb } = await supabase.from('embarques').select('id, tracking_number, client_name, company_name').or(`tracking_number.ilike.%${q}%,client_name.ilike.%${q}%`).limit(5)
       ;(emb || []).forEach(e => {

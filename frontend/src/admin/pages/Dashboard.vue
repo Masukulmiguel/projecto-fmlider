@@ -214,6 +214,7 @@
             <li><i class="bi bi-file-earmark"></i> {{ t('admin.dashboard_reset_all_documents') }}</li>
             <li><i class="bi bi-receipt"></i> {{ t('admin.dashboard_reset_all_quotes') }}</li>
             <li><i class="bi bi-person-rolodex"></i> {{ t('admin.dashboard_reset_all_contacts') }}</li>
+            <li><i class="bi bi-file-earmark-check"></i> {{ t('admin.dashboard_reset_all_licenciamentos') }}</li>
           </ul>
           <p class="text-muted small mb-3">{{ t('admin.dashboard_admin_kept') }}</p>
           <div class="mb-3">
@@ -388,21 +389,27 @@ const openResetModal = () => {
 
 const executeReset = async () => {
   if (!resetSecretKey.value) return
-  if (resetSecretKey.value !== '191925Pmg@') {
-    resetError.value = 'Chave secreta incorrecta'
-    return
-  }
   resetLoading.value = true
   resetError.value = ''
   resetSuccess.value = ''
   try {
-    const tables = ['chat_messages', 'visitors', 'embarques', 'cotacoes', 'documentos', 'contacts']
-    for (const table of tables) {
-      await supabase.from(table).delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    const API_URL = import.meta.env.VITE_API_URL || ''
+    const token = sessionStorage.getItem('supabase_access_token') || ''
+    const res = await fetch(`${API_URL}/admin/secret-reset`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ secret_key: resetSecretKey.value })
+    })
+    const data = await res.json()
+    if (data.status === 'success') {
+      resetSuccess.value = t('admin.dashboard_reset_success')
+      setTimeout(() => { window.location.reload() }, 2000)
+    } else {
+      resetError.value = data.message || t('admin.dashboard_reset_error')
     }
-    await supabase.from('users').delete().neq('role', 'admin')
-    resetSuccess.value = t('admin.dashboard_reset_success')
-    setTimeout(() => { window.location.reload() }, 2000)
   } catch (e) {
     resetError.value = e.message || t('admin.dashboard_reset_error')
   } finally {

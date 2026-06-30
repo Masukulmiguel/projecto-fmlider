@@ -46,17 +46,15 @@ class SecretResetController
         try {
             $db->query("SET FOREIGN_KEY_CHECKS = 0");
 
-            $db->query("TRUNCATE TABLE chat_messages");
-            $db->query("TRUNCATE TABLE notifications");
-            $db->query("TRUNCATE TABLE visitors");
-            $db->query("TRUNCATE TABLE activity_logs");
-            $db->query("TRUNCATE TABLE documentos");
-            $db->query("TRUNCATE TABLE cotacoes");
-            $db->query("TRUNCATE TABLE contactos");
-            $db->query("TRUNCATE TABLE embarques");
-            $db->query("TRUNCATE TABLE companies");
-            $db->query("TRUNCATE TABLE contacts");
-            $db->query("TRUNCATE TABLE user_photos");
+            $tables = [
+                'chat_messages', 'notifications', 'visitors', 'activity_logs',
+                'documentos', 'cotacoes', 'contactos', 'embarques',
+                'companies', 'contacts', 'user_photos',
+                'licenciamento_historico', 'licenciamento_estados_historico', 'licenciamentos'
+            ];
+            foreach ($tables as $table) {
+                try { $db->query("TRUNCATE TABLE `$table`"); } catch (\Throwable $e) {}
+            }
 
             $stmt = $db->prepare("DELETE FROM users WHERE id != ?");
             $stmt->bind_param('i', $adminId);

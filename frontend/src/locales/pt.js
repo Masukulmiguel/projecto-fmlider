@@ -1044,6 +1044,7 @@ export default {
     dashboard_reset_all_documents: 'Todos os documentos',
     dashboard_reset_all_quotes: 'Todas as cotações',
     dashboard_reset_all_contacts: 'Todos os contactos',
+    dashboard_reset_all_licenciamentos: 'Todos os licenciamentos',
     dashboard_admin_kept: 'A conta de administrador será mantida.',
     dashboard_secret_key: 'Chave secreta:',
     dashboard_enter_key: 'Insira a chave secreta',

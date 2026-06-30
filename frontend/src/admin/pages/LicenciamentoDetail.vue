@@ -51,15 +51,15 @@
           <div class="card info-card">
             <div class="card-body">
               <div class="info-label">Cliente</div>
-              <div class="info-value">{{ item.cliente_nome || item.user_name || '—' }}</div>
+              <div class="info-value">{{ item.empresa || item.user_name || '—' }}</div>
             </div>
           </div>
         </div>
         <div class="col-md-3">
           <div class="card info-card">
             <div class="card-body">
-              <div class="info-label">Empresa</div>
-              <div class="info-value">{{ item.empresa || '—' }}</div>
+              <div class="info-label">Shipper</div>
+              <div class="info-value">{{ item.shipper || '—' }}</div>
             </div>
           </div>
         </div>

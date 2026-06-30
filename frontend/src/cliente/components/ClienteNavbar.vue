@@ -153,7 +153,7 @@ const handleSearch = () => {
     const results = []
     try {
       if (userId) {
-        const { data: lic } = await supabase.from('licenciamentos').select('id, referencia, cliente_nome, empresa, estado').eq('user_id', userId).or(`referencia.ilike.%${q}%,cliente_nome.ilike.%${q}%,empresa.ilike.%${q}%`).limit(5)
+        const { data: lic } = await supabase.from('licenciamentos').select('id, referencia, empresa, shipper, estado').eq('user_id', userId).or(`referencia.ilike.%${q}%,empresa.ilike.%${q}%,shipper.ilike.%${q}%`).limit(5)
         ;(lic || []).forEach(l => {
           results.push({ id: 'l-' + l.id, label: l.referencia || 'Sem referência', meta: l.empresa || l.estado || '', icon: 'bi bi-file-earmark-check', link: '/licenciamentos/' + l.id })
         })

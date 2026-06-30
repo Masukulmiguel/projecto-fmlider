@@ -67,8 +67,12 @@
             <div class="card-body">
               <div class="info-grid">
                 <div class="info-item">
-                  <span class="info-label">Empresa</span>
+                  <span class="info-label">Cliente</span>
                   <span class="info-value">{{ item.empresa || '—' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Shipper</span>
+                  <span class="info-value">{{ item.shipper || '—' }}</span>
                 </div>
                 <div class="info-item">
                   <span class="info-label">NIF</span>
@@ -208,7 +212,7 @@ const fetchItem = async () => {
           .from('licenciamentos')
           .select('*')
           .eq('id', route.params.id)
-          .ilike('cliente_nome', `%${userName}%`)
+          .ilike('empresa', `%${userName}%`)
           .single()
         if (byName) item.value = byName
       }

@@ -109,9 +109,9 @@ class LicenciamentoController
         $dataSubmissao = !empty($data['data_submissao']) ? $data['data_submissao'] : null;
         $dataValidade = !empty($data['data_validade']) ? $data['data_validade'] : null;
 
-        $stmt = $db->prepare("INSERT INTO licenciamentos (user_id, funcionario_id, numero_processo, referencia, tipo_licenciamento, descricao, empresa, nif_empresa, estado, data_submissao, data_validade, observacoes, fonte) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $db->prepare("INSERT INTO licenciamentos (user_id, funcionario_id, numero_processo, referencia, tipo_licenciamento, descricao, empresa, shipper, nif_empresa, estado, data_submissao, data_validade, observacoes, fonte) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-        $stmt->bind_param('iisssssssssss',
+        $stmt->bind_param('iissssssssssss',
             $userId,
             $funcionarioId,
             $data['numero_processo'] ?? null,
@@ -119,6 +119,7 @@ class LicenciamentoController
             $tipo,
             $data['descricao'] ?? null,
             $data['empresa'] ?? null,
+            $data['shipper'] ?? null,
             $data['nif_empresa'] ?? null,
             $estado,
             $dataSubmissao,
@@ -158,7 +159,7 @@ class LicenciamentoController
 
         $data = Response::input();
 
-        $fields = ['numero_processo', 'tipo_licenciamento', 'descricao', 'empresa', 'nif_empresa', 'observacoes', 'funcionario_id'];
+        $fields = ['numero_processo', 'tipo_licenciamento', 'descricao', 'empresa', 'shipper', 'nif_empresa', 'observacoes', 'funcionario_id'];
         $setClauses = [];
         $params = [];
         $types = '';
