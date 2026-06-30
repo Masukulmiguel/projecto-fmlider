@@ -884,19 +884,12 @@ const processImport = async () => {
       }
       usedRefs.add(referencia)
 
-      const { entry: cliEntry, matchType: cliMatch } = findClientFunc(clienteNome, nifExcel, cliMap, cliNifMap)
       if (!clienteNome) {
         warnings.push('Nome do cliente/em empresa em branco')
-      } else if (!cliEntry) {
-        warnings.push(`Cliente "${clienteNome}" não encontrado no sistema — user_id será null`)
-      } else if (cliMatch !== 'exact') {
-        warnings.push(`Cliente "${clienteNome}" identificado como "${cliEntry.name}" (${cliMatch})`)
       }
 
       let funcEntry = null
-      if (!funcName) {
-        errors.push('Funcionário (User) em branco — obrigatório')
-      } else {
+      if (funcName) {
         const funcKey = funcName.toLowerCase().trim()
         funcEntry = funcMap[funcKey]
         if (!funcEntry) {
@@ -906,9 +899,6 @@ const processImport = async () => {
           )
           if (matches.length === 1) {
             funcEntry = funcMap[matches[0]]
-            warnings.push(`Funcionário "${funcName}" identificado como "${funcEntry.name}"`)
-          } else {
-            errors.push(`Funcionário "${funcName}" não existe no sistema — registe o funcionário primeiro`)
           }
         }
       }
@@ -930,9 +920,9 @@ const processImport = async () => {
               cliente_nome: clienteNome,
               empresa: clienteNome,
               shipper: shipper,
-              user_id: cliEntry?.id || existing.user_id,
+              user_id: existing.user_id,
               funcionario_id: funcEntry?.id || existing.funcionario_id,
-              funcionario_responsavel: funcEntry ? funcEntry.name : funcName,
+              funcionario_responsavel: funcEntry ? funcEntry.name : (funcName || existing.funcionario_responsavel),
               estado: item.estado || existing.estado,
               data_submissao: item.data_submissao || existing.data_submissao,
               data_validade: item.data_validade || existing.data_validade,
@@ -954,7 +944,7 @@ const processImport = async () => {
         }
 
         if (action === 'insert') {
-          const finalUserId = cliEntry?.id || authStore.user?.id
+          const finalUserId = authStore.user?.id || null
           const record = {
             referencia,
             user_id: finalUserId,

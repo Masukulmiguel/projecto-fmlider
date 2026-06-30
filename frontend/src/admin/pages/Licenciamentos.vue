@@ -297,10 +297,10 @@
               </div>
             </div>
             <div v-else-if="!excelData.length">
-              <p class="text-muted mb-3">Selecione um ficheiro Excel (.xlsx, .xls ou .csv). O sistema irá validar:</p>
+              <p class="text-muted mb-3">Selecione um ficheiro Excel (.xlsx, .xls ou .csv). O sistema importa directamente os dados.</p>
               <ul class="text-muted small mb-3">
-                <li><strong>Cliente/Empresa</strong> — será validado mas não bloqueia a importação</li>
-                <li><strong>Funcionário (User)</strong> — deve existir na base de dados</li>
+                <li><strong>Cliente/Empresa</strong> — nome é guardado como está</li>
+                <li><strong>Funcionário</strong> — opcional, guardado no campo de observações</li>
               </ul>
               <input ref="excelFileInput" type="file" accept=".xlsx,.xls,.csv" class="d-none" @change="handleExcelFile">
               <button class="btn btn-outline-primary" @click="$refs.excelFileInput.click()">
@@ -773,19 +773,12 @@ const submitExcelImport = async () => {
       }
       usedRefs.add(referencia)
 
-      const { entry: cliEntry, matchType: cliMatch } = findClient(clienteNome, nifExcel, cliMap, cliNifMap)
       if (!clienteNome) {
         warnings.push('Nome do cliente/em empresa em branco')
-      } else if (!cliEntry) {
-        warnings.push(`Cliente "${clienteNome}" não encontrado no sistema — user_id será null`)
-      } else if (cliMatch !== 'exact') {
-        warnings.push(`Cliente "${clienteNome}" identificado como "${cliEntry.name}" (${cliMatch})`)
       }
 
       let funcEntry = null
-      if (!funcName) {
-        errors.push('Funcionário (User) em branco — obrigatório')
-      } else {
+      if (funcName) {
         const funcKey = funcName.toLowerCase().trim()
         funcEntry = funcMap[funcKey]
         if (!funcEntry) {
@@ -795,9 +788,6 @@ const submitExcelImport = async () => {
           )
           if (matches.length === 1) {
             funcEntry = funcMap[matches[0]]
-            warnings.push(`Funcionário "${funcName}" identificado como "${funcEntry.name}"`)
-          } else {
-            errors.push(`Funcionário "${funcName}" não existe no sistema — registe o funcionário primeiro`)
           }
         }
       }
@@ -819,9 +809,9 @@ const submitExcelImport = async () => {
               cliente_nome: clienteNome,
               empresa: clienteNome,
               shipper: shipper,
-              user_id: cliEntry?.id || existing.user_id,
+              user_id: existing.user_id,
               funcionario_id: funcEntry?.id || existing.funcionario_id,
-              funcionario_responsavel: funcEntry ? funcEntry.name : funcName,
+              funcionario_responsavel: funcEntry ? funcEntry.name : (funcName || existing.funcionario_responsavel),
               estado: row.estado || existing.estado,
               data_submissao: row.data_submissao || existing.data_submissao,
               data_validade: row.data_validade || existing.data_validade,
@@ -843,7 +833,7 @@ const submitExcelImport = async () => {
         }
 
         if (action === 'insert') {
-          const finalUserId = cliEntry?.id || null
+          const finalUserId = null
           const insertRow = {
             referencia,
             user_id: finalUserId,
