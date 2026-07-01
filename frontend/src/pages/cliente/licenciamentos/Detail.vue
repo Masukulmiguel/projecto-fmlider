@@ -76,7 +76,7 @@
                 </div>
                 <div class="info-item">
                   <span class="info-label">NIF</span>
-                  <span class="info-value">{{ item.nif || '—' }}</span>
+                  <span class="info-value">{{ item.nif_empresa || '—' }}</span>
                 </div>
                 <div class="info-item">
                   <span class="info-label">Tipo</span>
@@ -127,6 +127,42 @@
           <p class="mb-0 observacoes-text">{{ item.observacoes }}</p>
         </div>
       </div>
+
+      <div v-if="historico.length > 0" class="card mb-4">
+        <div class="card-header">
+          <h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Histórico de Observações</h6>
+        </div>
+        <div class="card-body">
+          <div v-for="h in historico" :key="h.id" class="historico-item mb-3 pb-3 border-bottom">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <span class="historico-campo badge bg-light text-dark me-2">{{ h.campo }}</span>
+                <span v-if="h.valor_novo" class="historico-valor">{{ h.valor_novo }}</span>
+              </div>
+              <small class="text-muted">{{ formatDate(h.created_at) }}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="estadosHistorico.length > 0" class="card mb-4">
+        <div class="card-header">
+          <h6 class="mb-0"><i class="bi bi-diagram-3 me-2"></i>Linha do Tempo do Estado</h6>
+        </div>
+        <div class="card-body">
+          <div v-for="e in estadosHistorico" :key="e.id" class="estado-item mb-3 pb-3 border-bottom">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <span v-if="e.estado_anterior" class="badge bg-secondary me-1">{{ estadoLabel(e.estado_anterior) }}</span>
+                <i v-if="e.estado_anterior" class="bi bi-arrow-right mx-1 text-muted"></i>
+                <span class="badge bg-primary">{{ estadoLabel(e.estado_novo) }}</span>
+              </div>
+              <small class="text-muted">{{ formatDate(e.created_at) }}</small>
+            </div>
+            <div v-if="e.observacao" class="mt-1 text-muted small">{{ e.observacao }}</div>
+          </div>
+        </div>
+      </div>
     </template>
   </div>
 </template>
@@ -142,6 +178,8 @@ const router = useRouter()
 const route = useRoute()
 const item = ref(null)
 const loading = ref(true)
+const estadosHistorico = ref([])
+const historico = ref([])
 
 const timelineSteps = computed(() => {
   if (!item.value) return []
@@ -217,6 +255,17 @@ const fetchItem = async () => {
         if (byName) item.value = byName
       }
     }
+
+    if (item.value) {
+      const [estadosRes, histRes] = await Promise.all([
+        supabase.from('licenciamento_estados_historico').select('*')
+          .eq('licenciamento_id', item.value.id).order('created_at', { ascending: true }),
+        supabase.from('licenciamento_historico').select('*')
+          .eq('licenciamento_id', item.value.id).order('created_at', { ascending: false })
+      ])
+      estadosHistorico.value = estadosRes.data || []
+      historico.value = histRes.data || []
+    }
   } catch (e) {
     console.error(e)
   } finally {
@@ -243,6 +292,17 @@ const tipoLabel = (tipo) => ({
   licenca_especial: 'Licença Especial',
   outro: 'Outro'
 }[tipo] || tipo || '—')
+
+const estadoLabel = (estado) => ({
+  pendente: 'Pendente',
+  documentacao_recebida: 'Documentação Recebida',
+  submetido: 'Submetido',
+  em_analise: 'Em Análise',
+  aprovado: 'Aprovado',
+  indeferido: 'Indeferido',
+  resubmetido: 'Re-Submetido',
+  certificacao_solicitada: 'Certificação - Solicitada'
+}[estado] || estado)
 
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'
 
@@ -311,6 +371,11 @@ onMounted(fetchItem)
 .info-value { font-size: 0.95rem; color: #0f172a; font-weight: 500; }
 
 .observacoes-text { color: #334155; line-height: 1.7; white-space: pre-line; }
+
+.historico-item:last-child { border-bottom: none !important; margin-bottom: 0 !important; padding-bottom: 0 !important; }
+.historico-campo { font-size: 0.75rem; font-weight: 600; }
+.historico-valor { color: #334155; white-space: pre-line; }
+.estado-item:last-child { border-bottom: none !important; margin-bottom: 0 !important; padding-bottom: 0 !important; }
 
 @media (max-width: 576px) {
   .info-grid { grid-template-columns: 1fr; }
