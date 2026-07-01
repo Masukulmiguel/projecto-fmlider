@@ -297,10 +297,11 @@
               </div>
             </div>
             <div v-else-if="!excelData.length">
-              <p class="text-muted mb-3">Selecione um ficheiro Excel (.xlsx, .xls ou .csv). O sistema importa directamente os dados.</p>
+              <p class="text-muted mb-3">Selecione um ficheiro Excel (.xlsx, .xls ou .csv). O sistema importa os dados com as seguintes regras:</p>
               <ul class="text-muted small mb-3">
-                <li><strong>Cliente/Empresa</strong> — nome é guardado como está</li>
-                <li><strong>Funcionário</strong> — opcional, guardado no campo de observações</li>
+                <li><strong>Sheet Licenciamentos</strong> — valida o <strong>Cliente</strong> (deve existir como utilizador no sistema)</li>
+                <li><strong>Sheet Observações</strong> — valida o <strong>Funcionário</strong> (deve existir como utilizador no sistema)</li>
+                <li>Os dados são importados automaticamente ao clicar em "Validar e Importar"</li>
               </ul>
               <input ref="excelFileInput" type="file" accept=".xlsx,.xls,.csv" class="d-none" @change="handleExcelFile">
               <button class="btn btn-outline-primary" @click="$refs.excelFileInput.click()">

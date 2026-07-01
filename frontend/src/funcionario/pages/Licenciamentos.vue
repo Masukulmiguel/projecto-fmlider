@@ -318,7 +318,12 @@
               </div>
             </div>
             <div v-else>
-              <p class="text-muted mb-3">O sistema irá validar se o <strong>funcionário</strong> existe no sistema. A validação do cliente/empresa é opcional.</p>
+              <p class="text-muted mb-3">Selecione um ficheiro Excel (.xlsx, .xls ou .csv). O sistema importa os dados com as seguintes regras:</p>
+              <ul class="text-muted small mb-3">
+                <li><strong>Sheet Licenciamentos</strong> — valida o <strong>Cliente</strong> (deve existir como utilizador no sistema)</li>
+                <li><strong>Sheet Observações</strong> — valida o <strong>Funcionário</strong> (deve existir como utilizador no sistema)</li>
+                <li>Os dados são importados automaticamente ao clicar em "Validar e Importar"</li>
+              </ul>
               <div class="upload-area" @dragover.prevent @drop.prevent="handleDrop">
                 <i class="bi bi-cloud-upload"></i>
                 <p>Arraste um ficheiro Excel ou clique para selecionar</p>
