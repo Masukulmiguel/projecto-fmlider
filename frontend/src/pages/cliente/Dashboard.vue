@@ -78,6 +78,20 @@
           </div>
         </router-link>
       </div>
+      <div class="col-md-6 col-xl-3">
+        <router-link to="/licenciamentos" class="stat-tile-link">
+          <div class="stat-tile">
+            <div class="stat-tile-icon bg-purple-soft"><i class="bi bi-file-earmark-medical"></i></div>
+            <div>
+              <div class="stat-tile-label">Licenciamentos</div>
+              <div class="stat-tile-value">{{ counts.licenciamentos }}</div>
+              <div class="stat-tile-meta">
+                <span class="text-success">{{ counts.licenciamentos_aprovado || 0 }} aprovados</span>
+              </div>
+            </div>
+          </div>
+        </router-link>
+      </div>
     </div>
 
     <div v-if="chartsReady" class="row g-4 mb-4">
@@ -101,6 +115,38 @@
             <div v-else class="text-center text-muted py-5">
               <i class="bi bi-inbox"></i>
               <p class="mb-0 mt-2 small">{{ t('cliente.dashboard_no_shipments') }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="licencChartsReady" class="row g-4 mb-4">
+      <div class="col-lg-5">
+        <div class="card chart-card h-100">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h6 class="mb-0"><i class="bi bi-pie-chart-fill me-2"></i>Licenciamentos por Estado</h6>
+            <router-link to="/licenciamentos" class="btn btn-sm btn-outline-primary">Ver todos</router-link>
+          </div>
+          <div class="card-body d-flex align-items-center justify-content-center">
+            <Doughnut v-if="licencStatusData.datasets[0].data.some(v => v > 0)" :data="licencStatusData" :options="licencStatusOptions" style="height: 260px; width: 100%" />
+            <div v-else class="text-center text-muted py-5">
+              <i class="bi bi-inbox" style="font-size: 2.5rem; display: block; margin-bottom: 0.5rem; opacity: 0.4;"></i>
+              <p class="mb-0 small">Sem licenciamentos registados</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="card chart-card">
+          <div class="card-header">
+            <h6 class="mb-0"><i class="bi bi-bar-chart-line-fill me-2"></i>Licenciamentos por Mês</h6>
+          </div>
+          <div class="card-body">
+            <Bar v-if="licencMonthlyData.datasets[0].data.some(v => v > 0)" :data="licencMonthlyData" :options="licencMonthlyOptions" style="height: 260px" />
+            <div v-else class="text-center text-muted py-5">
+              <i class="bi bi-inbox" style="font-size: 2.5rem; display: block; margin-bottom: 0.5rem; opacity: 0.4;"></i>
+              <p class="mb-0 small">Sem dados para exibir</p>
             </div>
           </div>
         </div>
@@ -185,10 +231,11 @@ const authStore = useAuthStore()
 const companyStore = useCompanyStore()
 const router = useRouter()
 
-const counts = reactive({ embarques: 0, embarques_pendente: 0, cotacoes: 0, cotacoes_aprovada: 0, documentos: 0, contactos: 0 })
+const counts = reactive({ embarques: 0, embarques_pendente: 0, cotacoes: 0, cotacoes_aprovada: 0, documentos: 0, contactos: 0, licenciamentos: 0, licenciamentos_aprovado: 0 })
 const recentEmbarques = ref([])
 const embarques = ref([])
 const cotacoes = ref([])
+const licenciamentos = ref([])
 
 const statusLabel = (s) => ({ pendente: t('cliente.dashboard_status_pending'), em_transito: t('cliente.dashboard_status_transit'), entregue: t('cliente.dashboard_status_delivered'), cancelado: t('cliente.dashboard_status_cancelled') }[s] || s)
 
@@ -199,21 +246,25 @@ const loadCounts = async () => {
     const userId = authStore.user?.id
     if (!userId) return
 
-    const [embRes, cotRes, docsRes, contsRes] = await Promise.all([
+    const [embRes, cotRes, docsRes, contsRes, licRes] = await Promise.all([
       supabase.from('embarques').select('*').eq('user_id', userId),
       supabase.from('cotacoes').select('*').eq('user_id', userId),
       supabase.from('documentos').select('*').eq('user_id', userId),
-      supabase.from('contactos').select('*').eq('user_id', userId)
+      supabase.from('contactos').select('*').eq('user_id', userId),
+      supabase.from('licenciamentos').select('*').eq('user_id', userId)
     ])
 
     embarques.value = embRes.data || []
     cotacoes.value = cotRes.data || []
+    licenciamentos.value = licRes.data || []
     counts.embarques = embarques.value.length
     counts.embarques_pendente = embarques.value.filter(e => e.status === 'pendente').length
     counts.cotacoes = cotacoes.value.length
     counts.cotacoes_aprovada = cotacoes.value.filter(c => c.status === 'aprovada').length
     counts.documentos = (docsRes.data || []).length
     counts.contactos = (contsRes.data || []).length
+    counts.licenciamentos = licenciamentos.value.length
+    counts.licenciamentos_aprovado = licenciamentos.value.filter(l => l.estado === 'aprovado').length
     recentEmbarques.value = embarques.value.slice(0, 5)
   } catch (e) {
     console.error(e)
@@ -221,6 +272,7 @@ const loadCounts = async () => {
 }
 
 const chartsReady = computed(() => embarques.value.length > 0 || cotacoes.value.length > 0)
+const licencChartsReady = computed(() => licenciamentos.value.length > 0)
 
 const monthKey = (iso) => {
   if (!iso) return null
@@ -274,6 +326,103 @@ const statusOptions = {
   responsive: true, maintainAspectRatio: false,
   plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } } },
   cutout: '60%',
+}
+
+const licencEstadoLabel = (s) => ({
+  pendente: 'Pendente',
+  documentacao_recebida: 'Doc. Recebida',
+  submetido: 'Submetido',
+  em_analise: 'Em Análise',
+  aprovado: 'Aprovado',
+  indeferido: 'Indeferido',
+  resubmetido: 'Re-Submetido',
+  certificacao_solicitada: 'Certif. Solicitada'
+}[s] || s || '—')
+
+const licencEstadoColor = (s) => ({
+  pendente: '#f59e0b',
+  documentacao_recebida: '#3b82f6',
+  submetido: '#8b5cf6',
+  em_analise: '#f97316',
+  aprovado: '#22c55e',
+  indeferido: '#ef4444',
+  resubmetido: '#6366f1',
+  certificacao_solicitada: '#06b6d4'
+}[s] || '#64748b')
+
+const licencStatusData = computed(() => {
+  const groups = {}
+  licenciamentos.value.forEach(l => {
+    const e = l.estado || 'pendente'
+    groups[e] = (groups[e] || 0) + 1
+  })
+  const keys = Object.keys(groups).sort((a, b) => groups[b] - groups[a])
+  return {
+    labels: keys.map(licencEstadoLabel),
+    datasets: [{
+      data: keys.map(k => groups[k]),
+      backgroundColor: keys.map(licencEstadoColor),
+      borderWidth: 2,
+      borderColor: '#ffffff',
+      hoverOffset: 6
+    }]
+  }
+})
+
+const licencStatusOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  cutout: '55%',
+  plugins: {
+    legend: {
+      position: 'bottom',
+      labels: {
+        boxWidth: 12,
+        padding: 12,
+        font: { size: 11 },
+        usePointStyle: true,
+        pointStyleWidth: 10
+      }
+    }
+  },
+  layout: { padding: { bottom: 10 } }
+}
+
+const licencMonthlyData = computed(() => {
+  const labels = []
+  const mapEmb = new Map()
+  const mapCot = new Map()
+  const now = new Date()
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    labels.push(d.toLocaleDateString(locale.value === 'pt' ? 'pt-PT' : locale.value === 'en' ? 'en-US' : 'fr-FR', { month: 'short' }))
+    mapEmb.set(k, 0)
+    mapCot.set(k, 0)
+  }
+  licenciamentos.value.forEach(l => {
+    const k = monthKey(l.created_at)
+    if (mapEmb.has(k)) mapEmb.set(k, mapEmb.get(k) + 1)
+  })
+  return {
+    labels,
+    datasets: [
+      { label: 'Licenciamentos', data: [...mapEmb.values()], backgroundColor: '#8b5cf6', borderRadius: 6, barPercentage: 0.6 },
+    ],
+  }
+})
+
+const licencMonthlyOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: { backgroundColor: '#1e293b', titleFont: { size: 12 }, bodyFont: { size: 11 }, cornerRadius: 8, padding: 10 }
+  },
+  scales: {
+    y: { beginAtZero: true, ticks: { precision: 0, font: { size: 11 } }, grid: { color: '#f1f5f9' } },
+    x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+  },
 }
 
 onMounted(async () => {
@@ -347,6 +496,7 @@ onMounted(async () => {
 .bg-success-soft { background: #d1fae5; color: #047857; }
 .bg-info-soft { background: #cffafe; color: #0e7490; }
 .bg-warning-soft { background: #fef3c7; color: #b45309; }
+.bg-purple-soft { background: #ede9fe; color: #6d28d9; }
 
 .stat-tile-label { color: #64748b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
 .stat-tile-value { font-size: 2rem; font-weight: 700; color: #0f172a; line-height: 1.2; }
