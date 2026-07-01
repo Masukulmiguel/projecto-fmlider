@@ -403,8 +403,12 @@
               <span>{{ selectedItem.empresa || '-' }}</span>
             </div>
             <div class="detail-item">
-              <label>Empresa</label>
-              <span>{{ selectedItem.empresa || '-' }}</span>
+              <label>Shipper</label>
+              <span>{{ selectedItem.shipper || '—' }}</span>
+            </div>
+            <div class="detail-item">
+              <label>NIF</label>
+              <span>{{ selectedItem.nif_empresa || '—' }}</span>
             </div>
             <div class="detail-item">
               <label>Tipo</label>
@@ -424,6 +428,10 @@
               <label>Data Validade</label>
               <span>{{ formatDate(selectedItem.data_validade) }}</span>
             </div>
+          </div>
+          <div class="detail-item full-width" v-if="selectedItem.descricao">
+            <label>Descrição</label>
+            <p>{{ selectedItem.descricao }}</p>
           </div>
           <div class="detail-item full-width" v-if="selectedItem.observacoes">
             <label>Observações</label>
@@ -801,6 +809,9 @@ const parseFuncSheet = (workbook, sheetName) => {
       cliente: mapped.cliente || mapped.cliente_nome || '',
       tipo: mapped.tipo || '',
       empresa: mapped.empresa || '',
+      shipper: mapped.shipper || '',
+      grupo: mapped.grupo || '',
+      nif_empresa: mapped.nif_empresa || '',
       numero_processo: mapped.numero_processo || '',
       funcionario_responsavel: mapped.funcionario_responsavel || '',
       observacoes: mapped.observacoes || '',
