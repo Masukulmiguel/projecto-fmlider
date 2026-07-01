@@ -785,9 +785,9 @@ const submitExcelImport = async () => {
   showValidation.value = false
 
   try {
-    const [{ data: funcionarios }, { data: clientes }] = await Promise.all([
+    const [{ data: funcionarios }, { data: companies }] = await Promise.all([
       supabase.from('users').select('id, name').eq('role', 'funcionario'),
-      supabase.from('users').select('id, name, nif').eq('role', 'cliente')
+      supabase.from('companies').select('user_id, company_name, nif')
     ])
 
     const funcMap = {}
@@ -797,10 +797,11 @@ const submitExcelImport = async () => {
     })
     const cliMap = {}
     const cliNifMap = {}
-    ;(clientes || []).forEach(c => {
-      const name = (c.name || '').toLowerCase().trim()
-      if (name) cliMap[name] = c
-      if (c.nif) cliNifMap[c.nif] = c
+    ;(companies || []).forEach(c => {
+      const name = (c.company_name || '').toLowerCase().trim()
+      const entry = { id: c.user_id, name: c.company_name, nif: c.nif }
+      if (name) cliMap[name] = entry
+      if (c.nif) cliNifMap[c.nif] = entry
     })
 
     const { data: existingRefs } = await supabase.from('licenciamentos').select('referencia')
