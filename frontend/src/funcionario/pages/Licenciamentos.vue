@@ -953,7 +953,7 @@ const processImport = async () => {
       if (!clienteNome) {
         errors.push('Nome do cliente em branco — obrigatório')
       } else if (!cliEntry) {
-        errors.push(`Cliente "${clienteNome}" não existe no sistema — registe o cliente primeiro`)
+        warnings.push(`Cliente "${clienteNome}" não encontrado no sistema — será importado sem vinculação`)
       } else if (cliMatch !== 'exact') {
         warnings.push(`Cliente "${clienteNome}" identificado como "${cliEntry.name}" (${cliMatch})`)
       }
