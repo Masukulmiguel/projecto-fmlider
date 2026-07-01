@@ -437,6 +437,39 @@
             <label>Observações</label>
             <p>{{ selectedItem.observacoes }}</p>
           </div>
+
+          <div class="detail-item full-width" v-if="selectedItemEstadosHistorico.length > 0">
+            <label>Linha do Tempo do Estado</label>
+            <div class="mt-2">
+              <div v-for="e in selectedItemEstadosHistorico" :key="e.id" class="mb-2 pb-2 border-bottom">
+                <span v-if="e.estado_anterior" class="badge bg-secondary me-1">{{ formatEstado(e.estado_anterior) }}</span>
+                <i v-if="e.estado_anterior" class="bi bi-arrow-right mx-1 text-muted"></i>
+                <span class="badge bg-primary">{{ formatEstado(e.estado_novo) }}</span>
+                <div v-if="e.observacao" class="mt-1 text-muted small">{{ e.observacao }}</div>
+                <small class="text-muted">{{ formatDate(e.created_at) }}</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-item full-width" v-if="selectedItemHistorico.length > 0">
+            <label>Histórico de Observações</label>
+            <div class="mt-2">
+              <div v-for="h in selectedItemHistorico" :key="h.id" class="historico-entry mb-3 pb-3 border-bottom">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <span class="badge bg-info text-white">
+                    <i class="bi bi-person-fill me-1"></i>{{ parseObsUser(h.valor_novo) || 'Sistema' }}
+                  </span>
+                  <span class="badge bg-light text-dark">{{ formatCampo(h.campo) }}</span>
+                </div>
+                <div v-if="parseObsText(h.valor_novo)" class="historico-valor ms-1">
+                  {{ parseObsText(h.valor_novo) }}
+                </div>
+                <div v-if="parseObsDate(h.valor_novo)" class="ms-1">
+                  <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ parseObsDate(h.valor_novo) }}</small>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" @click="closeDetailsModal">{{ t('common.close') }}</button>
@@ -681,14 +714,66 @@ const saveEdit = async () => {
   }
 }
 
-const viewDetails = (item) => {
+const selectedItemHistorico = ref([])
+const selectedItemEstadosHistorico = ref([])
+
+const viewDetails = async (item) => {
   selectedItem.value = item
   showDetailsModal.value = true
+
+  const [histRes, estadosRes] = await Promise.all([
+    supabase.from('licenciamento_historico').select('*')
+      .eq('licenciamento_id', item.id).order('created_at', { ascending: false }),
+    supabase.from('licenciamento_estados_historico').select('*')
+      .eq('licenciamento_id', item.id).order('created_at', { ascending: true })
+  ])
+  selectedItemHistorico.value = histRes.data || []
+  selectedItemEstadosHistorico.value = estadosRes.data || []
+}
+
+const parseObsUser = (text) => {
+  if (!text) return ''
+  const m = text.match(/\[([^\]]+)\]/)
+  return m ? m[1] : ''
+}
+
+const parseObsDate = (text) => {
+  if (!text) return ''
+  const m = text.match(/^(\d{4}-\d{2}-\d{2})/)
+  return m ? m[1] : ''
+}
+
+const parseObsText = (text) => {
+  if (!text) return ''
+  return text
+    .replace(/^\d{4}-\d{2}-\d{2}\s*/, '')
+    .replace(/\[[^\]]+\]\s*$/, '')
+    .trim()
+}
+
+const formatCampo = (campo) => {
+  const map = {
+    'observacao_excel': 'Observação',
+    'observacao': 'Observação',
+    'estado': 'Estado',
+    'cliente_nome': 'Cliente',
+    'empresa': 'Empresa',
+    'shipper': 'Shipper',
+    'descricao': 'Descrição',
+    'data_submissao': 'Data de Submissão',
+    'data_validade': 'Data de Validade',
+    'funcionario_responsavel': 'Funcionário Responsável',
+    'tipo_licenciamento': 'Tipo de Licenciamento',
+    'nif_empresa': 'NIF'
+  }
+  return map[campo] || campo
 }
 
 const closeDetailsModal = () => {
   showDetailsModal.value = false
   selectedItem.value = null
+  selectedItemHistorico.value = []
+  selectedItemEstadosHistorico.value = []
 }
 
 const handleFileSelect = (event) => {
@@ -937,6 +1022,12 @@ const processImport = async () => {
     const { data: existingRefs } = await supabase.from('licenciamentos').select('referencia')
     const usedRefs = new Set((existingRefs || []).map(r => r.referencia))
 
+    const { data: existingByProc } = await supabase.from('licenciamentos').select('id, numero_processo, referencia')
+    const existingProcMap = {}
+    ;(existingByProc || []).forEach(e => {
+      if (e.numero_processo) existingProcMap[String(e.numero_processo).trim()] = e
+    })
+
     let existingItems = []
     if (updateMode.value) {
       const { data } = await supabase.from('licenciamentos').select('*')
@@ -946,6 +1037,7 @@ const processImport = async () => {
     const results = []
     let successCount = 0
     let updateCount = 0
+    let skipCount = 0
     let failCount = 0
 
     for (let idx = 0; idx < importData.value.length; idx++) {
@@ -995,6 +1087,15 @@ const processImport = async () => {
       let action = 'insert'
 
       if (success) {
+        const numProc = String(item.numero_processo || '').trim()
+        if (!updateMode.value && numProc && existingProcMap[numProc]) {
+          action = 'skip'
+          skipCount++
+          warnings.push(`Registo já existe (Nº Processo: ${numProc}) — ignorado`)
+        }
+      }
+
+      if (success && action !== 'skip') {
         if (updateMode.value && nifExcel) {
           const matchIdx = existingItems.findIndex(e =>
             e.nif_empresa === nifExcel && e.tipo_licenciamento === tipo
@@ -1244,6 +1345,13 @@ END $$;
 DO $$ DECLARE r RECORD; BEGIN
   FOR r IN (SELECT conname FROM pg_constraint WHERE conrelid = 'public.licenciamento_estados_historico'::regclass AND contype = 'f') LOOP
     EXECUTE 'ALTER TABLE public.licenciamento_estados_historico DROP CONSTRAINT IF EXISTS ' || quote_ident(r.conname);
+  END LOOP;
+END $$;
+
+-- Remover constraint UNIQUE de numero_processo (vários licenciamentos podem ter o mesmo processo)
+DO $$ DECLARE r RECORD; BEGIN
+  FOR r IN (SELECT conname FROM pg_constraint WHERE conrelid = 'public.licenciamentos'::regclass AND contype = 'u') LOOP
+    EXECUTE 'ALTER TABLE public.licenciamentos DROP CONSTRAINT IF EXISTS ' || quote_ident(r.conname);
   END LOOP;
 END $$;
 
@@ -1671,7 +1779,8 @@ const copySQL = async () => {
   width: 90%;
   max-width: 500px;
   max-height: 90vh;
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .custom-modal-large {
@@ -1702,6 +1811,9 @@ const copySQL = async () => {
 
 .modal-body {
   padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .form-group {
@@ -1746,7 +1858,11 @@ const copySQL = async () => {
 .alert-rejected { border-radius: 12px; border: 1px solid #fecdd3; background: #fff1f2; overflow: hidden; }
 .alert-rejected-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #fecdd3; color: #991b1b; font-weight: 600; font-size: 0.85rem; }
 .alert-rejected-header i { font-size: 1.1rem; }
-.alert-rejected-list { padding: 8px; max-height: 250px; overflow-y: auto; }
+.alert-rejected-list { padding: 8px; max-height: 200px; overflow-y: auto; }
+
+.warning-list { padding: 8px; max-height: 200px; overflow-y: auto; }
+
+.updated-list { padding: 8px; max-height: 200px; overflow-y: auto; }
 .rejected-item { padding: 10px 12px; border-radius: 8px; background: #fff; margin-bottom: 6px; border: 1px solid #fecdd3; }
 .rejected-item:last-child { margin-bottom: 0; }
 .rejected-item-header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
@@ -1764,7 +1880,6 @@ const copySQL = async () => {
 .alert-warning-custom { border-radius: 12px; border: 1px solid #fde68a; background: #fffbeb; overflow: hidden; }
 .alert-warning-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #fde68a; color: #92400e; font-weight: 600; font-size: 0.85rem; }
 .alert-warning-header i { font-size: 1.1rem; }
-.warning-list { padding: 8px; }
 .warning-item { padding: 6px 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .warning-ref { font-size: 0.78rem; color: #92400e; font-weight: 600; background: #fde68a; padding: 2px 8px; border-radius: 20px; }
 .warning-msg { font-size: 0.8rem; color: #a16207; }
@@ -1772,7 +1887,6 @@ const copySQL = async () => {
 .alert-updated { border-radius: 12px; border: 1px solid #bfdbfe; background: #eff6ff; overflow: hidden; }
 .alert-updated-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #bfdbfe; color: #1e40af; font-weight: 600; font-size: 0.85rem; }
 .alert-updated-header i { font-size: 1.1rem; }
-.updated-list { padding: 8px; }
 .updated-item { padding: 6px 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .updated-ref { font-size: 0.78rem; color: #1e40af; font-weight: 600; background: #bfdbfe; padding: 2px 8px; border-radius: 20px; }
 .updated-msg { font-size: 0.8rem; color: #1d4ed8; }

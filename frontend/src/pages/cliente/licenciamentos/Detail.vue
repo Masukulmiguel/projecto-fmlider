@@ -4,6 +4,11 @@
       <button class="btn btn-outline-secondary" @click="router.back()">
         <i class="bi bi-arrow-left me-1"></i> Voltar
       </button>
+      <button v-if="item" class="btn btn-primary" @click="downloadPdf" :disabled="generatingPdf">
+        <i v-if="generatingPdf" class="spinner-border spinner-border-sm me-1"></i>
+        <i v-else class="bi bi-file-earmark-pdf me-1"></i>
+        {{ generatingPdf ? 'A gerar PDF...' : 'Descarregar PDF' }}
+      </button>
     </div>
 
     <div v-if="loading" class="text-center py-5">
@@ -133,14 +138,29 @@
           <h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Histórico de Observações</h6>
         </div>
         <div class="card-body">
-          <div v-for="h in historico" :key="h.id" class="historico-item mb-3 pb-3 border-bottom">
-            <div class="d-flex justify-content-between align-items-start">
-              <div>
-                <span class="historico-campo badge bg-light text-dark me-2">{{ h.campo }}</span>
-                <span v-if="h.valor_novo" class="historico-valor">{{ h.valor_novo }}</span>
-              </div>
-              <small class="text-muted">{{ formatDate(h.created_at) }}</small>
+          <div v-for="h in paginatedHistorico" :key="h.id" class="historico-item mb-3 pb-3 border-bottom">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span v-if="parseObsUser(h.valor_novo)" class="badge bg-info text-white">
+                <i class="bi bi-person-fill me-1"></i>{{ parseObsUser(h.valor_novo) }}
+              </span>
+              <span v-else class="badge bg-secondary text-white">Sistema</span>
+              <span class="historico-campo badge bg-light text-dark">{{ formatCampo(h.campo) }}</span>
             </div>
+            <div v-if="parseObsText(h.valor_novo)" class="historico-valor ms-1">
+              {{ parseObsText(h.valor_novo) }}
+            </div>
+            <small class="text-muted ms-1">
+              <i v-if="parseObsDate(h.valor_novo)" class="bi bi-calendar3 me-1"></i>{{ parseObsDate(h.valor_novo) || formatDate(h.created_at) }}
+            </small>
+          </div>
+          <div v-if="historico.length > obsPerPage" class="d-flex justify-content-center align-items-center gap-3 mt-3">
+            <button class="btn btn-outline-secondary btn-sm" :disabled="obsPage === 1" @click="obsPage--">
+              <i class="bi bi-chevron-left me-1"></i> Anterior
+            </button>
+            <span class="text-muted small">{{ obsPage }} / {{ totalObsPages }}</span>
+            <button class="btn btn-outline-primary btn-sm" :disabled="obsPage >= totalObsPages" @click="obsPage++">
+              Próximo <i class="bi bi-chevron-right ms-1"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -172,14 +192,25 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
+import { generateLicenciamentoPdf } from '@/utils/generateLicenciamentoPdf'
 
 const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 const item = ref(null)
 const loading = ref(true)
+const generatingPdf = ref(false)
 const estadosHistorico = ref([])
 const historico = ref([])
+const obsPage = ref(1)
+const obsPerPage = 5
+
+const totalObsPages = computed(() => Math.ceil(historico.value.length / obsPerPage))
+
+const paginatedHistorico = computed(() => {
+  const start = (obsPage.value - 1) * obsPerPage
+  return historico.value.slice(start, start + obsPerPage)
+})
 
 const timelineSteps = computed(() => {
   if (!item.value) return []
@@ -306,12 +337,62 @@ const estadoLabel = (estado) => ({
 
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'
 
+const parseObsUser = (text) => {
+  if (!text) return ''
+  const m = text.match(/\[([^\]]+)\]/)
+  return m ? m[1] : ''
+}
+
+const parseObsDate = (text) => {
+  if (!text) return ''
+  const m = text.match(/^(\d{4}-\d{2}-\d{2})/)
+  return m ? m[1] : ''
+}
+
+const parseObsText = (text) => {
+  if (!text) return ''
+  return text
+    .replace(/^\d{4}-\d{2}-\d{2}\s*/, '')
+    .replace(/\[[^\]]+\]\s*$/, '')
+    .trim()
+}
+
+const formatCampo = (campo) => {
+  const map = {
+    'observacao_excel': 'Observação',
+    'observacao': 'Observação',
+    'estado': 'Estado',
+    'cliente_nome': 'Cliente',
+    'empresa': 'Empresa',
+    'shipper': 'Shipper',
+    'descricao': 'Descrição',
+    'data_submissao': 'Data de Submissão',
+    'data_validade': 'Data de Validade',
+    'funcionario_responsavel': 'Funcionário Responsável',
+    'tipo_licenciamento': 'Tipo de Licenciamento',
+    'nif_empresa': 'NIF'
+  }
+  return map[campo] || campo
+}
+
+const downloadPdf = async () => {
+  if (!item.value) return
+  generatingPdf.value = true
+  try {
+    await generateLicenciamentoPdf(item.value, historico.value, estadosHistorico.value)
+  } catch (e) {
+    console.error('Erro ao gerar PDF:', e)
+  } finally {
+    generatingPdf.value = false
+  }
+}
+
 onMounted(fetchItem)
 </script>
 
 <style scoped>
 .crud-page { padding: 1.5rem; }
-.page-header { display: flex; align-items: center; }
+.page-header { display: flex; justify-content: space-between; align-items: center; }
 .page-title { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; color: #0f172a; }
 
 .card { border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }

@@ -812,6 +812,12 @@ const submitExcelImport = async () => {
     const { data: existingRefs } = await supabase.from('licenciamentos').select('referencia')
     const usedRefs = new Set((existingRefs || []).map(r => r.referencia))
 
+    const { data: existingByProc } = await supabase.from('licenciamentos').select('id, numero_processo, referencia')
+    const existingProcMap = {}
+    ;(existingByProc || []).forEach(e => {
+      if (e.numero_processo) existingProcMap[String(e.numero_processo).trim()] = e
+    })
+
     let existingItems = []
     if (updateMode.value) {
       const { data } = await supabase.from('licenciamentos').select('*')
@@ -821,6 +827,7 @@ const submitExcelImport = async () => {
     const results = []
     let successCount = 0
     let updateCount = 0
+    let skipCount = 0
     let failCount = 0
 
     for (let idx = 0; idx < excelData.value.length; idx++) {
@@ -870,6 +877,15 @@ const submitExcelImport = async () => {
       let action = 'insert'
 
       if (success) {
+        const numProc = String(row.numero_processo || '').trim()
+        if (!updateMode.value && numProc && existingProcMap[numProc]) {
+          action = 'skip'
+          skipCount++
+          warnings.push(`Registo já existe (Nº Processo: ${numProc}) — ignorado`)
+        }
+      }
+
+      if (success && action !== 'skip') {
         if (updateMode.value && nifExcel) {
           const matchIdx = existingItems.findIndex(e =>
             e.nif_empresa === nifExcel && e.tipo_licenciamento === tipo
@@ -1067,6 +1083,13 @@ DO $$ DECLARE r RECORD; BEGIN
   END LOOP;
 END $$;
 
+-- Remover constraint UNIQUE de numero_processo (vários licenciamentos podem ter o mesmo processo)
+DO $$ DECLARE r RECORD; BEGIN
+  FOR r IN (SELECT conname FROM pg_constraint WHERE conrelid = 'public.licenciamentos'::regclass AND contype = 'u') LOOP
+    EXECUTE 'ALTER TABLE public.licenciamentos DROP CONSTRAINT IF EXISTS ' || quote_ident(r.conname);
+  END LOOP;
+END $$;
+
 -- Desactivar RLS
 ALTER TABLE public.licenciamentos DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.licenciamento_historico DISABLE ROW LEVEL SECURITY;
@@ -1149,13 +1172,13 @@ const copySQL = async () => {
 .status-expirado { background: #fecaca; color: #7f1d1d; }
 
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1050; }
-.modal-content { background: white; border-radius: 12px; width: 100%; max-width: 520px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
+.modal-content { background: white; border-radius: 12px; width: 100%; max-width: 520px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
 .modal-content.modal-sm { max-width: 400px; }
 .modal-content.modal-lg { max-width: 700px; }
-.modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
+.modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
 .modal-header h5 { margin: 0; font-weight: 600; }
-.modal-body { padding: 1.5rem; }
-.modal-footer { padding: 1rem 1.5rem; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 0.5rem; }
+.modal-body { padding: 1.5rem; overflow-y: auto; flex: 1; min-height: 0; }
+.modal-footer { padding: 1rem 1.5rem; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 0.5rem; flex-shrink: 0; }
 
 .validation-stat { border-radius: 10px; padding: 0.75rem; text-align: center; }
 .validation-stat .stat-num { display: block; font-size: 1.5rem; font-weight: 700; }
@@ -1182,7 +1205,7 @@ const copySQL = async () => {
 .alert-updated { border-radius: 12px; border: 1px solid #bfdbfe; background: #eff6ff; overflow: hidden; }
 .alert-updated-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #bfdbfe; color: #1e40af; font-weight: 600; font-size: 0.85rem; }
 .alert-updated-header i { font-size: 1.1rem; }
-.updated-list { padding: 8px; }
+.updated-list { padding: 8px; max-height: 200px; overflow-y: auto; }
 .updated-item { padding: 6px 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .updated-ref { font-size: 0.78rem; color: #1e40af; font-weight: 600; background: #bfdbfe; padding: 2px 8px; border-radius: 20px; }
 .updated-msg { font-size: 0.8rem; color: #1d4ed8; }
@@ -1190,7 +1213,7 @@ const copySQL = async () => {
 .alert-warning-custom { border-radius: 12px; border: 1px solid #fde68a; background: #fffbeb; overflow: hidden; }
 .alert-warning-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #fde68a; color: #92400e; font-weight: 600; font-size: 0.85rem; }
 .alert-warning-header i { font-size: 1.1rem; }
-.warning-list { padding: 8px; }
+.warning-list { padding: 8px; max-height: 200px; overflow-y: auto; }
 .warning-item { padding: 6px 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .warning-ref { font-size: 0.78rem; color: #92400e; font-weight: 600; background: #fde68a; padding: 2px 8px; border-radius: 20px; }
 .warning-msg { font-size: 0.8rem; color: #a16207; }

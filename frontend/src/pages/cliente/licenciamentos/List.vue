@@ -45,7 +45,7 @@
             <i class="bi bi-search"></i>
             <input v-model="filters.q" type="text" placeholder="Pesquisar por referência, processo ou empresa..." @input="debounceSearch">
           </div>
-          <select v-model="filters.status" class="form-select" @change="fetchData">
+          <select v-model="filters.status" class="form-select" @change="cardsPage = 1; fetchData()">
             <option value="">Todos os estados</option>
             <option value="pendente">Pendente</option>
             <option value="documentacao_recebida">Documentação Recebida</option>
@@ -71,7 +71,7 @@
 
     <div v-else class="licenciamentos-grid">
       <div
-        v-for="item in items"
+        v-for="item in paginatedItems"
         :key="item.id"
         class="licenciamento-card"
         @click="router.push(`/licenciamentos/${item.id}`)"
@@ -105,11 +105,21 @@
         </div>
       </div>
     </div>
+
+    <div v-if="!loading && items.length > cardsPerPage" class="pagination-controls d-flex justify-content-center align-items-center gap-3 mt-4">
+      <button class="btn btn-outline-secondary btn-sm" :disabled="cardsPage === 1" @click="cardsPage--">
+        <i class="bi bi-chevron-left me-1"></i> Anterior
+      </button>
+      <span class="text-muted small">{{ cardsPage }} / {{ totalCardsPages }}</span>
+      <button class="btn btn-outline-primary btn-sm" :disabled="cardsPage >= totalCardsPages" @click="cardsPage++">
+        Próximo <i class="bi bi-chevron-right ms-1"></i>
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
@@ -123,6 +133,16 @@ const stats = ref({})
 const loading = ref(false)
 const filters = reactive({ q: '', status: '' })
 let searchTimer = null
+
+const cardsPage = ref(1)
+const cardsPerPage = 6
+
+const totalCardsPages = computed(() => Math.ceil(items.value.length / cardsPerPage))
+
+const paginatedItems = computed(() => {
+  const start = (cardsPage.value - 1) * cardsPerPage
+  return items.value.slice(start, start + cardsPerPage)
+})
 
 const computeStats = () => {
   const all = items.value
@@ -173,7 +193,7 @@ const fetchData = async () => {
 
 const debounceSearch = () => {
   clearTimeout(searchTimer)
-  searchTimer = setTimeout(fetchData, 300)
+  searchTimer = setTimeout(() => { cardsPage.value = 1; fetchData() }, 300)
 }
 
 const statusLabel = (status) => ({

@@ -159,17 +159,27 @@
               <thead>
                 <tr>
                   <th>Campo</th>
-                  <th>Valor Anterior</th>
-                  <th>Valor Novo</th>
+                  <th>Utilizador</th>
+                  <th>Observação</th>
                   <th>Data</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(h, idx) in historico" :key="idx">
-                  <td><code>{{ h.campo }}</code></td>
-                  <td>{{ h.valor_anterior || '—' }}</td>
-                  <td>{{ h.valor_novo || '—' }}</td>
-                  <td><small class="text-muted">{{ formatDateTime(h.created_at) }}</small></td>
+                  <td><code>{{ formatCampo(h.campo) }}</code></td>
+                  <td>
+                    <span v-if="parseObsUser(h.valor_novo)" class="badge bg-info text-white">
+                      <i class="bi bi-person-fill me-1"></i>{{ parseObsUser(h.valor_novo) }}
+                    </span>
+                    <span v-else class="text-muted">Sistema</span>
+                  </td>
+                  <td>{{ parseObsText(h.valor_novo) || h.valor_novo || '—' }}</td>
+                  <td>
+                    <small class="text-muted">
+                      <span v-if="parseObsDate(h.valor_novo)"><i class="bi bi-calendar3 me-1"></i>{{ parseObsDate(h.valor_novo) }}</span>
+                      <span v-else>{{ formatDateTime(h.created_at) }}</span>
+                    </small>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -243,6 +253,44 @@ const showToast = (type, message) => {
   toast.value = { show: true, type, message }
   clearTimeout(toastTimer)
   toastTimer = setTimeout(() => { toast.value.show = false }, 3000)
+}
+
+const parseObsUser = (text) => {
+  if (!text) return ''
+  const m = text.match(/\[([^\]]+)\]/)
+  return m ? m[1] : ''
+}
+
+const parseObsDate = (text) => {
+  if (!text) return ''
+  const m = text.match(/^(\d{4}-\d{2}-\d{2})/)
+  return m ? m[1] : ''
+}
+
+const parseObsText = (text) => {
+  if (!text) return ''
+  return text
+    .replace(/^\d{4}-\d{2}-\d{2}\s*/, '')
+    .replace(/\[[^\]]+\]\s*$/, '')
+    .trim()
+}
+
+const formatCampo = (campo) => {
+  const map = {
+    'observacao_excel': 'Observação',
+    'observacao': 'Observação',
+    'estado': 'Estado',
+    'cliente_nome': 'Cliente',
+    'empresa': 'Empresa',
+    'shipper': 'Shipper',
+    'descricao': 'Descrição',
+    'data_submissao': 'Data de Submissão',
+    'data_validade': 'Data de Validade',
+    'funcionario_responsavel': 'Funcionário Responsável',
+    'tipo_licenciamento': 'Tipo de Licenciamento',
+    'nif_empresa': 'NIF'
+  }
+  return map[campo] || campo
 }
 
 const allEstados = [
