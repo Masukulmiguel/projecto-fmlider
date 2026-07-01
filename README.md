@@ -84,10 +84,6 @@ fmlider.co.ao/
 └── prd.md             # Product Requirements Document
 ```
 
-## 🔑 Credenciais Padrão
-
-- **Email**: admin@fmlider.co.ao
-- **Senha**: Admin@2026
 
 ## 🌐 Endpoints da API
 
