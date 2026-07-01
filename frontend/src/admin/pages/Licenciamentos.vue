@@ -703,7 +703,12 @@ const parseSheet = (workbook, sheetName) => {
 
 const onSheetSelect = () => {
   if (selectedSheet.value && window._workbook) {
-    parseSheet(window._workbook, selectedSheet.value)
+    if (/observa/i.test(selectedSheet.value)) {
+      excelObservations.value = parseObsSheet(window._workbook, selectedSheet.value)
+      excelData.value = []
+    } else {
+      parseSheet(window._workbook, selectedSheet.value)
+    }
   }
 }
 

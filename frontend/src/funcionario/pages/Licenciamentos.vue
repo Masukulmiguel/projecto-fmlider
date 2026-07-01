@@ -817,7 +817,12 @@ const parseFuncSheet = (workbook, sheetName) => {
 
 const onFuncSheetSelect = () => {
   if (funcSelectedSheet.value && window._funcWorkbook) {
-    parseFuncSheet(window._funcWorkbook, funcSelectedSheet.value)
+    if (/observa/i.test(funcSelectedSheet.value)) {
+      funcExcelObservations.value = parseFuncObsSheet(window._funcWorkbook, funcSelectedSheet.value)
+      importData.value = []
+    } else {
+      parseFuncSheet(window._funcWorkbook, funcSelectedSheet.value)
+    }
   }
 }
 
