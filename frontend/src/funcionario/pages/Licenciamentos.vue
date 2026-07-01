@@ -1047,7 +1047,7 @@ const processImport = async () => {
             funcionario_responsavel: funcEntry ? funcEntry.name : funcName,
             observacoes: item.observacoes || '',
             descricao: item.descricao || '',
-            nif_empresa: nifExcel || null,
+            nif_empresa: nifExcel || cliEntry?.nif || null,
             fonte: 'excel'
           }
 

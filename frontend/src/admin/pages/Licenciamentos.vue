@@ -922,7 +922,7 @@ const submitExcelImport = async () => {
             funcionario_responsavel: funcEntry ? funcEntry.name : funcName,
             observacoes: row.observacoes || '',
             descricao: row.descricao || '',
-            nif_empresa: nifExcel || null,
+            nif_empresa: nifExcel || cliEntry?.nif || null,
             fonte: 'excel'
           }
 
