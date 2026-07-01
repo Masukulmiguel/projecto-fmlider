@@ -343,32 +343,33 @@ export async function generateLicenciamentoPdf(item, historico = [], estadosHist
       stack: [
         {
           canvas: [{ type: 'line', x1: 40, y1: 0, x2: 515, y2: 0, lineWidth: 0.5, lineColor: '#cbd5e1' }],
-          margin: [0, 0, 0, 6]
+          margin: [0, 0, 0, 5]
         },
         {
-          columns: [
-            {
-              width: '60%',
-              stack: [
-                { text: 'FMLider Transitário & Logística', style: { fontSize: 8, bold: true, color: '#1a365d' } },
-                { text: 'FMLider Base, Estrada da Pedreira, Bairro da Vidrul – Cacuaco, Luanda, Angola', style: { fontSize: 7, color: '#94a3b8' } },
-                { text: 'Tel: +244 935 141 747 | Email: geral@fmlider.co.ao | www.fmlider.co.ao', style: { fontSize: 7, color: '#94a3b8' } }
-              ]
-            },
-            {
-              width: '40%',
-              stack: [
-                { text: 'Documento gerado automaticamente', style: { fontSize: 7, color: '#94a3b8', italics: true }, alignment: 'right' },
-                { text: formatDateTime(new Date()), style: { fontSize: 7, color: '#94a3b8' }, alignment: 'right' },
-                { text: `Página ${currentPage} de ${pageCount}`, style: { fontSize: 7, color: '#94a3b8' }, alignment: 'right', margin: [0, 2, 0, 0] }
-              ]
-            }
-          ]
+          text: 'FMLider Transitário & Logística',
+          style: { fontSize: 8, bold: true, color: '#1a365d' },
+          alignment: 'center'
+        },
+        {
+          text: 'FMLider Base, Estrada da Pedreira, Bairro da Vidrul – Cacuaco, Luanda, Angola',
+          style: { fontSize: 7, color: '#94a3b8' },
+          alignment: 'center'
+        },
+        {
+          text: 'Tel: +244 935 141 747 | Email: geral@fmlider.co.ao | www.fmlider.co.ao',
+          style: { fontSize: 7, color: '#94a3b8' },
+          alignment: 'center'
+        },
+        {
+          text: `Documento gerado automaticamente em ${formatDateTime(new Date())} — Página ${currentPage} de ${pageCount}`,
+          style: { fontSize: 6.5, color: '#b0b8c4', italics: true },
+          alignment: 'center',
+          margin: [0, 4, 0, 0]
         }
       ],
       margin: [0, 0, 0, 0]
     }),
-    pageMargins: [40, 35, 40, 65]
+    pageMargins: [40, 35, 40, 70]
   }
 
   const pdfMake = await getPdfMake()
