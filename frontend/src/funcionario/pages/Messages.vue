@@ -1,19 +1,21 @@
 <template>
-  <div class="funcionario-messages">
+  <div class="messenger-page">
     <div class="page-header">
       <div>
-        <h1 class="page-title"><i class="bi bi-chat-dots-fill me-2"></i>{{ t('funcionario.messages_subtitle') }}</h1>
-        <p class="text-muted mb-0">{{ t('funcionario.messages_description') }}</p>
+        <h1 class="page-title"><i class="bi bi-chat-dots-fill me-2"></i>Mensagens</h1>
+        <p class="text-muted mb-0">Comunique directamente com a administração</p>
       </div>
     </div>
 
-    <div v-if="!adminConv" class="card empty-card">
-      <div class="card-body text-center py-5">
-        <i class="bi bi-headset" style="font-size: 3rem; color: #0f766e;"></i>
-        <h5 class="mt-3">{{ t('funcionario.messages_admin') }}</h5>
-        <p class="text-muted mb-3">{{ t('funcionario.messages_start') }}</p>
-        <button class="btn btn-success" @click="startChat">
-          <i class="bi bi-chat-dots me-1"></i> {{ t('funcionario.messages_begin') }}
+    <div v-if="!adminConv" class="empty-chat-card">
+      <div class="empty-chat-inner">
+        <div class="empty-icon-wrap">
+          <i class="bi bi-headset"></i>
+        </div>
+        <h4>Fale com a Administração</h4>
+        <p>Inicie uma conversa para tirar dúvidas, enviar pedidos ou acompanhar processos.</p>
+        <button class="btn-start-chat" @click="startChat">
+          <i class="bi bi-chat-dots-fill me-2"></i>Iniciar Conversa
         </button>
       </div>
     </div>
@@ -26,9 +28,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import ChatPanel from '@/components/ChatPanel.vue'
 import { useChatStore } from '@/stores/chatStore'
-import { useI18n } from '@/composables/useI18n'
 
-const { t } = useI18n()
 const chatStore = useChatStore()
 const adminConv = ref(null)
 
@@ -41,7 +41,7 @@ const startChat = async () => {
   }
 }
 
-const onSent = () => { /* handled in store */ }
+const onSent = () => {}
 
 onMounted(async () => {
   await chatStore.fetchConversations()
@@ -59,15 +59,39 @@ onMounted(async () => {
   }
 })
 
-onBeforeUnmount(() => {
-  chatStore.stopPolling()
-})
+onBeforeUnmount(() => { chatStore.stopPolling() })
 </script>
 
 <style scoped>
-.funcionario-messages { padding: 1.5rem; }
+.messenger-page { padding: 1.5rem; }
 .page-header { margin-bottom: 1rem; }
 .page-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.25rem; color: #0f172a; }
 
-.empty-card { border: none; border-radius: 14px; box-shadow: 0 4px 18px rgba(15,23,42,0.06); }
+.empty-chat-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+.empty-chat-inner {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+.empty-icon-wrap {
+  width: 100px; height: 100px; border-radius: 50%;
+  background: linear-gradient(135deg, #e7f3ff, #cce5ff);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1.5rem;
+}
+.empty-icon-wrap i { font-size: 2.8rem; color: #0084ff; }
+.empty-chat-inner h4 { color: #050505; font-weight: 700; margin-bottom: 0.5rem; }
+.empty-chat-inner p { color: #65676b; font-size: 0.95rem; max-width: 400px; margin: 0 auto 1.5rem; }
+.btn-start-chat {
+  background: #0084ff; color: #fff; border: none;
+  padding: 12px 28px; border-radius: 24px;
+  font-size: 0.95rem; font-weight: 600;
+  cursor: pointer; transition: background 0.2s;
+  display: inline-flex; align-items: center;
+}
+.btn-start-chat:hover { background: #0073e6; }
 </style>
