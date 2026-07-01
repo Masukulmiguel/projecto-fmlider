@@ -1,4 +1,5 @@
 <template>
+<!-- cache-bust -->
   <div class="admin-page">
     <div class="page-header">
       <h1>Licenciamentos</h1>

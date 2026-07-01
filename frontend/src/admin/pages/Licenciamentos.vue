@@ -1,4 +1,5 @@
 <template>
+<!-- cache-bust -->
   <div class="admin-page p-5">
     <div class="page-header mb-4">
       <div>
