@@ -340,14 +340,14 @@ const licencEstadoLabel = (s) => ({
 }[s] || s || '—')
 
 const licencEstadoColor = (s) => ({
-  pendente: '#f59e0b',
-  documentacao_recebida: '#3b82f6',
-  submetido: '#8b5cf6',
+  pendente: '#eab308',
+  documentacao_recebida: '#0ea5e9',
+  submetido: '#a855f7',
   em_analise: '#f97316',
   aprovado: '#22c55e',
   indeferido: '#ef4444',
-  resubmetido: '#6366f1',
-  certificacao_solicitada: '#06b6d4'
+  resubmetido: '#ec4899',
+  certificacao_solicitada: '#14b8a6'
 }[s] || '#64748b')
 
 const licencStatusData = computed(() => {
