@@ -68,7 +68,7 @@ export const useNotificationStore = defineStore('notifications', () => {
         .eq('is_read', false)
       if (!error) {
         const newCount = count || 0
-        if (newCount > previousUnread && previousUnread > 0) {
+        if (newCount > previousUnread) {
           playNotificationSound()
         }
         previousUnread = newCount

@@ -2,14 +2,52 @@
 <!-- cache-bust-2 -->
   <div class="admin-page p-5">
     <div class="page-header mb-4">
-      <div>
-        <h2>Gestão de Licenciamentos</h2>
-        <p class="text-muted mb-0">Gestão inteligente de processos de licenciamento e autorizações</p>
+      <h2>Gestão de Licenciamentos</h2>
+      <p class="text-muted mb-0">Gestão inteligente de processos de licenciamento e autorizações</p>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="stats-grid mb-4">
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #dbeafe; color: #1e40af;">
+          <i class="bi bi-file-earmark-text"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats.total }}</span>
+          <span class="stat-label">Total</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #fef3c7; color: #92400e;">
+          <i class="bi bi-clock"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats.pendente_cliente }}</span>
+          <span class="stat-label">Pendentes</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #cffafe; color: #155e75;">
+          <i class="bi bi-arrow-repeat"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats.em_analise }}</span>
+          <span class="stat-label">Em Análise</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #d1fae5; color: #065f46;">
+          <i class="bi bi-check-circle"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats.aprovado }}</span>
+          <span class="stat-label">Aprovados</span>
+        </div>
       </div>
     </div>
 
     <!-- Schema Error Banner -->
-    <div v-if="schemaError" class="schema-error-banner">
+    <div v-if="schemaError" class="schema-error-banner mb-4">
       <div class="schema-error-icon">
         <i class="bi bi-exclamation-triangle-fill"></i>
       </div>
@@ -29,13 +67,6 @@
           </button>
           <pre><code>{{ fixSchemaSQL }}</code></pre>
         </div>
-      </div>
-    </div>
-
-    <div class="stats-row mb-4">
-      <div class="stat-card" v-for="stat in stats" :key="stat.key">
-        <div class="stat-value">{{ stat.value }}</div>
-        <div class="stat-label">{{ stat.label }}</div>
       </div>
     </div>
 
@@ -480,20 +511,42 @@ watch(() => [filters.q, filters.estado, filters.tipo], () => {
 
 const debounceSearch = () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => { currentPage.value = 1; fetchData() }, 300) }
 
-const stats = computed(() => {
-  const all = items.value
-  return [
-    { key: 'total', label: 'Total', value: all.length },
-    { key: 'rascunho', label: 'Rascunho', value: all.filter(i => i.estado === 'rascunho').length },
-    { key: 'pendente_cliente', label: 'Pendente', value: all.filter(i => i.estado === 'pendente_cliente').length },
-    { key: 'submetido', label: 'Submetido', value: all.filter(i => i.estado === 'submetido').length },
-    { key: 'em_analise', label: 'Em Análise', value: all.filter(i => i.estado === 'em_analise').length },
-    { key: 'aprovado', label: 'Aprovado', value: all.filter(i => i.estado === 'aprovado').length },
-    { key: 'indeferido', label: 'Indeferido', value: all.filter(i => i.estado === 'indeferido').length },
-    { key: 'expira_brevemente', label: 'Expira Breve', value: all.filter(i => i.estado === 'expira_brevemente').length },
-    { key: 'expirado', label: 'Expirado', value: all.filter(i => i.estado === 'expirado').length }
-  ]
+const stats = reactive({
+  total: 0,
+  rascunho: 0,
+  pendente_cliente: 0,
+  submetido: 0,
+  em_analise: 0,
+  aprovado: 0,
+  indeferido: 0,
+  expira_brevemente: 0,
+  expirado: 0
 })
+
+const fetchStats = async () => {
+  try {
+    const counts = await Promise.all([
+      supabase.from('licenciamentos').select('id', { count: 'exact', head: true }),
+      supabase.from('licenciamentos').select('id', { count: 'exact', head: true }).eq('estado', 'rascunho'),
+      supabase.from('licenciamentos').select('id', { count: 'exact', head: true }).eq('estado', 'pendente_cliente'),
+      supabase.from('licenciamentos').select('id', { count: 'exact', head: true }).eq('estado', 'submetido'),
+      supabase.from('licenciamentos').select('id', { count: 'exact', head: true }).eq('estado', 'em_analise'),
+      supabase.from('licenciamentos').select('id', { count: 'exact', head: true }).eq('estado', 'aprovado'),
+      supabase.from('licenciamentos').select('id', { count: 'exact', head: true }).eq('estado', 'indeferido'),
+      supabase.from('licenciamentos').select('id', { count: 'exact', head: true }).eq('estado', 'expira_brevemente'),
+      supabase.from('licenciamentos').select('id', { count: 'exact', head: true }).eq('estado', 'expirado')
+    ])
+    stats.total = counts[0].count || 0
+    stats.rascunho = counts[1].count || 0
+    stats.pendente_cliente = counts[2].count || 0
+    stats.submetido = counts[3].count || 0
+    stats.em_analise = counts[4].count || 0
+    stats.aprovado = counts[5].count || 0
+    stats.indeferido = counts[6].count || 0
+    stats.expira_brevemente = counts[7].count || 0
+    stats.expirado = counts[8].count || 0
+  } catch (e) {}
+}
 
 const tipoLabel = (tipo) => ({
   importacao: 'Importação',
@@ -548,6 +601,7 @@ const submitEdit = async () => {
     showToast('success', 'Licenciamento atualizado com sucesso!')
     closeEdit()
     fetchData()
+    fetchStats()
   } catch (e) {
     showToast('error', 'Erro ao atualizar licenciamento.')
   } finally { saving.value = false }
@@ -575,6 +629,7 @@ const submitDelete = async () => {
     showToast('success', 'Licenciamento eliminado com sucesso!')
     closeDelete()
     fetchData()
+    fetchStats()
   } catch (e) {
     showToast('error', 'Erro ao eliminar licenciamento.')
   } finally { deleting.value = false }
@@ -1041,10 +1096,12 @@ const submitExcelImport = async () => {
     if (successCount > 0) {
       showToast('success', `${successCount} licenciamento(s) importado(s) com sucesso!`)
       fetchData()
+      fetchStats()
     }
     if (updateCount > 0) {
       showToast('success', `${updateCount} licenciamento(s) actualizado(s) com sucesso!`)
       fetchData()
+      fetchStats()
     }
     if (failCount > 0) {
       showToast('error', `${failCount} registo(s) não importado(s). Verifique os detalhes.`)
@@ -1065,7 +1122,7 @@ const showToast = (type, message) => {
   toastTimer = setTimeout(() => { toast.show = false }, 3000)
 }
 
-onMounted(fetchData)
+onMounted(() => { fetchData(); fetchStats() })
 
 const fixSchemaSQL = `-- Execute este SQL no Supabase SQL Editor
 -- Passo 1: Abra o Supabase Dashboard → SQL Editor
@@ -1156,10 +1213,47 @@ const copySQL = async () => {
 .form-select { max-width: 220px; border: 2px solid #e2e8f0; border-radius: 8px; }
 .tracking-code { background: #f1f5f9; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; color: #334155; }
 
-.stats-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-.stat-card { background: white; border: none; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); padding: 1rem 1.25rem; min-width: 110px; text-align: center; }
-.stat-value { font-size: 1.5rem; font-weight: 700; color: #1e293b; }
-.stat-label { font-size: 0.7rem; color: #64748b; margin-top: 0.15rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a365d;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
 
 .status-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.72rem; font-weight: 600; }
 .status-rascunho { background: #f1f5f9; color: #475569; }
@@ -1261,4 +1355,11 @@ const copySQL = async () => {
 }
 .page-btn:hover:not(:disabled) { border-color: #0f766e; color: #0f766e; background: #f0fdfa; }
 .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+@media (max-width: 768px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+}
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+}
 </style>

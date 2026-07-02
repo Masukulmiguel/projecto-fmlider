@@ -41,20 +41,6 @@
         </router-link>
       </div>
       <div class="col-md-6 col-xl-3">
-        <router-link to="/cotacoes" class="stat-tile-link">
-          <div class="stat-tile">
-            <div class="stat-tile-icon bg-success-soft"><i class="bi bi-receipt"></i></div>
-            <div>
-              <div class="stat-tile-label">{{ t('cliente.dashboard_quotes') }}</div>
-              <div class="stat-tile-value">{{ counts.cotacoes }}</div>
-              <div class="stat-tile-meta">
-                <span class="text-success">{{ counts.cotacoes_aprovada || 0 }} {{ t('cliente.dashboard_approved') }}</span>
-              </div>
-            </div>
-          </div>
-        </router-link>
-      </div>
-      <div class="col-md-6 col-xl-3">
         <router-link to="/documentos" class="stat-tile-link">
           <div class="stat-tile">
             <div class="stat-tile-icon bg-info-soft"><i class="bi bi-file-earmark-text-fill"></i></div>
@@ -190,10 +176,6 @@
                 <i class="bi bi-plus-circle-fill"></i>
                 <span>{{ t('cliente.dashboard_new_shipment') }}</span>
               </router-link>
-              <router-link to="/cotacoes/novo" class="quick-action">
-                <i class="bi bi-plus-circle-fill"></i>
-                <span>{{ t('cliente.dashboard_new_quote') }}</span>
-              </router-link>
               <button class="quick-action" @click="goToDocumentos">
                 <i class="bi bi-upload"></i>
                 <span>{{ t('cliente.dashboard_send_doc') }}</span>
@@ -231,10 +213,9 @@ const authStore = useAuthStore()
 const companyStore = useCompanyStore()
 const router = useRouter()
 
-const counts = reactive({ embarques: 0, embarques_pendente: 0, cotacoes: 0, cotacoes_aprovada: 0, documentos: 0, contactos: 0, licenciamentos: 0, licenciamentos_aprovado: 0 })
+const counts = reactive({ embarques: 0, embarques_pendente: 0, documentos: 0, contactos: 0, licenciamentos: 0, licenciamentos_aprovado: 0 })
 const recentEmbarques = ref([])
 const embarques = ref([])
-const cotacoes = ref([])
 const licenciamentos = ref([])
 
 const statusLabel = (s) => ({ pendente: t('cliente.dashboard_status_pending'), em_transito: t('cliente.dashboard_status_transit'), entregue: t('cliente.dashboard_status_delivered'), cancelado: t('cliente.dashboard_status_cancelled') }[s] || s)
@@ -246,21 +227,17 @@ const loadCounts = async () => {
     const userId = authStore.user?.id
     if (!userId) return
 
-    const [embRes, cotRes, docsRes, contsRes, licRes] = await Promise.all([
+    const [embRes, docsRes, contsRes, licRes] = await Promise.all([
       supabase.from('embarques').select('*').eq('user_id', userId),
-      supabase.from('cotacoes').select('*').eq('user_id', userId),
       supabase.from('documentos').select('*').eq('user_id', userId),
       supabase.from('contactos').select('*').eq('user_id', userId),
       supabase.from('licenciamentos').select('*').eq('user_id', userId)
     ])
 
     embarques.value = embRes.data || []
-    cotacoes.value = cotRes.data || []
     licenciamentos.value = licRes.data || []
     counts.embarques = embarques.value.length
     counts.embarques_pendente = embarques.value.filter(e => e.status === 'pendente').length
-    counts.cotacoes = cotacoes.value.length
-    counts.cotacoes_aprovada = cotacoes.value.filter(c => c.status === 'aprovada').length
     counts.documentos = (docsRes.data || []).length
     counts.contactos = (contsRes.data || []).length
     counts.licenciamentos = licenciamentos.value.length
@@ -271,7 +248,7 @@ const loadCounts = async () => {
   }
 }
 
-const chartsReady = computed(() => embarques.value.length > 0 || cotacoes.value.length > 0)
+const chartsReady = computed(() => embarques.value.length > 0)
 const licencChartsReady = computed(() => licenciamentos.value.length > 0)
 
 const monthKey = (iso) => {
@@ -283,22 +260,18 @@ const monthKey = (iso) => {
 const monthlyData = computed(() => {
   const labels = []
   const mapEmb = new Map()
-  const mapCot = new Map()
   const now = new Date()
   for (let i = 5; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
     const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
     labels.push(d.toLocaleDateString(locale.value === 'pt' ? 'pt-PT' : locale.value === 'en' ? 'en-US' : 'fr-FR', { month: 'short' }))
     mapEmb.set(k, 0)
-    mapCot.set(k, 0)
   }
   embarques.value.forEach(e => { const k = monthKey(e.created_at); if (mapEmb.has(k)) mapEmb.set(k, mapEmb.get(k) + 1) })
-  cotacoes.value.forEach(c => { const k = monthKey(c.created_at); if (mapCot.has(k)) mapCot.set(k, mapCot.get(k) + 1) })
   return {
     labels,
     datasets: [
       { label: t('cliente.dashboard_chart_shipments_label'), data: [...mapEmb.values()], backgroundColor: '#2563eb', borderRadius: 6 },
-      { label: t('cliente.dashboard_chart_quotes_label'), data: [...mapCot.values()], backgroundColor: '#10b981', borderRadius: 6 },
     ],
   }
 })

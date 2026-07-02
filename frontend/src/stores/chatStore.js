@@ -18,13 +18,23 @@ export const useChatStore = defineStore('chat', () => {
   const fetchAvailableUsers = async () => {
     try {
       const myId = authStore.user?.id
+      const myRole = authStore.user?.role
       if (!myId) return
-      const { data, error } = await supabase
+
+      let query = supabase
         .from('users')
         .select('id, name, email, photo, role')
         .neq('id', myId)
-        .in('role', ['funcionario', 'cliente'])
-        .order('name', { ascending: true })
+
+      if (myRole === 'admin') {
+        query = query.in('role', ['funcionario', 'cliente'])
+      } else if (myRole === 'funcionario') {
+        query = query.in('role', ['admin', 'cliente'])
+      } else {
+        query = query.in('role', ['admin', 'funcionario'])
+      }
+
+      const { data, error } = await query.order('name', { ascending: true })
       if (!error) availableUsers.value = data || []
     } catch (e) {
       availableUsers.value = []
@@ -180,6 +190,11 @@ export const useChatStore = defineStore('chat', () => {
         .eq('user_id', myId)
         .eq('is_read', false)
         .in('type', ['chat', 'message'])
+      try {
+        const { useNotificationStore } = await import('@/stores/notificationStore')
+        const notifStore = useNotificationStore()
+        await notifStore.fetchUnread()
+      } catch {}
     } catch (e) {}
   }
 
@@ -228,8 +243,86 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
+  const sendFileMessage = async (file, receiverId) => {
+    sending.value = true
+    try {
+      const myId = authStore.user?.id
+      if (!myId) return { success: false, error: 'Sessao invalida' }
+      if (!receiverId) return { success: false, error: 'Destinatário inválido' }
+
+      let fileUrl = null
+      const ext = (file.name.split('.').pop() || 'bin').toLowerCase()
+      const path = `chat/${myId}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`
+      const opts = { cacheControl: '3600', upsert: false, contentType: file.type || undefined }
+
+      const buckets = ['uploads', 'chat-files']
+      for (const bucket of buckets) {
+        const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, opts)
+        if (!upErr) {
+          const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+          fileUrl = data?.publicUrl
+          break
+        }
+      }
+
+      if (!fileUrl && file.size <= 2097152) {
+        const b64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result)
+          reader.onerror = reject
+          reader.readAsDataURL(file)
+        })
+        fileUrl = b64
+      }
+
+      if (!fileUrl) return { success: false, error: 'Não foi possível enviar o ficheiro' }
+
+      const fileMeta = JSON.stringify({
+        url: fileUrl,
+        name: file.name,
+        type: file.type,
+        size: file.size
+      })
+
+      return await sendMessage(`[FILE]${fileMeta}`, receiverId)
+    } catch (e) {
+      return { success: false, error: e.message }
+    } finally {
+      sending.value = false
+    }
+  }
+
   const refreshUnread = async () => {
     await fetchConversations()
+  }
+
+  const deleteConversation = async (otherUserId) => {
+    try {
+      const myId = authStore.user?.id
+      if (!myId || !otherUserId) return { success: false }
+
+      await supabase
+        .from('chat_messages')
+        .delete()
+        .eq('sender_id', myId)
+        .eq('receiver_id', otherUserId)
+
+      await supabase
+        .from('chat_messages')
+        .delete()
+        .eq('sender_id', otherUserId)
+        .eq('receiver_id', myId)
+
+      if (activeUserId.value === otherUserId) {
+        messages.value = []
+        activeUserId.value = null
+      }
+
+      await fetchConversations()
+      return { success: true }
+    } catch (e) {
+      return { success: false, error: e.message }
+    }
   }
 
   const startPolling = (intervalMs = 5000) => {
@@ -270,6 +363,8 @@ export const useChatStore = defineStore('chat', () => {
     fetchConversations,
     fetchMessages,
     sendMessage,
+    sendFileMessage,
+    deleteConversation,
     refreshUnread,
     startPolling,
     stopPolling,

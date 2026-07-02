@@ -103,7 +103,7 @@ const chatStore = useChatStore()
 const { getImage } = useSiteImages()
 
 const chatUnread = ref(0)
-const logoUrl = computed(() => getImage('cliente_logo', '/assets/img/logos/logojfoko1.png'))
+const logoUrl = computed(() => getImage('header', 'logo', '/assets/img/logo.png'))
 
 const userInitials = computed(() => {
   const name = authStore.user?.name || 'C'

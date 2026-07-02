@@ -4,7 +4,7 @@
     <div class="sidebar-inner">
       <div class="sidebar-header">
         <div class="sidebar-brand">
-          <div class="brand-icon"><i class="bi bi-box-seam-fill"></i></div>
+          <img :src="logoUrl" alt="FMLider" class="brand-logo" />
           <span class="brand-text">FMLider</span>
         </div>
         <button class="collapse-btn d-none d-lg-flex" @click="emit('toggle-collapse')" :title="collapsed ? t('admin_sidebar.expand') : t('admin_sidebar.collapse')">
@@ -93,9 +93,11 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useChatStore } from '@/stores/chatStore'
+import { useSiteImages } from '@/composables/useSiteImages'
 import { useI18n } from '@/composables/useI18n'
 
 const { t } = useI18n()
+const { getImage } = useSiteImages()
 
 const props = defineProps({
   isOpen: { type: Boolean, default: false },
@@ -105,6 +107,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'toggle-collapse'])
 
 const authStore = useAuthStore()
+const logoUrl = computed(() => getImage('header', 'logo', '/assets/img/logo.png'))
 
 const deptLabels = {
   certificacao: 'Certificação',
@@ -211,16 +214,11 @@ onBeforeUnmount(() => {
   gap: 10px;
 }
 
-.brand-icon {
+.brand-logo {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #1877f2, #0a5dc2);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
+  object-fit: contain;
   flex-shrink: 0;
 }
 
