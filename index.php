@@ -13,6 +13,54 @@ if (strpos($path, '/api/') === 0 || isset($_GET['api'])) {
     if (isset($_GET['path'])) {
         $path = '/api/' . $_GET['path'];
     }
+
+    // Handle bi-lookup directly (external APIs)
+    if (preg_match('#^/api/bi-lookup/(\d{9}[A-Za-z]{2}\d{3})$#', $path, $m)) {
+        header('Content-Type: application/json; charset=utf-8');
+        header('Access-Control-Allow-Origin: *');
+        $bi = strtoupper($m[1]);
+        $apis = [
+            'http://consulta.edgarsingui.ao/consultar/' . $bi,
+            'https://buscador.ao/search/document?type=BI&number=' . $bi,
+        ];
+        foreach ($apis as $url) {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 8,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_USERAGENT => 'FMLider-App/1.0',
+            ]);
+            $resp = curl_exec($ch);
+            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            if ($resp !== false && $code === 200) {
+                $data = json_decode($resp, true);
+                if ($data && isset($data['name']) && !$data['error']) {
+                    echo json_encode(['success' => true, 'message' => 'OK', 'data' => ['nome' => $data['name'], 'bi' => $bi, 'fonte' => 'Edgar Singui API']]);
+                    exit;
+                }
+                if ($data && isset($data['data']['name'])) {
+                    echo json_encode(['success' => true, 'message' => 'OK', 'data' => ['nome' => $data['data']['name'], 'bi' => $bi, 'fonte' => 'Buscador.ao']]);
+                    exit;
+                }
+            }
+        }
+        echo json_encode(['success' => false, 'message' => 'BI não encontrado. Verifique o número.']);
+        exit;
+    }
+
+    // Handle nif-lookup via AGT scraping
+    if (preg_match('#^/api/nif-lookup/(\d{10})$#', $path, $m)) {
+        header('Content-Type: application/json; charset=utf-8');
+        header('Access-Control-Allow-Origin: *');
+        $nif = $m[1];
+        require_once __DIR__ . '/backend/app/Controllers/NifController.php';
+        $ctrl = new \App\Controllers\NifController();
+        $ctrl->lookup($nif);
+        exit;
+    }
+
     // Get Authorization header (Apache may not pass it automatically)
     $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
     if (empty($authHeader) && function_exists('getallheaders')) {

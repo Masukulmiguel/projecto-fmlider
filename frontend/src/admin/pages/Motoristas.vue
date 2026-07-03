@@ -435,55 +435,25 @@ const consultarBI = async () => {
   biLookupMessage.value = ''
   const bi = form.bilhete_identidade.toUpperCase()
 
-  const corsProxy = 'https://api.allorigins.win/raw?url='
-
   try {
-    let nome = null
-
-    try {
-      const url1 = corsProxy + encodeURIComponent(`http://consulta.edgarsingui.ao/consultar/${bi}`)
-      const r1 = await fetch(url1, { signal: AbortSignal.timeout(8000) })
-      if (r1.ok) {
-        const d1 = await r1.json()
-        if (!d1.error && d1.name) nome = d1.name
-      }
-    } catch (_) {}
-
-    if (!nome) {
-      try {
-        const url2 = corsProxy + encodeURIComponent(`https://buscador.ao/search/document?type=BI&number=${bi}`)
-        const r2 = await fetch(url2, { signal: AbortSignal.timeout(8000) })
-        if (r2.ok) {
-          const d2 = await r2.json()
-          if (d2.data && d2.data.name) nome = d2.data.name
-        }
-      } catch (_) {}
-    }
-
-    if (!nome) {
-      try {
-        const url3 = `https://angolaapi.onrender.com/api/v1/validate/bi/${bi}`
-        const r3 = await fetch(url3, { signal: AbortSignal.timeout(8000) })
-        if (r3.ok) {
-          const d3 = await r3.json()
-          if (d3.success) nome = 'BI válido (nome indisponível)'
-        }
-      } catch (_) {}
-    }
-
-    if (nome) {
+    const res = await fetch(`/api/bi-lookup/${bi}`, { signal: AbortSignal.timeout(15000) })
+    const data = await res.json()
+    if (data.success && data.data && data.data.nome) {
       biLookupStatus.value = 'success'
-      biLookupMessage.value = `Titular: ${nome}`
+      biLookupMessage.value = `Titular: ${data.data.nome} (${data.data.fonte})`
       if (!form.nome_completo || !editingItem.value) {
-        form.nome_completo = nome
+        form.nome_completo = data.data.nome
       }
+    } else if (data.success && data.data && data.data.validFormat) {
+      biLookupStatus.value = 'success'
+      biLookupMessage.value = `BI com formato válido (fonte: ${data.data.fonte})`
     } else {
       biLookupStatus.value = 'error'
-      biLookupMessage.value = 'BI não encontrado nas bases de dados'
+      biLookupMessage.value = data.message || 'BI não encontrado'
     }
   } catch (e) {
     biLookupStatus.value = 'error'
-    biLookupMessage.value = 'Erro ao consultar BI'
+    biLookupMessage.value = 'Erro ao consultar BI. Tente novamente.'
     console.error(e)
   } finally {
     consultingBi.value = false
@@ -506,50 +476,20 @@ const consultarNIF = async () => {
   nifLookupMessage.value = ''
   nifData.value = null
 
-  const corsProxy = 'https://api.allorigins.win/raw?url='
-  const nif = form.nif_empresa
-
   try {
-    let nome = null
-    let tipo = null
-    let estado = null
-
-    try {
-      const url1 = corsProxy + encodeURIComponent(`http://consulta.edgarsingui.ao/consultar/${nif}/nif`)
-      const r1 = await fetch(url1, { signal: AbortSignal.timeout(8000) })
-      if (r1.ok) {
-        const d1 = await r1.json()
-        if (!d1.error && d1.name) {
-          nome = d1.name
-          tipo = d1.type || 'Consulta de NIF'
-        }
-      }
-    } catch (_) {}
-
-    if (!nome) {
-      try {
-        const url2 = corsProxy + encodeURIComponent(`https://buscador.ao/search/document?type=NIF&number=${nif}`)
-        const r2 = await fetch(url2, { signal: AbortSignal.timeout(8000) })
-        if (r2.ok) {
-          const d2 = await r2.json()
-          if (d2.data && d2.data.name) {
-            nome = d2.data.name
-          }
-        }
-      } catch (_) {}
-    }
-
-    if (nome) {
+    const res = await fetch(`/api/nif-lookup/${form.nif_empresa}`, { signal: AbortSignal.timeout(15000) })
+    const data = await res.json()
+    if (data.success && data.data && data.data.nome) {
       nifLookupStatus.value = 'success'
-      nifLookupMessage.value = `Empresa: ${nome}`
-      nifData.value = { nome, nif, tipo, estado: estado || 'Desconhecido' }
+      nifLookupMessage.value = `Empresa: ${data.data.nome}`
+      nifData.value = data.data
     } else {
       nifLookupStatus.value = 'error'
-      nifLookupMessage.value = 'NIF não encontrado nas bases de dados'
+      nifLookupMessage.value = data.message || 'NIF não encontrado na AGT'
     }
   } catch (e) {
     nifLookupStatus.value = 'error'
-    nifLookupMessage.value = 'Erro ao consultar NIF'
+    nifLookupMessage.value = 'Erro ao consultar NIF na AGT'
     console.error(e)
   } finally {
     consultingNif.value = false
