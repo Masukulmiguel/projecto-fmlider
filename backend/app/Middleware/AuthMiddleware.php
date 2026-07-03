@@ -2,6 +2,8 @@
 
 namespace App\Middleware;
 
+use App\Helpers\Jwt;
+
 class AuthMiddleware
 {
     public function handle($request, $next)
@@ -15,58 +17,18 @@ class AuthMiddleware
             exit;
         }
 
-        $user = $this->verifyToken($token);
+        $payload = Jwt::decode($token);
 
-        if (!$user) {
+        if (!$payload) {
             header('Content-Type: application/json; charset=utf-8');
             http_response_code(401);
             echo json_encode(['success' => false, 'message' => 'Invalid or expired token'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
-        $_REQUEST['_supabase_user'] = $user;
-
-        return $next($request);
-    }
-
-    private function getToken($request)
-    {
-        $header = isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '';
-        if (preg_match('/Bearer\s+(.+)/i', $header, $matches)) {
-            return $matches[1];
-        }
-        return null;
-    }
-
-    private function verifyToken($token)
-    {
-        if (empty($token)) {
-            return null;
-        }
-
-        $parts = explode('.', $token);
-        if (count($parts) === 3) {
-            return $this->decodeJwt($token);
-        }
-
-        return null;
-    }
-
-    private function decodeJwt($token)
-    {
-        $parts = explode('.', $token);
-        if (count($parts) !== 3) return null;
-
-        $payload = json_decode(base64_decode(strtr($parts[1], '-_', '+/')), true);
-        if (!$payload) return null;
-
-        if (isset($payload['exp']) && $payload['exp'] < time()) {
-            return null;
-        }
-
         $meta = $payload['user_metadata'] ?? [];
 
-        return [
+        $_REQUEST['_supabase_user'] = [
             'user_id' => $payload['sub'] ?? '',
             'email' => $payload['email'] ?? '',
             'name' => $meta['name'] ?? $payload['email'] ?? '',
@@ -81,5 +43,16 @@ class AuthMiddleware
             'must_change_password' => $meta['must_change_password'] ?? false,
             'password_changed_at' => $meta['password_changed_at'] ?? null,
         ];
+
+        return $next($request);
+    }
+
+    private function getToken($request)
+    {
+        $header = isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '';
+        if (preg_match('/Bearer\s+(.+)/i', $header, $matches)) {
+            return $matches[1];
+        }
+        return null;
     }
 }

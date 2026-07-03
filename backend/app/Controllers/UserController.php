@@ -111,7 +111,7 @@ class UserController
         if (!in_array($role, ['admin', 'cliente', 'funcionario'], true)) {
             Response::error('Role inválido', 422);
         }
-        if ($username === '' || $name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($password) < 6) {
+        if ($username === '' || $name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($password) < 12) {
             Response::error('Dados inválidos', 422);
         }
 
@@ -386,6 +386,7 @@ class UserController
 
     public function permissions()
     {
+        $this->requireAdmin();
         Response::success(['permissions' => self::PERMISSIONS]);
     }
 
@@ -417,7 +418,7 @@ class UserController
 
         MailHelper::sendPasswordResetEmail($user['email'], $user['name'], $newPassword);
 
-        Response::success(['password' => $newPassword], 'Senha reposta e email enviado');
+        Response::success([], 'Senha reposta e email enviado');
     }
 
     private function requireAdmin()

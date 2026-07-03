@@ -17,7 +17,13 @@ class VisitorController
 
         $sessionId = $_COOKIE['fml_sid'] ?? bin2hex(random_bytes(16));
         if (!isset($_COOKIE['fml_sid'])) {
-            setcookie('fml_sid', $sessionId, time() + 86400 * 30, '/');
+            setcookie('fml_sid', $sessionId, [
+                'expires' => time() + 86400 * 30,
+                'path' => '/',
+                'secure' => true,
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
         }
 
         $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';

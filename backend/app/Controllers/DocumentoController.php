@@ -87,7 +87,7 @@ class DocumentoController
         $ext = preg_replace('/[^a-zA-Z0-9]/', '', strtolower($ext)) ?: 'bin';
         $stored = 'doc_' . $auth['user_id'] . '_' . time() . '_' . bin2hex(random_bytes(3)) . '.' . $ext;
         $dir = BASE_PATH . '/storage/uploads/documentos';
-        if (!is_dir($dir)) mkdir($dir, 0777, true);
+        if (!is_dir($dir)) mkdir($dir, 0755, true);
         $dest = $dir . '/' . $stored;
 
         if (!move_uploaded_file($file['tmp_name'], $dest)) Response::error('Falha ao guardar ficheiro', 500);

@@ -13,9 +13,10 @@ header('Content-Type: application/json; charset=utf-8');
 // Security headers
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
-header('X-XSS-Protection: 1; mode=block');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-ancestors 'none'");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);

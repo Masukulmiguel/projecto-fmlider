@@ -18,6 +18,26 @@ class AuthController
             Response::error('Email e senha são obrigatórios', 422);
         }
 
+        // Rate limiting: max 5 attempts per email per 15 minutes
+        $rateDir = sys_get_temp_dir() . '/fml_rate';
+        if (!is_dir($rateDir)) mkdir($rateDir, 0755, true);
+        $rateFile = $rateDir . '/' . md5($email) . '.json';
+        $rateData = ['attempts' => [], 'locked_until' => 0];
+        if (file_exists($rateFile)) {
+            $rateData = json_decode(file_get_contents($rateFile), true) ?: $rateData;
+        }
+        $now = time();
+        $rateData['attempts'] = array_filter($rateData['attempts'], fn($t) => $t > $now - 900);
+        if ($rateData['locked_until'] > $now) {
+            $mins = ceil(($rateData['locked_until'] - $now) / 60);
+            Response::error("Conta bloqueada temporariamente. Tente novamente em {$mins} minuto(s).", 429);
+        }
+        if (count($rateData['attempts']) >= 5) {
+            $rateData['locked_until'] = $now + 900;
+            file_put_contents($rateFile, json_encode($rateData));
+            Response::error('Muitas tentativas. Conta bloqueada por 15 minutos.', 429);
+        }
+
         $db = Database::connection();
         $stmt = $db->prepare('SELECT * FROM users WHERE email = ? LIMIT 1');
         $stmt->bind_param('s', $email);
@@ -27,6 +47,8 @@ class AuthController
         $stmt->close();
 
         if (!$user || !password_verify($password, $user['password'])) {
+            $rateData['attempts'][] = $now;
+            file_put_contents($rateFile, json_encode($rateData));
             Response::error('Credenciais inválidas', 401);
         }
 
@@ -73,6 +95,9 @@ class AuthController
         $stmt = $db->prepare('UPDATE users SET last_login = NOW(), locked_at = NULL, locked_reason = NULL WHERE id = ?');
         $stmt->bind_param('i', $user['id']);
         $stmt->execute();
+
+        // Clear rate limit on successful login
+        if (file_exists($rateFile)) @unlink($rateFile);
         $stmt->close();
 
         $permissions = [];
@@ -113,7 +138,7 @@ class AuthController
         if (strlen($username) < 3) $errors['username'] = 'Nome de utilizador deve ter pelo menos 3 caracteres';
         if ($name === '') $errors['name'] = 'Nome é obrigatório';
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors['email'] = 'Email inválido';
-        if (strlen($password) < 6) $errors['password'] = 'Senha deve ter pelo menos 6 caracteres';
+        if (strlen($password) < 12) $errors['password'] = 'Senha deve ter pelo menos 12 caracteres';
         if ($password !== $passwordConfirm) $errors['password_confirm'] = 'As senhas não coincidem';
 
         if (!empty($errors)) {
@@ -335,7 +360,7 @@ class AuthController
         $name = 'photo_' . $auth['user_id'] . '_' . time() . '.' . $ext;
         $dir = BASE_PATH . '/storage/uploads/photos';
         if (!is_dir($dir)) {
-            mkdir($dir, 0777, true);
+            mkdir($dir, 0755, true);
         }
         $dest = $dir . '/' . $name;
 

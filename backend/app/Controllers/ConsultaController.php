@@ -81,7 +81,7 @@ class ConsultaController
             curl_setopt_array($ch, [
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_TIMEOUT => self::TIMEOUT,
-                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_USERAGENT => 'FMLider-App/1.0',
                 CURLOPT_ENCODING => '',
             ]);
@@ -119,7 +119,7 @@ class ConsultaController
             curl_setopt_array($ch, [
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_TIMEOUT => self::TIMEOUT,
-                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_USERAGENT => 'FMLider-App/1.0',
                 CURLOPT_ENCODING => '',
             ]);
