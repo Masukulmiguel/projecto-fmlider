@@ -219,6 +219,30 @@ $router->delete('/licenciamentos/{id}', 'App\Controllers\LicenciamentoController
 $router->post('/licenciamentos/import', 'App\Controllers\LicenciamentoController', 'importExcel');
 $router->put('/licenciamentos/{id}/estado', 'App\Controllers\LicenciamentoController', 'updateEstado');
 
+// Logística - Motoristas
+$router->get('/motoristas', 'App\Controllers\MotoristaController', 'index');
+$router->post('/motoristas', 'App\Controllers\MotoristaController', 'store');
+$router->get('/motoristas/{id}', 'App\Controllers\MotoristaController', 'show');
+$router->put('/motoristas/{id}', 'App\Controllers\MotoristaController', 'update');
+$router->delete('/motoristas/{id}', 'App\Controllers\MotoristaController', 'destroy');
+
+// Logística - Camiões
+$router->get('/camioes', 'App\Controllers\CamiaoController', 'index');
+$router->post('/camioes', 'App\Controllers\CamiaoController', 'store');
+$router->get('/camioes/{id}', 'App\Controllers\CamiaoController', 'show');
+$router->put('/camioes/{id}', 'App\Controllers\CamiaoController', 'update');
+$router->delete('/camioes/{id}', 'App\Controllers\CamiaoController', 'destroy');
+
+// Logística - Entregas
+$router->get('/entregas', 'App\Controllers\EntregaController', 'index');
+$router->get('/entregas/stats', 'App\Controllers\EntregaController', 'stats');
+$router->post('/entregas', 'App\Controllers\EntregaController', 'store');
+$router->get('/entregas/{id}', 'App\Controllers\EntregaController', 'show');
+$router->put('/entregas/{id}', 'App\Controllers\EntregaController', 'update');
+$router->delete('/entregas/{id}', 'App\Controllers\EntregaController', 'destroy');
+$router->put('/entregas/{id}/estado', 'App\Controllers\EntregaController', 'updateEstado');
+$router->post('/entregas/import', 'App\Controllers\EntregaController', 'importExcel');
+
 // Secret reset (admin only)
 $router->post('/admin/secret-reset', 'App\Controllers\SecretResetController', 'reset');
 

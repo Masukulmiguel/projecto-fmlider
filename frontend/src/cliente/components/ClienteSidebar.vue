@@ -38,6 +38,10 @@
               <i class="bi bi-file-earmark-medical menu-icon"></i>
               <span class="menu-text" v-show="!collapsed">{{ t('cliente.sidebar_licenciamentos') }}</span>
             </router-link>
+            <router-link to="/entregas" class="menu-item" :class="{ active: $route.path.startsWith('/entregas') }" :title="collapsed ? 'Entregas' : ''">
+              <i class="bi bi-truck menu-icon"></i>
+              <span class="menu-text" v-show="!collapsed">Entregas</span>
+            </router-link>
             <router-link to="/mensagens" class="menu-item" :class="{ active: $route.path === '/mensagens' }" :title="collapsed ? t('cliente.sidebar_messages') : ''">
               <i class="bi bi-chat-dots-fill menu-icon"></i>
               <span class="menu-text" v-show="!collapsed">{{ t('cliente.sidebar_messages') }}</span>

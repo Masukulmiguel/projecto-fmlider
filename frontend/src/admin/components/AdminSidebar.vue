@@ -54,6 +54,26 @@
           </div>
 
           <div class="menu-section">
+            <span class="section-label" v-show="!collapsed">Logística</span>
+            <router-link to="/admin/logistica" class="menu-item" :class="{ active: $route.path === '/admin/logistica' }" :title="collapsed ? 'Dashboard' : ''">
+              <i class="bi bi-truck-menu menu-icon"></i>
+              <span class="menu-text" v-show="!collapsed">Dashboard</span>
+            </router-link>
+            <router-link to="/admin/entregas" class="menu-item" :class="{ active: $route.path.startsWith('/admin/entregas') }" :title="collapsed ? 'Entregas' : ''">
+              <i class="bi bi-truck menu-icon"></i>
+              <span class="menu-text" v-show="!collapsed">Entregas</span>
+            </router-link>
+            <router-link to="/admin/motoristas" class="menu-item" :class="{ active: $route.path.startsWith('/admin/motoristas') }" :title="collapsed ? 'Motoristas' : ''">
+              <i class="bi bi-person-badge menu-icon"></i>
+              <span class="menu-text" v-show="!collapsed">Motoristas</span>
+            </router-link>
+            <router-link to="/admin/camioes" class="menu-item" :class="{ active: $route.path.startsWith('/admin/camioes') }" :title="collapsed ? 'Camiões' : ''">
+              <i class="bi bi-truck-front menu-icon"></i>
+              <span class="menu-text" v-show="!collapsed">Camiões</span>
+            </router-link>
+          </div>
+
+          <div class="menu-section">
             <span class="section-label" v-show="!collapsed">{{ t('admin_sidebar.content') }}</span>
             <router-link to="/admin/servicos" class="menu-item" :class="{ active: $route.path === '/admin/servicos' }" :title="collapsed ? t('admin_sidebar.services') : ''">
               <i class="bi bi-gear-wide-connected menu-icon"></i>

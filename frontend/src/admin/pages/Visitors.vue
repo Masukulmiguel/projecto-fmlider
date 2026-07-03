@@ -159,7 +159,9 @@ const filteredRecent = computed(() => {
       (v.country || '').toLowerCase().includes(q) ||
       (v.city || '').toLowerCase().includes(q) ||
       (v.browser || '').toLowerCase().includes(q) ||
-      (v.os || '').toLowerCase().includes(q)
+      (v.os || '').toLowerCase().includes(q) ||
+      (v.user_name || '').toLowerCase().includes(q) ||
+      (v.page_url || '').toLowerCase().includes(q)
     )
   })
 })

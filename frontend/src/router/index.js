@@ -57,6 +57,11 @@ const AdminFuncionarios = () => import('@/admin/pages/Funcionarios.vue')
 const AdminSiteImages = () => import('@/admin/pages/SiteImages.vue')
 const AdminLicenciamentos = () => import('@/admin/pages/Licenciamentos.vue')
 const AdminLicenciamentoDetail = () => import('@/admin/pages/LicenciamentoDetail.vue')
+const AdminMotoristas = () => import('@/admin/pages/Motoristas.vue')
+const AdminCamioes = () => import('@/admin/pages/Camioes.vue')
+const AdminEntregas = () => import('@/admin/pages/Entregas.vue')
+const AdminDashboardLogistica = () => import('@/admin/pages/DashboardLogistica.vue')
+const ClienteEntregas = () => import('@/pages/cliente/Entregas.vue')
 
 const FuncionarioDashboard = () => import('@/funcionario/pages/Dashboard.vue')
 const FuncionarioMessages = () => import('@/funcionario/pages/Messages.vue')
@@ -118,6 +123,10 @@ const routes = [
   { path: '/admin/imagens', name: 'AdminSiteImages', component: AdminSiteImages, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
   { path: '/admin/licenciamentos', name: 'AdminLicenciamentos', component: AdminLicenciamentos, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
   { path: '/admin/licenciamentos/:id', name: 'AdminLicenciamentoDetail', component: AdminLicenciamentoDetail, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
+  { path: '/admin/logistica', name: 'AdminDashboardLogistica', component: AdminDashboardLogistica, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
+  { path: '/admin/entregas', name: 'AdminEntregas', component: AdminEntregas, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
+  { path: '/admin/motoristas', name: 'AdminMotoristas', component: AdminMotoristas, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
+  { path: '/admin/camioes', name: 'AdminCamioes', component: AdminCamioes, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
 
   { path: '/funcionario', name: 'FuncionarioDashboard', component: FuncionarioDashboard, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
   { path: '/funcionario/mensagens', name: 'FuncionarioMessages', component: FuncionarioMessages, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
@@ -148,6 +157,7 @@ const routes = [
 
   { path: '/licenciamentos', name: 'ClienteLicenciamentosList', component: ClienteLicenciamentosList, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
   { path: '/licenciamentos/:id', name: 'ClienteLicenciamentoDetail', component: ClienteLicenciamentoDetail, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
+  { path: '/entregas', name: 'ClienteEntregas', component: ClienteEntregas, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
 
   { path: '/licenciamentos', name: 'LicenciamentosList', component: LicenciamentosList, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
   { path: '/licenciamentos/:id', name: 'LicenciamentoDetail', component: LicenciamentoDetail, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
