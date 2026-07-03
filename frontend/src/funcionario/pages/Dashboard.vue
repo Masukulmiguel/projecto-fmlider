@@ -16,34 +16,6 @@
 
     <!-- Stats Cards -->
     <div class="row g-3 mb-4">
-      <div v-if="can('embarques.view')" class="col-md-6 col-xl-3">
-        <router-link to="/funcionario/embarques" class="stat-card-link">
-          <div class="stat-card fml-fade-up stagger-1 hover-lift">
-            <div class="stat-icon stat-blue">
-              <i class="bi bi-box-seam-fill"></i>
-            </div>
-            <div class="stat-info">
-              <span class="stat-label">{{ t('dashboard.shipments') }}</span>
-              <span class="stat-value">{{ counts.embarques }}</span>
-              <span class="stat-meta">{{ counts.embarques_pendente || 0 }} {{ t('dashboard.pending') }}</span>
-            </div>
-          </div>
-        </router-link>
-      </div>
-      <div v-if="can('cotacoes.view')" class="col-md-6 col-xl-3">
-        <router-link to="/funcionario/cotacoes" class="stat-card-link">
-          <div class="stat-card fml-fade-up stagger-2 hover-lift">
-            <div class="stat-icon stat-green">
-              <i class="bi bi-receipt"></i>
-            </div>
-            <div class="stat-info">
-              <span class="stat-label">{{ t('dashboard.quotes') }}</span>
-              <span class="stat-value">{{ counts.cotacoes }}</span>
-              <span class="stat-meta">{{ counts.cotacoes_pendente || 0 }} {{ t('dashboard.pending') }}</span>
-            </div>
-          </div>
-        </router-link>
-      </div>
       <div v-if="can('clients.view')" class="col-md-6 col-xl-3">
         <router-link to="/funcionario/clientes" class="stat-card-link">
           <div class="stat-card fml-fade-up stagger-3 hover-lift">
@@ -133,14 +105,6 @@
             <h6><i class="bi bi-lightning-charge-fill me-2"></i>{{ t('dashboard.quick_actions') }}</h6>
           </div>
           <div class="quick-actions">
-            <router-link v-if="can('embarques.manage')" to="/funcionario/embarques" class="action-btn">
-              <div class="action-icon stat-blue"><i class="bi bi-plus-circle"></i></div>
-              <span>{{ t('dashboard.new_shipment') }}</span>
-            </router-link>
-            <router-link v-if="can('cotacoes.manage')" to="/funcionario/cotacoes" class="action-btn">
-              <div class="action-icon stat-green"><i class="bi bi-plus-square"></i></div>
-              <span>{{ t('dashboard.new_quote') }}</span>
-            </router-link>
             <router-link v-if="can('clients.view')" to="/funcionario/clientes" class="action-btn">
               <div class="action-icon stat-cyan"><i class="bi bi-people"></i></div>
               <span>{{ t('dashboard.view_clients') }}</span>
@@ -224,7 +188,7 @@ import { useI18n } from '@/composables/useI18n.js'
 
 const authStore = useAuthStore()
 const { t } = useI18n()
-const counts = reactive({ embarques: 0, embarques_pendente: 0, cotacoes: 0, cotacoes_pendente: 0, clientes: 0, clientes_pendente: 0, documentos: 0, licenciamentos: 0, licenciamentos_pendente: 0, entregas: 0, entregas_pendente: 0 })
+const counts = reactive({ clientes: 0, clientes_pendente: 0, documentos: 0, licenciamentos: 0, licenciamentos_pendente: 0, entregas: 0, entregas_pendente: 0 })
 const recentActivity = ref([])
 
 const greeting = computed(() => {
@@ -239,8 +203,6 @@ const initials = (n) => (n || '?').split(' ').map(s => s[0]).slice(0, 2).join(''
 const PERM_LABELS = computed(() => ({
   'dashboard.view': t('funcionario.perm_dashboard'),
   'clients.view': t('funcionario.perm_view_clients'), 'clients.manage': t('funcionario.perm_manage_clients'),
-  'embarques.view': t('funcionario.perm_view_shipments'), 'embarques.manage': t('funcionario.perm_manage_shipments'),
-  'cotacoes.view': t('funcionario.perm_view_quotes'), 'cotacoes.manage': t('funcionario.perm_manage_quotes'),
   'documentos.view': t('funcionario.perm_view_documents'), 'documentos.manage': t('funcionario.perm_manage_documents'),
   'contactos.view': t('funcionario.perm_view_contacts'), 'contactos.manage': t('funcionario.perm_manage_contacts'),
   'chat.view': t('funcionario.perm_view_chat'), 'chat.reply': t('funcionario.perm_reply_chat'),
@@ -264,26 +226,16 @@ const can = (perm) => {
 }
 
 const deptPermissions = {
-  certificacao: ['dashboard.view', 'embarques.view', 'embarques.manage', 'clients.view', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply'],
+  certificacao: ['dashboard.view', 'clients.view', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply'],
   documentacao: ['dashboard.view', 'documentos.view', 'documentos.manage', 'clients.view', 'contactos.view', 'chat.view'],
   licenciamentos: ['dashboard.view', 'licenciamentos.view', 'licenciamentos.manage', 'clients.view', 'contactos.view', 'chat.view'],
-  facturacao: ['dashboard.view', 'cotacoes.view', 'cotacoes.manage', 'clients.view', 'clients.manage', 'contactos.view', 'chat.view'],
+  facturacao: ['dashboard.view', 'clients.view', 'clients.manage', 'contactos.view', 'chat.view'],
   logistica: ['dashboard.view', 'logistica.view', 'logistica.manage', 'motoristas.view', 'motoristas.manage', 'camioes.view', 'camioes.manage', 'entregas.view', 'entregas.manage', 'clients.view', 'contactos.view', 'chat.view'],
-  administracao: ['dashboard.view', 'clients.view', 'clients.manage', 'embarques.view', 'embarques.manage', 'cotacoes.view', 'cotacoes.manage', 'documentos.view', 'documentos.manage', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply', 'licenciamentos.view', 'licenciamentos.manage', 'logistica.view', 'logistica.manage', 'motoristas.view', 'motoristas.manage', 'camioes.view', 'camioes.manage', 'entregas.view', 'entregas.manage', 'visitors.view', 'content.manage']
+  administracao: ['dashboard.view', 'clients.view', 'clients.manage', 'documentos.view', 'documentos.manage', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply', 'licenciamentos.view', 'licenciamentos.manage', 'logistica.view', 'logistica.manage', 'motoristas.view', 'motoristas.manage', 'camioes.view', 'camioes.manage', 'entregas.view', 'entregas.manage', 'visitors.view', 'content.manage']
 }
 
 const load = async () => {
   const tasks = []
-  if (can('embarques.view')) tasks.push(
-    supabase.from('embarques').select('*').then(({ data, error }) => {
-      if (!error && data) { counts.embarques = data.length; counts.embarques_pendente = data.filter(e => e.status === 'pendente').length }
-    })
-  )
-  if (can('cotacoes.view')) tasks.push(
-    supabase.from('cotacoes').select('*').then(({ data, error }) => {
-      if (!error && data) { counts.cotacoes = data.length; counts.cotacoes_pendente = data.filter(c => c.status === 'pendente').length }
-    })
-  )
   if (can('documentos.view')) tasks.push(
     supabase.from('documentos').select('*').then(({ data, error }) => {
       if (!error && data) counts.documentos = data.length
@@ -320,8 +272,6 @@ const load = async () => {
   await Promise.all(tasks)
 
   const acts = []
-  if (counts.embarques_pendente > 0) acts.push({ title: `${counts.embarques_pendente} ${t('dashboard.shipments').toLowerCase()} ${t('dashboard.pending')}`, subtitle: t('dashboard.needs_attention'), icon: 'bi-box-seam-fill', color: 'blue', time: t('dashboard.now') })
-  if (counts.cotacoes_pendente > 0) acts.push({ title: `${counts.cotacoes_pendente} ${t('dashboard.quotes').toLowerCase()} ${t('dashboard.pending')}`, subtitle: t('dashboard.awaits_response'), icon: 'bi-receipt', color: 'green', time: t('dashboard.now') })
   if (counts.clientes_pendente > 0) acts.push({ title: `${counts.clientes_pendente} ${t('dashboard.clients').toLowerCase()} ${t('dashboard.pending_approval')}`, subtitle: t('dashboard.awaits_admin'), icon: 'bi-person-plus-fill', color: 'cyan', time: t('dashboard.today') })
   if (counts.licenciamentos_pendente > 0) acts.push({ title: `${counts.licenciamentos_pendente} licenciamento(s) pendente(s)`, subtitle: 'Requer atenção', icon: 'bi-sticky-fill', color: 'purple', time: t('dashboard.now') })
   recentActivity.value = acts

@@ -22,14 +22,6 @@
 
           <div class="menu-section">
             <span class="section-label" v-show="!collapsed">{{ t('cliente.sidebar_operations') }}</span>
-            <router-link to="/embarques" class="menu-item" :class="{ active: $route.path === '/embarques' }" :title="collapsed ? t('cliente.sidebar_shipments') : ''">
-              <i class="bi bi-box-seam-fill menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">{{ t('cliente.sidebar_shipments') }}</span>
-            </router-link>
-            <router-link to="/cotacoes" class="menu-item" :class="{ active: $route.path === '/cotacoes' }" :title="collapsed ? t('cliente.sidebar_quotes') : ''">
-              <i class="bi bi-receipt-cutoff menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">{{ t('cliente.sidebar_quotes') }}</span>
-            </router-link>
             <router-link to="/documentos" class="menu-item" :class="{ active: $route.path === '/documentos' }" :title="collapsed ? t('cliente.sidebar_documents') : ''">
               <i class="bi bi-file-earmark-text-fill menu-icon"></i>
               <span class="menu-text" v-show="!collapsed">{{ t('cliente.sidebar_documents') }}</span>

@@ -88,18 +88,7 @@
               </div>
             </div>
           </div>
-          <div class="stat-card">
-            <div class="stat-icon stat-icon-operations">
-              <i class="bi bi-box-seam-fill"></i>
-            </div>
-            <div class="stat-content">
-              <div class="stat-label">{{ t('admin.dashboard_operations') }}</div>
-              <div class="stat-value">{{ totalOperations }}</div>
-              <div class="stat-trend">
-                <span class="trend-info">{{ data.embarques }} {{ t('admin.dashboard_shipments_count') }} · {{ data.cotacoes }} {{ t('admin.dashboard_quotes_count') }}</span>
-              </div>
-            </div>
-          </div>
+
       </div>
 
       <div class="row g-4 mb-4">
@@ -210,9 +199,7 @@
             <li><i class="bi bi-people-fill"></i> {{ t('admin.dashboard_reset_all_employees_clients') }}</li>
             <li><i class="bi bi-globe"></i> {{ t('admin.dashboard_reset_all_visitors') }}</li>
             <li><i class="bi bi-chat-dots-fill"></i> {{ t('admin.dashboard_reset_all_messages') }}</li>
-            <li><i class="bi bi-box-seam-fill"></i> {{ t('admin.dashboard_reset_all_shipments') }}</li>
             <li><i class="bi bi-file-earmark"></i> {{ t('admin.dashboard_reset_all_documents') }}</li>
-            <li><i class="bi bi-receipt"></i> {{ t('admin.dashboard_reset_all_quotes') }}</li>
             <li><i class="bi bi-person-rolodex"></i> {{ t('admin.dashboard_reset_all_contacts') }}</li>
             <li><i class="bi bi-file-earmark-check"></i> {{ t('admin.dashboard_reset_all_licenciamentos') }}</li>
           </ul>
@@ -297,13 +284,11 @@ const loadStats = async () => {
     since.setDate(since.getDate() - statsDays.value)
     const sinceISO = since.toISOString()
 
-    const [allClientsRes, employeesRes, visitorsRes, messagesRes, embarquesRes, cotacoesRes, documentosRes] = await Promise.all([
+    const [allClientsRes, employeesRes, visitorsRes, messagesRes, documentosRes] = await Promise.all([
       supabase.from('users').select('id, created_at, approval_status, name, email, photo').eq('role', 'cliente'),
       supabase.from('users').select('id, created_at, approval_status, name, email, photo').eq('role', 'funcionario'),
       supabase.from('visitors').select('id, visited_at, country').gte('visited_at', sinceISO),
       supabase.from('chat_messages').select('id, created_at, message, is_read, sender_id, users:sender_id(name)'),
-      supabase.from('embarques').select('id, created_at'),
-      supabase.from('cotacoes').select('id, created_at'),
       supabase.from('documentos').select('id, created_at'),
     ])
 
@@ -311,8 +296,6 @@ const loadStats = async () => {
     const employees = employeesRes.data || []
     const visitors = visitorsRes.data || []
     const messages = messagesRes.data || []
-    const embarques = embarquesRes.data || []
-    const cotacoes = cotacoesRes.data || []
     const documentos = documentosRes.data || []
 
     const today = new Date().toISOString().split('T')[0]
@@ -362,8 +345,6 @@ const loadStats = async () => {
       },
       visitors: { total: visitors.length, today: todayVisitors },
       messages: { total: messages.length, unread: unreadMessages },
-      embarques: embarques.length,
-      cotacoes: cotacoes.length,
       documentos: documentos.length,
       recent: {
         clients: [...allClients].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5),
@@ -612,7 +593,7 @@ onUnmounted(() => {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
 }
 

@@ -35,16 +35,8 @@
           </router-link>
         </template>
 
-        <template v-if="can('embarques.view') || can('cotacoes.view') || can('documentos.view') || can('contactos.view')">
+        <template v-if="can('documentos.view') || can('contactos.view')">
           <div class="nav-section">{{ t('funcionario.sidebar_operations') }}</div>
-          <router-link v-if="can('embarques.view')" to="/funcionario/embarques" class="nav-item" active-class="active" :class="{ 'icon-only': collapsed }" :title="collapsed ? t('funcionario.sidebar_shipments') : ''">
-            <i class="bi bi-box-seam-fill nav-icon"></i>
-            <span class="nav-text">{{ t('funcionario.sidebar_shipments') }}</span>
-          </router-link>
-          <router-link v-if="can('cotacoes.view')" to="/funcionario/cotacoes" class="nav-item" active-class="active" :class="{ 'icon-only': collapsed }" :title="collapsed ? t('funcionario.sidebar_quotes') : ''">
-            <i class="bi bi-receipt-cutoff nav-icon"></i>
-            <span class="nav-text">{{ t('funcionario.sidebar_quotes') }}</span>
-          </router-link>
           <router-link v-if="can('documentos.view')" to="/funcionario/documentos" class="nav-item" active-class="active" :class="{ 'icon-only': collapsed }" :title="collapsed ? t('funcionario.sidebar_documents') : ''">
             <i class="bi bi-file-earmark-text-fill nav-icon"></i>
             <span class="nav-text">{{ t('funcionario.sidebar_documents') }}</span>
@@ -139,12 +131,12 @@ const chatUnread = ref(0)
 let pollInterval = null
 
 const deptPermissions = {
-  certificacao: ['dashboard.view', 'embarques.view', 'embarques.manage', 'clients.view', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply'],
+  certificacao: ['dashboard.view', 'clients.view', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply'],
   documentacao: ['dashboard.view', 'documentos.view', 'documentos.manage', 'clients.view', 'contactos.view', 'chat.view'],
   licenciamentos: ['dashboard.view', 'licenciamentos.view', 'licenciamentos.manage', 'clients.view', 'contactos.view', 'chat.view'],
-  facturacao: ['dashboard.view', 'cotacoes.view', 'cotacoes.manage', 'clients.view', 'clients.manage', 'contactos.view', 'chat.view'],
+  facturacao: ['dashboard.view', 'clients.view', 'clients.manage', 'contactos.view', 'chat.view'],
   logistica: ['dashboard.view', 'logistica.view', 'logistica.manage', 'motoristas.view', 'motoristas.manage', 'camioes.view', 'camioes.manage', 'entregas.view', 'entregas.manage', 'clients.view', 'contactos.view', 'chat.view'],
-  administracao: ['dashboard.view', 'clients.view', 'clients.manage', 'embarques.view', 'embarques.manage', 'cotacoes.view', 'cotacoes.manage', 'documentos.view', 'documentos.manage', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply', 'licenciamentos.view', 'licenciamentos.manage', 'logistica.view', 'logistica.manage', 'motoristas.view', 'motoristas.manage', 'camioes.view', 'camioes.manage', 'entregas.view', 'entregas.manage', 'visitors.view', 'content.manage']
+  administracao: ['dashboard.view', 'clients.view', 'clients.manage', 'documentos.view', 'documentos.manage', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply', 'licenciamentos.view', 'licenciamentos.manage', 'logistica.view', 'logistica.manage', 'motoristas.view', 'motoristas.manage', 'camioes.view', 'camioes.manage', 'entregas.view', 'entregas.manage', 'visitors.view', 'content.manage']
 }
 
 const can = (perm) => {

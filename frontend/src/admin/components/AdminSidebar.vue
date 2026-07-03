@@ -31,14 +31,6 @@
 
           <div class="menu-section">
             <span class="section-label" v-show="!collapsed">{{ t('admin_sidebar.operations') }}</span>
-            <router-link to="/admin/embarques" class="menu-item" :class="{ active: $route.path === '/admin/embarques' }" :title="collapsed ? t('admin_sidebar.shipments') : ''">
-              <i class="bi bi-box-seam-fill menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.shipments') }}</span>
-            </router-link>
-            <router-link to="/admin/cotacoes" class="menu-item" :class="{ active: $route.path === '/admin/cotacoes' }" :title="collapsed ? t('admin_sidebar.quotes') : ''">
-              <i class="bi bi-receipt-cutoff menu-icon"></i>
-              <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.quotes') }}</span>
-            </router-link>
             <router-link to="/admin/documentos" class="menu-item" :class="{ active: $route.path === '/admin/documentos' }" :title="collapsed ? t('admin_sidebar.documents') : ''">
               <i class="bi bi-file-earmark-text-fill menu-icon"></i>
               <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.documents') }}</span>
