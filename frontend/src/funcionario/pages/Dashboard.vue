@@ -72,6 +72,20 @@
           </div>
         </router-link>
       </div>
+      <div v-if="can('entregas.view')" class="col-md-6 col-xl-3">
+        <router-link to="/funcionario/entregas" class="stat-card-link">
+          <div class="stat-card fml-fade-up stagger-4 hover-lift">
+            <div class="stat-icon stat-red">
+              <i class="bi bi-truck"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">Entregas</span>
+              <span class="stat-value">{{ counts.entregas }}</span>
+              <span class="stat-meta">{{ counts.entregas_pendente || 0 }} pendentes</span>
+            </div>
+          </div>
+        </router-link>
+      </div>
       <div class="col-md-6 col-xl-3">
         <router-link to="/funcionario/licenciamentos" class="stat-card-link">
           <div class="stat-card fml-fade-up stagger-4 hover-lift">
@@ -138,6 +152,10 @@
             <router-link v-if="can('chat.view')" to="/funcionario/mensagens" class="action-btn">
               <div class="action-icon stat-purple"><i class="bi bi-chat-dots"></i></div>
               <span>{{ t('dashboard.view_messages') }}</span>
+            </router-link>
+            <router-link v-if="can('entregas.view')" to="/funcionario/entregas" class="action-btn">
+              <div class="action-icon stat-red"><i class="bi bi-truck"></i></div>
+              <span>Ver Entregas</span>
             </router-link>
             <router-link to="/funcionario/licenciamentos" class="action-btn">
               <div class="action-icon stat-purple"><i class="bi bi-sticky-fill"></i></div>
@@ -206,7 +224,7 @@ import { useI18n } from '@/composables/useI18n.js'
 
 const authStore = useAuthStore()
 const { t } = useI18n()
-const counts = reactive({ embarques: 0, embarques_pendente: 0, cotacoes: 0, cotacoes_pendente: 0, clientes: 0, clientes_pendente: 0, documentos: 0, licenciamentos: 0, licenciamentos_pendente: 0 })
+const counts = reactive({ embarques: 0, embarques_pendente: 0, cotacoes: 0, cotacoes_pendente: 0, clientes: 0, clientes_pendente: 0, documentos: 0, licenciamentos: 0, licenciamentos_pendente: 0, entregas: 0, entregas_pendente: 0 })
 const recentActivity = ref([])
 
 const greeting = computed(() => {
@@ -250,7 +268,8 @@ const deptPermissions = {
   documentacao: ['dashboard.view', 'documentos.view', 'documentos.manage', 'clients.view', 'contactos.view', 'chat.view'],
   licenciamentos: ['dashboard.view', 'licenciamentos.view', 'licenciamentos.manage', 'clients.view', 'contactos.view', 'chat.view'],
   facturacao: ['dashboard.view', 'cotacoes.view', 'cotacoes.manage', 'clients.view', 'clients.manage', 'contactos.view', 'chat.view'],
-  administracao: ['dashboard.view', 'clients.view', 'clients.manage', 'embarques.view', 'embarques.manage', 'cotacoes.view', 'cotacoes.manage', 'documentos.view', 'documentos.manage', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply', 'licenciamentos.view', 'licenciamentos.manage', 'visitors.view', 'content.manage']
+  logistica: ['dashboard.view', 'logistica.view', 'logistica.manage', 'motoristas.view', 'motoristas.manage', 'camioes.view', 'camioes.manage', 'entregas.view', 'entregas.manage', 'clients.view', 'contactos.view', 'chat.view'],
+  administracao: ['dashboard.view', 'clients.view', 'clients.manage', 'embarques.view', 'embarques.manage', 'cotacoes.view', 'cotacoes.manage', 'documentos.view', 'documentos.manage', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply', 'licenciamentos.view', 'licenciamentos.manage', 'logistica.view', 'logistica.manage', 'motoristas.view', 'motoristas.manage', 'camioes.view', 'camioes.manage', 'entregas.view', 'entregas.manage', 'visitors.view', 'content.manage']
 }
 
 const load = async () => {
@@ -273,6 +292,11 @@ const load = async () => {
   if (can('clients.view')) tasks.push(
     supabase.from('users').select('*').eq('role', 'cliente').then(({ data, error }) => {
       if (!error && data) { counts.clientes = data.length; counts.clientes_pendente = data.filter(u => u.approval_status === 'pending').length }
+    })
+  )
+  if (can('entregas.view')) tasks.push(
+    supabase.from('entregas').select('*').then(({ data, error }) => {
+      if (!error && data) { counts.entregas = data.length; counts.entregas_pendente = data.filter(e => e.estado === 'pendente' || e.estado === 'em_transito').length }
     })
   )
   tasks.push(
@@ -372,6 +396,7 @@ onMounted(load)
 .stat-cyan { background: var(--stat-cyan-bg); color: var(--stat-cyan-text); }
 .stat-amber { background: var(--stat-amber-bg); color: var(--stat-amber-text); }
 .stat-purple { background: var(--stat-purple-bg); color: var(--stat-purple-text); }
+.stat-red { background: #fee2e2; color: #991b1b; }
 
 .stat-info { display: flex; flex-direction: column; }
 .stat-label { color: var(--text-secondary); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }

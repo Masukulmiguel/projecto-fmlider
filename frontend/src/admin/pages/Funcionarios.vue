@@ -131,6 +131,7 @@
                     <option value="documentacao">Documentação</option>
                     <option value="licenciamentos">Licenciamentos</option>
                     <option value="facturacao">Facturação</option>
+                    <option value="logistica">Logística</option>
                     <option value="administracao">Administração</option>
                   </select>
                 </div>
@@ -246,6 +247,7 @@ const deptLabels = {
   documentacao: 'Documentação',
   licenciamentos: 'Licenciamentos',
   facturacao: 'Facturação',
+  logistica: 'Logística',
   administracao: 'Administração'
 }
 
@@ -254,7 +256,8 @@ const deptPermissions = {
   documentacao: ['dashboard.view', 'documentos.view', 'documentos.manage', 'clients.view', 'contactos.view', 'chat.view'],
   licenciamentos: ['dashboard.view', 'licenciamentos.view', 'licenciamentos.manage', 'clients.view', 'contactos.view', 'chat.view'],
   facturacao: ['dashboard.view', 'cotacoes.view', 'cotacoes.manage', 'clients.view', 'clients.manage', 'contactos.view', 'chat.view'],
-  administracao: ['dashboard.view', 'clients.view', 'clients.manage', 'embarques.view', 'embarques.manage', 'cotacoes.view', 'cotacoes.manage', 'documentos.view', 'documentos.manage', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply', 'licenciamentos.view', 'licenciamentos.manage', 'visitors.view', 'content.manage']
+  logistica: ['dashboard.view', 'logistica.view', 'logistica.manage', 'motoristas.view', 'motoristas.manage', 'camioes.view', 'camioes.manage', 'entregas.view', 'entregas.manage', 'clients.view', 'contactos.view', 'chat.view'],
+  administracao: ['dashboard.view', 'clients.view', 'clients.manage', 'embarques.view', 'embarques.manage', 'cotacoes.view', 'cotacoes.manage', 'documentos.view', 'documentos.manage', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply', 'licenciamentos.view', 'licenciamentos.manage', 'logistica.view', 'logistica.manage', 'motoristas.view', 'motoristas.manage', 'camioes.view', 'camioes.manage', 'entregas.view', 'entregas.manage', 'visitors.view', 'content.manage']
 }
 
 const onDepartamentoChange = () => {

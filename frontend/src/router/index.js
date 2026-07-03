@@ -72,6 +72,9 @@ const FuncionarioDocumentos = () => import('@/funcionario/pages/Documentos.vue')
 const FuncionarioContactos = () => import('@/funcionario/pages/Contactos.vue')
 const FuncionarioClientes = () => import('@/funcionario/pages/Clientes.vue')
 const FuncionarioLicenciamentos = () => import('@/funcionario/pages/Licenciamentos.vue')
+const FuncionarioEntregas = () => import('@/pages/cliente/Entregas.vue')
+const FuncionarioMotoristas = () => import('@/admin/pages/Motoristas.vue')
+const FuncionarioCamioes = () => import('@/admin/pages/Camioes.vue')
 
 const ClienteMessages = () => import('@/pages/cliente/Messages.vue')
 const ClienteLicenciamentosList = () => import('@/pages/cliente/licenciamentos/List.vue')
@@ -137,6 +140,9 @@ const routes = [
   { path: '/funcionario/contactos', name: 'FuncionarioContactos', component: FuncionarioContactos, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
   { path: '/funcionario/clientes', name: 'FuncionarioClientes', component: FuncionarioClientes, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
   { path: '/funcionario/licenciamentos', name: 'FuncionarioLicenciamentos', component: FuncionarioLicenciamentos, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
+  { path: '/funcionario/entregas', name: 'FuncionarioEntregas', component: FuncionarioEntregas, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
+  { path: '/funcionario/motoristas', name: 'FuncionarioMotoristas', component: FuncionarioMotoristas, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
+  { path: '/funcionario/camioes', name: 'FuncionarioCamioes', component: FuncionarioCamioes, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
 
   { path: '/dashboard', name: 'ClienteDashboard', component: ClienteDashboard, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
   { path: '/perfil', name: 'ClienteProfile', component: ClienteProfile, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
