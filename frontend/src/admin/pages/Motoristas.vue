@@ -76,6 +76,7 @@
                 <th>Nome</th>
                 <th>BI</th>
                 <th>Telefone</th>
+                <th>NIF Empresa</th>
                 <th>Carta Condução</th>
                 <th>Validade Carta</th>
                 <th>Validade BI</th>
@@ -90,6 +91,7 @@
                 </td>
                 <td><code class="tracking-code">{{ item.bilhete_identidade || '—' }}</code></td>
                 <td>{{ item.telefone || '—' }}</td>
+                <td><code class="tracking-code">{{ item.nif_empresa || '—' }}</code></td>
                 <td>{{ item.carta_conducao || '—' }}</td>
                 <td><small class="text-muted">{{ formatDate(item.validade_carta) }}</small>
                   <span v-if="isExpired(item.validade_carta)" class="badge bg-danger ms-1"><i class="bi bi-exclamation-triangle-fill me-1"></i>Expirado</span>
@@ -142,8 +144,21 @@
           </div>
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label class="form-label">Bilhete de Identidade</label>
-              <input v-model="form.bilhete_identidade" type="text" class="form-control" placeholder="Nº BI">
+              <label class="form-label">Bilhete de Identidade <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <input v-model="form.bilhete_identidade" type="text" class="form-control" placeholder="006151112LA041" maxlength="14" :class="{'is-invalid': form.bilhete_identidade && !isValidBiFormat(form.bilhete_identidade)}" @blur="onBiBlur">
+                <button class="btn btn-outline-primary" type="button" @click="consultarBI" :disabled="consultingBi || !form.bilhete_identidade">
+                  <span v-if="consultingBi" class="spinner-border spinner-border-sm"></span>
+                  <i v-else class="bi bi-search"></i>
+                </button>
+              </div>
+              <div v-if="form.bilhete_identidade && !isValidBiFormat(form.bilhete_identidade)" class="invalid-feedback d-block">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>BI deve ter 14 caracteres (ex: 006151112LA041)
+              </div>
+              <div v-if="biLookupStatus" class="small mt-1" :class="biLookupStatus === 'error' ? 'text-danger' : 'text-success'">
+                <i :class="biLookupStatus === 'error' ? 'bi bi-x-circle-fill' : 'bi bi-check-circle-fill'" class="me-1"></i>
+                {{ biLookupMessage }}
+              </div>
             </div>
             <div class="col-md-6 mb-3">
               <label class="form-label">Validade BI</label>
@@ -175,6 +190,30 @@
           <div class="mb-3">
             <label class="form-label">Telefone</label>
             <input v-model="form.telefone" type="text" class="form-control" placeholder="Nº telefone">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">NIF da Empresa</label>
+            <div class="input-group">
+              <input v-model="form.nif_empresa" type="text" class="form-control" placeholder="Nº NIF (10 dígitos)" maxlength="10" :class="{'is-invalid': form.nif_empresa && !/^\d{10}$/.test(form.nif_empresa)}">
+              <button class="btn btn-outline-primary" type="button" @click="consultarNIF" :disabled="consultingNif || !form.nif_empresa || !/^\d{10}$/.test(form.nif_empresa)">
+                <span v-if="consultingNif" class="spinner-border spinner-border-sm"></span>
+                <i v-else class="bi bi-search"></i>
+              </button>
+            </div>
+            <div v-if="form.nif_empresa && !/^\d{10}$/.test(form.nif_empresa)" class="invalid-feedback d-block">
+              <i class="bi bi-exclamation-triangle-fill me-1"></i>NIF deve ter 10 dígitos
+            </div>
+            <div v-if="nifLookupStatus" class="small mt-1" :class="nifLookupStatus === 'error' ? 'text-danger' : 'text-success'">
+              <i :class="nifLookupStatus === 'error' ? 'bi bi-x-circle-fill' : 'bi bi-check-circle-fill'" class="me-1"></i>
+              {{ nifLookupMessage }}
+            </div>
+            <div v-if="nifData" class="nif-info-card mt-2">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-building"></i>
+                <strong>{{ nifData.nome }}</strong>
+              </div>
+              <small class="text-muted">Estado: {{ nifData.estado }} | Tipo: {{ nifData.tipo }}</small>
+            </div>
           </div>
           <div class="mb-3">
             <label class="form-label">Estado</label>
@@ -326,6 +365,7 @@ const form = reactive({
   carta_conducao: '',
   validade_carta: '',
   validade_bi: '',
+  nif_empresa: '',
   estado: 'ativo',
   observacoes: ''
 })
@@ -337,8 +377,14 @@ const resetForm = () => {
   form.carta_conducao = ''
   form.validade_carta = ''
   form.validade_bi = ''
+  form.nif_empresa = ''
   form.estado = 'ativo'
   form.observacoes = ''
+  biLookupStatus.value = ''
+  biLookupMessage.value = ''
+  nifLookupStatus.value = ''
+  nifLookupMessage.value = ''
+  nifData.value = null
 }
 
 const openCreate = () => {
@@ -355,9 +401,94 @@ const openEdit = (item) => {
   form.carta_conducao = item.carta_conducao || ''
   form.validade_carta = item.validade_carta || ''
   form.validade_bi = item.validade_bi || ''
+  form.nif_empresa = item.nif_empresa || ''
   form.estado = item.estado || 'ativo'
   form.observacoes = item.observacoes || ''
+  biLookupStatus.value = ''
+  biLookupMessage.value = ''
+  nifLookupStatus.value = ''
+  nifLookupMessage.value = ''
+  nifData.value = null
   showModal.value = true
+}
+
+const isValidBiFormat = (bi) => /^\d{9}[A-Z]{2}\d{3}$/.test(bi.toUpperCase())
+
+const consultingBi = ref(false)
+const biLookupStatus = ref('')
+const biLookupMessage = ref('')
+
+const onBiBlur = () => {
+  if (form.bilhete_identidade && isValidBiFormat(form.bilhete_identidade)) {
+    consultarBI()
+  }
+}
+
+const consultarBI = async () => {
+  if (!form.bilhete_identidade || !isValidBiFormat(form.bilhete_identidade)) {
+    biLookupStatus.value = 'error'
+    biLookupMessage.value = 'Formato de BI inválido'
+    return
+  }
+  consultingBi.value = true
+  biLookupStatus.value = ''
+  biLookupMessage.value = ''
+  try {
+    const bi = form.bilhete_identidade.toUpperCase()
+    const res = await fetch(`https://fmlider.co.ao/api/bi-lookup/${bi}`)
+    const data = await res.json()
+    if (data.success && data.data && data.data.nome) {
+      biLookupStatus.value = 'success'
+      biLookupMessage.value = `Titular: ${data.data.nome}`
+      if (!form.nome_completo || editingItem.value === null) {
+        form.nome_completo = data.data.nome
+      }
+    } else {
+      biLookupStatus.value = 'error'
+      biLookupMessage.value = data.message || 'BI não encontrado'
+    }
+  } catch (e) {
+    biLookupStatus.value = 'error'
+    biLookupMessage.value = 'Erro ao consultar BI'
+    console.error(e)
+  } finally {
+    consultingBi.value = false
+  }
+}
+
+const consultingNif = ref(false)
+const nifLookupStatus = ref('')
+const nifLookupMessage = ref('')
+const nifData = ref(null)
+
+const consultarNIF = async () => {
+  if (!form.nif_empresa || !/^\d{10}$/.test(form.nif_empresa)) {
+    nifLookupStatus.value = 'error'
+    nifLookupMessage.value = 'NIF deve ter 10 dígitos'
+    return
+  }
+  consultingNif.value = true
+  nifLookupStatus.value = ''
+  nifLookupMessage.value = ''
+  nifData.value = null
+  try {
+    const res = await fetch(`https://fmlider.co.ao/api/nif-lookup/${form.nif_empresa}`)
+    const data = await res.json()
+    if (data.success && data.data && data.data.nome) {
+      nifLookupStatus.value = 'success'
+      nifLookupMessage.value = `Empresa: ${data.data.nome}`
+      nifData.value = data.data
+    } else {
+      nifLookupStatus.value = 'error'
+      nifLookupMessage.value = data.message || 'NIF não encontrado na AGT'
+    }
+  } catch (e) {
+    nifLookupStatus.value = 'error'
+    nifLookupMessage.value = 'Erro ao consultar NIF na AGT'
+    console.error(e)
+  } finally {
+    consultingNif.value = false
+  }
 }
 
 const closeModal = () => {
@@ -374,11 +505,12 @@ const save = async () => {
   try {
     const payload = {
       nome_completo: form.nome_completo,
-      bilhete_identidade: form.bilhete_identidade,
+      bilhete_identidade: form.bilhete_identidade.toUpperCase(),
       telefone: form.telefone,
       carta_conducao: form.carta_conducao,
       validade_carta: form.validade_carta || null,
       validade_bi: form.validade_bi || null,
+      nif_empresa: form.nif_empresa || null,
       estado: form.estado,
       observacoes: form.observacoes
     }
@@ -465,6 +597,14 @@ onMounted(() => {
 .search-box input:focus { border-color: #2563eb; outline: none; }
 .form-select { max-width: 220px; border: 2px solid #e2e8f0; border-radius: 8px; }
 .tracking-code { background: #f1f5f9; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; color: #334155; }
+.nif-info-card {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 0.85rem;
+}
+.input-group .btn { z-index: 0; }
 
 .stats-grid {
   display: grid;

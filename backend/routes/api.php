@@ -73,6 +73,10 @@ $router->post('/auth/forgot-password', 'App\Controllers\AuthController', 'resetP
 $router->get('/nif-lookup', 'App\Controllers\NifController', 'lookupByQuery');
 $router->get('/nif-lookup/{nif}', 'App\Controllers\NifController', 'lookup');
 
+// BI Lookup (public)
+$router->get('/bi-lookup', 'App\Controllers\ConsultaController', 'lookupBiByQuery');
+$router->get('/bi-lookup/{bi}', 'App\Controllers\ConsultaController', 'lookupBi');
+
 // Public API routes
 $router->get('/services', 'App\Controllers\ServiceController', 'index');
 $router->get('/services/{id}', 'App\Controllers\ServiceController', 'show');
