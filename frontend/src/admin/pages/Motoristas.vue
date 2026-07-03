@@ -34,6 +34,15 @@
           <span class="stat-label">Inativos</span>
         </div>
       </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #fef3c7; color: #92400e;">
+          <i class="bi bi-clock-history"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats.expirados }}</span>
+          <span class="stat-label">Docs. Expirados</span>
+        </div>
+      </div>
     </div>
 
     <div class="card">
@@ -69,6 +78,7 @@
                 <th>Telefone</th>
                 <th>Carta Condução</th>
                 <th>Validade Carta</th>
+                <th>Validade BI</th>
                 <th>Estado</th>
                 <th>Ações</th>
               </tr>
@@ -81,7 +91,14 @@
                 <td><code class="tracking-code">{{ item.bilhete_identidade || '—' }}</code></td>
                 <td>{{ item.telefone || '—' }}</td>
                 <td>{{ item.carta_conducao || '—' }}</td>
-                <td><small class="text-muted">{{ formatDate(item.validade_carta) }}</small></td>
+                <td><small class="text-muted">{{ formatDate(item.validade_carta) }}</small>
+                  <span v-if="isExpired(item.validade_carta)" class="badge bg-danger ms-1"><i class="bi bi-exclamation-triangle-fill me-1"></i>Expirado</span>
+                  <span v-else-if="isExpiringSoon(item.validade_carta)" class="badge bg-warning text-dark ms-1"><i class="bi bi-clock-fill me-1"></i>A expirar</span>
+                </td>
+                <td><small class="text-muted">{{ formatDate(item.validade_bi) }}</small>
+                  <span v-if="isExpired(item.validade_bi)" class="badge bg-danger ms-1"><i class="bi bi-exclamation-triangle-fill me-1"></i>Expirado</span>
+                  <span v-else-if="isExpiringSoon(item.validade_bi)" class="badge bg-warning text-dark ms-1"><i class="bi bi-clock-fill me-1"></i>A expirar</span>
+                </td>
                 <td><span class="status-badge" :class="'status-' + item.estado">{{ item.estado === 'ativo' ? 'Ativo' : 'Inativo' }}</span></td>
                 <td>
                   <div class="action-buttons">
@@ -129,8 +146,14 @@
               <input v-model="form.bilhete_identidade" type="text" class="form-control" placeholder="Nº BI">
             </div>
             <div class="col-md-6 mb-3">
-              <label class="form-label">Telefone</label>
-              <input v-model="form.telefone" type="text" class="form-control" placeholder="Nº telefone">
+              <label class="form-label">Validade BI</label>
+              <input v-model="form.validade_bi" type="date" class="form-control" :class="{'is-invalid': form.validade_bi && isExpired(form.validade_bi)}">
+              <div v-if="form.validade_bi && isExpired(form.validade_bi)" class="invalid-feedback">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>BI Expirado — Documento vencido!
+              </div>
+              <div v-else-if="form.validade_bi && isExpiringSoon(form.validade_bi)" class="text-warning small mt-1">
+                <i class="bi bi-clock-fill me-1"></i>BI a expirar em breve
+              </div>
             </div>
           </div>
           <div class="row">
@@ -140,8 +163,18 @@
             </div>
             <div class="col-md-6 mb-3">
               <label class="form-label">Validade Carta</label>
-              <input v-model="form.validade_carta" type="date" class="form-control">
+              <input v-model="form.validade_carta" type="date" class="form-control" :class="{'is-invalid': form.validade_carta && isExpired(form.validade_carta)}">
+              <div v-if="form.validade_carta && isExpired(form.validade_carta)" class="invalid-feedback">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>Carta Expirada — Documento vencido!
+              </div>
+              <div v-else-if="form.validade_carta && isExpiringSoon(form.validade_carta)" class="text-warning small mt-1">
+                <i class="bi bi-clock-fill me-1"></i>Carta a expirar em breve
+              </div>
             </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Telefone</label>
+            <input v-model="form.telefone" type="text" class="form-control" placeholder="Nº telefone">
           </div>
           <div class="mb-3">
             <label class="form-label">Estado</label>
@@ -156,8 +189,12 @@
           </div>
         </div>
         <div class="modal-footer">
+          <div v-if="(form.validade_carta && isExpired(form.validade_carta)) || (form.validade_bi && isExpired(form.validade_bi))" class="alert-expired w-100">
+            <i class="bi bi-exclamation-diamond-fill me-2"></i>
+            <strong>Atenção:</strong> Este motorista possui documentos expirados. O sistema não permitirá o registo enquanto os documentos não estiverem válidos.
+          </div>
           <button class="btn btn-secondary" @click="closeModal">Cancelar</button>
-          <button class="btn btn-primary" @click="save" :disabled="saving">
+          <button class="btn btn-primary" @click="save" :disabled="saving || (form.validade_carta && isExpired(form.validade_carta)) || (form.validade_bi && isExpired(form.validade_bi))">
             <span v-if="saving" class="spinner-border spinner-border-sm me-1"></span>
             {{ editingItem ? 'Guardar' : 'Criar' }}
           </button>
@@ -188,7 +225,7 @@
 
     <!-- Toast -->
     <div v-if="toast.show" class="toast-container" :class="'toast-' + toast.type">
-      <i :class="toast.type === 'success' ? 'bi bi-check-circle-fill' : 'bi bi-exclamation-circle-fill'" class="me-2"></i>
+      <i :class="toast.type === 'success' ? 'bi bi-check-circle-fill' : toast.type === 'warning' ? 'bi bi-exclamation-triangle-fill' : 'bi bi-exclamation-circle-fill'" class="me-2"></i>
       {{ toast.message }}
     </div>
   </div>
@@ -240,7 +277,7 @@ const debounceSearch = () => {
   }, 300)
 }
 
-const stats = reactive({ total: 0, ativos: 0, inativos: 0 })
+const stats = reactive({ total: 0, ativos: 0, inativos: 0, expirados: 0 })
 
 const fetchStats = async () => {
   try {
@@ -249,13 +286,34 @@ const fetchStats = async () => {
       supabase.from('motoristas').select('id', { count: 'exact', head: true }).eq('estado', 'ativo'),
       supabase.from('motoristas').select('id', { count: 'exact', head: true }).eq('estado', 'inativo')
     ])
+    const today = new Date().toISOString().split('T')[0]
+    const { count: expirados } = await supabase.from('motoristas').select('id', { count: 'exact', head: true })
+      .or(`validade_carta.lt.${today},validade_bi.lt.${today}`)
+
     stats.total = total.count || 0
     stats.ativos = ativos.count || 0
     stats.inativos = inativos.count || 0
+    stats.expirados = expirados || 0
   } catch (e) {}
 }
 
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
+
+const isExpired = (dateStr) => {
+  if (!dateStr) return false
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return new Date(dateStr) < today
+}
+
+const isExpiringSoon = (dateStr) => {
+  if (!dateStr) return false
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const date = new Date(dateStr)
+  const diffDays = Math.ceil((date - today) / (1000 * 60 * 60 * 24))
+  return diffDays > 0 && diffDays <= 30
+}
 
 // Create/Edit modal
 const showModal = ref(false)
@@ -267,6 +325,7 @@ const form = reactive({
   telefone: '',
   carta_conducao: '',
   validade_carta: '',
+  validade_bi: '',
   estado: 'ativo',
   observacoes: ''
 })
@@ -277,6 +336,7 @@ const resetForm = () => {
   form.telefone = ''
   form.carta_conducao = ''
   form.validade_carta = ''
+  form.validade_bi = ''
   form.estado = 'ativo'
   form.observacoes = ''
 }
@@ -294,6 +354,7 @@ const openEdit = (item) => {
   form.telefone = item.telefone || ''
   form.carta_conducao = item.carta_conducao || ''
   form.validade_carta = item.validade_carta || ''
+  form.validade_bi = item.validade_bi || ''
   form.estado = item.estado || 'ativo'
   form.observacoes = item.observacoes || ''
   showModal.value = true
@@ -317,6 +378,7 @@ const save = async () => {
       telefone: form.telefone,
       carta_conducao: form.carta_conducao,
       validade_carta: form.validade_carta || null,
+      validade_bi: form.validade_bi || null,
       estado: form.estado,
       observacoes: form.observacoes
     }
@@ -332,6 +394,9 @@ const save = async () => {
     closeModal()
     fetchData()
     fetchStats()
+    if (isExpiringSoon(form.validade_carta) || isExpiringSoon(form.validade_bi)) {
+      showToast('warning', 'Atenção: O motorista possui documentos que irão expirar em breve.')
+    }
   } catch (e) {
     showToast('error', 'Erro ao guardar motorista.')
   } finally {
@@ -379,7 +444,7 @@ const showToast = (type, message) => {
   toast.message = message
   toast.show = true
   clearTimeout(toastTimer)
-  toastTimer = setTimeout(() => { toast.show = false }, 3000)
+  toastTimer = setTimeout(() => { toast.show = false }, 4000)
 }
 
 onMounted(() => {
@@ -484,7 +549,21 @@ onMounted(() => {
 
 .toast-container { position: fixed; top: 20px; right: 20px; padding: 0.75rem 1.25rem; border-radius: 8px; color: white; font-weight: 500; z-index: 1100; animation: slideIn 0.3s ease; }
 .toast-success { background: #059669; }
+.toast-warning { background: #d97706; }
 .toast-error { background: #dc2626; }
+
+.alert-expired {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #991b1b;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
 .pagination-bar {
