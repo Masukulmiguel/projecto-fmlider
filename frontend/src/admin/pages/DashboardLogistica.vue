@@ -1,7 +1,7 @@
 <template>
   <div class="logistica-dashboard p-4 p-md-5">
     <div class="welcome-card mb-4">
-      <h2 class="mb-1">Painel de Logística</h2>
+      <h2 class="mb-1"><i class="bi bi-speedometer2 me-2"></i>Painel de Logística</h2>
       <p class="text-muted mb-0">Visão geral das operações de transporte e entregas</p>
     </div>
 
