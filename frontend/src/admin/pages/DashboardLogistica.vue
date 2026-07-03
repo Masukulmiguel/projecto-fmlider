@@ -115,6 +115,7 @@ import {
   Chart, BarElement, CategoryScale, LinearScale, Tooltip, Legend,
   ArcElement, DoughnutController, BarController
 } from 'chart.js'
+import { supabase } from '@/lib/supabase'
 
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend, ArcElement, DoughnutController, BarController)
 
@@ -125,7 +126,6 @@ const stats = reactive({
   em_transito: 0,
   entregues: 0,
   cancelados: 0,
-  by_estado: {},
   top_clientes: [],
   top_motoristas: [],
   top_camioes: [],
@@ -134,11 +134,6 @@ const stats = reactive({
 
 const entregas = ref([])
 const chartsReady = computed(() => entregas.value.length > 0)
-
-const getAuthHeaders = () => {
-  const token = JSON.parse(localStorage.getItem('sb-vsupwqxtnzdnxklgbynn-auth-token') || '{}').access_token
-  return token ? { Authorization: `Bearer ${token}` } : {}
-}
 
 const statCards = computed(() => [
   { label: 'Total Entregas', value: stats.total, icon: 'bi bi-truck', iconClass: 'bg-primary-soft' },
@@ -180,100 +175,129 @@ const monthlyData = computed(() => {
 const estadoData = computed(() => {
   const labels = ['Pendente', 'Em Trânsito', 'Entregue', 'Cancelado']
   const colors = ['#f59e0b', '#06b6d4', '#10b981', '#ef4444']
-  const data = [
-    stats.pendentes,
-    stats.em_transito,
-    stats.entregues,
-    stats.cancelados
-  ]
-  return {
-    labels,
-    datasets: [{ data, backgroundColor: colors, borderWidth: 0 }]
-  }
+  const data = [stats.pendentes, stats.em_transito, stats.entregues, stats.cancelados]
+  return { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0 }] }
 })
 
 const topClientesData = computed(() => {
   const items = (stats.top_clientes || []).slice(0, 8)
   return {
-    labels: items.map(i => i.cliente || i.nome || 'Desconhecido'),
-    datasets: [{ label: 'Entregas', data: items.map(i => i.total || i.count || 0), backgroundColor: '#2563eb', borderRadius: 6, barPercentage: 0.6 }]
+    labels: items.map(i => i.cliente_nome || 'Desconhecido'),
+    datasets: [{ label: 'Entregas', data: items.map(i => i.total || 0), backgroundColor: '#2563eb', borderRadius: 6, barPercentage: 0.6 }]
   }
 })
 
 const topMotoristasData = computed(() => {
   const items = (stats.top_motoristas || []).slice(0, 8)
   return {
-    labels: items.map(i => i.motorista || i.nome || 'Desconhecido'),
-    datasets: [{ label: 'Entregas', data: items.map(i => i.total || i.count || 0), backgroundColor: '#8b5cf6', borderRadius: 6, barPercentage: 0.6 }]
+    labels: items.map(i => i.motorista_nome || 'Desconhecido'),
+    datasets: [{ label: 'Entregas', data: items.map(i => i.total || 0), backgroundColor: '#8b5cf6', borderRadius: 6, barPercentage: 0.6 }]
   }
 })
 
 const topCamioesData = computed(() => {
   const items = (stats.top_camioes || []).slice(0, 8)
   return {
-    labels: items.map(i => i.camiao || i.matricula || i.nome || '—'),
-    datasets: [{ label: 'Viagens', data: items.map(i => i.total || i.count || 0), backgroundColor: '#f97316', borderRadius: 6, barPercentage: 0.6 }]
+    labels: items.map(i => i.matricula || '—'),
+    datasets: [{ label: 'Viagens', data: items.map(i => i.total || 0), backgroundColor: '#f97316', borderRadius: 6, barPercentage: 0.6 }]
   }
 })
 
 const contentoresClienteData = computed(() => {
   const items = (stats.contentores_por_cliente || []).slice(0, 8)
   return {
-    labels: items.map(i => i.cliente || i.nome || 'Desconhecido'),
-    datasets: [{ label: 'Contentores', data: items.map(i => i.total || i.count || 0), backgroundColor: '#06b6d4', borderRadius: 6, barPercentage: 0.6 }]
+    labels: items.map(i => i.cliente_nome || 'Desconhecido'),
+    datasets: [{ label: 'Contentores', data: items.map(i => i.total || 0), backgroundColor: '#06b6d4', borderRadius: 6, barPercentage: 0.6 }]
   }
 })
 
 const barOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
+  responsive: true, maintainAspectRatio: false,
   plugins: { legend: { position: 'top' } },
   scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } }
 }
-
 const barHorizontalOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  indexAxis: 'y',
+  responsive: true, maintainAspectRatio: false, indexAxis: 'y',
   plugins: { legend: { display: false } },
   scales: { x: { beginAtZero: true, ticks: { precision: 0 } }, y: { grid: { display: false } } }
 }
-
 const doughnutOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  cutout: '60%',
+  responsive: true, maintainAspectRatio: false, cutout: '60%',
   plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } } }
 }
 
 onMounted(async () => {
   try {
-    const headers = getAuthHeaders()
-    const apiUrl = import.meta.env.VITE_API_URL
+    const { data: entregasData } = await supabase
+      .from('entregas')
+      .select('*')
+      .order('created_at', { ascending: false })
 
-    const [statsRes, entregasRes] = await Promise.all([
-      fetch(`${apiUrl}/entregas/stats`, { headers }),
-      fetch(`${apiUrl}/entregas`, { headers })
-    ])
+    entregas.value = entregasData || []
 
-    if (statsRes.ok) {
-      const data = await statsRes.json()
-      stats.total = data.total || 0
-      stats.total_contentores = data.total_contentores || 0
-      stats.by_estado = data.by_estado || {}
-      stats.pendentes = stats.by_estado.pendente || 0
-      stats.em_transito = stats.by_estado.em_transito || 0
-      stats.entregues = stats.by_estado.entregue || 0
-      stats.cancelados = stats.by_estado.cancelado || 0
-      stats.top_clientes = data.top_clientes || []
-      stats.top_motoristas = data.top_motoristas || []
-      stats.top_camioes = data.top_camioes || []
-      stats.contentores_por_cliente = data.contentores_por_cliente || []
+    stats.total = entregas.value.length
+    stats.pendentes = entregas.value.filter(e => e.estado === 'pendente').length
+    stats.em_transito = entregas.value.filter(e => ['saiu_da_base', 'em_transporte', 'chegou_cliente'].includes(e.estado)).length
+    stats.entregues = entregas.value.filter(e => e.estado === 'entregue').length
+    stats.cancelados = entregas.value.filter(e => e.estado === 'cancelado').length
+
+    const { data: contentoresData } = await supabase.from('contentores').select('*')
+    stats.total_contentores = (contentoresData || []).length
+
+    const clienteMap = {}
+    const motoristaMap = {}
+    const camiaoMap = {}
+    const contentoresClienteMap = {}
+
+    entregas.value.forEach(e => {
+      if (e.cliente_nome) {
+        clienteMap[e.cliente_nome] = (clienteMap[e.cliente_nome] || 0) + 1
+      }
+      if (e.motorista_id) {
+        const key = e.motorista_id
+        motoristaMap[key] = (motoristaMap[key] || 0) + 1
+      }
+      if (e.camiao_id) {
+        const key = e.camiao_id
+        camiaoMap[key] = (camiaoMap[key] || 0) + 1
+      }
+    })
+
+    stats.top_clientes = Object.entries(clienteMap)
+      .map(([cliente_nome, total]) => ({ cliente_nome, total }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10)
+
+    if (Object.keys(motoristaMap).length > 0) {
+      const ids = Object.keys(motoristaMap)
+      const { data: motoristas } = await supabase.from('motoristas').select('id, nome_completo').in('id', ids)
+      const motoristaNames = {}
+      ;(motoristas || []).forEach(m => { motoristaNames[m.id] = m.nome_completo })
+      stats.top_motoristas = Object.entries(motoristaMap)
+        .map(([id, total]) => ({ motorista_nome: motoristaNames[id] || `ID ${id}`, total }))
+        .sort((a, b) => b.total - a.total).slice(0, 10)
     }
 
-    if (entregasRes.ok) {
-      const data = await entregasRes.json()
-      entregas.value = data.data || data || []
+    if (Object.keys(camiaoMap).length > 0) {
+      const ids = Object.keys(camiaoMap)
+      const { data: camioes } = await supabase.from('camioes').select('id, matricula').in('id', ids)
+      const camiaoNames = {}
+      ;(camioes || []).forEach(c => { camiaoNames[c.id] = c.matricula })
+      stats.top_camioes = Object.entries(camiaoMap)
+        .map(([id, total]) => ({ matricula: camiaoNames[id] || `ID ${id}`, total }))
+        .sort((a, b) => b.total - a.total).slice(0, 10)
+    }
+
+    if (contentoresData && contentoresData.length > 0) {
+      const entregaMap = {}
+      entregas.value.forEach(e => { entregaMap[e.id] = e.cliente_nome })
+      contentoresData.forEach(c => {
+        const cliente = entregaMap[c.entrega_id] || 'Desconhecido'
+        contentoresClienteMap[cliente] = (contentoresClienteMap[cliente] || 0) + 1
+      })
+      stats.contentores_por_cliente = Object.entries(contentoresClienteMap)
+        .map(([cliente_nome, total]) => ({ cliente_nome, total }))
+        .sort((a, b) => b.total - a.total).slice(0, 10)
     }
   } catch (e) {
     console.error('Erro ao carregar dados do painel de logística:', e)

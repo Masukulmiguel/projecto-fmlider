@@ -468,14 +468,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
-
-const API_URL = import.meta.env.VITE_API_URL
-const getToken = () => {
-  try {
-    return JSON.parse(localStorage.getItem('sb-vsupwqxtnzdnxklgbynn-auth-token') || '{}').access_token
-  } catch { return '' }
-}
-const headers = () => ({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` })
+import { supabase } from '@/lib/supabase'
 
 const items = ref([])
 const loading = ref(false)
@@ -485,104 +478,61 @@ const clients = ref([])
 const filters = reactive({ q: '', estado: '', motorista_id: '', destino: '' })
 const currentPage = ref(1)
 const pageSize = 20
-const totalItems = ref(0)
 let searchTimer = null
 
 const stats = reactive({
-  total: 0,
-  pendente: 0,
-  em_preparacao: 0,
-  saiu_da_base: 0,
-  em_transporte: 0,
-  chegou_cliente: 0,
-  entregue: 0,
-  cancelado: 0
+  total: 0, pendente: 0, em_preparacao: 0, saiu_da_base: 0,
+  em_transporte: 0, chegou_cliente: 0, entregue: 0, cancelado: 0
 })
 
 const fetchData = async () => {
   loading.value = true
   try {
-    const params = new URLSearchParams()
-    if (filters.q) params.append('q', filters.q)
-    if (filters.estado) params.append('estado', filters.estado)
-    if (filters.motorista_id) params.append('motorista_id', filters.motorista_id)
-    if (filters.destino) params.append('destino', filters.destino)
-    params.append('page', currentPage.value)
-    const res = await fetch(`${API_URL}/entregas?${params.toString()}`, { headers: headers() })
-    if (!res.ok) throw new Error('Erro ao carregar entregas')
-    const data = await res.json()
-    items.value = data.entregas || data.data || []
-    totalItems.value = items.value.length >= 500 ? items.value.length : items.value.length
-    computeStats()
+    let query = supabase.from('entregas').select('*')
+    if (filters.estado) query = query.eq('estado', filters.estado)
+    if (filters.motorista_id) query = query.eq('motorista_id', filters.motorista_id)
+    if (filters.destino) query = query.ilike('destino', `%${filters.destino}%`)
+    if (filters.q) {
+      query = query.or(`referencia_fmlider.ilike.%${filters.q}%,referencia_cliente.ilike.%${filters.q}%,numero_processo.ilike.%${filters.q}%,cliente_nome.ilike.%${filters.q}%,origem.ilike.%${filters.q}%,destino.ilike.%${filters.q}%,matricula.ilike.%${filters.q}%`)
+    }
+    query = query.order('created_at', { ascending: false })
+    const { data, error } = await query
+    if (error) throw error
+    items.value = data || []
+
+    const all = items.value
+    stats.total = all.length
+    stats.pendente = all.filter(i => i.estado === 'pendente').length
+    stats.em_preparacao = all.filter(i => i.estado === 'em_preparacao').length
+    stats.saiu_da_base = all.filter(i => i.estado === 'saiu_da_base').length
+    stats.em_transporte = all.filter(i => i.estado === 'em_transporte').length
+    stats.chegou_cliente = all.filter(i => i.estado === 'chegou_cliente').length
+    stats.entregue = all.filter(i => i.estado === 'entregue').length
+    stats.cancelado = all.filter(i => i.estado === 'cancelado').length
+
+    for (const item of items.value) {
+      const { data: cs } = await supabase.from('contentores').select('*').eq('entrega_id', item.id)
+      item.contentores = cs || []
+    }
   } catch (e) {
     showToast('error', 'Erro ao carregar entregas.')
   } finally { loading.value = false }
 }
 
-const computeStats = async () => {
-  try {
-    const res = await fetch(`${API_URL}/entregas/stats`, { headers: headers() })
-    if (!res.ok) return
-    const data = await res.json()
-    const s = data.stats || data
-    stats.total = s.total || 0
-    stats.pendente = s.pendente || 0
-    stats.em_preparacao = s.em_preparacao || 0
-    stats.saiu_da_base = s.saiu_da_base || 0
-    stats.em_transporte = s.em_transporte || 0
-    stats.chegou_cliente = s.chegou_cliente || 0
-    stats.entregue = s.entregue || 0
-    stats.cancelado = s.cancelado || 0
-  } catch (e) {
-    stats.total = items.value.length
-    stats.pendente = items.value.filter(i => i.estado === 'pendente').length
-    stats.em_preparacao = items.value.filter(i => i.estado === 'em_preparacao').length
-    stats.saiu_da_base = items.value.filter(i => i.estado === 'saiu_da_base').length
-    stats.em_transporte = items.value.filter(i => i.estado === 'em_transporte').length
-    stats.chegou_cliente = items.value.filter(i => i.estado === 'chegou_cliente').length
-    stats.entregue = items.value.filter(i => i.estado === 'entregue').length
-    stats.cancelado = items.value.filter(i => i.estado === 'cancelado').length
-  }
-}
-
 const fetchMotoristas = async () => {
-  try {
-    const res = await fetch(`${API_URL}/motoristas`, { headers: headers() })
-    if (!res.ok) return
-    const data = await res.json()
-    motoristas.value = Array.isArray(data) ? data : (data.data || data.motoristas || [])
-  } catch (e) { /* silent */ }
+  const { data } = await supabase.from('motoristas').select('*').eq('estado', 'ativo').order('nome_completo')
+  motoristas.value = data || []
 }
 
 const fetchCamioes = async () => {
-  try {
-    const res = await fetch(`${API_URL}/camioes`, { headers: headers() })
-    if (!res.ok) return
-    const data = await res.json()
-    camioes.value = Array.isArray(data) ? data : (data.data || data.camioes || [])
-  } catch (e) { /* silent */ }
+  const { data } = await supabase.from('camioes').select('*').order('matricula')
+  camioes.value = data || []
 }
 
 const fetchClients = async () => {
-  try {
-    const res = await fetch(`${API_URL}/admin/users`, { headers: headers() })
-    if (!res.ok) return
-    const data = await res.json()
-    const allUsers = Array.isArray(data) ? data : (data.data || data.users || [])
-    clients.value = allUsers.filter(u => u.role === 'cliente')
-  } catch (e) { /* silent */ }
+  const { data } = await supabase.from('users').select('id, name, email').eq('role', 'cliente')
+  clients.value = data || []
 }
-
-const totalPages = computed(() => Math.max(1, Math.ceil(totalItems.value / pageSize)))
-
-const changePage = (page) => {
-  currentPage.value = page
-  fetchData()
-}
-
-watch(() => [filters.q, filters.estado, filters.motorista_id, filters.destino], () => {
-  currentPage.value = 1
-})
 
 const debounceSearch = () => {
   clearTimeout(searchTimer)
@@ -590,13 +540,9 @@ const debounceSearch = () => {
 }
 
 const estadoLabel = (estado) => ({
-  pendente: 'Pendente',
-  em_preparacao: 'Em Preparação',
-  saiu_da_base: 'Saiu da Base',
-  em_transporte: 'Em Transporte',
-  chegou_cliente: 'Chegou ao Cliente',
-  entregue: 'Entregue',
-  cancelado: 'Cancelado'
+  pendente: 'Pendente', em_preparacao: 'Em Preparação', saiu_da_base: 'Saiu da Base',
+  em_transporte: 'Em Transporte', chegou_cliente: 'Chegou ao Cliente',
+  entregue: 'Entregue', cancelado: 'Cancelado'
 }[estado] || estado)
 
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
@@ -608,89 +554,45 @@ const saving = ref(false)
 const contentores = ref([])
 
 const editForm = reactive({
-  referencia_fmlider: '',
-  referencia_cliente: '',
-  numero_processo: '',
-  tipologia: '',
-  origem: '',
-  destino: '',
-  cliente_id: '',
-  cliente_nome: '',
-  motorista_id: '',
-  camiao_id: '',
-  matricula: '',
-  estado: 'pendente',
-  data_saida: '',
-  data_prevista: '',
-  data_entrega: '',
-  observacoes: ''
+  referencia_fmlider: '', referencia_cliente: '', numero_processo: '', tipologia: '',
+  origem: '', destino: '', cliente_id: '', cliente_nome: '', motorista_id: '',
+  camiao_id: '', matricula: '', estado: 'pendente', data_saida: '',
+  data_prevista: '', data_entrega: '', observacoes: ''
 })
 
 const resetForm = () => {
   Object.assign(editForm, {
-    referencia_fmlider: '',
-    referencia_cliente: '',
-    numero_processo: '',
-    tipologia: '',
-    origem: '',
-    destino: '',
-    cliente_id: '',
-    cliente_nome: '',
-    motorista_id: '',
-    camiao_id: '',
-    matricula: '',
-    estado: 'pendente',
-    data_saida: '',
-    data_prevista: '',
-    data_entrega: '',
-    observacoes: ''
+    referencia_fmlider: '', referencia_cliente: '', numero_processo: '', tipologia: '',
+    origem: '', destino: '', cliente_id: '', cliente_nome: '', motorista_id: '',
+    camiao_id: '', matricula: '', estado: 'pendente', data_saida: '',
+    data_prevista: '', data_entrega: '', observacoes: ''
   })
   contentores.value = []
 }
 
-const openCreate = () => {
-  editingItem.value = null
-  resetForm()
-  showModal.value = true
-}
+const openCreate = () => { editingItem.value = null; resetForm(); showModal.value = true }
 
 const openEdit = (item) => {
   editingItem.value = item
   Object.assign(editForm, {
-    referencia_fmlider: item.referencia_fmlider || '',
-    referencia_cliente: item.referencia_cliente || '',
-    numero_processo: item.numero_processo || '',
-    tipologia: item.tipologia || '',
-    origem: item.origem || '',
-    destino: item.destino || '',
-    cliente_id: item.cliente_id || '',
-    cliente_nome: item.cliente_nome || '',
-    motorista_id: item.motorista_id || '',
-    camiao_id: item.camiao_id || '',
-    matricula: item.matricula || '',
-    estado: item.estado || 'pendente',
-    data_saida: item.data_saida || '',
-    data_prevista: item.data_prevista || '',
-    data_entrega: item.data_entrega || '',
+    referencia_fmlider: item.referencia_fmlider || '', referencia_cliente: item.referencia_cliente || '',
+    numero_processo: item.numero_processo || '', tipologia: item.tipologia || '',
+    origem: item.origem || '', destino: item.destino || '', cliente_id: item.cliente_id || '',
+    cliente_nome: item.cliente_nome || '', motorista_id: item.motorista_id || '',
+    camiao_id: item.camiao_id || '', matricula: item.matricula || '',
+    estado: item.estado || 'pendente', data_saida: item.data_saida || '',
+    data_prevista: item.data_prevista || '', data_entrega: item.data_entrega || '',
     observacoes: item.observacoes || ''
   })
   contentores.value = (item.contentores || []).map(c => ({
-    numero: c.numero || '',
-    tipo: c.tipo || '',
-    estado: c.estado || '',
-    data_entrega: c.data_entrega || '',
-    observacoes: c.observacoes || ''
+    numero: c.numero || '', tipo: c.tipo || '', estado: c.estado || '',
+    data_entrega: c.data_entrega || '', observacoes: c.observacoes || ''
   }))
-  if (contentores.value.length === 0) {
-    addContentor()
-  }
+  if (contentores.value.length === 0) addContentor()
   showModal.value = true
 }
 
-const closeModal = () => {
-  showModal.value = false
-  editingItem.value = null
-}
+const closeModal = () => { showModal.value = false; editingItem.value = null }
 
 const onClienteChange = () => {
   const client = clients.value.find(c => c.id === editForm.cliente_id)
@@ -698,22 +600,25 @@ const onClienteChange = () => {
 }
 
 const onCamiaoChange = () => {
-  const camiao = camioes.value.find(c => c.id === editForm.camiao_id)
+  const camiao = camioes.value.find(c => c.id == editForm.camiao_id)
   editForm.matricula = camiao ? (camiao.matricula || '') : ''
 }
 
-const addContentor = () => {
-  contentores.value.push({ numero: '', tipo: '', estado: '', data_entrega: '', observacoes: '' })
-}
+const addContentor = () => { contentores.value.push({ numero: '', tipo: '', estado: '', data_entrega: '', observacoes: '' }) }
+const removeContentor = (idx) => { contentores.value.splice(idx, 1) }
 
-const removeContentor = (idx) => {
-  contentores.value.splice(idx, 1)
+const generateRef = () => {
+  const now = new Date()
+  const d = now.toISOString().slice(0, 10).replace(/-/g, '')
+  const r = Math.random().toString(36).slice(2, 6).toUpperCase()
+  return `ENT-${d}-${r}`
 }
 
 const save = async () => {
   saving.value = true
   try {
     const payload = {
+      referencia_fmlider: editForm.referencia_fmlider || generateRef(),
       referencia_cliente: editForm.referencia_cliente || null,
       numero_processo: editForm.numero_processo || null,
       tipologia: editForm.tipologia || null,
@@ -721,34 +626,45 @@ const save = async () => {
       destino: editForm.destino,
       cliente_id: editForm.cliente_id || null,
       cliente_nome: editForm.cliente_nome || null,
-      motorista_id: editForm.motorista_id || null,
-      camiao_id: editForm.camiao_id || null,
+      motorista_id: editForm.motorista_id ? Number(editForm.motorista_id) : null,
+      camiao_id: editForm.camiao_id ? Number(editForm.camiao_id) : null,
       matricula: editForm.matricula || null,
       estado: editForm.estado || 'pendente',
       data_saida: editForm.data_saida || null,
       data_prevista: editForm.data_prevista || null,
       data_entrega: editForm.data_entrega || null,
-      observacoes: editForm.observacoes || null,
-      contentores: contentores.value.filter(c => c.numero || c.tipo).map(c => ({
-        numero: c.numero || null,
-        tipo: c.tipo || null,
-        estado: c.estado || null,
-        data_entrega: c.data_entrega || null,
-        observacoes: c.observacoes || null
-      }))
+      observacoes: editForm.observacoes || null
     }
 
-    const method = editingItem.value ? 'PUT' : 'POST'
-    const url = editingItem.value ? `${API_URL}/entregas/${editingItem.value.id}` : `${API_URL}/entregas`
-    const res = await fetch(url, { method, headers: headers(), body: JSON.stringify(payload) })
-    if (!res.ok) {
-      const err = await res.json().catch(() => null)
-      throw new Error(err?.message || 'Erro ao salvar')
+    let entregaId
+    if (editingItem.value) {
+      const { error } = await supabase.from('entregas').update(payload).eq('id', editingItem.value.id)
+      if (error) throw error
+      entregaId = editingItem.value.id
+      await supabase.from('contentores').delete().eq('entrega_id', entregaId)
+    } else {
+      const { data, error } = await supabase.from('entregas').insert(payload).select().single()
+      if (error) throw error
+      entregaId = data.id
     }
-    showToast('success', editingItem.value ? 'Entrega actualizada com sucesso!' : 'Entrega criada com sucesso!')
+
+    const validContentores = contentores.value.filter(c => c.numero || c.tipo)
+    if (validContentores.length > 0) {
+      const cs = validContentores.map(c => ({
+        entrega_id: entregaId, numero: c.numero || null, tipo: c.tipo || null,
+        estado: c.estado || null, data_entrega: c.data_entrega || null, observacoes: c.observacoes || null
+      }))
+      await supabase.from('contentores').insert(cs)
+    }
+
+    await supabase.from('historico_entregas').insert({
+      entrega_id: entregaId, estado_anterior: editingItem.value?.estado || null,
+      estado_novo: payload.estado, utilizador_nome: 'Admin', observacoes: 'Entrega criada/atualizada'
+    })
+
+    showToast('success', editingItem.value ? 'Entrega actualizada!' : 'Entrega criada!')
     closeModal()
     fetchData()
-    computeStats()
   } catch (e) {
     showToast('error', e.message || 'Erro ao salvar entrega.')
   } finally { saving.value = false }
@@ -759,25 +675,17 @@ const showDeleteModal = ref(false)
 const deleteItem = ref(null)
 const deleting = ref(false)
 
-const openDelete = (item) => {
-  deleteItem.value = item
-  showDeleteModal.value = true
-}
-
-const closeDelete = () => {
-  showDeleteModal.value = false
-  deleteItem.value = null
-}
+const openDelete = (item) => { deleteItem.value = item; showDeleteModal.value = true }
+const closeDelete = () => { showDeleteModal.value = false; deleteItem.value = null }
 
 const deleteItemConfirm = async () => {
   deleting.value = true
   try {
-    const res = await fetch(`${API_URL}/entregas/${deleteItem.value.id}`, { method: 'DELETE', headers: headers() })
-    if (!res.ok) throw new Error('Erro ao eliminar')
-    showToast('success', 'Entrega eliminada com sucesso!')
+    await supabase.from('contentores').delete().eq('entrega_id', deleteItem.value.id)
+    await supabase.from('entregas').delete().eq('id', deleteItem.value.id)
+    showToast('success', 'Entrega eliminada!')
     closeDelete()
     fetchData()
-    computeStats()
   } catch (e) {
     showToast('error', 'Erro ao eliminar entrega.')
   } finally { deleting.value = false }
@@ -796,24 +704,25 @@ const openStatus = (item) => {
   showStatusModal.value = true
 }
 
-const closeStatusModal = () => {
-  showStatusModal.value = false
-  statusItem.value = null
-}
+const closeStatusModal = () => { showStatusModal.value = false; statusItem.value = null }
 
 const updateStatus = async () => {
   savingStatus.value = true
   try {
-    const res = await fetch(`${API_URL}/entregas/${statusItem.value.id}/estado`, {
-      method: 'PUT',
-      headers: headers(),
-      body: JSON.stringify({ estado: statusForm.estado, observacoes: statusForm.observacoes || null })
+    const { error } = await supabase.from('entregas')
+      .update({ estado: statusForm.estado, data_entrega: statusForm.estado === 'entregue' ? new Date().toISOString() : null })
+      .eq('id', statusItem.value.id)
+    if (error) throw error
+
+    await supabase.from('historico_entregas').insert({
+      entrega_id: statusItem.value.id, estado_anterior: statusItem.value.estado,
+      estado_novo: statusForm.estado, utilizador_nome: 'Admin',
+      observacoes: statusForm.observacoes || null
     })
-    if (!res.ok) throw new Error('Erro ao actualizar estado')
-    showToast('success', 'Estado actualizado com sucesso!')
+
+    showToast('success', 'Estado actualizado!')
     closeStatusModal()
     fetchData()
-    computeStats()
   } catch (e) {
     showToast('error', 'Erro ao actualizar estado.')
   } finally { savingStatus.value = false }
@@ -826,25 +735,14 @@ const importData = ref([])
 const importHeaders = ref([])
 const importError = ref('')
 const importing = ref(false)
-const importFileInput = ref(null)
 
-const openImport = () => {
-  showImportModal.value = true
-}
-
-const closeImport = () => {
-  showImportModal.value = false
-  importPreview.value = false
-  importData.value = []
-  importHeaders.value = []
-  importError.value = ''
-}
+const openImport = () => { showImportModal.value = true }
+const closeImport = () => { showImportModal.value = false; importPreview.value = false; importData.value = []; importHeaders.value = []; importError.value = '' }
 
 const handleImportFile = async (event) => {
   const file = event.target.files[0]
   if (!file) return
   importError.value = ''
-
   const ext = file.name.split('.').pop().toLowerCase()
 
   if (ext === 'json') {
@@ -852,13 +750,11 @@ const handleImportFile = async (event) => {
       const text = await file.text()
       const json = JSON.parse(text)
       const arr = Array.isArray(json) ? json : (json.entregas || json.data || [json])
-      if (arr.length === 0) { importError.value = 'Nenhum registo encontrado no ficheiro.'; return }
+      if (arr.length === 0) { importError.value = 'Nenhum registo encontrado.'; return }
       importHeaders.value = [...new Set(arr.flatMap(r => Object.keys(r)))]
       importData.value = arr
       importPreview.value = true
-    } catch (e) {
-      importError.value = 'Erro ao processar o ficheiro JSON.'
-    }
+    } catch { importError.value = 'Erro ao processar JSON.' }
     return
   }
 
@@ -867,73 +763,53 @@ const handleImportFile = async (event) => {
     const reader = new FileReader()
     reader.onload = (e) => {
       try {
-        const workbook = XLSX.read(e.target.result, { type: 'array' })
-        const sheetName = workbook.SheetNames[0]
-        const worksheet = workbook.Sheets[sheetName]
-        const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' })
-        if (rawData.length < 2) { importError.value = 'A sheet não contém dados.'; return }
-
-        let headers = rawData[0]
-        let dataStart = 1
-        const row0Vals = rawData[0].filter(v => v !== '' && v !== null)
-        const row1Vals = rawData[1].filter(v => v !== '' && v !== null)
-        if (row0Vals.length < row1Vals.length && row1Vals.length > 3) {
-          headers = rawData[1]
-          dataStart = 2
-        }
-
+        const wb = XLSX.read(e.target.result, { type: 'array' })
+        const ws = wb.Sheets[wb.SheetNames[0]]
+        const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' })
+        if (raw.length < 2) { importError.value = 'Sem dados.'; return }
+        let hdrs = raw[0], start = 1
+        if (raw[0].filter(v => v).length < raw[1].filter(v => v).length && raw[1].filter(v => v).length > 3) { hdrs = raw[1]; start = 2 }
         const jsonData = []
-        for (let i = dataStart; i < rawData.length; i++) {
-          const row = rawData[i]
-          if (!row || row.every(v => v === '' || v === null)) continue
-          const obj = {}
-          headers.forEach((h, idx) => {
-            if (h !== '' && h !== null && row[idx] !== undefined) obj[h] = row[idx]
-          })
+        for (let i = start; i < raw.length; i++) {
+          const row = raw[i]; if (!row || row.every(v => !v)) continue
+          const obj = {}; hdrs.forEach((h, idx) => { if (h && row[idx] !== undefined) obj[h] = row[idx] })
           if (Object.keys(obj).length > 0) jsonData.push(obj)
         }
-
-        if (jsonData.length === 0) { importError.value = 'Nenhum registo válido encontrado.'; return }
-
+        if (jsonData.length === 0) { importError.value = 'Nenhum registo válido.'; return }
         importHeaders.value = [...new Set(jsonData.flatMap(r => Object.keys(r)))]
         importData.value = jsonData
         importPreview.value = true
-      } catch (e) {
-        importError.value = 'Erro ao processar o ficheiro Excel.'
-      }
+      } catch { importError.value = 'Erro ao processar Excel.' }
     }
     reader.readAsArrayBuffer(file)
-  } catch {
-    importError.value = 'Biblioteca XLSX não disponível. Use ficheiros JSON ou CSV.'
-  }
+  } catch { importError.value = 'Use ficheiros JSON ou Excel.' }
 }
 
 const submitImport = async () => {
   importing.value = true
   try {
-    const payload = importData.value.map(row => ({
-      origem: row.origem || row.Origem || null,
-      destino: row.destino || row.Destino || null,
-      cliente_nome: row.cliente || row.Cliente || row.cliente_nome || null,
-      referencia_cliente: row.referencia_cliente || row['Ref Cliente'] || null,
-      numero_processo: row.numero_processo || row.processo || row['Nº Processo'] || null,
-      tipologia: row.tipologia || row.tipo || row.Tipologia || null,
-      observacoes: row.observacoes || row.Observações || null
-    }))
-
-    const res = await fetch(`${API_URL}/entregas/import`, {
-      method: 'POST',
-      headers: headers(),
-      body: JSON.stringify({ entregas: payload })
-    })
-    if (!res.ok) throw new Error('Erro na importação')
-    const data = await res.json()
-    showToast('success', `${data.imported || payload.length} entrega(s) importada(s) com sucesso!`)
+    for (const row of importData.value) {
+      const payload = {
+        referencia_fmlider: generateRef(),
+        origem: row.origem || row.Origem || null,
+        destino: row.destino || row.Destino || null,
+        cliente_nome: row.cliente || row.Cliente || null,
+        referencia_cliente: row.referencia_cliente || row['Ref Cliente'] || null,
+        numero_processo: row.numero_processo || row.processo || null,
+        tipologia: row.tipologia || row.tipo || null,
+        estado: 'pendente'
+      }
+      const { data: newEntrega, error } = await supabase.from('entregas').insert(payload).select().single()
+      if (error) continue
+      await supabase.from('historico_entregas').insert({
+        entrega_id: newEntrega.id, estado_novo: 'pendente', utilizador_nome: 'Admin', observacoes: 'Importação em massa'
+      })
+    }
+    showToast('success', `${importData.value.length} entrega(s) importada(s)!`)
     closeImport()
     fetchData()
-    computeStats()
   } catch (e) {
-    showToast('error', 'Erro ao importar entregas.')
+    showToast('error', 'Erro ao importar.')
   } finally { importing.value = false }
 }
 
@@ -941,19 +817,12 @@ const submitImport = async () => {
 const toast = reactive({ show: false, type: 'success', message: '' })
 let toastTimer = null
 const showToast = (type, message) => {
-  toast.type = type
-  toast.message = message
-  toast.show = true
+  toast.type = type; toast.message = message; toast.show = true
   clearTimeout(toastTimer)
   toastTimer = setTimeout(() => { toast.show = false }, 3000)
 }
 
-onMounted(() => {
-  fetchData()
-  fetchMotoristas()
-  fetchCamioes()
-  fetchClients()
-})
+onMounted(() => { fetchData(); fetchMotoristas(); fetchCamioes(); fetchClients() })
 </script>
 
 <style scoped>

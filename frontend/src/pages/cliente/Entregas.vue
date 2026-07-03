@@ -267,6 +267,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+import { supabase } from '@/lib/supabase'
 
 const items = ref([])
 const loading = ref(true)
@@ -332,20 +333,26 @@ const openDetail = (item) => {
 const fetchEntregas = async () => {
   loading.value = true
   try {
-    const tokenData = JSON.parse(localStorage.getItem('sb-vsupwqxtnzdnxklgbynn-auth-token') || '{}')
-    const token = tokenData.access_token
+    const { data: authData } = await supabase.auth.getUser()
+    const userId = authData?.user?.id
+    if (!userId) return
 
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/entregas`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    })
+    let query = supabase.from('entregas').select('*').eq('user_id', userId).order('created_at', { ascending: false })
+    const { data, error } = await query
+    if (error) throw error
 
-    if (!res.ok) throw new Error('Erro ao carregar entregas')
+    items.value = (data || []).map(e => ({
+      ...e,
+      ref_fmlider: e.referencia_fmlider,
+      processo: e.numero_processo,
+      motorista: e.motorista_nome || '',
+      ref_cliente: e.referencia_cliente
+    }))
 
-    const data = await res.json()
-    items.value = Array.isArray(data) ? data : (data.data || [])
+    for (const item of items.value) {
+      const { data: cs } = await supabase.from('contentores').select('*').eq('entrega_id', item.id)
+      item.contentores = cs || []
+    }
 
     counts.total = items.value.length
     counts.em_transporte = items.value.filter(i => ['em_transporte', 'saiu_da_base'].includes(i.estado)).length

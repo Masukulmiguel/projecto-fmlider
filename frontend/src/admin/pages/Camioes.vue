@@ -192,14 +192,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-
-const API_URL = import.meta.env.VITE_API_URL
-const getToken = () => {
-  try {
-    return JSON.parse(localStorage.getItem('sb-vsupwqxtnzdnxklgbynn-auth-token') || '{}').access_token
-  } catch { return '' }
-}
-const headers = () => ({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` })
+import { supabase } from '@/lib/supabase'
 
 const items = ref([])
 const loading = ref(false)
@@ -211,13 +204,15 @@ const stats = reactive({ total: 0, disponivel: 0, em_servico: 0, em_manutencao: 
 const fetchData = async () => {
   loading.value = true
   try {
-    const params = new URLSearchParams()
-    if (filters.estado) params.append('estado', filters.estado)
-    if (filters.q) params.append('q', filters.q)
-    const res = await fetch(`${API_URL}/camioes?${params.toString()}`, { headers: headers() })
-    if (!res.ok) throw new Error('Erro ao carregar camiões')
-    const data = await res.json()
-    items.value = Array.isArray(data) ? data : (data.data || [])
+    let query = supabase.from('camioes').select('*')
+    if (filters.estado) query = query.eq('estado', filters.estado)
+    if (filters.q) {
+      query = query.or(`codigo_interno.ilike.%${filters.q}%,matricula.ilike.%${filters.q}%,marca.ilike.%${filters.q}%,modelo.ilike.%${filters.q}%`)
+    }
+    query = query.order('codigo_interno', { ascending: true })
+    const { data, error } = await query
+    if (error) throw error
+    items.value = data || []
     computeStats()
   } catch (e) {
     showToast('error', 'Erro ao carregar camiões.')
@@ -276,11 +271,15 @@ const closeEdit = () => { showEditModal.value = false; editingItem.value = null 
 const save = async () => {
   saving.value = true
   try {
-    const method = editingItem.value ? 'PUT' : 'POST'
-    const url = editingItem.value ? `${API_URL}/camioes/${editingItem.value.id}` : `${API_URL}/camioes`
-    const res = await fetch(url, { method, headers: headers(), body: JSON.stringify(editForm) })
-    if (!res.ok) throw new Error('Erro ao salvar')
-    showToast('success', editingItem.value ? 'Camião atualizado com sucesso!' : 'Camião criado com sucesso!')
+    if (editingItem.value) {
+      const { error } = await supabase.from('camioes').update(editForm).eq('id', editingItem.value.id)
+      if (error) throw error
+      showToast('success', 'Camião atualizado com sucesso!')
+    } else {
+      const { error } = await supabase.from('camioes').insert(editForm)
+      if (error) throw error
+      showToast('success', 'Camião criado com sucesso!')
+    }
     closeEdit()
     fetchData()
   } catch (e) {
@@ -298,8 +297,8 @@ const closeDelete = () => { showDeleteModal.value = false; deletingItem.value = 
 const deleteItem = async () => {
   deleting.value = true
   try {
-    const res = await fetch(`${API_URL}/camioes/${deletingItem.value.id}`, { method: 'DELETE', headers: headers() })
-    if (!res.ok) throw new Error('Erro ao eliminar')
+    const { error } = await supabase.from('camioes').delete().eq('id', deletingItem.value.id)
+    if (error) throw error
     showToast('success', 'Camião eliminado com sucesso!')
     closeDelete()
     fetchData()
