@@ -424,24 +424,75 @@
             <div v-if="importError" class="alert alert-danger mt-3">{{ importError }}</div>
           </template>
           <template v-else>
-            <div class="alert alert-info mb-3">
-              {{ importData.length }} registo(s) encontrado(s) no ficheiro.
+            <div v-if="!showValidation">
+              <div class="alert alert-info mb-3">
+                {{ importData.length }} registo(s) encontrado(s) no ficheiro.
+              </div>
+              <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                <table class="table table-sm table-bordered">
+                  <thead class="table-light">
+                    <tr>
+                      <th v-for="header in importHeaders" :key="header">{{ header }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(row, idx) in importData.slice(0, 20)" :key="idx">
+                      <td v-for="header in importHeaders" :key="header">{{ row[header] || '' }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p v-if="importData.length > 20" class="text-muted small">...e mais {{ importData.length - 20 }} registo(s)</p>
             </div>
-            <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-              <table class="table table-sm table-bordered">
-                <thead class="table-light">
-                  <tr>
-                    <th v-for="header in importHeaders" :key="header">{{ header }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(row, idx) in importData.slice(0, 20)" :key="idx">
-                    <td v-for="header in importHeaders" :key="header">{{ row[header] || '' }}</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div v-else>
+              <div class="d-flex gap-3 mb-3 flex-wrap">
+                <div class="validation-stat bg-success-subtle text-success">
+                  <span class="stat-num">{{ successImportCount }}</span>
+                  <span class="stat-txt">Sucesso</span>
+                </div>
+                <div class="validation-stat bg-danger-subtle text-danger">
+                  <span class="stat-num">{{ failImportCount }}</span>
+                  <span class="stat-txt">Erros</span>
+                </div>
+                <div class="validation-stat bg-warning-subtle text-warning">
+                  <span class="stat-num">{{ warnImportCount }}</span>
+                  <span class="stat-txt">Avisos</span>
+                </div>
+              </div>
+              <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+                <table class="table table-sm table-bordered">
+                  <thead class="table-light">
+                    <tr>
+                      <th>#</th>
+                      <th>Ref</th>
+                      <th>Cliente</th>
+                      <th>Estado</th>
+                      <th>Detalhes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(r, idx) in importValidationResults" :key="idx" :class="{'table-danger': !r.success, 'table-warning': r.warnings.length > 0 && r.success}">
+                      <td>{{ idx + 1 }}</td>
+                      <td><code>{{ r.ref || '—' }}</code></td>
+                      <td>{{ r.cliente || '—' }}</td>
+                      <td>
+                        <span v-if="!r.success" class="badge bg-danger">Erro</span>
+                        <span v-else-if="r.warnings.length > 0" class="badge bg-warning">Aviso</span>
+                        <span v-else class="badge bg-success">OK</span>
+                      </td>
+                      <td>
+                        <div v-if="r.errors.length" class="text-danger small">
+                          <div v-for="e in r.errors" :key="e"><i class="bi bi-x-circle me-1"></i>{{ e }}</div>
+                        </div>
+                        <div v-if="r.warnings.length" class="text-warning small">
+                          <div v-for="w in r.warnings" :key="w"><i class="bi bi-exclamation-triangle me-1"></i>{{ w }}</div>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
-            <p v-if="importData.length > 20" class="text-muted small">...e mais {{ importData.length - 20 }} registo(s)</p>
           </template>
         </div>
         <div class="modal-footer">
@@ -735,9 +786,15 @@ const importData = ref([])
 const importHeaders = ref([])
 const importError = ref('')
 const importing = ref(false)
+const showValidation = ref(false)
+const importValidationResults = ref([])
+
+const successImportCount = computed(() => importValidationResults.value.filter(r => r.success && r.warnings.length === 0).length)
+const failImportCount = computed(() => importValidationResults.value.filter(r => !r.success).length)
+const warnImportCount = computed(() => importValidationResults.value.filter(r => r.warnings.length > 0).length)
 
 const openImport = () => { showImportModal.value = true }
-const closeImport = () => { showImportModal.value = false; importPreview.value = false; importData.value = []; importHeaders.value = []; importError.value = '' }
+const closeImport = () => { showImportModal.value = false; importPreview.value = false; importData.value = []; importHeaders.value = []; importError.value = ''; showValidation.value = false; importValidationResults.value = [] }
 
 const handleImportFile = async (event) => {
   const file = event.target.files[0]
@@ -785,29 +842,153 @@ const handleImportFile = async (event) => {
   } catch { importError.value = 'Use ficheiros JSON ou Excel.' }
 }
 
+const findClient = (nome, cliMap) => {
+  if (!nome) return { entry: null, matchType: null }
+  const key = nome.toLowerCase().trim()
+  if (cliMap[key]) return { entry: cliMap[key], matchType: 'exact' }
+  const words = key.split(/\s+/).filter(w => w.length > 2)
+  let candidates = Object.keys(cliMap).filter(k =>
+    words.some(w => k.includes(w)) || k.split(/\s+/).some(w => key.includes(w))
+  )
+  if (candidates.length === 1) return { entry: cliMap[candidates[0]], matchType: 'partial' }
+  if (key.length >= 4) {
+    candidates = Object.keys(cliMap).filter(k => k.includes(key) || key.includes(k))
+    if (candidates.length === 1) return { entry: cliMap[candidates[0]], matchType: 'substring' }
+  }
+  return { entry: null, matchType: null }
+}
+
+const findMotorista = (nome, motoristaMap) => {
+  if (!nome) return { entry: null, matchType: null }
+  const key = nome.toLowerCase().trim()
+  if (motoristaMap[key]) return { entry: motoristaMap[key], matchType: 'exact' }
+  const words = key.split(/\s+/).filter(w => w.length > 2)
+  let candidates = Object.keys(motoristaMap).filter(k =>
+    words.some(w => k.includes(w)) || k.split(/\s+/).some(w => key.includes(w))
+  )
+  if (candidates.length === 1) return { entry: motoristaMap[candidates[0]], matchType: 'partial' }
+  return { entry: null, matchType: null }
+}
+
 const submitImport = async () => {
   importing.value = true
+  importValidationResults.value = []
+  showValidation.value = false
+
   try {
-    for (const row of importData.value) {
-      const payload = {
-        referencia_fmlider: generateRef(),
-        origem: row.origem || row.Origem || null,
-        destino: row.destino || row.Destino || null,
-        cliente_nome: row.cliente || row.Cliente || null,
-        referencia_cliente: row.referencia_cliente || row['Ref Cliente'] || null,
-        numero_processo: row.numero_processo || row.processo || null,
-        tipologia: row.tipologia || row.tipo || null,
-        estado: 'pendente'
+    const [{ data: users }, { data: motoristasData }, { data: camioesData }] = await Promise.all([
+      supabase.from('users').select('id, name').eq('role', 'cliente'),
+      supabase.from('motoristas').select('id, nome_completo'),
+      supabase.from('camioes').select('id, matricula, codigo_interno')
+    ])
+
+    const cliMap = {}
+    ;(users || []).forEach(u => {
+      const name = (u.name || '').toLowerCase().trim()
+      if (name) cliMap[name] = u
+    })
+
+    const motoristaMap = {}
+    ;(motoristasData || []).forEach(m => {
+      const name = (m.nome_completo || '').toLowerCase().trim()
+      if (name) motoristaMap[name] = m
+    })
+
+    const camiaoMap = {}
+    ;(camioesData || []).forEach(c => {
+      const mat = (c.matricula || '').toLowerCase().trim()
+      const cod = (c.codigo_interno || '').toLowerCase().trim()
+      if (mat) camiaoMap[mat] = c
+      if (cod) camiaoMap[cod] = c
+    })
+
+    const results = []
+    let successCount = 0
+    let failCount = 0
+
+    for (let idx = 0; idx < importData.value.length; idx++) {
+      const row = importData.value[idx]
+      const errors = []
+      const warnings = []
+
+      const clienteNome = (row.cliente || row.Cliente || row.cliente_nome || '').trim()
+      const motoristaNome = (row.motorista || row.Motorista || '').trim()
+      const camiaoRef = (row.camiao || row.Camião || row.matricula || '').trim()
+
+      let clienteEntry = null
+      if (clienteNome) {
+        const { entry, matchType } = findClient(clienteNome, cliMap)
+        if (!entry) {
+          warnings.push(`Cliente "${clienteNome}" não encontrado no sistema`)
+        } else {
+          clienteEntry = entry
+          if (matchType !== 'exact') warnings.push(`Cliente "${clienteNome}" identificado como "${entry.name}" (${matchType})`)
+        }
+      } else {
+        errors.push('Cliente em branco — obrigatório')
       }
-      const { data: newEntrega, error } = await supabase.from('entregas').insert(payload).select().single()
-      if (error) continue
-      await supabase.from('historico_entregas').insert({
-        entrega_id: newEntrega.id, estado_novo: 'pendente', utilizador_nome: 'Admin', observacoes: 'Importação em massa'
+
+      let motoristaEntry = null
+      if (motoristaNome) {
+        const { entry, matchType } = findMotorista(motoristaNome, motoristaMap)
+        if (!entry) {
+          warnings.push(`Motorista "${motoristaNome}" não encontrado no sistema`)
+        } else {
+          motoristaEntry = entry
+          if (matchType !== 'exact') warnings.push(`Motorista "${motoristaNome}" identificado como "${entry.nome_completo}" (${matchType})`)
+        }
+      }
+
+      let camiaoEntry = null
+      if (camiaoRef) {
+        const camKey = camiaoRef.toLowerCase().trim()
+        camiaoEntry = camiaoMap[camKey] || null
+        if (!camiaoEntry) warnings.push(`Camião "${camiaoRef}" não encontrado no sistema`)
+      }
+
+      const ref = `ENT-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`
+
+      const success = errors.length === 0
+      if (success) successCount++
+      else failCount++
+
+      results.push({
+        ref, cliente: clienteNome, success, errors, warnings,
+        payload: success ? {
+          referencia_fmlider: ref,
+          origem: row.origem || row.Origem || null,
+          destino: row.destino || row.Destino || null,
+          cliente_id: clienteEntry?.id || null,
+          cliente_nome: clienteEntry?.name || clienteNome,
+          motorista_id: motoristaEntry?.id || null,
+          camiao_id: camiaoEntry?.id || null,
+          matricula: camiaoEntry?.matricula || row.matricula || null,
+          numero_processo: row.numero_processo || row.processo || row['Nº Processo'] || null,
+          referencia_cliente: row.referencia_cliente || row['Ref Cliente'] || null,
+          tipologia: row.tipologia || row.tipo || row.Tipologia || null,
+          estado: 'pendente',
+          observacoes: row.observacoes || row.Observações || null
+        } : null
       })
     }
-    showToast('success', `${importData.value.length} entrega(s) importada(s)!`)
-    closeImport()
-    fetchData()
+
+    importValidationResults.value = results
+    showValidation.value = true
+
+    if (failCount === 0) {
+      for (const r of results) {
+        if (!r.payload) continue
+        const { data: newEntrega, error } = await supabase.from('entregas').insert(r.payload).select().single()
+        if (!error && newEntrega) {
+          await supabase.from('historico_entregas').insert({
+            entrega_id: newEntrega.id, estado_novo: 'pendente', utilizador_nome: 'Admin', observacoes: 'Importação em massa'
+          })
+        }
+      }
+      showToast('success', `${successCount} entrega(s) importada(s) com sucesso!`)
+    } else {
+      showToast('warning', `${successCount} sucesso, ${failCount} erros, ${results.filter(r => r.warnings.length > 0).length} avisos`)
+    }
   } catch (e) {
     showToast('error', 'Erro ao importar.')
   } finally { importing.value = false }
@@ -1008,4 +1189,8 @@ onMounted(() => { fetchData(); fetchMotoristas(); fetchCamioes(); fetchClients()
 @media (max-width: 480px) {
   .stats-grid { grid-template-columns: 1fr; }
 }
+
+.validation-stat { border-radius: 10px; padding: 0.75rem 1.25rem; text-align: center; min-width: 90px; }
+.validation-stat .stat-num { display: block; font-size: 1.5rem; font-weight: 700; }
+.validation-stat .stat-txt { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.03em; }
 </style>
