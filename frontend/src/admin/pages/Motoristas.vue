@@ -259,9 +259,12 @@ let searchTimer = null
 const fetchData = async () => {
   loading.value = true
   try {
+    const q = (filters.q || '').trim()
     let query = supabase.from('motoristas').select('*', { count: 'exact' })
     if (filters.estado) query = query.eq('estado', filters.estado)
-    if (filters.q) query = query.or(`nome_completo.ilike.%${filters.q}%,bilhete_identidade.ilike.%${filters.q}%,telefone.ilike.%${filters.q}%`)
+    if (q) {
+      query = query.ilike('nome_completo', `%${q}%`)
+    }
     const from = (currentPage.value - 1) * pageSize
     const to = from + pageSize - 1
     const { data, error, count } = await query.order('nome_completo', { ascending: true }).range(from, to)
@@ -269,7 +272,7 @@ const fetchData = async () => {
     items.value = data || []
     totalItems.value = count || 0
   } catch (e) {
-    console.error(e)
+    console.error('Erro ao buscar motoristas:', e)
   } finally {
     loading.value = false
   }
