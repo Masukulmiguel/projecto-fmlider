@@ -310,13 +310,12 @@ npm run preview # Preview do build
 ## 📞 Suporte
 
 Para dúvidas ou problemas:
-- Email: geral@fmlider.co.ao
-- Telefone: +244 935141747
+- Email: masukulum@gmail.com
+- Telefone: +244 935603163
 
 ## 📜 Licença
 
 © 2024 FMLider Transitário & Logística. Todos os direitos reservados.
 
 ---
-
-**Desenvolvido com ❤️ para FMLider**
+**Desenvolvedor Masukulu Miguel**
