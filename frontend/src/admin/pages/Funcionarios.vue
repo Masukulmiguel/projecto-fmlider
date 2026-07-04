@@ -18,6 +18,7 @@
             <thead>
               <tr>
                 <th>{{ t('admin.employees_col_employee') }}</th>
+                <th>BI</th>
                 <th>Departamento</th>
                 <th>{{ t('admin.employees_position') }}</th>
                 <th>Email</th>
@@ -29,7 +30,7 @@
             </thead>
             <tbody>
               <tr v-if="items.length === 0">
-                <td colspan="8" class="text-center py-4 text-muted">
+                <td colspan="9" class="text-center py-4 text-muted">
                   <i class="bi bi-person-badge me-2" style="font-size: 1.5rem; opacity: 0.4;"></i>Nenhum funcionário registado
                 </td>
               </tr>
@@ -46,6 +47,7 @@
                     </div>
                   </div>
                 </td>
+                <td><code class="tracking-code">{{ f.bi || '—' }}</code></td>
                 <td><span class="badge bg-info">{{ f.position || '—' }}</span></td>
                 <td><span class="badge bg-secondary"><i class="bi bi-building me-1"></i>{{ deptLabels[f.departamento] || '—' }}</span></td>
                 <td>{{ f.email }}</td>
@@ -118,6 +120,23 @@
                 <div class="col-md-6">
                   <label class="form-label">{{ t('admin.employees_phone') }}</label>
                   <input v-model="form.phone" type="text" class="form-control">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Bilhete de Identidade</label>
+                  <div class="input-group">
+                    <input v-model="form.bi" type="text" class="form-control" placeholder="006151112LA041" maxlength="14" :class="{'is-invalid': form.bi && !isValidBiFormat(form.bi)}" @blur="onBiBlur">
+                    <button class="btn btn-outline-primary" type="button" @click="consultarBI" :disabled="consultingBi || !form.bi">
+                      <span v-if="consultingBi" class="spinner-border spinner-border-sm"></span>
+                      <i v-else class="bi bi-search"></i>
+                    </button>
+                  </div>
+                  <div v-if="form.bi && !isValidBiFormat(form.bi)" class="invalid-feedback d-block">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>BI deve ter 14 caracteres (ex: 006151112LA041)
+                  </div>
+                  <div v-if="biLookupStatus" class="small mt-1" :class="biLookupStatus === 'error' ? 'text-danger' : 'text-success'">
+                    <i :class="biLookupStatus === 'error' ? 'bi bi-x-circle-fill' : 'bi bi-check-circle-fill'" class="me-1"></i>
+                    {{ biLookupMessage }}
+                  </div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">{{ t('admin.employees_position_label') }}</label>
@@ -240,7 +259,7 @@ const saving = ref(false)
 const showForm = ref(false)
 const editing = ref(null)
 const errorMessage = ref('')
-const form = reactive({ name: '', username: '', email: '', phone: '', position: '', departamento: '', password: '', permissions: [] })
+const form = reactive({ name: '', username: '', email: '', phone: '', position: '', departamento: '', password: '', permissions: [], bi: '' })
 
 const deptLabels = {
   certificacao: 'Certificação',
@@ -252,12 +271,12 @@ const deptLabels = {
 }
 
 const deptPermissions = {
-  certificacao: ['dashboard.view', 'embarques.view', 'embarques.manage', 'clients.view', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply'],
+  certificacao: ['dashboard.view', 'clients.view', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply'],
   documentacao: ['dashboard.view', 'documentos.view', 'documentos.manage', 'clients.view', 'contactos.view', 'chat.view'],
   licenciamentos: ['dashboard.view', 'licenciamentos.view', 'licenciamentos.manage', 'clients.view', 'contactos.view', 'chat.view'],
-  facturacao: ['dashboard.view', 'cotacoes.view', 'cotacoes.manage', 'clients.view', 'clients.manage', 'contactos.view', 'chat.view'],
+  facturacao: ['dashboard.view', 'clients.view', 'clients.manage', 'contactos.view', 'chat.view'],
   logistica: ['dashboard.view', 'logistica.view', 'logistica.manage', 'motoristas.view', 'motoristas.manage', 'camioes.view', 'camioes.manage', 'entregas.view', 'entregas.manage', 'clients.view', 'contactos.view', 'chat.view'],
-  administracao: ['dashboard.view', 'clients.view', 'clients.manage', 'embarques.view', 'embarques.manage', 'cotacoes.view', 'cotacoes.manage', 'documentos.view', 'documentos.manage', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply', 'licenciamentos.view', 'licenciamentos.manage', 'logistica.view', 'logistica.manage', 'motoristas.view', 'motoristas.manage', 'camioes.view', 'camioes.manage', 'entregas.view', 'entregas.manage', 'visitors.view', 'content.manage']
+  administracao: ['dashboard.view', 'clients.view', 'clients.manage', 'documentos.view', 'documentos.manage', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply', 'licenciamentos.view', 'licenciamentos.manage', 'logistica.view', 'logistica.manage', 'motoristas.view', 'motoristas.manage', 'camioes.view', 'camioes.manage', 'entregas.view', 'entregas.manage', 'visitors.view', 'content.manage']
 }
 
 const onDepartamentoChange = () => {
@@ -297,6 +316,53 @@ const permissionGroups = [
 const permLabel = (code) => PERM_LABELS[code] || code
 const initials = (n) => (n || '?').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' }) : t('admin.employees_never')
+
+const isValidBiFormat = (bi) => /^\d{9}[A-Z]{2}\d{3}$/.test(bi.toUpperCase())
+const consultingBi = ref(false)
+const biLookupStatus = ref('')
+const biLookupMessage = ref('')
+
+const onBiBlur = () => {
+  if (form.bi && isValidBiFormat(form.bi)) {
+    consultarBI()
+  }
+}
+
+const consultarBI = async () => {
+  if (!form.bi || !isValidBiFormat(form.bi)) {
+    biLookupStatus.value = 'error'
+    biLookupMessage.value = 'Formato de BI inválido'
+    return
+  }
+  consultingBi.value = true
+  biLookupStatus.value = ''
+  biLookupMessage.value = ''
+  const bi = form.bi.toUpperCase()
+
+  try {
+    const res = await fetch(`/api/bi-lookup/${bi}`, { signal: AbortSignal.timeout(15000) })
+    const data = await res.json()
+    if (data.success && data.data && data.data.nome) {
+      biLookupStatus.value = 'success'
+      biLookupMessage.value = `Titular: ${data.data.nome} (${data.data.fonte})`
+      if (!form.name || !editing.value) {
+        form.name = data.data.nome
+      }
+    } else if (data.success && data.data && data.data.validFormat) {
+      biLookupStatus.value = 'success'
+      biLookupMessage.value = `BI com formato válido (fonte: ${data.data.fonte})`
+    } else {
+      biLookupStatus.value = 'error'
+      biLookupMessage.value = data.message || 'BI não encontrado'
+    }
+  } catch (e) {
+    biLookupStatus.value = 'error'
+    biLookupMessage.value = 'Erro ao consultar BI. Tente novamente.'
+    console.error(e)
+  } finally {
+    consultingBi.value = false
+  }
+}
 
 const isLocked = (u) => {
   if (!u.locked_at) return false
@@ -352,7 +418,7 @@ const unlockUser = async (u) => {
 const fetchList = async () => {
   loading.value = true
   try {
-    const { data, error } = await supabase.from('users').select('id, auth_id, created_at, updated_at, name, email, username, phone, role, position, departamento, permissions, approval_status, status, photo, password_must_change, password_changed_at, locked_at, locked_reason').eq('role', 'funcionario').order('created_at', { ascending: false })
+    const { data, error } = await supabase.from('users').select('id, auth_id, created_at, updated_at, name, email, username, phone, bi, role, position, departamento, permissions, approval_status, status, photo, password_must_change, password_changed_at, locked_at, locked_reason').eq('role', 'funcionario').order('created_at', { ascending: false })
     if (!error) items.value = data
   } finally { loading.value = false }
 }
@@ -372,6 +438,7 @@ const openForm = (item = null) => {
     form.departamento = item.departamento || ''
     form.password = ''
     form.permissions = Array.isArray(item.permissions) ? [...item.permissions] : []
+    form.bi = item.bi || ''
   } else {
     form.name = ''
     form.username = ''
@@ -381,8 +448,11 @@ const openForm = (item = null) => {
     form.departamento = ''
     form.password = ''
     form.permissions = []
+    form.bi = ''
   }
   errorMessage.value = ''
+  biLookupStatus.value = ''
+  biLookupMessage.value = ''
   showForm.value = true
 }
 
@@ -390,16 +460,47 @@ const closeForm = () => { showForm.value = false; editing.value = null }
 
 const handleSubmit = async () => {
   errorMessage.value = ''
-  if (!editing.value && form.permissions.length === 0) {
-    errorMessage.value = t('admin.employees_select_permissions')
+  if (!form.name.trim()) {
+    errorMessage.value = 'O nome completo é obrigatório.'
+    return
+  }
+  if (!form.username.trim()) {
+    errorMessage.value = 'O username é obrigatório.'
+    return
+  }
+  if (!form.email.trim()) {
+    errorMessage.value = 'O email é obrigatório.'
+    return
+  }
+  if (!form.departamento) {
+    errorMessage.value = 'Selecione o departamento.'
     return
   }
   if (!editing.value && !form.password) {
     errorMessage.value = t('admin.employees_password_required')
     return
   }
+  if (!editing.value && form.password && form.password.length < 12) {
+    errorMessage.value = 'A senha deve ter pelo menos 12 caracteres.'
+    return
+  }
+  if (form.bi && !isValidBiFormat(form.bi)) {
+    errorMessage.value = 'Formato de BI inválido. Use 14 caracteres (ex: 006151112LA041).'
+    return
+  }
+  if (!editing.value && form.permissions.length === 0) {
+    errorMessage.value = t('admin.employees_select_permissions')
+    return
+  }
   saving.value = true
   try {
+    if (form.bi) {
+      const biUpper = form.bi.toUpperCase()
+      const { data: existingBi } = await supabase.from('users').select('id, name').eq('bi', biUpper).maybeSingle()
+      if (existingBi && (!editing.value || existingBi.id !== editing.value.id)) {
+        throw new Error(`Este BI já está registado para "${existingBi.name}".`)
+      }
+    }
     if (editing.value) {
       const payload = {
         name: form.name,
@@ -408,6 +509,7 @@ const handleSubmit = async () => {
         position: form.position,
         departamento: form.departamento,
         permissions: form.permissions,
+        bi: form.bi ? form.bi.toUpperCase() : null,
       }
       const { error } = await supabase.from('users').update(payload).eq('id', editing.value.id)
       if (error) throw error
@@ -490,6 +592,7 @@ const handleSubmit = async () => {
           phone: form.phone || '',
           position: form.position || '',
           departamento: form.departamento || '',
+          bi: form.bi ? form.bi.toUpperCase() : null,
           role: 'funcionario',
           approval_status: 'approved',
           status: 1,
@@ -527,6 +630,8 @@ onMounted(async () => {
 <style scoped>
 .admin-page { background: #f8f9fa; min-height: 100vh; }
 .page-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.25rem; color: #0f172a; }
+.tracking-code { background: #f1f5f9; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; color: #334155; }
+.input-group .btn { z-index: 0; }
 
 .card { border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
 .empty-card { border: none; }

@@ -269,13 +269,39 @@ const openEdit = (item) => {
 const closeEdit = () => { showEditModal.value = false; editingItem.value = null }
 
 const save = async () => {
+  if (!editForm.codigo_interno.trim()) {
+    showToast('error', 'O código interno é obrigatório.')
+    return
+  }
+  if (!editForm.matricula.trim()) {
+    showToast('error', 'A matrícula é obrigatória.')
+    return
+  }
   saving.value = true
   try {
     if (editingItem.value) {
+      const { data: existingMat } = await supabase.from('camioes').select('id, codigo_interno').eq('matricula', editForm.matricula.trim()).maybeSingle()
+      if (existingMat && existingMat.id !== editingItem.value.id) {
+        showToast('error', `Esta matrícula já está registada no camião "${existingMat.codigo_interno}".`)
+        saving.value = false
+        return
+      }
       const { error } = await supabase.from('camioes').update(editForm).eq('id', editingItem.value.id)
       if (error) throw error
       showToast('success', 'Camião atualizado com sucesso!')
     } else {
+      const { data: existingCod } = await supabase.from('camioes').select('id').eq('codigo_interno', editForm.codigo_interno.trim()).maybeSingle()
+      if (existingCod) {
+        showToast('error', 'Este código interno já está em uso.')
+        saving.value = false
+        return
+      }
+      const { data: existingMat } = await supabase.from('camioes').select('id, codigo_interno').eq('matricula', editForm.matricula.trim()).maybeSingle()
+      if (existingMat) {
+        showToast('error', `Esta matrícula já está registada no camião "${existingMat.codigo_interno}".`)
+        saving.value = false
+        return
+      }
       const { error } = await supabase.from('camioes').insert(editForm)
       if (error) throw error
       showToast('success', 'Camião criado com sucesso!')
@@ -283,7 +309,9 @@ const save = async () => {
     closeEdit()
     fetchData()
   } catch (e) {
-    showToast('error', 'Erro ao salvar camião.')
+    console.error('Erro ao salvar camião:', e)
+    const msg = e?.message || e?.error?.message || JSON.stringify(e)
+    showToast('error', 'Erro ao salvar camião: ' + msg)
   } finally { saving.value = false }
 }
 

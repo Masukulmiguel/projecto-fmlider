@@ -435,11 +435,26 @@ const save = async () => {
     showToast('error', 'O nome completo é obrigatório.')
     return
   }
+  if (!form.bilhete_identidade.trim()) {
+    showToast('error', 'O Bilhete de Identidade é obrigatório.')
+    return
+  }
+  if (!isValidBiFormat(form.bilhete_identidade)) {
+    showToast('error', 'Formato de BI inválido. Use 14 caracteres (ex: 006151112LA041).')
+    return
+  }
   saving.value = true
   try {
+    const biUpper = form.bilhete_identidade.toUpperCase()
+    const { data: existingBi } = await supabase.from('motoristas').select('id, nome_completo').eq('bilhete_identidade', biUpper).maybeSingle()
+    if (existingBi && (!editingItem.value || existingBi.id !== editingItem.value.id)) {
+      showToast('error', `Este BI já está registado para o motorista "${existingBi.nome_completo}".`)
+      saving.value = false
+      return
+    }
     const payload = {
       nome_completo: form.nome_completo,
-      bilhete_identidade: form.bilhete_identidade.toUpperCase(),
+      bilhete_identidade: biUpper,
       telefone: form.telefone,
       carta_conducao: form.carta_conducao,
       validade_carta: form.validade_carta || null,
@@ -463,7 +478,9 @@ const save = async () => {
       showToast('warning', 'Atenção: O motorista possui documentos que irão expirar em breve.')
     }
   } catch (e) {
-    showToast('error', 'Erro ao guardar motorista.')
+    console.error('Erro ao guardar motorista:', e)
+    const msg = e?.message || e?.error?.message || JSON.stringify(e)
+    showToast('error', 'Erro ao guardar motorista: ' + msg)
   } finally {
     saving.value = false
   }
