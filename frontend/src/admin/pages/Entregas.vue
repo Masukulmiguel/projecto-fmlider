@@ -252,12 +252,30 @@
           <div class="form-section">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h6 class="form-section-title mb-0"><i class="bi bi-box-seam me-1"></i> Contentores</h6>
-              <button class="btn btn-sm btn-outline-primary" @click="addContentor">
-                <i class="bi bi-plus-lg me-1"></i>Adicionar Contentor
-              </button>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-success" @click="openSelectContentor">
+                  <i class="bi bi-search me-1"></i>Selecionar Contentor
+                </button>
+                <button class="btn btn-sm btn-outline-primary" @click="addContentor">
+                  <i class="bi bi-plus-lg me-1"></i>Adicionar Manual
+                </button>
+              </div>
             </div>
-            <div v-if="contentores.length === 0" class="text-muted text-center py-3">
-              Nenhum contentor adicionado. Clique em "Adicionar Contentor".
+            <div v-if="selectedContentor" class="selected-contentor-card mb-3">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="fw-bold text-primary"><i class="bi bi-box-seam me-1"></i>{{ selectedContentor.numero }}</div>
+                  <div class="small text-muted mt-1">
+                    <span v-if="selectedContentor.tipologia">Tipologia: {{ selectedContentor.tipologia }}</span>
+                    <span v-if="selectedContentor.terminal" class="ms-2">Terminal: {{ selectedContentor.terminal }}</span>
+                    <span v-if="selectedContentor.estado" class="ms-2">Estado: {{ selectedContentor.estado }}</span>
+                  </div>
+                </div>
+                <button class="btn-icon btn-delete btn-sm" @click="selectedContentor = null" title="Remover seleção"><i class="bi bi-x-lg"></i></button>
+              </div>
+            </div>
+            <div v-if="contentores.length === 0 && !selectedContentor" class="text-muted text-center py-3">
+              Nenhum contentor adicionado. Use "Selecionar Contentor" ou "Adicionar Manual".
             </div>
             <div v-for="(c, idx) in contentores" :key="idx" class="contentor-card">
               <div class="contentor-header">
@@ -514,6 +532,37 @@
       <i :class="toast.type === 'success' ? 'bi bi-check-circle-fill' : 'bi bi-exclamation-circle-fill'" class="me-2"></i>
       {{ toast.message }}
     </div>
+
+    <!-- Select Contentor Modal -->
+    <div v-if="showSelectContentor" class="modal-overlay" @click.self="closeSelectContentor">
+      <div class="modal-content modal-xl">
+        <div class="modal-header"><h5>Selecionar Contentor</h5><button class="btn-close" @click="closeSelectContentor"></button></div>
+        <div class="modal-body">
+          <div class="filters mb-3">
+            <div class="search-box"><i class="bi bi-search"></i><input v-model="contentorSearch" type="text" placeholder="Pesquisar por número, NS, processo..." @input="searchContentores"></div>
+            <select v-model="contentorEstadoFilter" class="form-select" @change="searchContentores"><option value="">Todos os estados</option><option value="na_base">Na Base</option><option value="em_terminal">Em Terminal</option><option value="chegou_ao_porto">Chegou ao Porto</option></select>
+          </div>
+          <div v-if="searchingContentores" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></div>
+          <div v-else-if="availableContentores.length === 0" class="text-center py-4 text-muted">Nenhum contentor disponível.</div>
+          <div v-else class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+            <table class="table table-hover align-middle mb-0">
+              <thead><tr><th>Número</th><th>Tipologia</th><th>Cliente</th><th>Terminal</th><th>ETA</th><th>Estado</th><th></th></tr></thead>
+              <tbody>
+                <tr v-for="c in availableContentores" :key="c.id" class="clickable-row">
+                  <td><code class="tracking-code">{{ c.numero }}</code></td>
+                  <td>{{ c.tipologia || '—' }}</td>
+                  <td>{{ getClientName(c.cliente_id) }}</td>
+                  <td>{{ c.terminal || '—' }}</td>
+                  <td><small class="text-muted">{{ formatDate(c.eta) }}</small></td>
+                  <td><span class="status-badge" :class="'status-' + c.estado">{{ estadoLabelCont(c.estado) }}</span></td>
+                  <td><button class="btn btn-sm btn-primary" @click="selectContentor(c)"><i class="bi bi-check-lg"></i> Selecionar</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -530,6 +579,13 @@ const filters = reactive({ q: '', estado: '', motorista_id: '', destino: '' })
 const currentPage = ref(1)
 const pageSize = 20
 let searchTimer = null
+
+const showSelectContentor = ref(false)
+const contentorSearch = ref('')
+const contentorEstadoFilter = ref('')
+const availableContentores = ref([])
+const searchingContentores = ref(false)
+const selectedContentor = ref(null)
 
 const stats = reactive({
   total: 0, pendente: 0, em_preparacao: 0, saiu_da_base: 0,
@@ -619,6 +675,7 @@ const resetForm = () => {
     data_prevista: '', data_entrega: '', observacoes: ''
   })
   contentores.value = []
+  selectedContentor.value = null
 }
 
 const openCreate = () => { editingItem.value = null; resetForm(); showModal.value = true }
@@ -657,6 +714,37 @@ const onCamiaoChange = () => {
 
 const addContentor = () => { contentores.value.push({ numero: '', tipo: '', estado: '', data_entrega: '', observacoes: '' }) }
 const removeContentor = (idx) => { contentores.value.splice(idx, 1) }
+
+const openSelectContentor = () => { showSelectContentor.value = true; searchContentores() }
+const closeSelectContentor = () => { showSelectContentor.value = false; contentorSearch.value = ''; contentorEstadoFilter.value = ''; availableContentores.value = [] }
+
+const searchContentores = async () => {
+  searchingContentores.value = true
+  try {
+    let query = supabase.from('contentores').select('*')
+    if (contentorEstadoFilter.value) query = query.eq('estado', contentorEstadoFilter.value)
+    if (contentorSearch.value) query = query.or(`numero.ilike.%${contentorSearch.value}%,ns.ilike.%${contentorSearch.value}%,numero_processo.ilike.%${contentorSearch.value}%,referencia_fmlider.ilike.%${contentorSearch.value}%`)
+    query = query.order('numero', { ascending: true }).limit(50)
+    const { data, error } = await query
+    if (error) throw error
+    availableContentores.value = data || []
+  } catch (e) { console.error(e) } finally { searchingContentores.value = false }
+}
+
+const selectContentor = (c) => {
+  selectedContentor.value = c
+  editForm.numero_processo = editForm.numero_processo || c.numero_processo || ''
+  editForm.referencia_fmlider = editForm.referencia_fmlider || c.referencia_fmlider || ''
+  editForm.referencia_cliente = editForm.referencia_cliente || c.referencia_cliente || ''
+  editForm.cliente_id = editForm.cliente_id || c.cliente_id || ''
+  if (c.cliente_id && !editForm.cliente_nome) {
+    const client = clients.value.find(cl => cl.id === c.cliente_id)
+    editForm.cliente_nome = client ? client.name : ''
+  }
+  closeSelectContentor()
+}
+
+const estadoLabelCont = (e) => ({ aguardando_chegada:'Aguardando', chegou_ao_porto:'No Porto', em_terminal:'Em Terminal', na_base:'Na Base', agendado_para_entrega:'Agendado', em_transporte:'Em Transporte', entregue:'Entregue', devolvido:'Devolvido', cancelado:'Cancelado' }[e] || e)
 
 const generateRef = () => {
   const now = new Date()
@@ -1126,6 +1214,26 @@ onMounted(() => { fetchData(); fetchMotoristas(); fetchCamioes(); fetchClients()
   font-size: 0.85rem;
   color: #1e40af;
 }
+
+.selected-contentor-card {
+  background: #f0fdf4;
+  border: 2px solid #86efac;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.clickable-row { cursor: pointer; transition: background 0.15s ease; }
+.clickable-row:hover { background: #f8fafc; }
+
+.status-aguardando_chegada { background: #f3f4f6; color: #4b5563; }
+.status-chegou_ao_porto { background: #cffafe; color: #155e75; }
+.status-em_terminal { background: #dbeafe; color: #1e40af; }
+.status-na_base { background: #d1fae5; color: #065f46; }
+.status-agendado_para_entrega { background: #fef3c7; color: #92400e; }
+.status-em_transporte { background: #ede9fe; color: #6d28d9; }
+.status-entregue { background: #bbf7d0; color: #14532d; }
+.status-devolvido { background: #f3f4f6; color: #1f2937; }
+.status-cancelado { background: #fee2e2; color: #991b1b; }
 
 .btn-status {
   color: #0e7490;

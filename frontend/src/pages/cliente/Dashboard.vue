@@ -64,6 +64,18 @@
           </div>
         </router-link>
       </div>
+      <div class="col-md-6 col-xl-3">
+        <router-link to="/contentores" class="stat-tile-link">
+          <div class="stat-tile">
+            <div class="stat-tile-icon bg-info-soft"><i class="bi bi-box-seam"></i></div>
+            <div>
+              <div class="stat-tile-label">Contentores</div>
+              <div class="stat-tile-value">{{ counts.contentores }}</div>
+              <div class="stat-tile-meta">{{ counts.contentores_entregue || 0 }} entregues</div>
+            </div>
+          </div>
+        </router-link>
+      </div>
     </div>
 
     <div v-if="licencChartsReady" class="row g-4 mb-4">
@@ -143,7 +155,7 @@ const authStore = useAuthStore()
 const companyStore = useCompanyStore()
 const router = useRouter()
 
-const counts = reactive({ documentos: 0, contactos: 0, licenciamentos: 0, licenciamentos_aprovado: 0 })
+const counts = reactive({ documentos: 0, contactos: 0, licenciamentos: 0, licenciamentos_aprovado: 0, contentores: 0, contentores_entregue: 0 })
 const licenciamentos = ref([])
 
 const goToDocumentos = () => router.push('/documentos')
@@ -153,10 +165,11 @@ const loadCounts = async () => {
     const userId = authStore.user?.id
     if (!userId) return
 
-    const [docsRes, contsRes, licRes] = await Promise.all([
+    const [docsRes, contsRes, licRes, contRes] = await Promise.all([
       supabase.from('documentos').select('*').eq('user_id', userId),
       supabase.from('contactos').select('*').eq('user_id', userId),
-      supabase.from('licenciamentos').select('*').eq('user_id', userId)
+      supabase.from('licenciamentos').select('*').eq('user_id', userId),
+      supabase.from('contentores').select('*').eq('cliente_id', userId)
     ])
 
     licenciamentos.value = licRes.data || []
@@ -164,6 +177,8 @@ const loadCounts = async () => {
     counts.contactos = (contsRes.data || []).length
     counts.licenciamentos = licenciamentos.value.length
     counts.licenciamentos_aprovado = licenciamentos.value.filter(l => l.estado === 'aprovado').length
+    counts.contentores = (contRes.data || []).length
+    counts.contentores_entregue = (contRes.data || []).filter(c => c.estado === 'entregue').length
   } catch (e) {
     console.error(e)
   }

@@ -63,6 +63,10 @@
               <i class="bi bi-truck-front menu-icon"></i>
               <span class="menu-text" v-show="!collapsed">Camiões</span>
             </router-link>
+            <router-link to="/admin/contentores" class="menu-item" :class="{ active: $route.path.startsWith('/admin/contentores') }" :title="collapsed ? 'Contentores' : ''">
+              <i class="bi bi-box-seam menu-icon"></i>
+              <span class="menu-text" v-show="!collapsed">Contentores</span>
+            </router-link>
           </div>
 
           <div class="menu-section">

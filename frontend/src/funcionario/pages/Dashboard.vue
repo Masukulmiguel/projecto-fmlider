@@ -58,6 +58,20 @@
           </div>
         </router-link>
       </div>
+      <div v-if="can('contentores.view') || can('documentos.view')" class="col-md-6 col-xl-3">
+        <router-link to="/funcionario/contentores" class="stat-card-link">
+          <div class="stat-card fml-fade-up stagger-4 hover-lift">
+            <div class="stat-icon stat-cyan">
+              <i class="bi bi-box-seam"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">Contentores</span>
+              <span class="stat-value">{{ counts.contentores }}</span>
+              <span class="stat-meta">{{ counts.contentores_na_base || 0 }} na base</span>
+            </div>
+          </div>
+        </router-link>
+      </div>
       <div class="col-md-6 col-xl-3">
         <router-link to="/funcionario/licenciamentos" class="stat-card-link">
           <div class="stat-card fml-fade-up stagger-4 hover-lift">
@@ -188,7 +202,7 @@ import { useI18n } from '@/composables/useI18n.js'
 
 const authStore = useAuthStore()
 const { t } = useI18n()
-const counts = reactive({ clientes: 0, clientes_pendente: 0, documentos: 0, licenciamentos: 0, licenciamentos_pendente: 0, entregas: 0, entregas_pendente: 0 })
+const counts = reactive({ clientes: 0, clientes_pendente: 0, documentos: 0, licenciamentos: 0, licenciamentos_pendente: 0, entregas: 0, entregas_pendente: 0, contentores: 0, contentores_na_base: 0 })
 const recentActivity = ref([])
 
 const greeting = computed(() => {
@@ -266,6 +280,12 @@ const load = async () => {
         counts.licenciamentos = data.length
         counts.licenciamentos_pendente = data.filter(l => l.estado === 'submetido' || l.estado === 'pendente_cliente' || l.estado === 'em_analise').length
       }
+    })
+  )
+
+  if (can('contentores.view') || can('documentos.view')) tasks.push(
+    supabase.from('contentores').select('*').then(({ data, error }) => {
+      if (!error && data) { counts.contentores = data.length; counts.contentores_na_base = data.filter(c => c.estado === 'na_base').length }
     })
   )
 
