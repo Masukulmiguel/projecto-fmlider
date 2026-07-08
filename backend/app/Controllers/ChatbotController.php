@@ -12,6 +12,8 @@ class ChatbotController
         $data = Response::input();
         $message = trim($data['message'] ?? '');
         $history = is_array($data['history'] ?? null) ? $data['history'] : [];
+        $verified = !empty($data['verified']);
+        $clientInfo = $data['client'] ?? null;
 
         if ($message === '') {
             Response::error('Mensagem vazia', 422);
@@ -26,7 +28,7 @@ class ChatbotController
             Response::error('Chatbot não configurado. Defina GROQ_API_KEY no .env do backend.', 503);
         }
 
-        $systemPrompt = $this->buildSystemPrompt($config, $this->buildContext());
+        $systemPrompt = $this->buildSystemPrompt($config, $this->buildContext(), $verified, $clientInfo);
         $chatMessages = $this->buildMessages($history, $message, $systemPrompt);
 
         $reply = $this->callGroq($config, $chatMessages);
@@ -75,7 +77,7 @@ class ChatbotController
         return $ctx;
     }
 
-    private function buildSystemPrompt($config, $context)
+    private function buildSystemPrompt($config, $context, $verified = false, $clientInfo = null)
     {
         $c = $config['company'];
 
@@ -97,11 +99,34 @@ class ChatbotController
             $partnersTxt .= "\n";
         }
 
-        return $this->getSystemPrompt($c, $servicesTxt, $faqsTxt, $partnersTxt);
+        $clientContext = '';
+        if ($verified && $clientInfo) {
+            $clientName = $clientInfo['name'] ?? 'Cliente';
+            $companyName = $clientInfo['company'] ?? 'Empresa';
+            $clientContext = "\n\n## Cliente autenticado\n- Nome: {$clientName}\n- Empresa: {$companyName}\n- O cliente está autenticado e pode receber informações sobre os seus processos.\n";
+        }
+
+        return $this->getSystemPrompt($c, $servicesTxt, $faqsTxt, $partnersTxt, $verified, $clientContext);
     }
 
-    private function getSystemPrompt($c, $servicesTxt, $faqsTxt, $partnersTxt)
+    private function getSystemPrompt($c, $servicesTxt, $faqsTxt, $partnersTxt, $verified = false, $clientContext = '')
     {
+        $verificationRules = $verified ? "
+## Cliente verificado
+- O cliente está autenticado e pode receber informações sobre os seus processos, embarques e entregas
+- Fornece informações sobre o estado dos processos quando solicitado
+- Informa se os contentores estão na base ou em trânsito para o cliente
+- NUNCA reveles senhas, credenciais ou dados de login de NENHUM utilizador
+- NUNCA reveles emails de administradores ou de outros clientes
+- NUNCA partilhes dados pessoais sensíveis (BI, NIF, telefones) de outros clientes
+- Mantém a confidencialidade dos dados pessoais de todos os utilizadores" : "
+## Cliente NÃO verificado
+- Ainda não foi feita a verificação de identidade do cliente
+- NÃO forneças informações sobre processos, embarques ou entregas
+- NÃO reveles dados de outros clientes
+- Apenas fornece informações gerais sobre a empresa e serviços
+- Orienta o cliente a fazer a verificação de identidade primeiro";
+
         return "Tu és o assistente virtual oficial da {$c['name']}, uma empresa de logística, transporte e serviços de transitário em Angola.
 
 ## Identidade
@@ -129,6 +154,16 @@ class ChatbotController
 
 ## Parceiros
 {$partnersTxt}
+{$clientContext}
+
+## Regras de segurança (CRÍTICO)
+1. NUNCA reveles senhas, palavras-passe ou credenciais de NENHUM utilizador
+2. NUNCA reveles emails de administradores ou funcionários da empresa
+3. NUNCA partilhes dados pessoais (BI, NIF, telefones, endereços) de outros clientes
+4. NUNCA reveles informações de sistemas internos, base de dados ou configurações
+5. Se te pedirem dados de outro utilizador, recusa educadamente e explica que isso é confidencial
+6. Se te pedirem senhas ou credenciais, recusa e orienta a usar o sistema de recuperação de senha
+{$verificationRules}
 
 ## Regras estritas
 1. Responde APENAS ao que foi perguntado — não adicione informação extra não solicitada

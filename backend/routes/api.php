@@ -89,6 +89,7 @@ $router->get('/faqs', 'App\Controllers\FAQController', 'index');
 $router->get('/companies/carousel', 'App\Controllers\CompanyController', 'publicCarousel');
 $router->post('/contacts', 'App\Controllers\ContactController', 'store');
 $router->post('/chatbot/chat', 'App\Controllers\ChatbotController', 'chat');
+$router->post('/chatbot/verify-client', 'App\Controllers\ChatbotVerifyController', 'verifyClient');
 
 // Admin/Authenticated routes
 $router->get('/auth/profile', 'App\Controllers\AuthController', 'getProfile');
