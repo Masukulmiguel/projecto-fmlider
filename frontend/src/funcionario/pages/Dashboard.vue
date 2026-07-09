@@ -86,6 +86,20 @@
           </div>
         </router-link>
       </div>
+      <div class="col-md-6 col-xl-3">
+        <router-link to="/funcionario/processos" class="stat-card-link">
+          <div class="stat-card fml-fade-up stagger-4 hover-lift">
+            <div class="stat-icon stat-amber">
+              <i class="bi bi-clipboard2-data"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">Processos</span>
+              <span class="stat-value">{{ counts.processos }}</span>
+              <span class="stat-meta">{{ counts.processos_pendente || 0 }} em curso</span>
+            </div>
+          </div>
+        </router-link>
+      </div>
     </div>
 
     <!-- Activity + Quick Actions -->
@@ -202,7 +216,7 @@ import { useI18n } from '@/composables/useI18n.js'
 
 const authStore = useAuthStore()
 const { t } = useI18n()
-const counts = reactive({ clientes: 0, clientes_pendente: 0, documentos: 0, licenciamentos: 0, licenciamentos_pendente: 0, entregas: 0, entregas_pendente: 0, contentores: 0, contentores_na_base: 0 })
+const counts = reactive({ clientes: 0, clientes_pendente: 0, documentos: 0, licenciamentos: 0, licenciamentos_pendente: 0, entregas: 0, entregas_pendente: 0, contentores: 0, contentores_na_base: 0, processos: 0, processos_pendente: 0 })
 const recentActivity = ref([])
 
 const greeting = computed(() => {
@@ -286,6 +300,12 @@ const load = async () => {
   if (can('contentores.view') || can('documentos.view')) tasks.push(
     supabase.from('contentores').select('*').then(({ data, error }) => {
       if (!error && data) { counts.contentores = data.length; counts.contentores_na_base = data.filter(c => c.estado === 'na_base').length }
+    })
+  )
+
+  tasks.push(
+    supabase.from('processos').select('*').then(({ data, error }) => {
+      if (!error && data) { counts.processos = data.length; counts.processos_pendente = data.filter(p => !['dar_saida_pronto', 'ep17_pago_comp_ok'].includes(p.estado)).length }
     })
   )
 

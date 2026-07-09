@@ -16,6 +16,7 @@ const Politicas = () => import('@/pages/Politicas.vue')
 const FAQ = () => import('@/pages/FAQ.vue')
 const PartnersPage = () => import('@/pages/Partners.vue')
 const ClientListPage = () => import('@/pages/ClientList.vue')
+const TrackingPage = () => import('@/pages/Tracking.vue')
 
 const Login = () => import('@/pages/auth/Login.vue')
 const Register = () => import('@/pages/auth/Register.vue')
@@ -61,9 +62,11 @@ const AdminMotoristas = () => import('@/admin/pages/Motoristas.vue')
 const AdminCamioes = () => import('@/admin/pages/Camioes.vue')
 const AdminEntregas = () => import('@/admin/pages/Entregas.vue')
 const AdminContentores = () => import('@/admin/pages/Contentores.vue')
+const AdminProcessos = () => import('@/admin/pages/Processos.vue')
 const AdminDashboardLogistica = () => import('@/admin/pages/DashboardLogistica.vue')
 const ClienteEntregas = () => import('@/pages/cliente/Entregas.vue')
 const ClienteContentores = () => import('@/pages/cliente/Contentores.vue')
+const ClienteProcessos = () => import('@/pages/cliente/Processos.vue')
 
 const FuncionarioDashboard = () => import('@/funcionario/pages/Dashboard.vue')
 const FuncionarioMessages = () => import('@/funcionario/pages/Messages.vue')
@@ -78,6 +81,7 @@ const FuncionarioEntregas = () => import('@/pages/cliente/Entregas.vue')
 const FuncionarioMotoristas = () => import('@/admin/pages/Motoristas.vue')
 const FuncionarioCamioes = () => import('@/admin/pages/Camioes.vue')
 const FuncionarioContentores = () => import('@/funcionario/pages/Contentores.vue')
+const FuncionarioProcessos = () => import('@/funcionario/pages/Processos.vue')
 
 const ClienteMessages = () => import('@/pages/cliente/Messages.vue')
 const ClienteLicenciamentosList = () => import('@/pages/cliente/licenciamentos/List.vue')
@@ -98,6 +102,7 @@ const routes = [
   { path: '/faq', name: 'FAQ', component: FAQ, meta: { layout: 'public' } },
   { path: '/parceiros', name: 'PartnersPage', component: PartnersPage, meta: { layout: 'public' } },
   { path: '/clientes', name: 'ClientListPage', component: ClientListPage, meta: { layout: 'public' } },
+  { path: '/rastrear', name: 'TrackingPage', component: TrackingPage, meta: { layout: 'public' } },
   { path: '/termos', name: 'Termos', component: Termos, meta: { layout: 'public' } },
   { path: '/politicas', name: 'Politicas', component: Politicas, meta: { layout: 'public' } },
 
@@ -134,6 +139,7 @@ const routes = [
   { path: '/admin/motoristas', name: 'AdminMotoristas', component: AdminMotoristas, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
   { path: '/admin/camioes', name: 'AdminCamioes', component: AdminCamioes, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
   { path: '/admin/contentores', name: 'AdminContentores', component: AdminContentores, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
+  { path: '/admin/processos', name: 'AdminProcessos', component: AdminProcessos, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
 
   { path: '/funcionario', name: 'FuncionarioDashboard', component: FuncionarioDashboard, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
   { path: '/funcionario/mensagens', name: 'FuncionarioMessages', component: FuncionarioMessages, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
@@ -148,6 +154,7 @@ const routes = [
   { path: '/funcionario/motoristas', name: 'FuncionarioMotoristas', component: FuncionarioMotoristas, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
   { path: '/funcionario/camioes', name: 'FuncionarioCamioes', component: FuncionarioCamioes, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
   { path: '/funcionario/contentores', name: 'FuncionarioContentores', component: FuncionarioContentores, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
+  { path: '/funcionario/processos', name: 'FuncionarioProcessos', component: FuncionarioProcessos, meta: { layout: 'funcionario', requiresAuth: true, role: 'funcionario' } },
 
   { path: '/dashboard', name: 'ClienteDashboard', component: ClienteDashboard, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
   { path: '/perfil', name: 'ClienteProfile', component: ClienteProfile, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
@@ -170,6 +177,7 @@ const routes = [
   { path: '/licenciamentos/:id', name: 'ClienteLicenciamentoDetail', component: ClienteLicenciamentoDetail, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
   { path: '/entregas', name: 'ClienteEntregas', component: ClienteEntregas, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
   { path: '/contentores', name: 'ClienteContentores', component: ClienteContentores, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
+  { path: '/processos', name: 'ClienteProcessos', component: ClienteProcessos, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
 
   { path: '/licenciamentos', name: 'LicenciamentosList', component: LicenciamentosList, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
   { path: '/licenciamentos/:id', name: 'LicenciamentoDetail', component: LicenciamentoDetail, meta: { layout: 'cliente', requiresAuth: true, role: 'cliente', requiresCompany: true } },
@@ -186,6 +194,16 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   const companyStore = useCompanyStore()
+
+  const hash = window.location.hash || ''
+  const isRecoveryFlow = hash.includes('access_token') && hash.includes('type=recovery')
+
+  if (isRecoveryFlow) {
+    if (to.path !== '/redefinir-senha') {
+      return next('/redefinir-senha')
+    }
+    return next()
+  }
 
   const requiresAuth = to.meta.requiresAuth
   const requiredRole = to.meta.role
@@ -213,7 +231,7 @@ router.beforeEach(async (to, from, next) => {
       }
     }
 
-    if (authStore.user?.must_change_password && to.path !== '/mudar-senha') {
+    if (authStore.user?.must_change_password && to.path !== '/mudar-senha' && to.path !== '/redefinir-senha') {
       return next('/mudar-senha')
     }
 
@@ -237,7 +255,7 @@ router.beforeEach(async (to, from, next) => {
       return next('/login')
     }
 
-    if (authStore.user?.role === 'cliente' && authStore.user?.approval_status !== 'approved') {
+    if (authStore.user?.role === 'cliente' && authStore.user?.approval_status !== 'approved' && to.path !== '/redefinir-senha') {
       authStore.logout()
       return next('/login')
     }
@@ -261,7 +279,7 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
-  const isPublicPage = to.meta?.layout === 'public' && !['/login', '/registro', '/esqueci-senha', '/mudar-senha'].some(p => to.path.startsWith(p))
+  const isPublicPage = to.meta?.layout === 'public' && !['/login', '/registro', '/esqueci-senha', '/mudar-senha', '/redefinir-senha'].some(p => to.path.startsWith(p))
 
   if (isPublicPage && authStore.isAuthenticated) {
     if (authStore.user?.role === 'admin') return next('/admin')

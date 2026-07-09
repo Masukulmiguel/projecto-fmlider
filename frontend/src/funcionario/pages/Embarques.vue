@@ -30,7 +30,7 @@
             <tbody>
               <tr v-for="e in items" :key="e.id">
                 <td><code class="tracking">{{ e.tracking_number }}</code></td>
-                <td>{{ e.client_name || '—' }}<br><small class="text-muted">{{ e.company_name || '' }}</small></td>
+                <td>{{ e.client_name || '' }}<br><small class="text-muted">{{ e.company_name || '' }}</small></td>
                 <td><span class="route">{{ e.origin }} → {{ e.destination }}</span></td>
                 <td><span class="text-capitalize">{{ e.type }}</span></td>
                 <td><span class="status-badge" :class="`status-${e.status}`">{{ statusLabel(e.status) }}</span></td>
@@ -56,7 +56,7 @@ const items = ref([])
 const loading = ref(false)
 
 const statusLabel = (s) => ({ pendente: t('funcionario.embarques_status_pending'), em_transito: t('funcionario.embarques_status_transit'), entregue: t('funcionario.embarques_status_delivered'), cancelado: t('funcionario.embarques_status_cancelled') }[s] || s)
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : ''
 
 const load = async () => {
   loading.value = true

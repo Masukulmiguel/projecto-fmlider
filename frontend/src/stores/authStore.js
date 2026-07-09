@@ -170,6 +170,12 @@ export const useAuthStore = defineStore('auth', () => {
           approval_status: 'pending',
           password: 'supabase_auth_managed',
         }, { onConflict: 'auth_id', ignoreDuplicates: true })
+
+        fetch('/api/auth/welcome-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: payload.email, name: payload.name }),
+        }).catch(() => {})
       }
 
       return {

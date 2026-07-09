@@ -36,15 +36,24 @@ class DashboardController
         $totalDocumentos = (int)($db->query("SELECT COUNT(*) as n FROM documentos")->fetch_assoc()['n'] ?? 0);
 
         $clientsByDay = [];
-        $r = $db->query("SELECT DATE(created_at) as d, COUNT(*) as n FROM users WHERE role = 'cliente' AND created_at >= '{$since}' GROUP BY DATE(created_at) ORDER BY d ASC");
+        $stmt = $db->prepare("SELECT DATE(created_at) as d, COUNT(*) as n FROM users WHERE role = 'cliente' AND created_at >= ? GROUP BY DATE(created_at) ORDER BY d ASC");
+        $stmt->bind_param('s', $since);
+        $stmt->execute();
+        $r = $stmt->get_result();
         if ($r) while ($row = $r->fetch_assoc()) $clientsByDay[] = $row;
 
         $visitorsByDay = [];
-        $r = $db->query("SELECT DATE(visited_at) as d, COUNT(*) as n FROM visitors WHERE visited_at >= '{$since}' GROUP BY DATE(visited_at) ORDER BY d ASC");
+        $stmt = $db->prepare("SELECT DATE(visited_at) as d, COUNT(*) as n FROM visitors WHERE visited_at >= ? GROUP BY DATE(visited_at) ORDER BY d ASC");
+        $stmt->bind_param('s', $since);
+        $stmt->execute();
+        $r = $stmt->get_result();
         if ($r) while ($row = $r->fetch_assoc()) $visitorsByDay[] = $row;
 
         $messagesByDay = [];
-        $r = $db->query("SELECT DATE(created_at) as d, COUNT(*) as n FROM chat_messages WHERE created_at >= '{$since}' GROUP BY DATE(created_at) ORDER BY d ASC");
+        $stmt = $db->prepare("SELECT DATE(created_at) as d, COUNT(*) as n FROM chat_messages WHERE created_at >= ? GROUP BY DATE(created_at) ORDER BY d ASC");
+        $stmt->bind_param('s', $since);
+        $stmt->execute();
+        $r = $stmt->get_result();
         if ($r) while ($row = $r->fetch_assoc()) $messagesByDay[] = $row;
 
         $visitorsByCountry = [];

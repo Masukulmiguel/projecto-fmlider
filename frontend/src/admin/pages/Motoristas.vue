@@ -88,9 +88,9 @@
                 <td>
                   <div class="fw-medium">{{ item.nome_completo }}</div>
                 </td>
-                <td><code class="tracking-code">{{ item.bilhete_identidade || '—' }}</code></td>
-                <td>{{ item.telefone || '—' }}</td>
-                <td>{{ item.carta_conducao || '—' }}</td>
+                <td><code class="tracking-code">{{ item.bilhete_identidade || '' }}</code></td>
+                <td>{{ item.telefone || '' }}</td>
+                <td>{{ item.carta_conducao || '' }}</td>
                 <td><small class="text-muted">{{ formatDate(item.validade_carta) }}</small>
                   <span v-if="isExpired(item.validade_carta)" class="badge bg-danger ms-1"><i class="bi bi-exclamation-triangle-fill me-1"></i>Expirado</span>
                   <span v-else-if="isExpiringSoon(item.validade_carta)" class="badge bg-warning text-dark ms-1"><i class="bi bi-clock-fill me-1"></i>A expirar</span>
@@ -313,7 +313,7 @@ const fetchStats = async () => {
   } catch (e) {}
 }
 
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : ''
 
 const isExpired = (dateStr) => {
   if (!dateStr) return false

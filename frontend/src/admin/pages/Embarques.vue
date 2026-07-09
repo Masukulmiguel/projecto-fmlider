@@ -175,8 +175,8 @@ const debounceSearch = () => { clearTimeout(searchTimer); searchTimer = setTimeo
 
 const typeLabel = (type) => ({ maritimo: t('admin.embarques_type_maritimo'), aereo: t('admin.embarques_type_aereo'), terrestre: t('admin.embarques_type_terrestre'), ferroviario: t('admin.embarques_type_ferroviario'), multimodal: t('admin.embarques_type_multimodal') }[type] || type)
 const statusLabel = (status) => ({ pendente: t('admin.embarques_status_pendente'), em_transito: t('admin.embarques_status_em_transito'), entregue: t('admin.embarques_status_entregue'), cancelado: t('admin.embarques_status_cancelado') }[status] || status)
-const formatCurrency = (v, c) => v ? new Intl.NumberFormat('pt-AO', { style: 'currency', currency: c || 'AOA', maximumFractionDigits: 0 }).format(v) : '—'
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
+const formatCurrency = (v, c) => v ? new Intl.NumberFormat('pt-AO', { style: 'currency', currency: c || 'AOA', maximumFractionDigits: 0 }).format(v) : ''
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : ''
 
 const showEditModal = ref(false)
 const saving = ref(false)

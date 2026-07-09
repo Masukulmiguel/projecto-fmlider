@@ -87,10 +87,10 @@
             <tbody>
               <tr v-for="item in items" :key="item.id">
                 <td><code class="tracking-code">{{ item.codigo_interno }}</code></td>
-                <td>{{ item.matricula || '—' }}</td>
-                <td>{{ item.marca || '—' }}</td>
-                <td>{{ item.modelo || '—' }}</td>
-                <td>{{ item.capacidade || '—' }}</td>
+                <td>{{ item.matricula || '' }}</td>
+                <td>{{ item.marca || '' }}</td>
+                <td>{{ item.modelo || '' }}</td>
+                <td>{{ item.capacidade || '' }}</td>
                 <td><span class="status-badge" :class="'status-' + item.estado">{{ estadoLabel(item.estado) }}</span></td>
                 <td>
                   <div class="action-buttons">

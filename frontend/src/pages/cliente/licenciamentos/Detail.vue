@@ -56,7 +56,7 @@
               <div class="timeline-content">
                 <div class="step-label">{{ step.label }}</div>
                 <div v-if="step.date" class="step-date"><i class="bi bi-calendar3 me-1"></i>{{ step.date }}</div>
-                <div v-else-if="step.status === 'completed'" class="step-date text-muted">—</div>
+                <div v-else-if="step.status === 'completed'" class="step-date text-muted"></div>
               </div>
             </div>
           </div>
@@ -73,15 +73,15 @@
               <div class="info-grid">
                 <div class="info-item">
                   <span class="info-label">Cliente</span>
-                  <span class="info-value">{{ item.empresa || '—' }}</span>
+                  <span class="info-value">{{ item.empresa || '' }}</span>
                 </div>
                 <div class="info-item">
                   <span class="info-label">Shipper</span>
-                  <span class="info-value">{{ item.shipper || '—' }}</span>
+                  <span class="info-value">{{ item.shipper || '' }}</span>
                 </div>
                 <div class="info-item">
                   <span class="info-label">NIF</span>
-                  <span class="info-value">{{ item.nif_empresa || '—' }}</span>
+                  <span class="info-value">{{ item.nif_empresa || '' }}</span>
                 </div>
                 <div class="info-item">
                   <span class="info-label">Tipo</span>
@@ -322,7 +322,7 @@ const tipoLabel = (tipo) => ({
   tranzito: 'Trânsito',
   licenca_especial: 'Licença Especial',
   outro: 'Outro'
-}[tipo] || tipo || '—')
+}[tipo] || tipo || '')
 
 const estadoLabel = (estado) => ({
   pendente: 'Pendente',
@@ -335,7 +335,7 @@ const estadoLabel = (estado) => ({
   certificacao_solicitada: 'Certificação - Solicitada'
 }[estado] || estado)
 
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' }) : ''
 
 const parseObsUser = (text) => {
   if (!text) return ''

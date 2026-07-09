@@ -48,7 +48,7 @@
                   />
                   <span v-else class="text-muted">{{ t('admin.site_images_no_image') }}</span>
                 </td>
-                <td class="align-middle">{{ img.alt_text || '—' }}</td>
+                <td class="align-middle">{{ img.alt_text || '' }}</td>
                 <td class="align-middle">
                   <span :class="img.status ? 'badge bg-success' : 'badge bg-secondary'">
                     {{ img.status ? t('admin.site_images_active') : t('admin.site_images_inactive') }}

@@ -32,10 +32,10 @@
                     <span>{{ c.name }}</span>
                   </div>
                 </td>
-                <td>{{ c.company || '—' }}</td>
-                <td>{{ c.email || '—' }}</td>
-                <td>{{ c.phone || '—' }}</td>
-                <td>{{ c.position || '—' }}</td>
+                <td>{{ c.company || '' }}</td>
+                <td>{{ c.email || '' }}</td>
+                <td>{{ c.phone || '' }}</td>
+                <td>{{ c.position || '' }}</td>
               </tr>
             </tbody>
           </table>

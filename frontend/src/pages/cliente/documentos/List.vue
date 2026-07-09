@@ -64,7 +64,7 @@
                 <td><span class="type-badge">{{ typeLabel(item.type) }}</span></td>
                 <td>
                   <code v-if="item.tracking_number" class="tracking-code">{{ item.tracking_number }}</code>
-                  <span v-else class="text-muted">—</span>
+                  <span v-else class="text-muted"></span>
                 </td>
                 <td>{{ formatSize(item.file_size) }}</td>
                 <td><small class="text-muted">{{ formatDate(item.created_at) }}</small></td>
@@ -295,12 +295,12 @@ const fileIcon = (m) => {
   return 'bi bi-file-earmark'
 }
 const formatSize = (b) => {
-  if (!b) return '—'
+  if (!b) return ''
   if (b < 1024) return b + ' B'
   if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB'
   return (b / 1024 / 1024).toFixed(2) + ' MB'
 }
-const formatDate = (d) => d ? new Date(d).toLocaleDateString(locale.value === 'pt' ? 'pt-PT' : locale.value === 'en' ? 'en-US' : 'fr-FR') : '—'
+const formatDate = (d) => d ? new Date(d).toLocaleDateString(locale.value === 'pt' ? 'pt-PT' : locale.value === 'en' ? 'en-US' : 'fr-FR') : ''
 
 onMounted(fetchData)
 </script>

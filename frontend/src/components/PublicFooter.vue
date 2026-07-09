@@ -44,7 +44,7 @@
               <li><router-link to="/login">{{ t('footer.link_login') }}</router-link></li>
               <li><router-link to="/registro">{{ t('footer.link_register') }}</router-link></li>
               <li><router-link to="/dashboard">{{ t('footer.link_dashboard') }}</router-link></li>
-              <li><router-link to="/embarques">{{ t('footer.link_tracking') }}</router-link></li>
+              <li><router-link to="/rastrear">{{ t('footer.link_tracking') }}</router-link></li>
               <li><router-link to="/cotacoes/novo">{{ t('footer.link_quote') }}</router-link></li>
             </ul>
           </div>

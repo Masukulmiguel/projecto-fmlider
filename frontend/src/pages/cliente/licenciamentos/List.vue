@@ -85,12 +85,12 @@
             <div class="info-row">
               <i class="bi bi-hash"></i>
               <span class="info-label">Processo</span>
-              <span class="info-value">{{ item.numero_processo || '—' }}</span>
+              <span class="info-value">{{ item.numero_processo || '' }}</span>
             </div>
             <div class="info-row">
               <i class="bi bi-building"></i>
               <span class="info-label">Cliente</span>
-              <span class="info-value">{{ item.empresa || '—' }}</span>
+              <span class="info-value">{{ item.empresa || '' }}</span>
             </div>
             <div class="info-row">
               <i class="bi bi-tag"></i>
@@ -214,9 +214,9 @@ const tipoLabel = (tipo) => ({
   tranzito: 'Trânsito',
   licenca_especial: 'Licença Especial',
   outro: 'Outro'
-}[tipo] || tipo || '—')
+}[tipo] || tipo || '')
 
-const formatDate = (d) => d ? new Date(d).toLocaleDateString(locale.value === 'pt' ? 'pt-PT' : locale.value === 'en' ? 'en-US' : 'fr-FR') : '—'
+const formatDate = (d) => d ? new Date(d).toLocaleDateString(locale.value === 'pt' ? 'pt-PT' : locale.value === 'en' ? 'en-US' : 'fr-FR') : ''
 
 onMounted(fetchData)
 </script>

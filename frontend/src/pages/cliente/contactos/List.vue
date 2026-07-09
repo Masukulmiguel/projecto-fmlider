@@ -48,10 +48,10 @@
                     <div class="fw-medium">{{ item.name }}</div>
                   </div>
                 </td>
-                <td>{{ item.company || '—' }}</td>
-                <td><a v-if="item.email" :href="`mailto:${item.email}`" class="text-decoration-none">{{ item.email }}</a><span v-else>—</span></td>
-                <td><a v-if="item.phone" :href="`tel:${item.phone}`" class="text-decoration-none">{{ item.phone }}</a><span v-else>—</span></td>
-                <td>{{ item.position || '—' }}</td>
+                <td>{{ item.company || '' }}</td>
+                <td><a v-if="item.email" :href="`mailto:${item.email}`" class="text-decoration-none">{{ item.email }}</a><span v-else></span></td>
+                <td><a v-if="item.phone" :href="`tel:${item.phone}`" class="text-decoration-none">{{ item.phone }}</a><span v-else></span></td>
+                <td>{{ item.position || '' }}</td>
                 <td class="text-end">
                   <div class="action-buttons">
                     <button class="btn-icon btn-edit" @click="openForm(item)" :title="t('cliente.contactos_edit')">

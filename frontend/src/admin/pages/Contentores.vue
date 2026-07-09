@@ -21,6 +21,69 @@
       <div class="stat-card"><div class="stat-icon" style="background:#d1fae5;color:#047857"><i class="bi bi-check-circle"></i></div><div class="stat-info"><span class="stat-value">{{ stats.entregues }}</span><span class="stat-label">Entregues</span></div></div>
     </div>
 
+    <div v-if="chartsLoaded" class="row g-4 mb-4">
+      <div class="col-lg-6">
+        <div class="card chart-card">
+          <div class="card-header bg-white fw-bold"><i class="bi bi-pie-chart me-2"></i>Por Estado</div>
+          <div class="card-body">
+            <div v-if="chartData.byEstado.length === 0" class="text-center text-muted py-3">Sem dados</div>
+            <div v-else class="bar-chart">
+              <div v-for="item in chartData.byEstado" :key="item.label" class="bar-row">
+                <span class="bar-label">{{ item.label }}</span>
+                <div class="bar-track"><div class="bar-fill" :style="{ width: item.pct + '%', background: item.color }"></div></div>
+                <span class="bar-value">{{ item.count }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card chart-card">
+          <div class="card-header bg-white fw-bold"><i class="bi bi-people me-2"></i>Top Clientes</div>
+          <div class="card-body">
+            <div v-if="chartData.byCliente.length === 0" class="text-center text-muted py-3">Sem dados</div>
+            <div v-else class="bar-chart">
+              <div v-for="item in chartData.byCliente" :key="item.label" class="bar-row">
+                <span class="bar-label">{{ item.label }}</span>
+                <div class="bar-track"><div class="bar-fill" style="background:#2563eb" :style="{ width: item.pct + '%' }"></div></div>
+                <span class="bar-value">{{ item.count }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card chart-card">
+          <div class="card-header bg-white fw-bold"><i class="bi bi-graph-up me-2"></i>Evolução Mensal</div>
+          <div class="card-body">
+            <div v-if="chartData.monthly.length === 0" class="text-center text-muted py-3">Sem dados</div>
+            <div v-else class="bar-chart">
+              <div v-for="item in chartData.monthly" :key="item.label" class="bar-row">
+                <span class="bar-label">{{ item.label }}</span>
+                <div class="bar-track"><div class="bar-fill" style="background:#059669" :style="{ width: item.pct + '%' }"></div></div>
+                <span class="bar-value">{{ item.count }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card chart-card">
+          <div class="card-header bg-white fw-bold"><i class="bi bi-truck me-2"></i>Entregas Mensais</div>
+          <div class="card-body">
+            <div v-if="chartData.entregas.length === 0" class="text-center text-muted py-3">Sem dados</div>
+            <div v-else class="bar-chart">
+              <div v-for="item in chartData.entregas" :key="item.label" class="bar-row">
+                <span class="bar-label">{{ item.label }}</span>
+                <div class="bar-track"><div class="bar-fill" style="background:#7c3aed" :style="{ width: item.pct + '%' }"></div></div>
+                <span class="bar-value">{{ item.count }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-body">
         <div class="filters mb-3">
@@ -38,10 +101,10 @@
             <tbody>
               <tr v-for="item in items" :key="item.id">
                 <td><code class="tracking-code">{{ item.numero }}</code></td>
-                <td>{{ item.ns || '—' }}</td>
-                <td>{{ item.tipologia || '—' }}</td>
+                <td>{{ item.ns || '' }}</td>
+                <td>{{ item.tipologia || '' }}</td>
                 <td>{{ getClientName(item.cliente_id) }}</td>
-                <td>{{ item.terminal || '—' }}</td>
+                <td>{{ item.terminal || '' }}</td>
                 <td><small class="text-muted">{{ formatDate(item.eta) }}</small></td>
                 <td><small class="text-muted">{{ formatDate(item.ata) }}</small></td>
                 <td><span class="status-badge" :class="'status-' + item.estado">{{ estadoLabel(item.estado) }}</span></td>
@@ -159,6 +222,16 @@ const pageSize = 20
 const totalItems = ref(0)
 let searchTimer = null
 
+const chartsLoaded = ref(false)
+const allContentores = ref([])
+const chartData = reactive({ byEstado: [], byCliente: [], monthly: [], entregas: [] })
+
+const estadoColors = {
+  aguardando_chegada: '#94a3b8', chegou_ao_porto: '#0891b2', em_terminal: '#2563eb',
+  na_base: '#059669', agendado_para_entrega: '#d97706', em_transporte: '#7c3aed',
+  entregue: '#16a34a', devolvido: '#6b7280', cancelado: '#dc2626'
+}
+
 const estados = [
   { value: 'aguardando_chegada', label: 'Aguardando Chegada' },
   { value: 'chegou_ao_porto', label: 'Chegou ao Porto' },
@@ -213,10 +286,81 @@ const fetchClients = async () => {
   clients.value = data || []
 }
 
-const getClientName = (id) => clients.value.find(c => c.id === id)?.name || '—'
+const fetchChartData = async () => {
+  try {
+    const { data } = await supabase.from('contentores').select('estado, cliente_id, created_at, data_descarga')
+    if (!data) return
+    allContentores.value = data
+
+    const estadoMap = {}
+    const clienteMap = {}
+    const monthMap = {}
+    const entregaMonthMap = {}
+
+    for (const c of data) {
+      const el = estadoLabel(c.estado)
+      estadoMap[el] = (estadoMap[el] || 0) + 1
+
+      const cn = getClientName(c.cliente_id) || 'Sem Cliente'
+      clienteMap[cn] = (clienteMap[cn] || 0) + 1
+
+      if (c.created_at) {
+        const d = new Date(c.created_at)
+        const mk = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+        monthMap[mk] = (monthMap[mk] || 0) + 1
+      }
+
+      if (c.data_descarga) {
+        const d = new Date(c.data_descarga)
+        const mk = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+        entregaMonthMap[mk] = (entregaMonthMap[mk] || 0) + 1
+      }
+    }
+
+    const buildBar = (map, maxItems = 8) => {
+      const entries = Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, maxItems)
+      const max = entries.length > 0 ? entries[0][1] : 1
+      return entries.map(([label, count]) => ({ label, count, pct: Math.round((count / max) * 100) }))
+    }
+
+    const estadoEntries = Object.entries(estadoMap).sort((a, b) => b[1] - a[1])
+    const maxEstado = estadoEntries.length > 0 ? estadoEntries[0][1] : 1
+    chartData.byEstado = estadoEntries.map(([label, count]) => ({
+      label, count, pct: Math.round((count / maxEstado) * 100),
+      color: Object.entries(estadoColors).find(([, v]) => true)?.[1] || '#2563eb'
+    }))
+    const estadoColorList = ['#94a3b8', '#0891b2', '#2563eb', '#059669', '#d97706', '#7c3aed', '#16a34a', '#6b7280', '#dc2626']
+    chartData.byEstado = estadoEntries.map(([label, count], i) => ({
+      label, count, pct: Math.round((count / maxEstado) * 100),
+      color: estadoColorList[i % estadoColorList.length]
+    }))
+
+    chartData.byCliente = buildBar(clienteMap)
+
+    const sortedMonths = Object.keys(monthMap).sort()
+    const maxMonth = sortedMonths.length > 0 ? Math.max(...sortedMonths.map(k => monthMap[k])) : 1
+    chartData.monthly = sortedMonths.map(k => {
+      const [y, m] = k.split('-')
+      const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+      return { label: `${monthNames[parseInt(m) - 1]} ${y}`, count: monthMap[k], pct: Math.round((monthMap[k] / maxMonth) * 100) }
+    })
+
+    const sortedEntregas = Object.keys(entregaMonthMap).sort()
+    const maxEntrega = sortedEntregas.length > 0 ? Math.max(...sortedEntregas.map(k => entregaMonthMap[k])) : 1
+    chartData.entregas = sortedEntregas.map(k => {
+      const [y, m] = k.split('-')
+      const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+      return { label: `${monthNames[parseInt(m) - 1]} ${y}`, count: entregaMonthMap[k], pct: Math.round((entregaMonthMap[k] / maxEntrega) * 100) }
+    })
+
+    chartsLoaded.value = true
+  } catch (e) { console.error('Erro ao carregar gráficos:', e) }
+}
+
+const getClientName = (id) => clients.value.find(c => c.id === id)?.name || ''
 
 const estadoLabel = (e) => estados.find(s => s.value === e)?.label || e
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : ''
 
 const showModal = ref(false)
 const editingItem = ref(null)
@@ -271,7 +415,7 @@ const toast = reactive({ show: false, type: 'success', message: '' })
 let toastTimer = null
 const showToast = (type, message) => { toast.type = type; toast.message = message; toast.show = true; clearTimeout(toastTimer); toastTimer = setTimeout(() => { toast.show = false }, 4000) }
 
-onMounted(() => { fetchData(); fetchClients() })
+onMounted(() => { fetchData(); fetchClients(); fetchChartData() })
 </script>
 
 <style scoped>
@@ -330,4 +474,12 @@ onMounted(() => { fetchData(); fetchClients() })
 .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; } }
 @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } }
+.chart-card { border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.chart-card .card-header { border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+.bar-chart { display: flex; flex-direction: column; gap: 0.6rem; }
+.bar-row { display: flex; align-items: center; gap: 0.75rem; }
+.bar-label { min-width: 120px; max-width: 140px; font-size: 0.78rem; color: #475569; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-track { flex: 1; height: 22px; background: #f1f5f9; border-radius: 6px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 6px; transition: width 0.5s ease; min-width: 2px; }
+.bar-value { min-width: 28px; font-size: 0.8rem; font-weight: 600; color: #1e293b; }
 </style>

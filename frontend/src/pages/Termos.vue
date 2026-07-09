@@ -20,7 +20,7 @@
         <div class="col-lg-9">
           <section v-for="(s, i) in sections" :key="i" :id="`s${i+1}`" class="legal-section">
             <h2>{{ i+1 }}. {{ s.title }}</h2>
-            <p v-for="(p, j) in s.body" :key="j" v-html="p"></p>
+            <p v-for="(p, j) in s.body" :key="j" v-html="sanitize(p)"></p>
           </section>
 
           <div class="alert alert-info mt-4">
@@ -37,6 +37,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from '@/composables/useI18n'
+import { sanitize } from '@/utils/sanitize'
 
 const { t, locale } = useI18n()
 

@@ -264,8 +264,8 @@
                   <div class="rejected-item-header">
                     <span class="rejected-idx">#{{ r.idx }}</span>
                     <code class="rejected-ref">{{ r.referencia }}</code>
-                    <span class="rejected-client">{{ r.clienteNome || '—' }}</span>
-                    <span class="rejected-company">{{ r.empresaNome || '—' }}</span>
+                    <span class="rejected-client">{{ r.clienteNome || '' }}</span>
+                    <span class="rejected-company">{{ r.empresaNome || '' }}</span>
                   </div>
                   <div class="rejected-item-errors">
                     <div v-for="(e, i) in r.errors" :key="i" class="rejected-error">
@@ -404,11 +404,11 @@
             </div>
             <div class="detail-item">
               <label>Shipper</label>
-              <span>{{ selectedItem.shipper || '—' }}</span>
+              <span>{{ selectedItem.shipper || '' }}</span>
             </div>
             <div class="detail-item">
               <label>NIF</label>
-              <span>{{ selectedItem.nif_empresa || '—' }}</span>
+              <span>{{ selectedItem.nif_empresa || '' }}</span>
             </div>
             <div class="detail-item">
               <label>Tipo</label>
@@ -812,15 +812,37 @@ const funcSelectedSheet = ref('')
 
 const parseExcel = async (file) => {
   try {
+    if (!file.name.match(/\.xlsx?$/i)) {
+      showToast('Formato inválido. Apenas ficheiros .xlsx ou .xls são aceites.', 'error')
+      return
+    }
+
     const data = await file.arrayBuffer()
     const workbook = XLSX.read(data)
-    funcExcelSheets.value = workbook.SheetNames
 
     const licSheet = workbook.SheetNames.find(s => /licenciamento/i.test(s))
-    const obsSheet = workbook.SheetNames.find(s => /observa/i.test(s))
+    const sheetToCheck = licSheet || workbook.SheetNames[0]
+    const worksheet = workbook.Sheets[sheetToCheck]
+    const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' })
+
+    if (rawData.length < 2) {
+      showToast('O ficheiro está vazio ou tem poucos dados.', 'error')
+      return
+    }
+
+    const allText = rawData.slice(0, 10).map(r => r.map(c => String(c).toLowerCase()).join(' ')).join(' ')
+    const expectedCols = ['cliente', 'empresa', 'shipper', 'tipo', 'processo', 'estado', 'nº processo', 'referência']
+    const foundCols = expectedCols.filter(c => allText.includes(c))
+    if (foundCols.length < 2) {
+      showToast('Este ficheiro não parece ser de Licenciamentos. Colunas esperadas (cliente, shipper, tipo, processo...) não encontradas.', 'error')
+      return
+    }
+
+    funcExcelSheets.value = workbook.SheetNames
 
     if (licSheet) {
       parseFuncSheet(workbook, licSheet)
+      const obsSheet = workbook.SheetNames.find(s => /observa/i.test(s))
       if (obsSheet) {
         funcExcelObservations.value = parseFuncObsSheet(workbook, obsSheet)
       }

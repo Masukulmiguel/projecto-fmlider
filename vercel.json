@@ -1,8 +1,8 @@
 {
+  "name": "fmlider-66",
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
-  "framework": "vite",
-  "installCommand": "cd frontend && npm install",
+  "installCommand": "cd frontend && npm install && cd ../api && npm install",
   "headers": [
     {
       "source": "/api/(.*)",

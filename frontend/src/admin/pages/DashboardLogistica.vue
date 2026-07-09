@@ -198,7 +198,7 @@ const topMotoristasData = computed(() => {
 const topCamioesData = computed(() => {
   const items = (stats.top_camioes || []).slice(0, 8)
   return {
-    labels: items.map(i => i.matricula || '—'),
+    labels: items.map(i => i.matricula || ''),
     datasets: [{ label: 'Viagens', data: items.map(i => i.total || 0), backgroundColor: '#f97316', borderRadius: 6, barPercentage: 0.6 }]
   }
 })

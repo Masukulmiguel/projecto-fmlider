@@ -170,7 +170,7 @@ const addBotMessage = async (text) => {
 const startValidationFlow = async () => {
   flowState.value = FLOW_STATES.AWAITING_NAME
   await addBotMessage(
-    'Antes de poder ajudá-lo, preciso de verificar a sua identidade. 🔒\n\nPor favor, digite o seu **nome completo** conforme consta no seu Bilhete de Identidade.'
+    'Antes de prosseguir, preciso de validar os seus dados para garantir a segurança da sua conta. Por favor, digite o seu nome completo.'
   )
 }
 
@@ -178,7 +178,7 @@ const validateBiName = async (name) => {
   flowState.value = FLOW_STATES.AWAITING_BI
   clientData.value.fullName = name
   await addBotMessage(
-    `Obrigado, **${name}**. Agora preciso do seu número de Bilhete de Identidade (B.I.) para validar os seus dados no sistema da AGT.\n\nDigite o número do B.I. (14 caracteres, ex: 006151112LA041).`
+    `Obrigado, **${name}**. Agora preciso do seu número de Bilhete de Identidade (B.I.) para validar os seus dados no sistema da AGT.\n\nDigite o número do B.I. (14 caracteres).`
   )
 }
 
@@ -198,12 +198,12 @@ const validateBi = async (bi) => {
         clientData.value.biNome = biNome
         flowState.value = FLOW_STATES.AWAITING_CLIENT_TYPE
         await addBotMessage(
-          `B.I. validado com sucesso! ✅\n\nTitular: **${biNome}**\n\nAgora diga-me: **Já é cliente da FMLider** ou **deseja ser cliente**?`
+          `B.I. validado com sucesso! Titular: **${biNome}**. Agora diga-me: **Já é cliente da FMLider** ou **deseja ser cliente**?`
         )
       } else {
         flowState.value = FLOW_STATES.BLOCKED
         await addBotMessage(
-          `⚠️ O nome que forneceu (**${clientData.value.fullName}**) não corresponde ao titular do B.I. (**${biNome}**).\n\nPor favor, contacte o seu supervisor para obter as informações corretas. Não posso continuar com a verificação.`
+          `O nome que forneceu (**${clientData.value.fullName}**) não corresponde ao titular do B.I. (**${biNome}**). Por favor, contacte o seu supervisor para obter as informações corretas. Não posso continuar com a verificação.`
         )
       }
     } else {
@@ -249,7 +249,7 @@ const validateNif = async (nif) => {
       clientData.value.nifData = data.data
       flowState.value = FLOW_STATES.AWAITING_EMAIL
       await addBotMessage(
-        `NIF validado! ✅\n\nEmpresa: **${data.data.nome}**\nEstado: ${data.data.estado || 'Activo'}\n\nAgora digite o seu **email** associado à conta.`
+        `NIF validado! Empresa: **${data.data.nome}**. Estado: ${data.data.estado || 'Activo'}. Agora digite o seu **email** associado à conta.`
       )
     } else {
       await addBotMessage(
@@ -297,20 +297,20 @@ const verifyClient = async (username) => {
 
       const companyName = data.data.company?.company_name || 'sua empresa'
       await addBotMessage(
-        `Cliente verificado com sucesso! ✅\n\nBem-vindo(a), **${data.data.user.name}**!\nEmpresa: **${companyName}**\n\nAgora posso ajudá-lo com informações sobre os seus processos. O que deseja saber?`
+        `Cliente verificado com sucesso! Bem-vindo(a), **${data.data.user.name}**. Empresa: **${companyName}**. Agora posso ajudá-lo com informações sobre os seus processos. O que deseja saber?`
       )
     } else {
       flowState.value = FLOW_STATES.BLOCKED
       const errorMsg = data.message || 'Dados não encontrados.'
       await addBotMessage(
-        `❌ Verificação falhou: ${errorMsg}\n\nNão posso continuar a responder às suas perguntas porque os dados fornecidos não foram encontrados no sistema.\n\nPor favor, contacte o seu supervisor para obter as informações corretas.`
+        `Verificação falhou: ${errorMsg}. Não posso continuar a responder às suas perguntas porque os dados fornecidos não foram encontrados no sistema. Por favor, contacte o seu supervisor para obter as informações corretas.`
       )
     }
   } catch (e) {
     console.error('Verify client error:', e)
     flowState.value = FLOW_STATES.BLOCKED
     await addBotMessage(
-      '❌ Erro ao verificar os seus dados. Não posso continuar.\n\nPor favor, contacte o seu supervisor para obter assistência.'
+      'Erro ao verificar os seus dados. Não posso continuar. Por favor, contacte o seu supervisor para obter assistência.'
     )
   } finally {
     loading.value = false
@@ -405,6 +405,57 @@ const containsSensitiveData = (text) => {
   return patterns.some(p => p.test(lower))
 }
 
+const isAboutProcesses = (text) => {
+  const lower = text.toLowerCase()
+  const patterns = [
+    /processo/i,
+    /embarque/i,
+    /contentor/i,
+    /container/i,
+    /carga/i,
+    /mercadoria/i,
+    /entrega/i,
+    /transporte/i,
+    /rastre/i,
+    /tracking/i,
+    /status.*processo/i,
+    /estado.*processo/i,
+    /onde.*carga/i,
+    /quando.*cheg/i,
+    /prazo/i,
+    /despacho/i,
+    /desembaraco/i,
+    /aduana/i,
+    /alfandega/i,
+    /factura/i,
+    /documento/i,
+    /cotacao/i,
+    / orcamento/i,
+    /preco/i,
+    /valor/i,
+  ]
+  return patterns.some(p => p.test(lower))
+}
+
+const isAboutClientData = (text) => {
+  const lower = text.toLowerCase()
+  const patterns = [
+    /meu.*dado/i,
+    /meu.*email/i,
+    /minha.*senha/i,
+    /minha.*conta/i,
+    /meu.*perfil/i,
+    /meu.*nif/i,
+    /meu.*bi/i,
+    /dados.*pessoais/i,
+    /account/i,
+    /password/i,
+    /senha/i,
+    /login/i,
+  ]
+  return patterns.some(p => p.test(lower))
+}
+
 const send = async (text) => {
   const content = (text ?? input.value).trim()
   if (!content || loading.value) return
@@ -413,15 +464,17 @@ const send = async (text) => {
   messages.value.push({ role: 'user', text: content, time: now() })
   await scrollDown()
 
-  if (flowState.value === FLOW_STATES.IDLE && messages.value.length === 1) {
-    await startValidationFlow()
-    return
+  if (flowState.value === FLOW_STATES.IDLE) {
+    if (isAboutProcesses(content) || isAboutClientData(content)) {
+      await startValidationFlow()
+      return
+    }
   }
 
   const handled = await handleFlowInput(content)
   if (handled) return
 
-  if (flowState.value !== FLOW_STATES.VERIFIED) {
+  if (flowState.value !== FLOW_STATES.VERIFIED && flowState.value !== FLOW_STATES.IDLE) {
     await addBotMessage(
       'Ainda não verifiquei a sua identidade. Por favor, responda às perguntas anteriores para que eu possa ajudá-lo.'
     )

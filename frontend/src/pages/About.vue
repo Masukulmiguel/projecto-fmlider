@@ -34,9 +34,9 @@
           <div class="col-lg-6" v-reveal="'right'">
             <span class="fml-eyebrow">{{ t('about.history_eyebrow') }}</span>
             <h2 class="section-title">{{ t('about.history_title') }}</h2>
-            <p class="text-muted mb-3" v-html="t('about.history_p1')"></p>
-            <p class="text-muted mb-3" v-html="t('about.history_p2')"></p>
-            <p class="text-muted mb-0" v-html="t('about.history_p3')"></p>
+            <p class="text-muted mb-3" v-html="sanitize(t('about.history_p1'))"></p>
+            <p class="text-muted mb-3" v-html="sanitize(t('about.history_p2'))"></p>
+            <p class="text-muted mb-0" v-html="sanitize(t('about.history_p3'))"></p>
           </div>
           <div class="col-lg-6" v-reveal="'left'">
             <div class="history-image">
@@ -171,7 +171,7 @@
           <div class="col-lg-6" v-reveal="'right'">
             <span class="fml-eyebrow">{{ t('about.fleet_eyebrow') }}</span>
             <h2 class="section-title text-white">{{ t('about.fleet_title') }}</h2>
-            <p class="mb-4 text-white" v-html="t('about.fleet_text')"></p>
+            <p class="mb-4 text-white" v-html="sanitize(t('about.fleet_text'))"></p>
             <ul class="fleet-list">
               <li><i class="bi bi-check-circle-fill"></i> {{ t('about.fleet_feat_1') }}</li>
               <li><i class="bi bi-check-circle-fill"></i> {{ t('about.fleet_feat_2') }}</li>
@@ -213,6 +213,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from '@/composables/useI18n'
 import { useSiteImages } from '@/composables/useSiteImages'
+import { sanitize } from '@/utils/sanitize'
 
 const { t } = useI18n()
 const { getImage, fetchAll } = useSiteImages()

@@ -106,18 +106,18 @@
             </thead>
             <tbody>
               <tr v-for="item in filteredItems" :key="item.id" class="clickable-row" @click="openDetail(item)">
-                <td><code class="ref-code">{{ item.ref_fmlider || '—' }}</code></td>
-                <td>{{ item.processo || '—' }}</td>
+                <td><code class="ref-code">{{ item.ref_fmlider || '' }}</code></td>
+                <td>{{ item.processo || '' }}</td>
                 <td>
                   <div class="route-cell">
-                    <span>{{ item.origem || '—' }}</span>
+                    <span>{{ item.origem || '' }}</span>
                     <i class="bi bi-arrow-right text-muted mx-1"></i>
-                    <span>{{ item.destino || '—' }}</span>
+                    <span>{{ item.destino || '' }}</span>
                   </div>
                 </td>
-                <td>{{ item.motorista || '—' }}</td>
-                <td>{{ item.camiao || '—' }}</td>
-                <td>{{ item.matricula || '—' }}</td>
+                <td>{{ item.motorista || '' }}</td>
+                <td>{{ item.camiao || '' }}</td>
+                <td>{{ item.matricula || '' }}</td>
                 <td class="text-center">
                   <span class="badge bg-light text-dark border">{{ item.contentores_count || 0 }}</span>
                 </td>
@@ -152,25 +152,25 @@
                   <div class="col-sm-6">
                     <div class="detail-field">
                       <span class="detail-label">Ref FMLider</span>
-                      <span class="detail-value"><code>{{ selectedItem.ref_fmlider || '—' }}</code></span>
+                      <span class="detail-value"><code>{{ selectedItem.ref_fmlider || '' }}</code></span>
                     </div>
                   </div>
                   <div class="col-sm-6">
                     <div class="detail-field">
                       <span class="detail-label">Processo</span>
-                      <span class="detail-value">{{ selectedItem.processo || '—' }}</span>
+                      <span class="detail-value">{{ selectedItem.processo || '' }}</span>
                     </div>
                   </div>
                   <div class="col-sm-6">
                     <div class="detail-field">
                       <span class="detail-label">Origem</span>
-                      <span class="detail-value">{{ selectedItem.origem || '—' }}</span>
+                      <span class="detail-value">{{ selectedItem.origem || '' }}</span>
                     </div>
                   </div>
                   <div class="col-sm-6">
                     <div class="detail-field">
                       <span class="detail-label">Destino</span>
-                      <span class="detail-value">{{ selectedItem.destino || '—' }}</span>
+                      <span class="detail-value">{{ selectedItem.destino || '' }}</span>
                     </div>
                   </div>
                   <div class="col-sm-6">
@@ -196,19 +196,19 @@
                   <div class="col-sm-4">
                     <div class="detail-field">
                       <span class="detail-label">Motorista</span>
-                      <span class="detail-value">{{ selectedItem.motorista || '—' }}</span>
+                      <span class="detail-value">{{ selectedItem.motorista || '' }}</span>
                     </div>
                   </div>
                   <div class="col-sm-4">
                     <div class="detail-field">
                       <span class="detail-label">Camião</span>
-                      <span class="detail-value">{{ selectedItem.camiao || '—' }}</span>
+                      <span class="detail-value">{{ selectedItem.camiao || '' }}</span>
                     </div>
                   </div>
                   <div class="col-sm-4">
                     <div class="detail-field">
                       <span class="detail-label">Matrícula</span>
-                      <span class="detail-value">{{ selectedItem.matricula || '—' }}</span>
+                      <span class="detail-value">{{ selectedItem.matricula || '' }}</span>
                     </div>
                   </div>
                 </div>
@@ -229,7 +229,7 @@
                     <tbody>
                       <tr v-for="(c, idx) in selectedItem.contentores" :key="idx">
                         <td><code class="ref-code">{{ c.numero }}</code></td>
-                        <td>{{ c.tipo || '—' }}</td>
+                        <td>{{ c.tipo || '' }}</td>
                         <td>
                           <span class="estado-badge" :style="{ background: estadoColor(c.estado), color: '#fff', fontSize: '0.7rem' }">
                             {{ estadoLabel(c.estado) }}
@@ -301,10 +301,10 @@ const estadoLabel = (e) => ({
   chegou_cliente: 'Chegou ao Cliente',
   entregue: 'Entregue',
   cancelado: 'Cancelado'
-}[e] || e || '—')
+}[e] || e || '')
 
 const formatDate = (d) => {
-  if (!d) return '—'
+  if (!d) return ''
   return new Date(d).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 

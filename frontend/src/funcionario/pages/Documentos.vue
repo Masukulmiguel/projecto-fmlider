@@ -27,8 +27,8 @@
             <tbody>
               <tr v-for="d in items" :key="d.id">
                 <td><i class="bi bi-file-earmark-text-fill text-primary me-2"></i>{{ d.name }}</td>
-                <td><span class="text-capitalize">{{ (d.type || '—').replace(/_/g, ' ') }}</span></td>
-                <td>{{ d.client_name || '—' }}</td>
+                <td><span class="text-capitalize">{{ (d.type || '').replace(/_/g, ' ') }}</span></td>
+                <td>{{ d.client_name || '' }}</td>
                 <td>{{ formatSize(d.file_size) }}</td>
                 <td><small class="text-muted">{{ formatDate(d.created_at) }}</small></td>
               </tr>
@@ -51,9 +51,9 @@ const authStore = useAuthStore()
 const items = ref([])
 const loading = ref(false)
 
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : ''
 const formatSize = (b) => {
-  if (!b) return '—'
+  if (!b) return ''
   if (b < 1024) return b + ' B'
   if (b < 1024*1024) return (b/1024).toFixed(1) + ' KB'
   return (b/1024/1024).toFixed(2) + ' MB'

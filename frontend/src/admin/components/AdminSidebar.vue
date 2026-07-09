@@ -67,6 +67,10 @@
               <i class="bi bi-box-seam menu-icon"></i>
               <span class="menu-text" v-show="!collapsed">Contentores</span>
             </router-link>
+            <router-link to="/admin/processos" class="menu-item" :class="{ active: $route.path.startsWith('/admin/processos') }" :title="collapsed ? 'Plano de Trabalho' : ''">
+              <i class="bi bi-clipboard2-data menu-icon"></i>
+              <span class="menu-text" v-show="!collapsed">Plano de Trabalho</span>
+            </router-link>
           </div>
 
           <div class="menu-section">

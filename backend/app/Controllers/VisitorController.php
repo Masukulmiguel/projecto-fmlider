@@ -76,7 +76,10 @@ class VisitorController
         $logged = (int)($db->query("SELECT COUNT(DISTINCT user_id) as n FROM visitors WHERE user_id IS NOT NULL")->fetch_assoc()['n'] ?? 0);
 
         $byDay = [];
-        $r = $db->query("SELECT DATE(visited_at) as d, COUNT(*) as n FROM visitors WHERE visited_at >= '{$since}' GROUP BY DATE(visited_at) ORDER BY d ASC");
+        $stmt = $db->prepare("SELECT DATE(visited_at) as d, COUNT(*) as n FROM visitors WHERE visited_at >= ? GROUP BY DATE(visited_at) ORDER BY d ASC");
+        $stmt->bind_param('s', $since);
+        $stmt->execute();
+        $r = $stmt->get_result();
         if ($r) while ($row = $r->fetch_assoc()) $byDay[] = $row;
 
         $byCountry = [];

@@ -35,8 +35,15 @@ app.config.globalProperties.$axios = axios
 const pinia = createPinia()
 app.use(pinia)
 
+const isRecoveryFlow = window.location.hash.includes('type=recovery')
+
 const authStore = useAuthStore()
 authStore.initSession().then(() => {
   app.use(router)
+
+  if (isRecoveryFlow) {
+    router.push('/redefinir-senha')
+  }
+
   app.mount('#app')
 })

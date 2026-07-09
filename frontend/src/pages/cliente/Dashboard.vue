@@ -76,6 +76,18 @@
           </div>
         </router-link>
       </div>
+      <div class="col-md-6 col-xl-3">
+        <router-link to="/processos" class="stat-tile-link">
+          <div class="stat-tile">
+            <div class="stat-tile-icon bg-warning-soft"><i class="bi bi-clipboard2-data"></i></div>
+            <div>
+              <div class="stat-tile-label">Processos</div>
+              <div class="stat-tile-value">{{ counts.processos }}</div>
+              <div class="stat-tile-meta">{{ counts.processos_pendente || 0 }} em curso</div>
+            </div>
+          </div>
+        </router-link>
+      </div>
     </div>
 
     <div v-if="licencChartsReady" class="row g-4 mb-4">
@@ -155,7 +167,7 @@ const authStore = useAuthStore()
 const companyStore = useCompanyStore()
 const router = useRouter()
 
-const counts = reactive({ documentos: 0, contactos: 0, licenciamentos: 0, licenciamentos_aprovado: 0, contentores: 0, contentores_entregue: 0 })
+const counts = reactive({ documentos: 0, contactos: 0, licenciamentos: 0, licenciamentos_aprovado: 0, contentores: 0, contentores_entregue: 0, processos: 0, processos_pendente: 0 })
 const licenciamentos = ref([])
 
 const goToDocumentos = () => router.push('/documentos')
@@ -165,11 +177,12 @@ const loadCounts = async () => {
     const userId = authStore.user?.id
     if (!userId) return
 
-    const [docsRes, contsRes, licRes, contRes] = await Promise.all([
+    const [docsRes, contsRes, licRes, contRes, procRes] = await Promise.all([
       supabase.from('documentos').select('*').eq('user_id', userId),
       supabase.from('contactos').select('*').eq('user_id', userId),
       supabase.from('licenciamentos').select('*').eq('user_id', userId),
-      supabase.from('contentores').select('*').eq('cliente_id', userId)
+      supabase.from('contentores').select('*').eq('cliente_id', userId),
+      supabase.from('processos').select('*').eq('cliente_id', userId)
     ])
 
     licenciamentos.value = licRes.data || []
@@ -179,6 +192,8 @@ const loadCounts = async () => {
     counts.licenciamentos_aprovado = licenciamentos.value.filter(l => l.estado === 'aprovado').length
     counts.contentores = (contRes.data || []).length
     counts.contentores_entregue = (contRes.data || []).filter(c => c.estado === 'entregue').length
+    counts.processos = (procRes.data || []).length
+    counts.processos_pendente = (procRes.data || []).filter(p => !['dar_saida_pronto', 'ep17_pago_comp_ok'].includes(p.estado)).length
   } catch (e) {
     console.error(e)
   }
@@ -201,7 +216,7 @@ const licencEstadoLabel = (s) => ({
   indeferido: 'Indeferido',
   resubmetido: 'Re-Submetido',
   certificacao_solicitada: 'Certif. Solicitada'
-}[s] || s || '—')
+}[s] || s || '')
 
 const licencEstadoColor = (s) => ({
   pendente: '#e74c3c',

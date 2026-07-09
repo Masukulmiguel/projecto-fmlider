@@ -33,11 +33,11 @@
               <tr v-for="item in filteredItems" :key="item.id" class="clickable-row" @click="openDetail(item)">
                 <td><code class="ref-code">{{ item.numero }}</code></td>
                 <td><span class="estado-badge" :style="{ background: estadoColor(item.estado), color: '#fff' }">{{ estadoLabel(item.estado) }}</span></td>
-                <td>{{ item.numero_processo || '—' }}</td>
-                <td>{{ item.referencia_fmlider || item.referencia_cliente || '—' }}</td>
+                <td>{{ item.numero_processo || '' }}</td>
+                <td>{{ item.referencia_fmlider || item.referencia_cliente || '' }}</td>
                 <td>{{ formatDate(item.eta) }}</td>
                 <td>{{ formatDate(item.ata) }}</td>
-                <td>{{ item.terminal || '—' }}</td>
+                <td>{{ item.terminal || '' }}</td>
               </tr>
             </tbody>
           </table>
@@ -53,8 +53,8 @@
             <div class="modal-body">
               <div class="detail-section"><h6 class="section-title"><i class="bi bi-info-circle me-1"></i> Identificação</h6><div class="row g-3">
                 <div class="col-sm-3"><div class="detail-field"><span class="detail-label">Número</span><span class="detail-value"><code>{{ selectedItem.numero }}</code></span></div></div>
-                <div class="col-sm-3"><div class="detail-field"><span class="detail-label">NS</span><span class="detail-value">{{ selectedItem.ns || '—' }}</span></div></div>
-                <div class="col-sm-3"><div class="detail-field"><span class="detail-label">Tipologia</span><span class="detail-value">{{ selectedItem.tipologia || '—' }}</span></div></div>
+                <div class="col-sm-3"><div class="detail-field"><span class="detail-label">NS</span><span class="detail-value">{{ selectedItem.ns || '' }}</span></div></div>
+                <div class="col-sm-3"><div class="detail-field"><span class="detail-label">Tipologia</span><span class="detail-value">{{ selectedItem.tipologia || '' }}</span></div></div>
                 <div class="col-sm-3"><div class="detail-field"><span class="detail-label">Estado</span><span class="estado-badge" :style="{ background: estadoColor(selectedItem.estado), color: '#fff' }">{{ estadoLabel(selectedItem.estado) }}</span></div></div>
               </div></div>
               <div class="detail-section"><h6 class="section-title"><i class="bi bi-calendar me-1"></i> Datas</h6><div class="row g-3">
@@ -64,15 +64,15 @@
                 <div class="col-sm-3"><div class="detail-field"><span class="detail-label">Previsão Saída</span><span class="detail-value">{{ formatDate(selectedItem.previsao_saida) }}</span></div></div>
               </div></div>
               <div class="detail-section"><h6 class="section-title"><i class="bi bi-geo-alt me-1"></i> Logística</h6><div class="row g-3">
-                <div class="col-sm-4"><div class="detail-field"><span class="detail-label">Terminal</span><span class="detail-value">{{ selectedItem.terminal || '—' }}</span></div></div>
-                <div class="col-sm-4"><div class="detail-field"><span class="detail-label">Nº T1</span><span class="detail-value">{{ selectedItem.numero_t1 || '—' }}</span></div></div>
+                <div class="col-sm-4"><div class="detail-field"><span class="detail-label">Terminal</span><span class="detail-value">{{ selectedItem.terminal || '' }}</span></div></div>
+                <div class="col-sm-4"><div class="detail-field"><span class="detail-label">Nº T1</span><span class="detail-value">{{ selectedItem.numero_t1 || '' }}</span></div></div>
                 <div class="col-sm-4"><div class="detail-field"><span class="detail-label">Data T1</span><span class="detail-value">{{ formatDate(selectedItem.data_t1) }}</span></div></div>
               </div></div>
               <div class="detail-section"><h6 class="section-title"><i class="bi bi-link-45deg me-1"></i> Processo</h6><div class="row g-3">
-                <div class="col-sm-3"><div class="detail-field"><span class="detail-label">Nº Processo</span><span class="detail-value">{{ selectedItem.numero_processo || '—' }}</span></div></div>
-                <div class="col-sm-3"><div class="detail-field"><span class="detail-label">Ref. FMLider</span><span class="detail-value">{{ selectedItem.referencia_fmlider || '—' }}</span></div></div>
-                <div class="col-sm-3"><div class="detail-field"><span class="detail-label">Ref. Cliente</span><span class="detail-value">{{ selectedItem.referencia_cliente || '—' }}</span></div></div>
-                <div class="col-sm-3"><div class="detail-field"><span class="detail-label">Selo</span><span class="detail-value">{{ selectedItem.selo || '—' }}</span></div></div>
+                <div class="col-sm-3"><div class="detail-field"><span class="detail-label">Nº Processo</span><span class="detail-value">{{ selectedItem.numero_processo || '' }}</span></div></div>
+                <div class="col-sm-3"><div class="detail-field"><span class="detail-label">Ref. FMLider</span><span class="detail-value">{{ selectedItem.referencia_fmlider || '' }}</span></div></div>
+                <div class="col-sm-3"><div class="detail-field"><span class="detail-label">Ref. Cliente</span><span class="detail-value">{{ selectedItem.referencia_cliente || '' }}</span></div></div>
+                <div class="col-sm-3"><div class="detail-field"><span class="detail-label">Selo</span><span class="detail-value">{{ selectedItem.selo || '' }}</span></div></div>
               </div></div>
               <div v-if="selectedItem.observacoes" class="detail-section"><h6 class="section-title"><i class="bi bi-chat-left-text me-1"></i> Observações</h6><p class="mb-0 small">{{ selectedItem.observacoes }}</p></div>
             </div>
@@ -111,8 +111,8 @@ const estados = [
 ]
 
 const estadoColor = (e) => ({ aguardando_chegada:'#6b7280', chegou_ao_porto:'#06b6d4', em_terminal:'#2563eb', na_base:'#10b981', agendado_para_entrega:'#f59e0b', em_transporte:'#8b5cf6', entregue:'#059669', devolvido:'#64748b', cancelado:'#ef4444' }[e] || '#6b7280')
-const estadoLabel = (e) => estados.find(s => s.value === e)?.label || e || '—'
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'
+const estadoLabel = (e) => estados.find(s => s.value === e)?.label || e || ''
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' }) : ''
 
 const filteredItems = computed(() => items.value.filter(item => {
   const matchSearch = !search.value || (item.numero || '').toLowerCase().includes(search.value.toLowerCase()) || (item.numero_processo || '').toLowerCase().includes(search.value.toLowerCase()) || (item.referencia_fmlider || '').toLowerCase().includes(search.value.toLowerCase()) || (item.referencia_cliente || '').toLowerCase().includes(search.value.toLowerCase())

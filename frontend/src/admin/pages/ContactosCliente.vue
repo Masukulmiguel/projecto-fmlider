@@ -38,9 +38,9 @@
               <tr v-for="item in items" :key="item.id">
                 <td><strong>{{ item.name }}</strong></td>
                 <td>{{ item.company_name || item.client_name }}</td>
-                <td>{{ item.company || '—' }}</td>
-                <td>{{ item.email || '—' }}</td>
-                <td>{{ item.phone || '—' }}</td>
+                <td>{{ item.company || '' }}</td>
+                <td>{{ item.email || '' }}</td>
+                <td>{{ item.phone || '' }}</td>
                 <td>
                   <div class="d-flex gap-2">
                     <button class="btn btn-sm btn-outline-info" @click="openDetail(item)" :title="t('admin.contactos_cliente_detail')">
@@ -67,31 +67,31 @@
         <div class="modal-body">
           <div class="detail-row">
             <label class="form-label fw-bold">{{ t('admin.contactos_cliente_name') }}</label>
-            <p>{{ detailItem?.name || '—' }}</p>
+            <p>{{ detailItem?.name || '' }}</p>
           </div>
           <div class="detail-row">
             <label class="form-label fw-bold">{{ t('admin.contactos_cliente_email') }}</label>
-            <p>{{ detailItem?.email || '—' }}</p>
+            <p>{{ detailItem?.email || '' }}</p>
           </div>
           <div class="detail-row">
             <label class="form-label fw-bold">{{ t('admin.contactos_cliente_phone') }}</label>
-            <p>{{ detailItem?.phone || '—' }}</p>
+            <p>{{ detailItem?.phone || '' }}</p>
           </div>
           <div class="detail-row">
             <label class="form-label fw-bold">{{ t('admin.contactos_cliente_company') }}</label>
-            <p>{{ detailItem?.company || '—' }}</p>
+            <p>{{ detailItem?.company || '' }}</p>
           </div>
           <div class="detail-row">
             <label class="form-label fw-bold">{{ t('admin.contactos_cliente_client') }}</label>
-            <p>{{ detailItem?.company_name || detailItem?.client_name || '—' }}</p>
+            <p>{{ detailItem?.company_name || detailItem?.client_name || '' }}</p>
           </div>
           <div class="detail-row">
             <label class="form-label fw-bold">{{ t('admin.contactos_cliente_subject') }}</label>
-            <p>{{ detailItem?.subject || '—' }}</p>
+            <p>{{ detailItem?.subject || '' }}</p>
           </div>
           <div class="detail-row">
             <label class="form-label fw-bold">{{ t('admin.contactos_cliente_message') }}</label>
-            <p class="message-text">{{ detailItem?.message || '—' }}</p>
+            <p class="message-text">{{ detailItem?.message || '' }}</p>
           </div>
         </div>
         <div class="modal-footer">

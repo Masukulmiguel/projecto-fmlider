@@ -6,7 +6,7 @@
       </button>
       <div>
         <h2 class="mb-0">Detalhe do Licenciamento</h2>
-        <p class="text-muted mb-0">{{ item?.numero_processo || '—' }}</p>
+        <p class="text-muted mb-0">{{ item?.numero_processo || '' }}</p>
       </div>
     </div>
 
@@ -28,7 +28,7 @@
           <div class="card info-card">
             <div class="card-body">
               <div class="info-label">Nº Processo</div>
-              <div class="info-value">{{ item.numero_processo || '—' }}</div>
+              <div class="info-value">{{ item.numero_processo || '' }}</div>
             </div>
           </div>
         </div>
@@ -51,7 +51,7 @@
           <div class="card info-card">
             <div class="card-body">
               <div class="info-label">Cliente</div>
-              <div class="info-value">{{ item.empresa || item.user_name || '—' }}</div>
+              <div class="info-value">{{ item.empresa || item.user_name || '' }}</div>
             </div>
           </div>
         </div>
@@ -59,7 +59,7 @@
           <div class="card info-card">
             <div class="card-body">
               <div class="info-label">Shipper</div>
-              <div class="info-value">{{ item.shipper || '—' }}</div>
+              <div class="info-value">{{ item.shipper || '' }}</div>
             </div>
           </div>
         </div>
@@ -67,7 +67,7 @@
           <div class="card info-card">
             <div class="card-body">
               <div class="info-label">NIF</div>
-              <div class="info-value">{{ item.nif_empresa || '—' }}</div>
+              <div class="info-value">{{ item.nif_empresa || '' }}</div>
             </div>
           </div>
         </div>
@@ -75,7 +75,7 @@
           <div class="card info-card">
             <div class="card-body">
               <div class="info-label">Tipo</div>
-              <div class="info-value">{{ item.tipo_licenciamento || '—' }}</div>
+              <div class="info-value">{{ item.tipo_licenciamento || '' }}</div>
             </div>
           </div>
         </div>
@@ -84,7 +84,7 @@
       <div class="card mb-4">
         <div class="card-body">
           <div class="info-label mb-2">Descrição</div>
-          <p class="mb-0">{{ item.descricao || '—' }}</p>
+          <p class="mb-0">{{ item.descricao || '' }}</p>
         </div>
       </div>
 
@@ -173,7 +173,7 @@
                     </span>
                     <span v-else class="text-muted">Sistema</span>
                   </td>
-                  <td>{{ parseObsText(h.valor_novo) || h.valor_novo || '—' }}</td>
+                  <td>{{ parseObsText(h.valor_novo) || h.valor_novo || '' }}</td>
                   <td>
                     <small class="text-muted">
                       <span v-if="parseObsDate(h.valor_novo)"><i class="bi bi-calendar3 me-1"></i>{{ parseObsDate(h.valor_novo) }}</span>
@@ -190,7 +190,7 @@
       <div class="card mb-4">
         <div class="card-body">
           <h6 class="section-title mb-3">Observações</h6>
-          <p class="mb-0">{{ item.observacoes || '—' }}</p>
+          <p class="mb-0">{{ item.observacoes || '' }}</p>
         </div>
       </div>
 
@@ -328,8 +328,8 @@ const estadoLabel = (estado) => ({
   expirado: 'Expirado'
 }[estado] || estado)
 
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
-const formatDateTime = (d) => d ? new Date(d).toLocaleString('pt-PT') : '—'
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : ''
+const formatDateTime = (d) => d ? new Date(d).toLocaleString('pt-PT') : ''
 
 const fetchData = async () => {
   loading.value = true

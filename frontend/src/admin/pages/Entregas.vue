@@ -118,21 +118,21 @@
               <tr v-for="item in items" :key="item.id">
                 <td><code class="tracking-code">{{ item.referencia_fmlider }}</code></td>
                 <td>
-                  <div class="fw-medium">{{ item.cliente_nome || '—' }}</div>
+                  <div class="fw-medium">{{ item.cliente_nome || '' }}</div>
                   <small v-if="item.referencia_cliente" class="text-muted">Ref: {{ item.referencia_cliente }}</small>
                 </td>
                 <td>
                   <div class="d-flex align-items-center gap-1">
-                    <span>{{ item.origem || '—' }}</span>
+                    <span>{{ item.origem || '' }}</span>
                     <i class="bi bi-arrow-right text-muted"></i>
-                    <span>{{ item.destino || '—' }}</span>
+                    <span>{{ item.destino || '' }}</span>
                   </div>
                 </td>
-                <td>{{ item.motorista_nome || '—' }}</td>
+                <td>{{ item.motorista_nome || '' }}</td>
                 <td>
                   <div v-if="item.camiao_matricula">{{ item.camiao_matricula }}</div>
                   <small v-if="item.camiao_codigo" class="text-muted">{{ item.camiao_codigo }}</small>
-                  <span v-else>—</span>
+                  <span v-else></span>
                 </td>
                 <td>
                   <span class="contentor-badge">{{ (item.contentores || []).length }}</span>
@@ -491,8 +491,8 @@
                   <tbody>
                     <tr v-for="(r, idx) in importValidationResults" :key="idx" :class="{'table-danger': !r.success, 'table-warning': r.warnings.length > 0 && r.success}">
                       <td>{{ idx + 1 }}</td>
-                      <td><code>{{ r.ref || '—' }}</code></td>
-                      <td>{{ r.cliente || '—' }}</td>
+                      <td><code>{{ r.ref || '' }}</code></td>
+                      <td>{{ r.cliente || '' }}</td>
                       <td>
                         <span v-if="!r.success" class="badge bg-danger">Erro</span>
                         <span v-else-if="r.warnings.length > 0" class="badge bg-warning">Aviso</span>
@@ -550,9 +550,9 @@
               <tbody>
                 <tr v-for="c in availableContentores" :key="c.id" class="clickable-row">
                   <td><code class="tracking-code">{{ c.numero }}</code></td>
-                  <td>{{ c.tipologia || '—' }}</td>
+                  <td>{{ c.tipologia || '' }}</td>
                   <td>{{ getClientName(c.cliente_id) }}</td>
-                  <td>{{ c.terminal || '—' }}</td>
+                  <td>{{ c.terminal || '' }}</td>
                   <td><small class="text-muted">{{ formatDate(c.eta) }}</small></td>
                   <td><span class="status-badge" :class="'status-' + c.estado">{{ estadoLabelCont(c.estado) }}</span></td>
                   <td><button class="btn btn-sm btn-primary" @click="selectContentor(c)"><i class="bi bi-check-lg"></i> Selecionar</button></td>
@@ -652,7 +652,7 @@ const estadoLabel = (estado) => ({
   entregue: 'Entregue', cancelado: 'Cancelado'
 }[estado] || estado)
 
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : ''
 
 // ===== Create/Edit Modal =====
 const showModal = ref(false)

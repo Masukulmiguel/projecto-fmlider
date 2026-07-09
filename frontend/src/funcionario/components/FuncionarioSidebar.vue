@@ -53,6 +53,10 @@
             <i class="bi bi-box-seam nav-icon"></i>
             <span class="nav-text">Contentores</span>
           </router-link>
+          <router-link v-if="can('documentos.view')" to="/funcionario/processos" class="nav-item" active-class="active" :class="{ 'icon-only': collapsed }" :title="collapsed ? 'Processos' : ''">
+            <i class="bi bi-clipboard2-data nav-icon"></i>
+            <span class="nav-text">Processos</span>
+          </router-link>
         </template>
 
         <template v-if="can('logistica.view')">
@@ -72,6 +76,10 @@
           <router-link v-if="can('logistica.view') || can('documentos.view')" to="/funcionario/contentores" class="nav-item" active-class="active" :class="{ 'icon-only': collapsed }" :title="collapsed ? 'Contentores' : ''">
             <i class="bi bi-box-seam nav-icon"></i>
             <span class="nav-text">Contentores</span>
+          </router-link>
+          <router-link v-if="can('logistica.view')" to="/funcionario/processos" class="nav-item" active-class="active" :class="{ 'icon-only': collapsed }" :title="collapsed ? 'Processos' : ''">
+            <i class="bi bi-clipboard2-data nav-icon"></i>
+            <span class="nav-text">Processos</span>
           </router-link>
         </template>
 
@@ -140,11 +148,11 @@ let pollInterval = null
 
 const deptPermissions = {
   certificacao: ['dashboard.view', 'clients.view', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply'],
-  documentacao: ['dashboard.view', 'documentos.view', 'documentos.manage', 'clients.view', 'contactos.view', 'chat.view'],
+  documentacao: ['dashboard.view', 'documentos.view', 'documentos.manage', 'clients.view', 'contactos.view', 'chat.view', 'contentores.view', 'contentores.manage', 'processos.view', 'processos.manage'],
   licenciamentos: ['dashboard.view', 'licenciamentos.view', 'licenciamentos.manage', 'clients.view', 'contactos.view', 'chat.view'],
   facturacao: ['dashboard.view', 'clients.view', 'clients.manage', 'contactos.view', 'chat.view'],
-  logistica: ['dashboard.view', 'logistica.view', 'logistica.manage', 'motoristas.view', 'motoristas.manage', 'camioes.view', 'camioes.manage', 'entregas.view', 'entregas.manage', 'contentores.view', 'clients.view', 'contactos.view', 'chat.view'],
-  administracao: ['dashboard.view', 'clients.view', 'clients.manage', 'documentos.view', 'documentos.manage', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply', 'licenciamentos.view', 'licenciamentos.manage', 'logistica.view', 'logistica.manage', 'motoristas.view', 'motoristas.manage', 'camioes.view', 'camioes.manage', 'entregas.view', 'entregas.manage', 'contentores.view', 'contentores.manage', 'visitors.view', 'content.manage']
+  logistica: ['dashboard.view', 'logistica.view', 'logistica.manage', 'motoristas.view', 'motoristas.manage', 'camioes.view', 'camioes.manage', 'entregas.view', 'entregas.manage', 'contentores.view', 'processos.view', 'clients.view', 'contactos.view', 'chat.view'],
+  administracao: ['dashboard.view', 'clients.view', 'clients.manage', 'documentos.view', 'documentos.manage', 'contactos.view', 'contactos.manage', 'chat.view', 'chat.reply', 'licenciamentos.view', 'licenciamentos.manage', 'logistica.view', 'logistica.manage', 'motoristas.view', 'motoristas.manage', 'camioes.view', 'camioes.manage', 'entregas.view', 'entregas.manage', 'contentores.view', 'contentores.manage', 'processos.view', 'processos.manage', 'visitors.view', 'content.manage']
 }
 
 const can = (perm) => {

@@ -127,11 +127,11 @@
             <tbody>
               <tr v-for="item in items" :key="item.id" class="cursor-pointer" @click="router.push('/admin/licenciamentos/' + item.id)">
                 <td><code class="tracking-code">{{ item.referencia }}</code></td>
-                <td>{{ item.numero_processo || '—' }}</td>
+                <td>{{ item.numero_processo || '' }}</td>
                 <td>
                   <div class="fw-medium">{{ item.empresa }}</div>
                 </td>
-                <td>{{ item.shipper || '—' }}</td>
+                <td>{{ item.shipper || '' }}</td>
                 <td>{{ tipoLabel(item.tipo) }}</td>
                 <td><span class="status-badge" :class="'status-' + item.estado">{{ estadoLabel(item.estado) }}</span></td>
                 <td><small class="text-muted">{{ formatDate(item.data_submissao) }}</small></td>
@@ -268,8 +268,8 @@
                   <div class="rejected-item-header">
                     <span class="rejected-idx">#{{ r.idx }}</span>
                     <code class="rejected-ref">{{ r.referencia }}</code>
-                    <span class="rejected-client">{{ r.clienteNome || '—' }}</span>
-                    <span class="rejected-company">{{ r.empresaNome || '—' }}</span>
+                    <span class="rejected-client">{{ r.clienteNome || '' }}</span>
+                    <span class="rejected-company">{{ r.empresaNome || '' }}</span>
                   </div>
                   <div class="rejected-item-errors">
                     <div v-for="(e, i) in r.errors" :key="i" class="rejected-error">
@@ -569,7 +569,7 @@ const estadoLabel = (estado) => ({
   expirado: 'Expirado'
 }[estado] || estado)
 
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : ''
 
 const showEditModal = ref(false)
 const saving = ref(false)
@@ -665,17 +665,39 @@ const handleExcelFile = (event) => {
   if (!file) return
   importError.value = ''
 
+  if (!file.name.match(/\.xlsx?$/i)) {
+    importError.value = 'Formato inválido. Apenas ficheiros .xlsx ou .xls são aceites.'
+    return
+  }
+
   const reader = new FileReader()
   reader.onload = (e) => {
     try {
       const workbook = XLSX.read(e.target.result, { type: 'array' })
-      excelSheets.value = workbook.SheetNames
 
       const licSheet = workbook.SheetNames.find(s => /licenciamento/i.test(s))
-      const obsSheet = workbook.SheetNames.find(s => /observa/i.test(s))
+      const sheetToCheck = licSheet || workbook.SheetNames[0]
+      const worksheet = workbook.Sheets[sheetToCheck]
+      const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' })
+
+      if (rawData.length < 2) {
+        importError.value = 'O ficheiro está vazio ou tem poucos dados.'
+        return
+      }
+
+      const allText = rawData.slice(0, 10).map(r => r.map(c => String(c).toLowerCase()).join(' ')).join(' ')
+      const expectedCols = ['cliente', 'empresa', 'shipper', 'tipo', 'processo', 'estado', 'nº processo', 'referência']
+      const foundCols = expectedCols.filter(c => allText.includes(c))
+      if (foundCols.length < 2) {
+        importError.value = `Este ficheiro não parece ser de Licenciamentos. Colunas esperadas (cliente, shipper, tipo, processo, estado...) não encontradas. Verifique se selecionou o ficheiro correcto.`
+        return
+      }
+
+      excelSheets.value = workbook.SheetNames
 
       if (licSheet) {
         parseSheet(workbook, licSheet)
+        const obsSheet = workbook.SheetNames.find(s => /observa/i.test(s))
         if (obsSheet) {
           excelObservations.value = parseObsSheet(workbook, obsSheet)
         }

@@ -93,7 +93,7 @@
           <div class="col-lg-7" v-reveal="'right'">
             <span class="fml-eyebrow">{{ t('home.about_eyebrow') }}</span>
             <h2 class="section-title mb-3">{{ t('home.about_title') }}</h2>
-            <p class="text-muted mb-0" v-html="t('home.about_text')">
+            <p class="text-muted mb-0" v-html="sanitize(t('home.about_text'))">
             </p>
           </div>
           <div class="col-lg-5" v-reveal="'left'">
@@ -193,7 +193,7 @@
           <div class="col-lg-6" v-reveal="'right'">
             <span class="fml-eyebrow">{{ t('home.fleet_eyebrow') }}</span>
             <h2 class="section-title">{{ t('home.fleet_title') }}</h2>
-            <p class="text-muted mb-4" v-html="t('home.fleet_text')">
+            <p class="text-muted mb-4" v-html="sanitize(t('home.fleet_text'))">
             </p>
             <ul class="feature-list">
               <li><i class="bi bi-check-circle-fill"></i> {{ t('home.fleet_feat_1') }}</li>
@@ -338,6 +338,7 @@ import ClientsCarousel from '@/components/ClientsCarousel.vue'
 import { supabase } from '@/lib/supabase'
 import { useSiteImages } from '@/composables/useSiteImages'
 import { useI18n } from '@/composables/useI18n'
+import { sanitize } from '@/utils/sanitize'
 
 const { t } = useI18n()
 const { getImage, fetchAll } = useSiteImages()

@@ -28,9 +28,9 @@
             <tbody>
               <tr v-for="item in items" :key="item.id">
                 <td><code class="tracking-code">{{ item.numero }}</code></td>
-                <td>{{ item.tipologia || '—' }}</td>
+                <td>{{ item.tipologia || '' }}</td>
                 <td>{{ getClientName(item.cliente_id) }}</td>
-                <td>{{ item.terminal || '—' }}</td>
+                <td>{{ item.terminal || '' }}</td>
                 <td><small class="text-muted">{{ formatDate(item.eta) }}</small></td>
                 <td><span class="status-badge" :class="'status-' + item.estado">{{ estadoLabel(item.estado) }}</span></td>
                 <td><button class="btn-icon btn-view" @click="openDetail(item)" title="Ver detalhes"><i class="bi bi-eye"></i></button></td>
@@ -55,14 +55,14 @@
         <div class="modal-body">
           <div class="form-section"><h6 class="form-section-title">Identificação</h6><div class="row g-3">
             <div class="col-md-3"><span class="detail-label">Número</span><div class="detail-value"><code>{{ detailItem.numero }}</code></div></div>
-            <div class="col-md-3"><span class="detail-label">NS</span><div class="detail-value">{{ detailItem.ns || '—' }}</div></div>
-            <div class="col-md-3"><span class="detail-label">Selo</span><div class="detail-value">{{ detailItem.selo || '—' }}</div></div>
-            <div class="col-md-3"><span class="detail-label">Tipologia</span><div class="detail-value">{{ detailItem.tipologia || '—' }}</div></div>
+            <div class="col-md-3"><span class="detail-label">NS</span><div class="detail-value">{{ detailItem.ns || '' }}</div></div>
+            <div class="col-md-3"><span class="detail-label">Selo</span><div class="detail-value">{{ detailItem.selo || '' }}</div></div>
+            <div class="col-md-3"><span class="detail-label">Tipologia</span><div class="detail-value">{{ detailItem.tipologia || '' }}</div></div>
           </div></div>
           <div class="form-section"><h6 class="form-section-title">Especificações</h6><div class="row g-3">
-            <div class="col-md-4"><span class="detail-label">Capacidade</span><div class="detail-value">{{ detailItem.capacidade || '—' }}</div></div>
-            <div class="col-md-4"><span class="detail-label">Peso</span><div class="detail-value">{{ detailItem.peso ? detailItem.peso + ' kg' : '—' }}</div></div>
-            <div class="col-md-4"><span class="detail-label">Taxas</span><div class="detail-value">{{ detailItem.taxas ? detailItem.taxas + ' Kz' : '—' }}</div></div>
+            <div class="col-md-4"><span class="detail-label">Capacidade</span><div class="detail-value">{{ detailItem.capacidade || '' }}</div></div>
+            <div class="col-md-4"><span class="detail-label">Peso</span><div class="detail-value">{{ detailItem.peso ? detailItem.peso + ' kg' : '' }}</div></div>
+            <div class="col-md-4"><span class="detail-label">Taxas</span><div class="detail-value">{{ detailItem.taxas ? detailItem.taxas + ' Kz' : '' }}</div></div>
           </div></div>
           <div class="form-section"><h6 class="form-section-title">Datas</h6><div class="row g-3">
             <div class="col-md-3"><span class="detail-label">ETA</span><div class="detail-value">{{ formatDate(detailItem.eta) }}</div></div>
@@ -71,16 +71,16 @@
             <div class="col-md-3"><span class="detail-label">Previsão Saída</span><div class="detail-value">{{ formatDate(detailItem.previsao_saida) }}</div></div>
           </div></div>
           <div class="form-section"><h6 class="form-section-title">Logística</h6><div class="row g-3">
-            <div class="col-md-3"><span class="detail-label">Terminal</span><div class="detail-value">{{ detailItem.terminal || '—' }}</div></div>
-            <div class="col-md-3"><span class="detail-label">Nº T1</span><div class="detail-value">{{ detailItem.numero_t1 || '—' }}</div></div>
+            <div class="col-md-3"><span class="detail-label">Terminal</span><div class="detail-value">{{ detailItem.terminal || '' }}</div></div>
+            <div class="col-md-3"><span class="detail-label">Nº T1</span><div class="detail-value">{{ detailItem.numero_t1 || '' }}</div></div>
             <div class="col-md-3"><span class="detail-label">Data T1</span><div class="detail-value">{{ formatDate(detailItem.data_t1) }}</div></div>
             <div class="col-md-3"><span class="detail-label">Estado</span><div><span class="status-badge" :class="'status-' + detailItem.estado">{{ estadoLabel(detailItem.estado) }}</span></div></div>
           </div></div>
           <div class="form-section"><h6 class="form-section-title">Processo & Cliente</h6><div class="row g-3">
             <div class="col-md-3"><span class="detail-label">Cliente</span><div class="detail-value">{{ getClientName(detailItem.cliente_id) }}</div></div>
-            <div class="col-md-3"><span class="detail-label">Nº Processo</span><div class="detail-value">{{ detailItem.numero_processo || '—' }}</div></div>
-            <div class="col-md-3"><span class="detail-label">Ref. FMLider</span><div class="detail-value">{{ detailItem.referencia_fmlider || '—' }}</div></div>
-            <div class="col-md-3"><span class="detail-label">Ref. Cliente</span><div class="detail-value">{{ detailItem.referencia_cliente || '—' }}</div></div>
+            <div class="col-md-3"><span class="detail-label">Nº Processo</span><div class="detail-value">{{ detailItem.numero_processo || '' }}</div></div>
+            <div class="col-md-3"><span class="detail-label">Ref. FMLider</span><div class="detail-value">{{ detailItem.referencia_fmlider || '' }}</div></div>
+            <div class="col-md-3"><span class="detail-label">Ref. Cliente</span><div class="detail-value">{{ detailItem.referencia_cliente || '' }}</div></div>
           </div></div>
           <div v-if="detailItem.observacoes" class="form-section"><h6 class="form-section-title">Observações</h6><p class="mb-0">{{ detailItem.observacoes }}</p></div>
         </div>
@@ -142,9 +142,9 @@ const changePage = (page) => { currentPage.value = page; fetchData() }
 const debounceSearch = () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => { currentPage.value = 1; fetchData() }, 300) }
 
 const fetchClients = async () => { const { data } = await supabase.from('users').select('id, name').eq('role', 'cliente').order('name'); clients.value = data || [] }
-const getClientName = (id) => clients.value.find(c => c.id === id)?.name || '—'
+const getClientName = (id) => clients.value.find(c => c.id === id)?.name || ''
 const estadoLabel = (e) => estados.find(s => s.value === e)?.label || e
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : ''
 
 const showDetail = ref(false)
 const detailItem = ref(null)

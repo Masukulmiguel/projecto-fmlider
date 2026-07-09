@@ -38,6 +38,10 @@
               <i class="bi bi-box-seam menu-icon"></i>
               <span class="menu-text" v-show="!collapsed">Contentores</span>
             </router-link>
+            <router-link to="/processos" class="menu-item" :class="{ active: $route.path.startsWith('/processos') }" :title="collapsed ? 'Processos' : ''">
+              <i class="bi bi-clipboard2-data menu-icon"></i>
+              <span class="menu-text" v-show="!collapsed">Processos</span>
+            </router-link>
             <router-link to="/mensagens" class="menu-item" :class="{ active: $route.path === '/mensagens' }" :title="collapsed ? t('cliente.sidebar_messages') : ''">
               <i class="bi bi-chat-dots-fill menu-icon"></i>
               <span class="menu-text" v-show="!collapsed">{{ t('cliente.sidebar_messages') }}</span>

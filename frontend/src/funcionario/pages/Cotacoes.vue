@@ -28,7 +28,7 @@
             <tbody>
               <tr v-for="c in items" :key="c.id">
                 <td><code class="ref">{{ c.reference }}</code></td>
-                <td>{{ c.client_name || '—' }}</td>
+                <td>{{ c.client_name || '' }}</td>
                 <td><span class="route">{{ c.origin }} → {{ c.destination }}</span></td>
                 <td>{{ c.currency }} {{ parseFloat(c.estimated_value || 0).toLocaleString('pt-PT', { minimumFractionDigits: 2 }) }}</td>
                 <td><span class="status-badge" :class="`status-${c.status}`">{{ statusLabel(c.status) }}</span></td>
@@ -54,7 +54,7 @@ const items = ref([])
 const loading = ref(false)
 
 const statusLabel = (s) => ({ pendente: t('funcionario.quotes_status_pending'), aprovada: t('funcionario.quotes_status_approved'), rejeitada: t('funcionario.quotes_status_rejected'), expirada: t('funcionario.quotes_status_expired') }[s] || s)
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : ''
 
 const load = async () => {
   loading.value = true

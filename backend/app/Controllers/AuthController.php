@@ -288,6 +288,20 @@ class AuthController
         Response::success([], 'Se o email existir, receberá instruções para redefinir a senha.');
     }
 
+    public function sendWelcomeEmail()
+    {
+        $data = Response::input();
+        $email = trim($data['email'] ?? '');
+        $name = trim($data['name'] ?? '');
+
+        if ($email === '') Response::error('Email é obrigatório', 422);
+        if ($name === '') Response::error('Nome é obrigatório', 422);
+
+        \App\Helpers\MailHelper::sendWelcomeEmail($email, $name);
+
+        Response::success([], 'Email de boas-vindas enviado');
+    }
+
     public function changePassword()
     {
         $auth = $this->userFromToken();

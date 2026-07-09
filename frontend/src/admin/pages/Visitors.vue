@@ -87,24 +87,24 @@
               <td colspan="8" class="text-center text-muted py-4">{{ t('admin.visitors_empty') }}</td>
             </tr>
             <tr v-for="v in filteredRecent" :key="v.id">
-              <td><code class="ip">{{ v.ip_address || '—' }}</code></td>
+              <td><code class="ip">{{ v.ip_address || '' }}</code></td>
               <td>
                 <i class="bi bi-geo-alt-fill text-danger me-1"></i>
                 <strong>{{ v.country || t('admin.visitors_unknown') }}</strong>
                 <small v-if="v.city" class="text-muted d-block">{{ v.city }}</small>
               </td>
-              <td><i :class="osIcon(v.os)" class="me-1"></i>{{ v.os || '—' }}</td>
-              <td>{{ v.browser || '—' }}</td>
+              <td><i :class="osIcon(v.os)" class="me-1"></i>{{ v.os || '' }}</td>
+              <td>{{ v.browser || '' }}</td>
               <td>
                 <span class="device-pill" :class="`device-${v.device_type}`">
-                  <i :class="deviceIcon(v.device_type)"></i> {{ v.device_type || '—' }}
+                  <i :class="deviceIcon(v.device_type)"></i> {{ v.device_type || '' }}
                 </span>
               </td>
               <td>
                 <span v-if="v.user_name" class="badge bg-success">{{ v.user_name }}</span>
                 <span v-else class="text-muted small">{{ t('admin.visitors_anonymous') }}</span>
               </td>
-              <td><small class="text-muted text-truncate d-inline-block" style="max-width: 200px;" :title="v.page_url">{{ v.page_url || '—' }}</small></td>
+              <td><small class="text-muted text-truncate d-inline-block" style="max-width: 200px;" :title="v.page_url">{{ v.page_url || '' }}</small></td>
               <td><small class="text-muted">{{ formatTime(v.visited_at) }}</small></td>
             </tr>
           </tbody>

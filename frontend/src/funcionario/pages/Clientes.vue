@@ -42,7 +42,7 @@
                   </div>
                 </td>
                 <td>{{ u.email }}</td>
-                <td>{{ u.phone || '—' }}</td>
+                <td>{{ u.phone || '' }}</td>
                 <td>
                   <span v-if="u.approval_status === 'pending'" class="badge bg-warning text-dark">{{ t('funcionario.clients_status_pending') }}</span>
                   <span v-else-if="u.approval_status === 'approved'" class="badge bg-success">{{ t('funcionario.clients_status_approved') }}</span>
@@ -84,7 +84,7 @@ const currentPage = ref(1)
 const perPage = 20
 
 const initials = (n) => (n || '?').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : '—'
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : ''
 
 const filtered = computed(() => {
   const q = search.value.trim().toLowerCase()

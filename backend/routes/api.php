@@ -68,6 +68,7 @@ $router = new Router();
 $router->post('/auth/login', 'App\Controllers\AuthController', 'login');
 $router->post('/auth/register', 'App\Controllers\AuthController', 'register');
 $router->post('/auth/forgot-password', 'App\Controllers\AuthController', 'resetPassword');
+$router->post('/auth/welcome-email', 'App\Controllers\AuthController', 'sendWelcomeEmail');
 
 // NIF Lookup (public)
 $router->get('/nif-lookup', 'App\Controllers\NifController', 'lookupByQuery');

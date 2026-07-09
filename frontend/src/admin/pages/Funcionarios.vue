@@ -47,9 +47,9 @@
                     </div>
                   </div>
                 </td>
-                <td><code class="tracking-code">{{ f.bi || '—' }}</code></td>
-                <td><span class="badge bg-info">{{ f.position || '—' }}</span></td>
-                <td><span class="badge bg-secondary"><i class="bi bi-building me-1"></i>{{ deptLabels[f.departamento] || '—' }}</span></td>
+                <td><code class="tracking-code">{{ f.bi || '' }}</code></td>
+                <td><span class="badge bg-info">{{ f.position || '' }}</span></td>
+                <td><span class="badge bg-secondary"><i class="bi bi-building me-1"></i>{{ deptLabels[f.departamento] || '' }}</span></td>
                 <td>{{ f.email }}</td>
                 <td>
                   <span v-if="isLocked(f)" class="badge bg-danger" :title="lockTooltip(f)">

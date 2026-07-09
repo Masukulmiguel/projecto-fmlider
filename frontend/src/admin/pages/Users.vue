@@ -38,7 +38,7 @@
                 <small class="d-block text-muted">@{{ user.username }}</small>
               </td>
               <td>{{ user.email }}</td>
-              <td>{{ user.phone || '—' }}</td>
+              <td>{{ user.phone || '' }}</td>
               <td>
                 <span :class="getStatusBadge(user).class">{{ getStatusBadge(user).text }}</span>
               </td>
@@ -110,7 +110,7 @@
                   <tr><th>{{ t('admin.users_full_name') }}</th><td>{{ detailUser?.name }}</td></tr>
                   <tr><th>Username</th><td>@{{ detailUser?.username }}</td></tr>
                   <tr><th>Email</th><td>{{ detailUser?.email }}</td></tr>
-                  <tr><th>{{ t('admin.users_phone') }}</th><td>{{ detailUser?.phone || '—' }}</td></tr>
+                  <tr><th>{{ t('admin.users_phone') }}</th><td>{{ detailUser?.phone || '' }}</td></tr>
                   <tr><th>Role</th><td><span class="badge bg-info text-dark">{{ detailUser?.role }}</span></td></tr>
                   <tr><th>{{ t('admin.users_approval') }}</th><td><span :class="getStatusBadge(detailUser).class">{{ getStatusBadge(detailUser).text }}</span></td></tr>
                   <tr><th>{{ t('admin.users_status') }}</th><td><span :class="getLockStatus(detailUser).class">{{ getLockStatus(detailUser).text }}</span></td></tr>
@@ -120,7 +120,7 @@
                     <span v-else-if="detailUser?.password_changed_at" class="badge bg-info text-dark">{{ t('admin.users_password_changed') }} {{ formatDateOnly(detailUser.password_changed_at) }}</span>
                     <span v-else class="badge bg-secondary">{{ t('admin.users_password_not_changed') }}</span>
                   </td></tr>
-                  <tr><th>{{ t('admin.lock_title') }}</th><td v-if="detailUser?.locked_at">Até {{ formatDate(detailUser.locked_at) }} - {{ detailUser?.locked_reason || t('admin.users_no_reason') }}</td><td v-else>—</td></tr>
+                  <tr><th>{{ t('admin.lock_title') }}</th><td v-if="detailUser?.locked_at">Até {{ formatDate(detailUser.locked_at) }} - {{ detailUser?.locked_reason || t('admin.users_no_reason') }}</td><td v-else></td></tr>
                   <tr><th>{{ t('admin.users_registered_at') }}</th><td>{{ formatDate(detailUser?.created_at) }}</td></tr>
                 </table>
               </div>
@@ -128,13 +128,13 @@
                 <h6>{{ t('admin.users_company_data') }}</h6>
                 <table class="table table-sm table-borderless" v-if="detailCompany">
                   <tr><th>{{ t('admin.users_company_name') }}</th><td>{{ detailCompany?.company_name }}</td></tr>
-                  <tr><th>NIF</th><td>{{ detailCompany?.nif || '—' }}</td></tr>
+                  <tr><th>NIF</th><td>{{ detailCompany?.nif || '' }}</td></tr>
                   <tr><th>{{ t('admin.users_address') }}</th><td>{{ detailCompany?.address }}</td></tr>
                   <tr><th>{{ t('admin.users_phone') }}</th><td>{{ detailCompany?.phone }}</td></tr>
                   <tr><th>Email</th><td>{{ detailCompany?.email }}</td></tr>
                   <tr><th>{{ t('admin.users_service') }}</th><td>{{ detailCompany?.service }}</td></tr>
                   <tr><th>{{ t('admin.users_case_description') }}</th><td>{{ detailCompany?.case_description }}</td></tr>
-                  <tr><th>Logo</th><td v-if="detailCompany?.logo"><img :src="detailCompany.logo" alt="Logo" style="max-height: 60px;"></td><td v-else>—</td></tr>
+                  <tr><th>Logo</th><td v-if="detailCompany?.logo"><img :src="detailCompany.logo" alt="Logo" style="max-height: 60px;"></td><td v-else></td></tr>
                   <tr><th>{{ t('admin.users_published') }}</th><td><span :class="detailCompany?.is_published ? 'badge bg-success' : 'badge bg-secondary'">{{ detailCompany?.is_published ? t('admin.users_yes') : t('admin.users_no') }}</span></td></tr>
                 </table>
                 <div v-if="!detailCompany" class="text-muted">{{ t('admin.users_no_company') }}</div>
@@ -339,12 +339,12 @@ const openDetail = async (user) => {
 }
 
 const formatDate = (date) => {
-  if (!date) return '—'
+  if (!date) return ''
   return new Date(date).toLocaleDateString('pt-PT', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
 const formatDateOnly = (date) => {
-  if (!date) return '—'
+  if (!date) return ''
   return new Date(date).toLocaleDateString('pt-PT', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 

@@ -23,7 +23,7 @@
         <div class="row g-5">
           <div class="col-lg-8">
             <article class="nd-article">
-              <div class="nd-article-body" v-html="article.content"></div>
+              <div class="nd-article-body" v-html="sanitize(article.content)"></div>
             </article>
 
             <!-- Share -->
@@ -72,6 +72,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { useI18n } from '@/composables/useI18n'
+import { sanitize } from '@/utils/sanitize'
 
 const { t, locale } = useI18n()
 const route = useRoute()

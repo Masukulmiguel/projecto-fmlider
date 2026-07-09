@@ -23,6 +23,7 @@
           <router-link to="/galeria" class="nav-link" @click="closeMobile">{{ t('nav.gallery') }}</router-link>
           <router-link to="/parceiros" class="nav-link" @click="closeMobile">{{ t('nav.partners') }}</router-link>
           <router-link to="/faq" class="nav-link" @click="closeMobile">{{ t('nav.faq') }}</router-link>
+          <router-link to="/rastrear" class="nav-link" @click="closeMobile">{{ t('nav.tracking') }}</router-link>
           <router-link to="/contacto" class="nav-link" @click="closeMobile">{{ t('nav.contact') }}</router-link>
           <LanguageSwitcher />
           <router-link to="/login" class="nav-cta" @click="closeMobile">
@@ -52,6 +53,7 @@
         <router-link to="/galeria" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-images"></i> {{ t('nav.gallery') }}</router-link>
         <router-link to="/parceiros" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-handshake"></i> {{ t('nav.partners') }}</router-link>
         <router-link to="/faq" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-question-circle"></i> {{ t('nav.faq') }}</router-link>
+        <router-link to="/rastrear" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-box-seam"></i> {{ t('nav.tracking') }}</router-link>
         <router-link to="/contacto" class="mobile-nav-link" @click="closeMobile"><i class="bi bi-envelope"></i> {{ t('nav.contact') }}</router-link>
         <div class="mobile-lang-row">
           <LanguageSwitcher />

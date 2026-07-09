@@ -45,7 +45,7 @@
                   <div class="fw-medium">{{ item.company_name || item.client_name }}</div>
                 </td>
                 <td>{{ typeLabel(item.type) }}</td>
-                <td><code v-if="item.tracking_number" class="tracking-code">{{ item.tracking_number }}</code><span v-else>—</span></td>
+                <td><code v-if="item.tracking_number" class="tracking-code">{{ item.tracking_number }}</code><span v-else></span></td>
                 <td>{{ formatSize(item.file_size) }}</td>
                 <td><small class="text-muted">{{ formatDate(item.created_at) }}</small></td>
                 <td>
@@ -129,9 +129,9 @@ const fileIcon = (m) => {
   if (m.includes('image')) return 'bi bi-file-earmark-image text-primary'
   return 'bi bi-file-earmark'
 }
-const formatSize = (b) => !b ? '—' : b < 1024 * 1024 ? (b/1024).toFixed(1)+' KB' : (b/1024/1024).toFixed(2)+' MB'
+const formatSize = (b) => !b ? '' : b < 1024 * 1024 ? (b/1024).toFixed(1)+' KB' : (b/1024/1024).toFixed(2)+' MB'
 const formatDate = (d) => {
-  if (!d) return '—'
+  if (!d) return ''
   const localeMap = { pt: 'pt-PT', en: 'en-GB', fr: 'fr-FR' }
   return new Date(d).toLocaleDateString(localeMap[useI18n().locale.value] || 'pt-PT')
 }

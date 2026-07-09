@@ -212,11 +212,11 @@ const statusLabel = (status) => ({
 }[status] || status)
 
 const formatCurrency = (v, c) => {
-  if (!v || v == 0) return '—'
+  if (!v || v == 0) return ''
   return new Intl.NumberFormat('pt-AO', { style: 'currency', currency: c || 'AOA', maximumFractionDigits: 0 }).format(v)
 }
 
-const formatDate = (d) => d ? new Date(d).toLocaleDateString(locale.value === 'pt' ? 'pt-PT' : locale.value === 'en' ? 'en-US' : 'fr-FR') : '—'
+const formatDate = (d) => d ? new Date(d).toLocaleDateString(locale.value === 'pt' ? 'pt-PT' : locale.value === 'en' ? 'en-US' : 'fr-FR') : ''
 
 onMounted(fetchData)
 </script>
