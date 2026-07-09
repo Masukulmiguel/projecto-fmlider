@@ -226,6 +226,40 @@
             <h6><i class="bi bi-text-left me-1"></i> Estado Legalização</h6>
             <p class="text-muted">{{ detailItem.estado_legalizacao }}</p>
           </div>
+
+          <div v-if="detailItem.bl" class="mt-3 tracking-panel">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0"><i class="bi bi-box-seam me-1"></i> Rastreamento do Contentor</h6>
+              <button class="btn btn-outline-primary btn-sm" @click="fetchTracking(detailItem.bl)" :disabled="trackingLoading">
+                <span v-if="trackingLoading" class="spinner-border spinner-border-sm me-1"></span>
+                {{ trackingLoading ? 'A rastrear...' : 'Actualizar' }}
+              </button>
+            </div>
+            <div v-if="trackingData">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge" :class="trackingStatusClass">{{ trackingData.fmliderStatusLabel }}</span>
+                <small class="text-muted">{{ trackingData.carrier }}</small>
+                <small v-if="trackingData.cached" class="text-muted">(dados de {{ formatDate(trackingData.cachedAt) }})</small>
+              </div>
+              <div v-if="trackingData.events && trackingData.events.length > 0" class="tracking-timeline-mini">
+                <div v-for="(evt, idx) in trackingData.events.slice(0, 5)" :key="idx" class="timeline-mini-item">
+                  <div class="timeline-mini-dot" :class="{ 'active': idx === 0 }"></div>
+                  <div class="timeline-mini-content">
+                    <strong>{{ evt.status }}</strong>
+                    <span v-if="evt.location" class="text-muted ms-1">- {{ evt.location }}</span>
+                    <div v-if="evt.date" class="text-muted" style="font-size:0.8rem">{{ formatDate(evt.date) }}</div>
+                  </div>
+                </div>
+              </div>
+              <div v-else-if="!trackingLoading" class="text-muted" style="font-size:0.9rem">
+                {{ trackingData.message || 'Nenhum evento de rastreamento encontrado.' }}
+              </div>
+            </div>
+            <div v-else-if="!trackingLoading" class="text-muted" style="font-size:0.9rem">
+              Clique em "Actualizar" para buscar dados de rastreamento do BL <code>{{ detailItem.bl }}</code>
+            </div>
+          </div>
+
           <div v-if="detailItem.observacoes" class="mt-3">
             <h6><i class="bi bi-sticky me-1"></i> Observações</h6>
             <p class="text-muted">{{ detailItem.observacoes }}</p>
@@ -280,6 +314,10 @@ const showDeleteModal = ref(false)
 const editingItem = ref(null)
 const detailItem = ref(null)
 const deleteItem = ref(null)
+
+const trackingLoading = ref(false)
+const trackingData = ref(null)
+const trackingStatusClass = ref('bg-secondary')
 
 const importing = ref(false)
 const importProgress = ref('')
@@ -412,11 +450,36 @@ const openEdit = (item) => {
   showModal.value = true
 }
 
-const openDetail = (item) => { detailItem.value = item; showDetailModal.value = true }
+const openDetail = (item) => { detailItem.value = item; showDetailModal.value = true; trackingData.value = null }
 const openDelete = (item) => { deleteItem.value = item; showDeleteModal.value = true }
 const closeModal = () => { showModal.value = false; editingItem.value = null }
-const closeDetail = () => { showDetailModal.value = false; detailItem.value = null }
+const closeDetail = () => { showDetailModal.value = false; detailItem.value = null; trackingData.value = null }
 const closeDelete = () => { showDeleteModal.value = false; deleteItem.value = null }
+
+const fetchTracking = async (bl) => {
+  if (!bl) return
+  trackingLoading.value = true
+  trackingData.value = null
+  try {
+    const apiBase = import.meta.env.VITE_API_URL || ''
+    const res = await fetch(`${apiBase}/api/tracking/process/${encodeURIComponent(bl)}`)
+    const data = await res.json()
+    if (data.success && data.data) {
+      trackingData.value = data.data
+      const status = data.data.fmliderStatus
+      if (status === 'entregue') trackingStatusClass.value = 'bg-success'
+      else if (status === 'na_base') trackingStatusClass.value = 'bg-primary'
+      else if (status === 'em_transporte') trackingStatusClass.value = 'bg-warning text-dark'
+      else if (status === 'em_transito') trackingStatusClass.value = 'bg-info text-dark'
+      else if (status === 'chegou_ao_porto') trackingStatusClass.value = 'bg-secondary'
+      else trackingStatusClass.value = 'bg-light text-dark'
+    }
+  } catch (e) {
+    trackingData.value = { message: 'Erro ao buscar dados de rastreamento.' }
+  } finally {
+    trackingLoading.value = false
+  }
+}
 
 const saveItem = async () => {
   if (!form.file_number) { showToast('File Number é obrigatório', 'error'); return }
@@ -750,6 +813,12 @@ onMounted(async () => {
 .toast-error { background: #dc3545; }
 .toast-warning { background: #f59e0b; }
 .toast-info { background: #3b82f6; }
+.tracking-panel { background: #f8f9fa; border: 1px solid #e4e6eb; border-radius: 12px; padding: 16px; }
+.tracking-timeline-mini { margin-top: 8px; padding-left: 8px; border-left: 2px solid #dee2e6; }
+.timeline-mini-item { position: relative; padding: 6px 0 6px 16px; }
+.timeline-mini-dot { position: absolute; left: -9px; top: 10px; width: 10px; height: 10px; border-radius: 50%; background: #dee2e6; border: 2px solid #fff; }
+.timeline-mini-dot.active { background: #d4af37; }
+.timeline-mini-content { font-size: 0.85rem; }
 @media (max-width: 768px) {
   .admin-page { padding: 16px !important; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
