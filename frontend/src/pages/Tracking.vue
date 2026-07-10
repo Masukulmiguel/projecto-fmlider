@@ -64,7 +64,16 @@
               </div>
             </div>
 
-            <div v-if="result.events && result.events.length > 0" class="result-body">
+            <div v-if="result.redirect" class="result-body text-center py-4">
+              <i class="bi bi-box-arrow-up-right display-4 text-primary"></i>
+              <p class="mt-3 mb-3">{{ result.message || t('tracking.no_events') }}</p>
+              <a :href="result.redirect" target="_blank" rel="noopener" class="btn btn-primary">
+                <i class="bi bi-box-arrow-up-right me-2"></i>
+                {{ t('tracking.open_carrier') || 'Abrir site do transportador' }}
+              </a>
+            </div>
+
+            <div v-else-if="result.events && result.events.length > 0" class="result-body">
               <h6 class="mb-3">{{ t('tracking.events_timeline') }}</h6>
               <div class="timeline">
                 <div

@@ -127,8 +127,10 @@ export default async function handler(req, res) {
         carrier: carrierName,
         carrierId: carrier,
         events,
+        redirect: result.redirect || null,
         cached: false,
         error: result.error || null,
+        message: result.message || null,
       },
     });
   } catch (error) {
