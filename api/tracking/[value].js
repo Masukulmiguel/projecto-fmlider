@@ -1,16 +1,24 @@
-import { createClient } from '@supabase/supabase-js';
-import { detectCarrier, normalizeEvents } from '../../lib/tracking/scrapers/browser.js';
+import { detectCarrier, normalizeEvents, closeBrowser } from '../../lib/tracking/scrapers/browser.js';
 import { trackHapag } from '../../lib/tracking/scrapers/hapag.js';
 import { trackMSC } from '../../lib/tracking/scrapers/msc.js';
 import { trackMaersk } from '../../lib/tracking/scrapers/maersk.js';
 import { trackCMACGM } from '../../lib/tracking/scrapers/cmacgm.js';
 import { trackNaiber } from '../../lib/tracking/scrapers/naiber.js';
-import { closeBrowser } from '../../lib/tracking/scrapers/browser.js';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
+let supabase = null;
+
+async function getSupabase() {
+  if (supabase) return supabase;
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
+  try {
+    const { createClient } = await import('@supabase/supabase-js');
+    supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+    return supabase;
+  } catch (e) {
+    console.error('Supabase init error:', e.message);
+    return null;
+  }
+}
 
 const scrapers = {
   hapag: trackHapag,
@@ -42,19 +50,23 @@ export default async function handler(req, res) {
   const { carrier, name: carrierName } = detectCarrier(cleanValue);
 
   try {
-    const cached = await getCached(cleanValue);
-    if (cached) {
-      return res.status(200).json({
-        success: true,
-        data: {
-          input: value.trim(),
-          carrier: carrierName,
-          carrierId: carrier,
-          events: cached.events,
-          cached: true,
-          cachedAt: cached.cached_at,
-        },
-      });
+    const db = await getSupabase();
+
+    if (db) {
+      const cached = await getCached(db, cleanValue);
+      if (cached) {
+        return res.status(200).json({
+          success: true,
+          data: {
+            input: value.trim(),
+            carrier: carrierName,
+            carrierId: carrier,
+            events: cached.events,
+            cached: true,
+            cachedAt: cached.cached_at,
+          },
+        });
+      }
     }
 
     if (carrier === 'unknown') {
@@ -87,13 +99,11 @@ export default async function handler(req, res) {
     const result = await scraper(cleanValue);
     const events = normalizeEvents(result.events || []);
 
-    if (events.length > 0) {
-      await cacheResult(cleanValue, carrier, events);
+    if (events.length > 0 && db) {
+      await cacheResult(db, cleanValue, carrier, events);
     }
 
-    try {
-      await closeBrowser();
-    } catch (e) {}
+    try { await closeBrowser(); } catch (e) {}
 
     return res.status(200).json({
       success: true,
@@ -107,36 +117,39 @@ export default async function handler(req, res) {
       },
     });
   } catch (error) {
-    try {
-      await closeBrowser();
-    } catch (e) {}
+    try { await closeBrowser(); } catch (e) {}
 
     console.error('Tracking error:', error.message);
-    return res.status(500).json({
-      success: false,
-      message: 'Erro ao rastrear. Tente novamente.',
+    return res.status(200).json({
+      success: true,
+      data: {
+        input: value.trim(),
+        carrier: carrierName,
+        carrierId: carrier,
+        events: [],
+        message: 'Erro ao rastrear. Tente novamente mais tarde.',
+      },
     });
   }
 }
 
-async function getCached(value) {
+async function getCached(db, value) {
   try {
-    const { data } = await supabase
+    const { data } = await db
       .from('container_events')
       .select('events, cached_at')
       .eq('container_number', value)
       .gte('cached_at', new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString())
       .single();
-
     return data;
   } catch {
     return null;
   }
 }
 
-async function cacheResult(value, carrier, events) {
+async function cacheResult(db, value, carrier, events) {
   try {
-    await supabase.from('container_events').upsert(
+    await db.from('container_events').upsert(
       {
         container_number: value,
         carrier,
