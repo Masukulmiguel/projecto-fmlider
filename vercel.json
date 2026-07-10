@@ -2,7 +2,7 @@
   "name": "projecto-fmlider",
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
-  "installCommand": "cd frontend && npm install && cd ../api && npm install",
+  "installCommand": "cd frontend && npm install",
   "headers": [
     {
       "source": "/api/(.*)",
