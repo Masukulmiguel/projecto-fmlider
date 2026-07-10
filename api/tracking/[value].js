@@ -1,21 +1,20 @@
-import { detectCarrier, normalizeEvents, closeBrowser } from '../../lib/tracking/scrapers/browser.js';
+import { detectCarrier, normalizeEvents } from '../../lib/tracking/scrapers/browser.js';
 import { trackHapag } from '../../lib/tracking/scrapers/hapag.js';
 import { trackMSC } from '../../lib/tracking/scrapers/msc.js';
 import { trackMaersk } from '../../lib/tracking/scrapers/maersk.js';
 import { trackCMACGM } from '../../lib/tracking/scrapers/cmacgm.js';
 import { trackNaiber } from '../../lib/tracking/scrapers/naiber.js';
 
-let supabase = null;
+let supabaseClient = null;
 
-async function getSupabase() {
-  if (supabase) return supabase;
+function getSupabase() {
+  if (supabaseClient) return supabaseClient;
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
   try {
-    const { createClient } = await import('@supabase/supabase-js');
-    supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-    return supabase;
+    const { createClient } = require('@supabase/supabase-js');
+    supabaseClient = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+    return supabaseClient;
   } catch (e) {
-    console.error('Supabase init error:', e.message);
     return null;
   }
 }
@@ -50,23 +49,31 @@ export default async function handler(req, res) {
   const { carrier, name: carrierName } = detectCarrier(cleanValue);
 
   try {
-    const db = await getSupabase();
+    const db = getSupabase();
 
     if (db) {
-      const cached = await getCached(db, cleanValue);
-      if (cached) {
-        return res.status(200).json({
-          success: true,
-          data: {
-            input: value.trim(),
-            carrier: carrierName,
-            carrierId: carrier,
-            events: cached.events,
-            cached: true,
-            cachedAt: cached.cached_at,
-          },
-        });
-      }
+      try {
+        const { data } = await db
+          .from('container_events')
+          .select('events, cached_at')
+          .eq('container_number', cleanValue)
+          .gte('cached_at', new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString())
+          .single();
+
+        if (data) {
+          return res.status(200).json({
+            success: true,
+            data: {
+              input: value.trim(),
+              carrier: carrierName,
+              carrierId: carrier,
+              events: data.events,
+              cached: true,
+              cachedAt: data.cached_at,
+            },
+          });
+        }
+      } catch (e) {}
     }
 
     if (carrier === 'unknown') {
@@ -100,10 +107,18 @@ export default async function handler(req, res) {
     const events = normalizeEvents(result.events || []);
 
     if (events.length > 0 && db) {
-      await cacheResult(db, cleanValue, carrier, events);
+      try {
+        await db.from('container_events').upsert(
+          {
+            container_number: cleanValue,
+            carrier,
+            events,
+            cached_at: new Date().toISOString(),
+          },
+          { onConflict: 'container_number' }
+        );
+      } catch (e) {}
     }
-
-    try { await closeBrowser(); } catch (e) {}
 
     return res.status(200).json({
       success: true,
@@ -117,8 +132,6 @@ export default async function handler(req, res) {
       },
     });
   } catch (error) {
-    try { await closeBrowser(); } catch (e) {}
-
     console.error('Tracking error:', error.message);
     return res.status(200).json({
       success: true,
@@ -130,35 +143,5 @@ export default async function handler(req, res) {
         message: 'Erro ao rastrear. Tente novamente mais tarde.',
       },
     });
-  }
-}
-
-async function getCached(db, value) {
-  try {
-    const { data } = await db
-      .from('container_events')
-      .select('events, cached_at')
-      .eq('container_number', value)
-      .gte('cached_at', new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString())
-      .single();
-    return data;
-  } catch {
-    return null;
-  }
-}
-
-async function cacheResult(db, value, carrier, events) {
-  try {
-    await db.from('container_events').upsert(
-      {
-        container_number: value,
-        carrier,
-        events,
-        cached_at: new Date().toISOString(),
-      },
-      { onConflict: 'container_number' }
-    );
-  } catch (e) {
-    console.error('Cache error:', e.message);
   }
 }
