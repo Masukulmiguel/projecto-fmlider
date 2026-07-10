@@ -77,6 +77,7 @@ export default async function handler(req, res) {
     }
 
     if (carrier === 'unknown') {
+      const searchUrl = `https://www.containertracking.org/tracking/${encodeURIComponent(cleanValue)}`;
       return res.status(200).json({
         success: true,
         data: {
@@ -84,7 +85,8 @@ export default async function handler(req, res) {
           carrier: 'Desconhecida',
           carrierId: 'unknown',
           events: [],
-          message: 'Não foi possível identificar a transportadora pelo número fornecido.',
+          redirect: searchUrl,
+          message: 'Transportadora não identificada. Pode tentar rastrear no ContainerTracking.org',
         },
       });
     }
