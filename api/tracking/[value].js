@@ -1,11 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
-import { detectCarrier, normalizeEvents } from './scrapers/browser.js';
-import { trackHapag } from './scrapers/hapag.js';
-import { trackMSC } from './scrapers/msc.js';
-import { trackMaersk } from './scrapers/maersk.js';
-import { trackCMACGM } from './scrapers/cmacgm.js';
-import { trackNaiber } from './scrapers/naiber.js';
-import { closeBrowser } from './scrapers/browser.js';
+import { detectCarrier, normalizeEvents } from '../../lib/tracking/scrapers/browser.js';
+import { trackHapag } from '../../lib/tracking/scrapers/hapag.js';
+import { trackMSC } from '../../lib/tracking/scrapers/msc.js';
+import { trackMaersk } from '../../lib/tracking/scrapers/maersk.js';
+import { trackCMACGM } from '../../lib/tracking/scrapers/cmacgm.js';
+import { trackNaiber } from '../../lib/tracking/scrapers/naiber.js';
+import { closeBrowser } from '../../lib/tracking/scrapers/browser.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,

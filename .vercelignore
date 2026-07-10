@@ -1,1 +1,7 @@
-api/
+api/admin/
+api/auth/
+api/bi-lookup/
+api/chatbot/
+api/nif-lookup/
+api/setup/
+api/tracking/scrapers/
