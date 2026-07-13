@@ -575,6 +575,22 @@ const loading = ref(false)
 const motoristas = ref([])
 const camioes = ref([])
 const clients = ref([])
+const entregaEstadoLabels = { pendente: 'Pendente', em_transito: 'Em Trânsito', entregue: 'Entregue', cancelado: 'Cancelado' }
+
+const notifyEntregaCliente = async (clienteId, referencia, oldEstado, newEstado) => {
+  if (!clienteId) return
+  try {
+    await supabase.from('notifications').insert({
+      user_id: clienteId,
+      type: 'entrega_status',
+      title: 'Estado da Entrega Atualizado',
+      body: `A entrega ${referencia} teve o estado alterado de "${entregaEstadoLabels[oldEstado] || oldEstado}" para "${entregaEstadoLabels[newEstado] || newEstado}".`,
+      icon: 'bi-truck',
+      is_read: false
+    })
+  } catch (e) { console.error('Erro ao notificar cliente sobre entrega:', e) }
+}
+
 const filters = reactive({ q: '', estado: '', motorista_id: '', destino: '' })
 const currentPage = ref(1)
 const pageSize = 20
@@ -848,16 +864,26 @@ const closeStatusModal = () => { showStatusModal.value = false; statusItem.value
 const updateStatus = async () => {
   savingStatus.value = true
   try {
+    const oldEstado = statusItem.value.estado
     const { error } = await supabase.from('entregas')
       .update({ estado: statusForm.estado, data_entrega: statusForm.estado === 'entregue' ? new Date().toISOString() : null })
       .eq('id', statusItem.value.id)
     if (error) throw error
 
     await supabase.from('historico_entregas').insert({
-      entrega_id: statusItem.value.id, estado_anterior: statusItem.value.estado,
+      entrega_id: statusItem.value.id, estado_anterior: oldEstado,
       estado_novo: statusForm.estado, utilizador_nome: 'Admin',
       observacoes: statusForm.observacoes || null
     })
+
+    if (oldEstado !== statusForm.estado && statusItem.value.cliente_id) {
+      await notifyEntregaCliente(
+        statusItem.value.cliente_id,
+        statusItem.value.referencia_fmlider || `#${statusItem.value.id}`,
+        oldEstado,
+        statusForm.estado
+      )
+    }
 
     showToast('success', 'Estado actualizado!')
     closeStatusModal()

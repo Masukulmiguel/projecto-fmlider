@@ -377,6 +377,22 @@ const openEdit = (item) => {
 }
 const closeModal = () => { showModal.value = false; editingItem.value = null }
 
+const estadoLabelMap = { aguardando_chegada: 'Aguardando Chegada', chegou_ao_porto: 'Chegou ao Porto', em_terminal: 'Em Terminal', na_base: 'Na Base FMLider', agendado_para_entrega: 'Agendado p/ Entrega', em_transporte: 'Em Transporte', entregue: 'Entregue', devolvido: 'Devolvido', cancelado: 'Cancelado' }
+
+const notifyClient = async (clienteId, numero, oldEstado, newEstado) => {
+  if (!clienteId) return
+  try {
+    await supabase.from('notifications').insert({
+      user_id: clienteId,
+      type: 'container_status',
+      title: 'Estado do Contentor Atualizado',
+      body: `O contentor ${numero} teve o estado alterado de "${estadoLabelMap[oldEstado] || oldEstado}" para "${estadoLabelMap[newEstado] || newEstado}".`,
+      icon: 'bi-box-seam',
+      is_read: false
+    })
+  } catch (e) { console.error('Erro ao notificar cliente:', e) }
+}
+
 const save = async () => {
   if (!form.numero?.trim()) { showToast('error', 'O número do contentor é obrigatório.'); return }
   if (!form.cliente_id) { showToast('error', 'O cliente é obrigatório.'); return }
@@ -385,8 +401,13 @@ const save = async () => {
     const payload = { ...form }
     Object.keys(payload).forEach(k => { if (payload[k] === '' || payload[k] === null) payload[k] = null })
     if (editingItem.value) {
+      const oldEstado = editingItem.value.estado
+      const newEstado = payload.estado
       const { error } = await supabase.from('contentores').update(payload).eq('id', editingItem.value.id)
       if (error) throw error
+      if (oldEstado && newEstado && oldEstado !== newEstado) {
+        await notifyClient(form.cliente_id, form.numero, oldEstado, newEstado)
+      }
       showToast('success', 'Contentor atualizado!')
     } else {
       const { error } = await supabase.from('contentores').insert(payload)

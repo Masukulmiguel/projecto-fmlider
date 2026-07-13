@@ -61,7 +61,14 @@
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
         <h6 class="mb-0">{{ t('admin.visitors_recent') }}</h6>
-        <small class="text-muted">{{ filteredRecent.length }} {{ t('common.of') }} {{ data?.recent?.length || 0 }}</small>
+        <div class="d-flex align-items-center gap-3">
+          <small class="text-muted">{{ pageStart }}–{{ pageEnd }} {{ t('common.of') }} {{ filteredRecent.length }}</small>
+          <div class="pagination-btns">
+            <button class="page-btn" :disabled="page === 1" @click="page--"><i class="bi bi-chevron-left"></i></button>
+            <span class="page-num">{{ page }}</span>
+            <button class="page-btn" :disabled="pageEnd >= filteredRecent.length" @click="page++"><i class="bi bi-chevron-right"></i></button>
+          </div>
+        </div>
       </div>
       <div class="table-responsive">
         <table class="table table-hover mb-0 align-middle">
@@ -86,7 +93,7 @@
             <tr v-else-if="filteredRecent.length === 0">
               <td colspan="8" class="text-center text-muted py-4">{{ t('admin.visitors_empty') }}</td>
             </tr>
-            <tr v-for="v in filteredRecent" :key="v.id">
+            <tr v-for="v in paginatedRecent" :key="v.id">
               <td><code class="ip">{{ v.ip_address || '' }}</code></td>
               <td>
                 <i class="bi bi-geo-alt-fill text-danger me-1"></i>
@@ -115,7 +122,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useI18n } from '@/composables/useI18n'
 
@@ -125,6 +132,37 @@ const data = ref(null)
 const loading = ref(false)
 const search = ref('')
 const deviceFilter = ref('')
+
+watch([search, deviceFilter], () => { page.value = 1 })
+const page = ref(1)
+const pageSize = 10
+
+const filteredRecent = computed(() => {
+  if (!data.value?.recent) return []
+  const q = search.value.trim().toLowerCase()
+  return data.value.recent.filter(v => {
+    if (deviceFilter.value && v.device_type !== deviceFilter.value) return false
+    if (!q) return true
+    return (
+      (v.ip_address || '').toLowerCase().includes(q) ||
+      (v.country || '').toLowerCase().includes(q) ||
+      (v.city || '').toLowerCase().includes(q) ||
+      (v.browser || '').toLowerCase().includes(q) ||
+      (v.os || '').toLowerCase().includes(q) ||
+      (v.user_name || '').toLowerCase().includes(q) ||
+      (v.page_url || '').toLowerCase().includes(q)
+    )
+  })
+})
+
+const totalPages = computed(() => Math.ceil(filteredRecent.value.length / pageSize))
+const pageStart = computed(() => filteredRecent.value.length === 0 ? 0 : (page.value - 1) * pageSize + 1)
+const pageEnd = computed(() => Math.min(page.value * pageSize, filteredRecent.value.length))
+
+const paginatedRecent = computed(() => {
+  const start = (page.value - 1) * pageSize
+  return filteredRecent.value.slice(start, start + pageSize)
+})
 
 const load = async () => {
   loading.value = true
@@ -147,24 +185,6 @@ const load = async () => {
   } catch (e) { console.error(e) }
   finally { loading.value = false }
 }
-
-const filteredRecent = computed(() => {
-  if (!data.value?.recent) return []
-  const q = search.value.trim().toLowerCase()
-  return data.value.recent.filter(v => {
-    if (deviceFilter.value && v.device_type !== deviceFilter.value) return false
-    if (!q) return true
-    return (
-      (v.ip_address || '').toLowerCase().includes(q) ||
-      (v.country || '').toLowerCase().includes(q) ||
-      (v.city || '').toLowerCase().includes(q) ||
-      (v.browser || '').toLowerCase().includes(q) ||
-      (v.os || '').toLowerCase().includes(q) ||
-      (v.user_name || '').toLowerCase().includes(q) ||
-      (v.page_url || '').toLowerCase().includes(q)
-    )
-  })
-})
 
 const formatTime = (iso) => {
   if (!iso) return ''
@@ -226,4 +246,39 @@ onMounted(load)
 .device-desktop { background: #dbeafe; color: #1d4ed8; }
 .device-mobile { background: #d1fae5; color: #065f46; }
 .device-tablet { background: #fef3c7; color: #92400e; }
+
+.pagination-btns {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.page-btn {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.page-btn:hover:not(:disabled) {
+  border-color: #2563eb;
+  color: #2563eb;
+  background: #eff6ff;
+}
+.page-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.page-num {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #334155;
+  min-width: 20px;
+  text-align: center;
+}
 </style>
