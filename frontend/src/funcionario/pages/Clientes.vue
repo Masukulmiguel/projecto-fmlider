@@ -81,7 +81,7 @@ const items = ref([])
 const loading = ref(false)
 const search = ref('')
 const currentPage = ref(1)
-const perPage = 20
+const perPage = 10
 
 const initials = (n) => (n || '?').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT') : ''

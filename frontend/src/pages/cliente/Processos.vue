@@ -172,7 +172,7 @@ const authStore = useAuthStore()
 const loading = ref(true)
 const items = ref([])
 const currentPage = ref(1)
-const perPage = 20
+const perPage = 10
 const totalCount = ref(0)
 
 const showDetailModal = ref(false)

@@ -218,7 +218,7 @@ const loading = ref(false)
 const clients = ref([])
 const filters = reactive({ q: '', estado: '', cliente_id: '', terminal: '' })
 const currentPage = ref(1)
-const pageSize = 20
+const pageSize = 10
 const totalItems = ref(0)
 let searchTimer = null
 

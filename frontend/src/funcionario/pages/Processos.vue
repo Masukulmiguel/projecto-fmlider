@@ -162,7 +162,7 @@ const loading = ref(true)
 const saving = ref(false)
 const items = ref([])
 const currentPage = ref(1)
-const perPage = 20
+const perPage = 10
 const totalCount = ref(0)
 
 const showModal = ref(false)

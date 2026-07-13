@@ -252,7 +252,7 @@ const items = ref([])
 const loading = ref(false)
 const filters = reactive({ q: '', estado: '' })
 const currentPage = ref(1)
-const pageSize = 20
+const pageSize = 10
 const totalItems = ref(0)
 let searchTimer = null
 

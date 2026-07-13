@@ -507,7 +507,7 @@ const updateMode = ref(false)
 const licenciamentos = ref([])
 const currentPage = ref(1)
 const totalPages = ref(1)
-const pageSize = 20
+const pageSize = 10
 const schemaError = ref(false)
 const sqlCopied = ref(false)
 

@@ -593,7 +593,7 @@ const notifyEntregaCliente = async (clienteId, referencia, oldEstado, newEstado)
 
 const filters = reactive({ q: '', estado: '', motorista_id: '', destino: '' })
 const currentPage = ref(1)
-const pageSize = 20
+const pageSize = 10
 let searchTimer = null
 
 const showSelectContentor = ref(false)
