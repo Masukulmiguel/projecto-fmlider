@@ -165,7 +165,7 @@ const saveSettings = async () => {
   message.value = null
   try {
     const rows = Object.entries(form).map(([key, value]) => ({ key, value }))
-    const { error } = await supabase.from('settings').upsert(rows)
+    const { error } = await supabase.from('settings').upsert(rows, { onConflict: 'key' })
     if (error) throw error
     message.value = { type: 'success', text: t('admin.settings_saved') }
   } catch (e) {
