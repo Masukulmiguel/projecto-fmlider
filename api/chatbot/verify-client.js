@@ -1,19 +1,9 @@
 import { setCorsHeaders, handleOptions } from '../_lib/cors.js'
-import { createClient } from '@supabase/supabase-js'
 
 export default async function handler(req, res) {
   setCorsHeaders(req, res)
   if (req.method === 'OPTIONS') return handleOptions(req, res)
   if (req.method !== 'POST') return res.status(405).json({ success: false, message: 'Method not allowed' })
-
-  const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || ''
-  const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY || ''
-
-  if (!supabaseUrl || !supabaseKey) {
-    return res.status(500).json({ success: false, message: 'Supabase env vars not configured' })
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseKey)
 
   const { email, username } = req.body || {}
   if (!email || !username) {
@@ -21,6 +11,16 @@ export default async function handler(req, res) {
   }
 
   try {
+    const { createClient } = await import('@supabase/supabase-js')
+    const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || ''
+    const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY || ''
+
+    if (!supabaseUrl || !supabaseKey) {
+      return res.status(500).json({ success: false, message: 'Supabase env vars not configured' })
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
     const { data: user, error } = await supabase
       .from('users')
       .select('id, name, approval_status')
