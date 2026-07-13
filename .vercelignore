@@ -1,6 +1,4 @@
 api/admin/
 api/auth/
-api/bi-lookup/
-api/nif-lookup/
 api/setup/
 api/tracking/scrapers/
