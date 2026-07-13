@@ -260,9 +260,9 @@ const uploadImage = async () => {
   const file = imageFile.value
   const fileExt = file.name.split('.').pop()
   const fileName = `fleet/${Date.now()}.${fileExt}`
-  const { error: uploadError } = await supabase.storage.from('site-images').upload(fileName, file)
+  const { error: uploadError } = await supabase.storage.from('uploads').upload(fileName, file)
   if (uploadError) throw uploadError
-  const { data } = supabase.storage.from('site-images').getPublicUrl(fileName)
+  const { data } = supabase.storage.from('uploads').getPublicUrl(fileName)
   return data.publicUrl
 }
 
