@@ -1,6 +1,6 @@
 <?php
 
-$allowedOrigins = ['https://fmlider.co.ao', 'https://fmlider-66.vercel.app', 'https://frontend-d79z59ydf-fmlider-projects.vercel.app'];
+$allowedOrigins = ['https://fmlider.co.ao', 'https://fmlider-66.vercel.app', 'https://frontend-d79z59ydf-fmlider-projects.vercel.app', 'https://projecto-fmlider.vercel.app'];
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($origin, $allowedOrigins)) {
     header('Access-Control-Allow-Origin: ' . $origin);

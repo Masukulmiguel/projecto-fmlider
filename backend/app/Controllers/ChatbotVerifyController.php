@@ -54,14 +54,11 @@ class ChatbotVerifyController
 
         Response::success([
             'user' => [
-                'id' => $user['id'],
-                'username' => $user['username'],
                 'name' => $user['name'],
-                'email' => $user['email'],
-                'role' => $user['role'],
-                'photo' => $user['photo'],
             ],
-            'company' => $company,
+            'company' => $company ? [
+                'company_name' => $company['company_name'] ?? null,
+            ] : null,
         ]);
     }
 }

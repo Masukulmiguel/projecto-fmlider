@@ -17,6 +17,28 @@ class OwnerScope
         if (!$payload) {
             Response::error('Token inválido ou expirado', 401);
         }
+
+        // Check token blacklist (logout)
+        if (isset($payload['user_id'])) {
+            try {
+                $db = Database::connection();
+                $stmt = $db->prepare('SELECT token_blacklisted_at FROM users WHERE id = ? LIMIT 1');
+                $stmt->bind_param('i', $payload['user_id']);
+                $stmt->execute();
+                $row = $stmt->get_result()->fetch_assoc();
+                $stmt->close();
+                if ($row && !empty($row['token_blacklisted_at'])) {
+                    $blacklistedAt = strtotime($row['token_blacklisted_at']);
+                    $tokenIat = $payload['iat'] ?? 0;
+                    if ($tokenIat < $blacklistedAt) {
+                        Response::error('Sessão expirada. Faça login novamente.', 401);
+                    }
+                }
+            } catch (\Exception $e) {
+                // Column may not exist yet - skip blacklist check
+            }
+        }
+
         return $payload;
     }
 

@@ -134,6 +134,27 @@ class AuthController
         $password = $data['password'] ?? '';
         $passwordConfirm = $data['password_confirm'] ?? $data['password_confirmation'] ?? '';
 
+        // Rate limiting: max 3 registrations per IP per hour
+        $clientIp = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $rateDir = sys_get_temp_dir() . '/fml_reg_rate';
+        if (!is_dir($rateDir)) @mkdir($rateDir, 0755, true);
+        $rateFile = $rateDir . '/' . md5($clientIp) . '.json';
+        $rateData = ['attempts' => [], 'locked_until' => 0];
+        if (file_exists($rateFile)) {
+            $rateData = json_decode(@file_get_contents($rateFile), true) ?: $rateData;
+        }
+        $now = time();
+        $rateData['attempts'] = array_filter($rateData['attempts'], fn($t) => $t > $now - 3600);
+        if ($rateData['locked_until'] > $now) {
+            $mins = ceil(($rateData['locked_until'] - $now) / 60);
+            Response::error("Demasiados registos. Tente novamente em {$mins} minuto(s).", 429);
+        }
+        if (count($rateData['attempts']) >= 3) {
+            $rateData['locked_until'] = $now + 3600;
+            @file_put_contents($rateFile, json_encode($rateData));
+            Response::error('Demasiados registos a partir do seu IP. Conta bloqueada por 1 hora.', 429);
+        }
+
         $errors = [];
         if (strlen($username) < 3) $errors['username'] = 'Nome de utilizador deve ter pelo menos 3 caracteres';
         if ($name === '') $errors['name'] = 'Nome é obrigatório';
@@ -142,6 +163,8 @@ class AuthController
         if ($password !== $passwordConfirm) $errors['password_confirm'] = 'As senhas não coincidem';
 
         if (!empty($errors)) {
+            $rateData['attempts'][] = $now;
+            @file_put_contents($rateFile, json_encode($rateData));
             Response::error('Verifique os campos do formulário', 422, $errors);
         }
 
@@ -153,6 +176,8 @@ class AuthController
         $stmt->close();
 
         if ($exists) {
+            $rateData['attempts'][] = $now;
+            @file_put_contents($rateFile, json_encode($rateData));
             Response::error('Já existe uma conta com este email ou nome de utilizador', 409);
         }
 
@@ -184,6 +209,9 @@ class AuthController
             $notif->close();
         }
 
+        // Clear rate limit on successful registration
+        if (file_exists($rateFile)) @unlink($rateFile);
+
         Response::success([
             'user_id' => $newId,
             'username' => $username,
@@ -193,6 +221,18 @@ class AuthController
 
     public function logout()
     {
+        try {
+            $auth = $this->userFromToken();
+            if ($auth && isset($auth['user_id'])) {
+                $db = Database::connection();
+                $stmt = $db->prepare('UPDATE users SET token_blacklisted_at = NOW() WHERE id = ?');
+                $stmt->bind_param('i', $auth['user_id']);
+                @$stmt->execute();
+                $stmt->close();
+            }
+        } catch (\Exception $e) {
+            // Token may already be invalid or column may not exist
+        }
         Response::success([], 'Sessão terminada');
     }
 
@@ -310,7 +350,7 @@ class AuthController
         $new = $data['new_password'] ?? '';
         $confirm = $data['new_password_confirmation'] ?? $data['password_confirmation'] ?? '';
 
-        if (strlen($new) < 6) Response::error('Nova senha deve ter pelo menos 6 caracteres', 422);
+        if (strlen($new) < 12) Response::error('Nova senha deve ter pelo menos 12 caracteres', 422);
         if ($new !== $confirm) Response::error('A confirmação da nova senha não coincide', 422);
 
         $db = Database::connection();
@@ -478,6 +518,27 @@ class AuthController
         $payload = Jwt::decode($m[1]);
         if (!$payload) {
             Response::error('Token inválido ou expirado', 401);
+        }
+
+        // Check token blacklist (logout)
+        if (isset($payload['user_id'])) {
+            try {
+                $db = Database::connection();
+                $stmt = $db->prepare('SELECT token_blacklisted_at FROM users WHERE id = ? LIMIT 1');
+                $stmt->bind_param('i', $payload['user_id']);
+                $stmt->execute();
+                $row = $stmt->get_result()->fetch_assoc();
+                $stmt->close();
+                if ($row && !empty($row['token_blacklisted_at'])) {
+                    $blacklistedAt = strtotime($row['token_blacklisted_at']);
+                    $tokenIat = $payload['iat'] ?? 0;
+                    if ($tokenIat < $blacklistedAt) {
+                        Response::error('Sessão expirada. Faça login novamente.', 401);
+                    }
+                }
+            } catch (\Exception $e) {
+                // Column may not exist yet - skip blacklist check
+            }
         }
 
         if (!isset($payload['user_id']) && isset($payload['sub'])) {

@@ -1,3 +1,4 @@
+import { setCorsHeaders, handleOptions } from '../../_lib/cors.js';
 import { createClient } from '@supabase/supabase-js';
 import { detectCarrier, normalizeEvents } from '../../../lib/tracking/scrapers/browser.js';
 import { trackHapag } from '../../../lib/tracking/scrapers/hapag.js';
@@ -53,11 +54,8 @@ const FMLIDER_STATUS_LABELS = {
 };
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  setCorsHeaders(req, res);
+  if (req.method === 'OPTIONS') return handleOptions(req, res);
   if (req.method !== 'GET') {
     return res.status(405).json({ success: false, message: 'Method not allowed' });
   }

@@ -17,7 +17,11 @@ if (strpos($path, '/api/') === 0 || isset($_GET['api'])) {
     // Handle bi-lookup directly (external APIs)
     if (preg_match('#^/api/bi-lookup/(\d{9}[A-Za-z]{2}\d{3})$#', $path, $m)) {
         header('Content-Type: application/json; charset=utf-8');
-        header('Access-Control-Allow-Origin: *');
+        $allowedOrigins = ['https://fmlider.co.ao', 'https://fmlider-66.vercel.app', 'https://projecto-fmlider.vercel.app', 'https://projecto-fmlider-ghjgy3j9k-fmlider-projects.vercel.app'];
+        $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+        if (in_array($origin, $allowedOrigins)) {
+            header('Access-Control-Allow-Origin: ' . $origin);
+        }
         $bi = strtoupper($m[1]);
         $apis = [
             'http://consulta.edgarsingui.ao/consultar/' . $bi,
@@ -53,7 +57,11 @@ if (strpos($path, '/api/') === 0 || isset($_GET['api'])) {
     // Handle nif-lookup via AGT scraping
     if (preg_match('#^/api/nif-lookup/(\d{10})$#', $path, $m)) {
         header('Content-Type: application/json; charset=utf-8');
-        header('Access-Control-Allow-Origin: *');
+        $allowedOrigins = ['https://fmlider.co.ao', 'https://fmlider-66.vercel.app', 'https://projecto-fmlider.vercel.app', 'https://projecto-fmlider-ghjgy3j9k-fmlider-projects.vercel.app'];
+        $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+        if (in_array($origin, $allowedOrigins)) {
+            header('Access-Control-Allow-Origin: ' . $origin);
+        }
         $nif = $m[1];
         require_once __DIR__ . '/backend/app/Controllers/NifController.php';
         $ctrl = new \App\Controllers\NifController();

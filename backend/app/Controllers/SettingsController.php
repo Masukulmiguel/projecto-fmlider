@@ -9,6 +9,9 @@ class SettingsController
 {
     public function index()
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $db = Database::connection();
         $result = $db->query("SELECT `key`, `value` FROM settings");
         $settings = [];
@@ -21,6 +24,9 @@ class SettingsController
 
     public function get($key)
     {
+        $auth = \App\Helpers\OwnerScope::userFromToken();
+        if (!\App\Helpers\OwnerScope::isAdmin($auth)) \App\Helpers\Response::error('Apenas admin', 403);
+
         $db = Database::connection();
         $stmt = $db->prepare("SELECT `value` FROM settings WHERE `key` = ?");
         $stmt->bind_param('s', $key);

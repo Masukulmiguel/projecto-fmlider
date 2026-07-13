@@ -1,13 +1,12 @@
+import { setCorsHeaders, handleOptions } from '../_lib/cors.js';
+
 const AGT_PORTAL = 'https://portaldocontribuinte.minfin.gov.ao';
 const AGT_LOOKUP = '/consultar-nif-do-contribuinte';
 const AGT_AJAX = '/consultar-headNifId-do-contribuinte';
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  setCorsHeaders(req, res);
+  if (req.method === 'OPTIONS') return handleOptions(req, res);
   if (req.method !== 'GET') return res.status(405).json({ success: false, message: 'Method not allowed' });
 
   const { bi } = req.query;
