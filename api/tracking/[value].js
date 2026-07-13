@@ -4,6 +4,8 @@ import { trackMSC } from '../../lib/tracking/scrapers/msc.js';
 import { trackMaersk } from '../../lib/tracking/scrapers/maersk.js';
 import { trackCMACGM } from '../../lib/tracking/scrapers/cmacgm.js';
 import { trackNaiber } from '../../lib/tracking/scrapers/naiber.js';
+import { trackGrimaldi } from '../../lib/tracking/scrapers/grimaldi.js';
+import { trackOREY } from '../../lib/tracking/scrapers/orey.js';
 
 let supabaseClient = null;
 
@@ -25,6 +27,8 @@ const scrapers = {
   maersk: trackMaersk,
   cmacgm: trackCMACGM,
   naiber: trackNaiber,
+  grimaldi: trackGrimaldi,
+  orey: trackOREY,
 };
 
 export default async function handler(req, res) {
