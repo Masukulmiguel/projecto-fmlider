@@ -39,10 +39,17 @@
 
             <div class="carrier-examples mt-3">
               <small class="text-muted">{{ t('tracking.example_container') }}:</small>
-              <code class="ms-1">HLCU4123456</code> (Hapag-Lloyd) &middot;
+              <code class="ms-1">HLCU4123456</code> (Hapag) &middot;
               <code>MSCU1234567</code> (MSC) &middot;
-              <code>MSDU7654321</code> (Maersk) &middot;
-              <code>CMAU8765432</code> (CMA CGM)
+              <code>CMAU8765432</code> (CMA CGM) &middot;
+              <code>MEDU9091004</code> (MSC)
+            </div>
+            <div class="carrier-examples mt-1">
+              <small class="text-muted">BL:</small>
+              <code class="ms-1">GGZ2993831</code> (CMA CGM) &middot;
+              <code>266800124</code> (Maersk) &middot;
+              <code>S329753028</code> (Grimaldi) &middot;
+              <code>LISLAD260393</code> (PSL)
             </div>
           </div>
         </div>
@@ -150,10 +157,12 @@ const error = ref(null)
 
 const carriers = [
   { id: 'hapag', name: 'Hapag-Lloyd', prefix: 'HLCU' },
-  { id: 'msc', name: 'MSC', prefix: 'MSCU' },
-  { id: 'maersk', name: 'Maersk', prefix: 'MSDU' },
+  { id: 'msc', name: 'MSC', prefix: 'MSCU/MEDU' },
+  { id: 'maersk', name: 'Maersk', prefix: 'MSDU/MSKU' },
   { id: 'cmacgm', name: 'CMA CGM', prefix: 'CMAU' },
-  { id: 'naiber', name: 'Naiber / PSL', prefix: '---' },
+  { id: 'grimaldi', name: 'Grimaldi', prefix: 'S+9d' },
+  { id: 'orey', name: 'OREY', prefix: '10d' },
+  { id: 'naiber', name: 'PSL/Naiber', prefix: 'LISLAD' },
 ]
 
 async function track() {
