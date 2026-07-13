@@ -149,6 +149,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { supabase } from '@/lib/supabase'
 import { useSiteImages } from '@/composables/useSiteImages'
 import { useI18n } from '@/composables/useI18n'
 
@@ -160,6 +161,7 @@ const highlightImage = ref('/assets/img/resachstacker/resachstacker1.jpeg')
 const selectedCategory = ref('all')
 const lightboxOpen = ref(false)
 const lightboxIndex = ref(0)
+const dbItems = ref([])
 
 const categories = computed(() => [
   { key: 'all', label: t('fleet.category_all'), icon: 'bi bi-grid' },
@@ -168,7 +170,22 @@ const categories = computed(() => [
   { key: 'equipment', label: t('fleet.category_equipment'), icon: 'bi bi-tools' },
 ])
 
-const fleetItems = computed(() => [
+const fleetItems = computed(() => {
+  if (dbItems.value.length > 0) {
+    return dbItems.value.filter(i => i.is_active !== false).map(item => ({
+      id: item.id,
+      title: item.title,
+      category: item.category,
+      categoryLabel: item.category_label || item.category,
+      image: item.image || '/assets/img/resachstacker/resachstacker1.jpeg',
+      description: item.description || '',
+      specs: item.specs || []
+    }))
+  }
+  return hardcodedFleetItems
+})
+
+const hardcodedFleetItems = [
   {
     id: 1,
     title: t('fleet.truck_tanker'),
@@ -247,7 +264,7 @@ const fleetItems = computed(() => [
       { label: t('fleet.spec_stack'), value: '4 contentores' },
     ]
   },
-])
+]
 
 const filteredItems = computed(() => {
   if (selectedCategory.value === 'all') return fleetItems.value
@@ -289,7 +306,12 @@ const nextImage = () => {
 }
 
 onMounted(async () => {
-  await fetchAll()
+  await Promise.all([
+    fetchAll(),
+    supabase.from('fleet_items').select('*').order('order_by', { ascending: true })
+      .then(({ data }) => { if (data && data.length) dbItems.value = data })
+      .catch(() => {})
+  ])
   heroBg.value = getImage('fleet', 'hero_bg', '/assets/img/resachstacker/resachstacker1.jpeg')
   highlightImage.value = getImage('fleet', 'highlight_image', '/assets/img/resachstacker/resachstacker1.jpeg')
 })

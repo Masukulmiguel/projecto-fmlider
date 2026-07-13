@@ -87,6 +87,10 @@
               <i class="bi bi-images menu-icon"></i>
               <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.gallery') }}</span>
             </router-link>
+            <router-link to="/admin/frota" class="menu-item" :class="{ active: $route.path === '/admin/frota' }" :title="collapsed ? 'Frota' : ''">
+              <i class="bi bi-truck menu-icon"></i>
+              <span class="menu-text" v-show="!collapsed">Frota</span>
+            </router-link>
             <router-link to="/admin/parceiros" class="menu-item" :class="{ active: $route.path === '/admin/parceiros' }" :title="collapsed ? t('admin_sidebar.partners') : ''">
               <i class="bi bi-handshake menu-icon"></i>
               <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.partners') }}</span>

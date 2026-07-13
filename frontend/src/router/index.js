@@ -36,6 +36,7 @@ const AdminFAQs = () => import('@/admin/pages/FAQs.vue')
 const AdminBanners = () => import('@/admin/pages/Banners.vue')
 const AdminProfile = () => import('@/admin/pages/Profile.vue')
 const AdminSettings = () => import('@/admin/pages/Settings.vue')
+const AdminFrota = () => import('@/admin/pages/Frota.vue')
 
 const ClienteDashboard = () => import('@/pages/cliente/Dashboard.vue')
 const ClienteProfile = () => import('@/pages/cliente/Profile.vue')
@@ -122,6 +123,7 @@ const routes = [
   { path: '/admin/testemunhos', name: 'AdminTestimonials', component: AdminTestimonials, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
   { path: '/admin/faqs', name: 'AdminFAQs', component: AdminFAQs, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
   { path: '/admin/banners', name: 'AdminBanners', component: AdminBanners, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
+  { path: '/admin/frota', name: 'AdminFrota', component: AdminFrota, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
   { path: '/admin/embarques', name: 'AdminEmbarques', component: AdminEmbarques, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
   { path: '/admin/documentos', name: 'AdminDocumentos', component: AdminDocumentos, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
   { path: '/admin/cotacoes', name: 'AdminCotacoes', component: AdminCotacoes, meta: { layout: 'admin', requiresAuth: true, role: 'admin' } },
