@@ -1,7 +1,7 @@
 <template>
   <div class="service-detail-page">
     <!-- Hero -->
-    <section class="sd-hero" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.72) 0%, rgba(30,58,138,0.55) 50%, rgba(15,23,42,0.72) 100%), url('${encodeURI(service.image || defaultBg)}')` }">
+    <section class="sd-hero" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.72) 0%, rgba(30,58,138,0.55) 50%, rgba(15,23,42,0.72) 100%), url('${encodeURI(heroImage)}')` }">
       <div class="container position-relative">
         <router-link to="/servicos" class="sd-back">
           <i class="bi bi-arrow-left"></i> {{ t('service_detail.back') }}
@@ -65,21 +65,24 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from '@/composables/useI18n'
+import { useSiteImages } from '@/composables/useSiteImages'
 
 const route = useRoute()
 const { t } = useI18n()
+const { getImage, fetchAll } = useSiteImages()
 
 const defaultBg = '/assets/img/servico/service1.jpg'
+const dbImages = ref({})
 
 const allServices = computed(() => ({
   'desembaraco-aduaneiro': {
     title: t('service_detail_pages.desembaraco_aduaneiro.title'),
     subtitle: t('service_detail_pages.desembaraco_aduaneiro.subtitle'),
     icon: 'bi bi-stamp',
-    image: '/assets/img/servico/Desembaraço Aduaneiro.jpeg',
+    image: dbImages.value['desembaraco-aduaneiro'] || '/assets/img/servico/Desembaraço Aduaneiro.jpeg',
     description: t('service_detail_pages.desembaraco_aduaneiro.description'),
     sections: [
       {
@@ -100,7 +103,7 @@ const allServices = computed(() => ({
     title: t('service_detail_pages.transportes.title'),
     subtitle: t('service_detail_pages.transportes.subtitle'),
     icon: 'bi bi-truck',
-    image: '/assets/img/servico/Transportes.jpg',
+    image: dbImages.value['transportes'] || '/assets/img/servico/Transportes.jpg',
     description: t('service_detail_pages.transportes.description'),
     sections: [
       {
@@ -121,7 +124,7 @@ const allServices = computed(() => ({
     title: t('service_detail_pages.armazenagem.title'),
     subtitle: t('service_detail_pages.armazenagem.subtitle'),
     icon: 'bi bi-box-seam',
-    image: '/assets/img/servico/service-storage.jpg',
+    image: dbImages.value['armazenagem'] || '/assets/img/servico/service-storage.jpg',
     description: t('service_detail_pages.armazenagem.description'),
     sections: [
       {
@@ -142,7 +145,7 @@ const allServices = computed(() => ({
     title: t('service_detail_pages.door_to_door.title'),
     subtitle: t('service_detail_pages.door_to_door.subtitle'),
     icon: 'bi bi-house-door',
-    image: '/assets/img/servico/service-door.jpg',
+    image: dbImages.value['door-to-door'] || '/assets/img/servico/service-door.jpg',
     description: t('service_detail_pages.door_to_door.description'),
     sections: [
       {
@@ -163,7 +166,7 @@ const allServices = computed(() => ({
     title: t('service_detail_pages.consultoria.title'),
     subtitle: t('service_detail_pages.consultoria.subtitle'),
     icon: 'bi bi-people',
-    image: '/assets/img/servico/service1.jpg',
+    image: dbImages.value['consultoria'] || '/assets/img/servico/service1.jpg',
     description: t('service_detail_pages.consultoria.description'),
     sections: [
       {
@@ -184,7 +187,7 @@ const allServices = computed(() => ({
     title: t('service_detail_pages.logistica_maritima.title'),
     subtitle: t('service_detail_pages.logistica_maritima.subtitle'),
     icon: 'bi bi-water',
-    image: '/assets/img/servico/Logística Marítima-1.jpg',
+    image: dbImages.value['logistica-maritima'] || '/assets/img/servico/Logística Marítima-1.jpg',
     description: t('service_detail_pages.logistica_maritima.description'),
     sections: [
       {
@@ -205,6 +208,21 @@ const allServices = computed(() => ({
 
 const slug = computed(() => route.params.slug)
 const service = computed(() => allServices.value[slug.value] || allServices.value['desembaraco-aduaneiro'])
+
+const heroImage = computed(() => {
+  const img = service.value.image
+  if (!img) return defaultBg
+  return img
+})
+
+onMounted(async () => {
+  await fetchAll()
+  const slugs = ['desembaraco-aduaneiro', 'transportes', 'armazenagem', 'door-to-door', 'consultoria', 'logistica-maritima']
+  slugs.forEach(s => {
+    const url = getImage('service_detail', s, '')
+    if (url) dbImages.value[s] = url
+  })
+})
 </script>
 
 <style scoped>
