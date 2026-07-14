@@ -85,7 +85,7 @@ import { useSiteImages } from '@/composables/useSiteImages'
 
 const router = useRouter()
 const { getImage, fetchAll } = useSiteImages()
-const bg = ref('https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=1920&q=80')
+const bg = ref('/assets/img/auth/bg1.jpg')
 
 const form = ref({
   password: '',
@@ -100,7 +100,7 @@ const showPassword = ref(false)
 
 onMounted(async () => {
   await fetchAll()
-  bg.value = getImage('auth', 'reset_bg', 'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=1920&q=80')
+  bg.value = getImage('auth', 'reset_bg', '/assets/img/auth/bg1.jpg')
 
   const { data: { session } } = await supabase.auth.getSession()
 
