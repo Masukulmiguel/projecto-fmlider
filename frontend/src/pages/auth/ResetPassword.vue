@@ -117,15 +117,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { useSiteImages } from '@/composables/useSiteImages'
-import BgImageEditor from '@/components/BgImageEditor.vue'
 
 const router = useRouter()
 const { getImage, fetchAll } = useSiteImages()
-const bg = ref('/assets/img/auth/reset_bg.jpg')
+const bg = computed(() => getImage('auth', 'reset_bg', '/assets/img/auth/reset_bg.jpg'))
 
 const form = ref({ password: '', password_confirm: '' })
 const sessionReady = ref(false)
@@ -136,7 +135,6 @@ const showPassword = ref(false)
 
 onMounted(async () => {
   await fetchAll()
-  bg.value = getImage('auth', 'reset_bg', '/assets/img/auth/reset_bg.jpg')
 
   const { data: { session } } = await supabase.auth.getSession()
   if (session) {

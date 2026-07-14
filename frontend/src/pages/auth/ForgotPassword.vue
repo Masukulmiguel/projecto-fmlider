@@ -88,24 +88,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useI18n } from '@/composables/useI18n'
 import { useSiteImages } from '@/composables/useSiteImages'
-import BgImageEditor from '@/components/BgImageEditor.vue'
 
 const authStore = useAuthStore()
 const { t } = useI18n()
 const { getImage, fetchAll } = useSiteImages()
 
-const bg = ref('/assets/img/auth/bg3.jpg')
+const bg = computed(() => getImage('auth', 'forgot_bg', getImage('auth', 'reset_bg', '/assets/img/auth/bg3.jpg')))
 const form = ref({ email: '' })
 const loading = ref(false)
 const sent = ref(false)
 
 onMounted(async () => {
   await fetchAll()
-  bg.value = getImage('auth', 'forgot_bg', getImage('auth', 'reset_bg', '/assets/img/auth/bg3.jpg'))
 })
 
 const handleReset = async () => {

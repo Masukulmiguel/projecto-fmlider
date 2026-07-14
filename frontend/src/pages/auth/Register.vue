@@ -143,16 +143,15 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useI18n } from '@/composables/useI18n'
 import { useSiteImages } from '@/composables/useSiteImages'
-import BgImageEditor from '@/components/BgImageEditor.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const { t } = useI18n()
 const { getImage, fetchAll } = useSiteImages()
 
-const bg1 = ref('/assets/img/auth/bg1.jpg')
-const bg2 = ref('/assets/img/auth/bg2.jpg')
-const bg3 = ref('/assets/img/auth/bg3.jpg')
+const bg1 = computed(() => getImage('auth', 'login_bg_1', '/assets/img/auth/bg1.jpg'))
+const bg2 = computed(() => getImage('auth', 'login_bg_2', '/assets/img/auth/bg2.jpg'))
+const bg3 = computed(() => getImage('auth', 'login_bg_3', '/assets/img/auth/bg3.jpg'))
 
 const form = reactive({
   username: '',
@@ -199,9 +198,6 @@ const eraseSubtitle = (text) => {
 
 onMounted(async () => {
   await fetchAll()
-  bg1.value = getImage('auth', 'login_bg_1', '/assets/img/auth/bg1.jpg')
-  bg2.value = getImage('auth', 'login_bg_2', '/assets/img/auth/bg2.jpg')
-  bg3.value = getImage('auth', 'login_bg_3', '/assets/img/auth/bg3.jpg')
   typeSubtitle(subtitles.value[0])
 })
 

@@ -1,4 +1,4 @@
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { supabase } from '@/lib/supabase'
 
 const siteImagesCache = ref({})
@@ -6,15 +6,19 @@ const loaded = ref(false)
 const loading = ref(false)
 
 export function useSiteImages() {
-  const fetchAll = async () => {
-    if (loaded.value) return siteImagesCache.value
+  const fetchAll = async (force = false) => {
+    if (!force && loaded.value) return siteImagesCache.value
     loading.value = true
     try {
       const { data, error } = await supabase
         .from('site_images')
         .select('section, key, image_url, alt_text')
         .eq('status', 1)
-      if (!error && data) {
+      if (error) {
+        console.error('useSiteImages: fetch error:', error.message)
+        return siteImagesCache.value
+      }
+      if (data) {
         const map = {}
         data.forEach(row => {
           if (!map[row.section]) map[row.section] = {}
@@ -27,7 +31,7 @@ export function useSiteImages() {
         loaded.value = true
       }
     } catch (e) {
-      // keep empty cache
+      console.error('useSiteImages: exception:', e)
     } finally {
       loading.value = false
     }
