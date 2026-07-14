@@ -8,6 +8,8 @@
     <div class="floating-shape shape-1"></div>
     <div class="floating-shape shape-2"></div>
 
+    <BgImageEditor section="auth" image-key="reset_bg" />
+
     <!-- Content -->
     <div class="reset-content">
       <div class="container">
@@ -121,6 +123,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { useSiteImages } from '@/composables/useSiteImages'
+import BgImageEditor from '@/components/BgImageEditor.vue'
 
 const router = useRouter()
 const { getImage, fetchAll } = useSiteImages()

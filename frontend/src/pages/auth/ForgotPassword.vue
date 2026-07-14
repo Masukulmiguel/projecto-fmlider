@@ -8,6 +8,9 @@
     <div class="floating-shape shape-1"></div>
     <div class="floating-shape shape-2"></div>
 
+    <!-- Admin bg editor -->
+    <BgImageEditor section="auth" image-key="forgot_bg" />
+
     <!-- Content -->
     <div class="forgot-content">
       <div class="container">
@@ -92,6 +95,7 @@ import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useI18n } from '@/composables/useI18n'
 import { useSiteImages } from '@/composables/useSiteImages'
+import BgImageEditor from '@/components/BgImageEditor.vue'
 
 const authStore = useAuthStore()
 const { t } = useI18n()

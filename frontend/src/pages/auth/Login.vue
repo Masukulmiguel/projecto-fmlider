@@ -11,6 +11,8 @@
     <div class="floating-shape shape-2"></div>
     <div class="floating-shape shape-3"></div>
 
+    <BgImageEditor section="auth" image-key="login_bg_1" />
+
     <div class="container login-container">
       <div class="row align-items-center justify-content-center min-vh-100">
         <div class="col-lg-10 col-xl-9">
@@ -94,6 +96,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useI18n } from '@/composables/useI18n'
 import { useSiteImages } from '@/composables/useSiteImages'
+import BgImageEditor from '@/components/BgImageEditor.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
