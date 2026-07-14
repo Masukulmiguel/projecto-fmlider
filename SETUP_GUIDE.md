@@ -1,50 +1,63 @@
-# 🚀 FMLIDER Website - Setup & Installation Guide
+# 🚀 FMLIDER Website - Guia de Configuração & Instalação
+
+## 📋 Informações do Projecto
+
+| Campo | Valor |
+|-------|-------|
+| 👨‍💻 **Desenvolvedor** | Masukulu Miguel |
+| 🏠 **Organização** | CodingLifeDev |
+| 📦 **Projecto Pai** | seefast-project |
+| 📅 **Início** | Abril 2025 |
+| 🏷️ **Versão Actual** | `2.2.1` |
+| 🌍 **Idioma** | Português de Portugal (PT-PT) |
+
+---
 
 ## ✅ Checklist de Instalação
 
 ### 1️⃣ Preparação do Ambiente
 
 - [ ] Verificar PHP 7.4+ instalado: `php -v`
-- [ ] Verificar MySQL 8.0+ instalado e rodando
+- [ ] Verificar MySQL 8.0+ instalado e a funcionar
 - [ ] Verificar Node.js 14+ instalado: `node -v`
 - [ ] Verificar npm instalado: `npm -v`
 
-### 2️⃣ Configuração do Banco de Dados
+### 2️⃣ Configuração da Base de Dados
 
 ```bash
-# Abrir MySQL
+# 🗃️ Abrir MySQL
 mysql -u root -p
 
-# Criar base de dados
+# 🔧 Criar base de dados
 CREATE DATABASE fmlider CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-# Usar a base de dados
+# 📂 Usar a base de dados
 USE fmlider;
 
-# Importar o schema
+# 📥 Importar o schema
 source C:/xampp/htdocs/fmlider.co.ao/backend/database/migrations/schema.sql;
 
-# Sair
+# 🚪 Sair
 exit;
 ```
 
 ### 3️⃣ Instalar Dependências - Frontend
 
 ```bash
-# Navegar para a pasta frontend
+# 📂 Navegar para a pasta frontend
 cd C:\xampp\htdocs\fmlider.co.ao\frontend
 
-# Copiar imagens para a pasta public (IMPORTANTE!)
+# 📋 Copiar imagens para a pasta public (IMPORTANTE!)
 # Windows - PowerShell
 Copy-Item -Path ..\assets\img\* -Destination .\public\assets\img\ -Force
 
 # Ou Windows - CMD
 xcopy ..\assets\img\* .\public\assets\img\ /Y
 
-# Instalar dependências npm
+# 📦 Instalar dependências npm
 npm install
 
-# Verificar instalação
+# 🔍 Verificar instalação
 npm list
 ```
 
@@ -64,7 +77,7 @@ Editar: `C:\xampp\apache\conf\extra\httpd-vhosts.conf`
         Require all granted
     </Directory>
     
-    # Rotas Frontend
+    # 🛣️ Rotas Frontend
     <IfModule mod_rewrite.c>
         RewriteEngine On
         RewriteBase /
@@ -97,10 +110,10 @@ Adicionar:
 ### 5️⃣ Dados Iniciais (Seeder)
 
 ```bash
-# Navegar para a pasta backend
+# 📂 Navegar para a pasta backend
 cd C:\xampp\htdocs\fmlider.co.ao\backend
 
-# Executar seeder (se estiver em CLI)
+# 🏃 Executar seeder (se estiver em CLI)
 php database/seeders/DatabaseSeeder.php
 
 # Ou executar SQL manualmente
@@ -110,143 +123,158 @@ mysql -u root -p fmlider < database/migrations/schema.sql
 ### 6️⃣ Iniciar Servidor Frontend (Desenvolvimento)
 
 ```bash
-# Na pasta frontend
+# 🚀 Na pasta frontend
 npm run dev
 
-# A aplicação estará disponível em:
+# 🌐 A aplicação estará disponível em:
 # http://localhost:5173
 ```
 
 ### 7️⃣ Testar a API
 
 ```bash
-# Teste de login
+# 🔧 Teste de login
 curl -X POST http://localhost:8000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@fmlider.co.ao","password":"YOUR_ADMIN_PASSWORD"}'
 
-# Teste de serviços
+# 🔧 Teste de serviços
 curl -X GET http://localhost:8000/api/services
 ```
 
 ---
 
-## 📁 Estrutura de Arquivos Criados
+## 📁 Estrutura de Ficheiros Criados
 
 ### Backend
 ```
 backend/
-├── index.php                          # Entry point da API
-├── .htaccess                          # Configuração Apache
-├── app/
-│   ├── Models/                        # Modelos de dados
-│   │   ├── User.php
-│   │   ├── Service.php
-│   │   ├── News.php
-│   │   ├── Gallery.php
-│   │   ├── Partner.php
-│   │   ├── Contact.php
-│   │   ├── Testimonial.php
-│   │   ├── FAQ.php
-│   │   ├── Banner.php
-│   │   ├── ActivityLog.php
-│   │   └── Setting.php
-│   ├── Controllers/                   # Controladores da API
-│   │   ├── AuthController.php
-│   │   ├── UserController.php
-│   │   ├── ServiceController.php
-│   │   ├── NewsController.php
-│   │   ├── GalleryController.php
-│   │   ├── PartnerController.php
-│   │   ├── ContactController.php
-│   │   ├── TestimonialController.php
-│   │   ├── FAQController.php
-│   │   └── BannerController.php
-│   └── Middleware/
-│       ├── AuthMiddleware.php
-│       └── PermissionMiddleware.php
-├── database/
-│   ├── migrations/
-│   │   └── schema.sql                 # Todas as tabelas
-│   └── seeders/
-│       └── DatabaseSeeder.php         # Dados iniciais
-├── routes/
-│   └── api.php                        # Definição de rotas
-├── config/
-│   └── database.php                   # Configuração MySQL
-└── storage/
-    └── uploads/                       # Armazenamento de arquivos
+├── 📄 index.php                          # Entry point da API
+├── 📄 .htaccess                          # Configuração Apache
+├── 📂 app/
+│   ├── 📂 Models/                        # Modelos de dados
+│   │   ├── 👤 User.php
+│   │   ├── 🔧 Service.php
+│   │   ├── 📰 News.php
+│   │   ├── 🖼️ Gallery.php
+│   │   ├── 🤝 Partner.php
+│   │   ├── 📞 Contact.php
+│   │   ├── ⭐ Testimonial.php
+│   │   ├── ❓ FAQ.php
+│   │   ├── 📢 Banner.php
+│   │   ├── 📝 ActivityLog.php
+│   │   └── ⚙️ Setting.php
+│   ├── 📂 Controllers/                   # Controladores da API
+│   │   ├── 🔐 AuthController.php
+│   │   ├── 👥 UserController.php
+│   │   ├── 🔧 ServiceController.php
+│   │   ├── 📰 NewsController.php
+│   │   ├── 🖼️ GalleryController.php
+│   │   ├── 🤝 PartnerController.php
+│   │   ├── 📞 ContactController.php
+│   │   ├── ⭐ TestimonialController.php
+│   │   ├── ❓ FAQController.php
+│   │   └── 📢 BannerController.php
+│   └── 📂 Middleware/
+│       ├── 🔐 AuthMiddleware.php
+│       └── 🛡️ PermissionMiddleware.php
+├── 📂 database/
+│   ├── 📂 migrations/
+│   │   └── 🗃️ schema.sql                 # Todas as tabelas
+│   └── 📂 seeders/
+│       └── 💾 DatabaseSeeder.php         # Dados iniciais
+├── 📂 routes/
+│   └── 🛣️ api.php                        # Definição de rotas
+├── 📂 config/
+│   └── ⚙️ database.php                   # Configuração MySQL
+└── 📂 storage/
+    └── 📤 uploads/                       # Armazenamento de ficheiros
 ```
 
 ### Frontend
 ```
 frontend/
-├── index.html                         # HTML principal
-├── package.json                       # Dependências Node
-├── vite.config.js                     # Configuração Vite
-├── src/
-│   ├── main.js                        # Entry point
-│   ├── App.vue                        # Componente raiz
-│   ├── router/
-│   │   └── index.js                   # Configuração Vue Router
-│   ├── stores/
-│   │   └── authStore.js               # Pinia store de autenticação
-│   ├── api/                           # (Pronto para serviços API)
-│   ├── utils/                         # (Pronto para utilitários)
-│   ├── components/
-│   │   ├── PublicHeader.vue           # Cabeçalho público
-│   │   ├── PublicFooter.vue           # Rodapé público
-│   │   ├── ServiceCard.vue            # Cartão de serviço
-│   │   ├── Counter.vue                # Contador animado
-│   │   ├── GalleryCarousel.vue        # Carrossel de galeria
-│   │   ├── NewsCard.vue               # Cartão de notícia
-│   │   └── PartnersCarousel.vue       # Carrossel de parceiros
-│   ├── pages/
-│   │   ├── Home.vue                   # Página inicial
-│   │   ├── About.vue                  # Sobre nós
-│   │   ├── Services.vue               # Serviços
-│   │   ├── ServiceDetail.vue          # Detalhe do serviço
-│   │   ├── Fleet.vue                  # Frota
-│   │   ├── News.vue                   # Notícias
-│   │   ├── NewsDetail.vue             # Detalhe da notícia
-│   │   ├── Gallery.vue                # Galeria
-│   │   ├── Contact.vue                # Contactos
-│   │   └── auth/
-│   │       ├── Login.vue              # Login
-│   │       ├── Register.vue           # Registro
-│   │       ├── ForgotPassword.vue     # Recuperação de senha
-│   │       └── ResetPassword.vue      # Redefinição de senha
-│   └── admin/
-│       ├── components/
-│       │   ├── AdminSidebar.vue       # Menu lateral admin
-│       │   └── AdminNavbar.vue        # Barra superior admin
-│       └── pages/
-│           ├── Dashboard.vue          # Dashboard
-│           ├── Users.vue              # Gestão de utilizadores
-│           ├── Services.vue           # Gestão de serviços
-│           ├── News.vue               # Gestão de notícias
-│           ├── Gallery.vue            # Gestão de galeria
-│           ├── Partners.vue           # Gestão de parceiros
-│           ├── Contacts.vue           # Visualização de contactos
-│           ├── Testimonials.vue       # Gestão de testemunhos
-│           ├── FAQs.vue               # Gestão de FAQs
-│           ├── Banners.vue            # Gestão de banners
-│           └── Profile.vue            # Perfil do utilizador
+├── 📄 index.html                         # HTML principal
+├── 📄 package.json                       # Dependências Node
+├── 📄 vite.config.js                     # Configuração Vite
+├── 📂 src/
+│   ├── 📄 main.js                        # Entry point
+│   ├── 📄 App.vue                        # Componente raiz
+│   ├── 📂 router/
+│   │   └── 🛣️ index.js                   # Configuração Vue Router
+│   ├── 📂 stores/
+│   │   └── 🗃️ authStore.js               # Pinia store de autenticação
+│   ├── 📂 composable/
+│   │   └── 🔄 usePresence.js             # Presença online/offline
+│   │   └── 🖼️ useSiteImages.js           # Gestão de imagens
+│   ├── 📂 api/                           # (Pronto para serviços API)
+│   ├── 📂 utils/                         # (Pronto para utilitários)
+│   ├── 📂 components/
+│   │   ├── 🧭 PublicHeader.vue           # Cabeçalho público
+│   │   ├── 📎 PublicFooter.vue           # Rodapé público
+│   │   ├── 🃏 ServiceCard.vue            # Cartão de serviço
+│   │   ├── 🔢 Counter.vue                # Contador animado
+│   │   ├── 🎠 GalleryCarousel.vue        # Carrossel de galeria
+│   │   ├── 📰 NewsCard.vue               # Cartão de notícia
+│   │   └── 🎠 PartnersCarousel.vue       # Carrossel de parceiros
+│   ├── 📂 pages/
+│   │   ├── 🏠 Home.vue                   # Página inicial
+│   │   ├── 📖 About.vue                  # Sobre nós
+│   │   ├── 🔧 Services.vue               # Serviços
+│   │   ├── 📄 ServiceDetail.vue          # Detalhe do serviço
+│   │   ├── 🚛 Fleet.vue                  # Frota
+│   │   ├── 📰 News.vue                   # Notícias
+│   │   ├── 📄 NewsDetail.vue             # Detalhe da notícia
+│   │   ├── 🖼️ Gallery.vue                # Galeria
+│   │   ├── 📞 Contact.vue                # Contactos
+│   │   └── 📂 auth/
+│   │       ├── 🔑 Login.vue              # Login
+│   │       ├── 📝 Register.vue           # Registo
+│   │       ├── 🔄 ForgotPassword.vue     # Recuperação de senha
+│   │       └── 🔄 ResetPassword.vue      # Redefinição de senha
+│   └── 📂 admin/
+│       ├── 📂 components/
+│       │   ├── 🧭 AdminSidebar.vue       # Menu lateral admin
+│       │   └── 🧭 AdminNavbar.vue        # Barra superior admin
+│       └── 📂 pages/
+│           ├── 📊 Dashboard.vue          # Dashboard
+│           ├── 👥 Users.vue              # Gestão de utilizadores
+│           ├── 🔧 Services.vue           # Gestão de serviços
+│           ├── 📰 News.vue               # Gestão de notícias
+│           ├── 🖼️ Gallery.vue            # Gestão de galeria
+│           ├── 🤝 Partners.vue           # Gestão de parceiros
+│           ├── 📞 Contacts.vue           # Visualização de contactos
+│           ├── ⭐ Testimonials.vue       # Gestão de testemunhos
+│           ├── ❓ FAQs.vue               # Gestão de FAQs
+│           ├── 📢 Banners.vue            # Gestão de banners
+│           ├── 🚛 Frota.vue              # Gestão de frota
+│           ├── 📦 Contentores.vue        # Gestão de contentores
+│           ├── 🔔 Notifications.vue      # Notificações
+│           ├── ⚙️ Settings.vue           # Configurações
+│           └── 👤 Profile.vue            # Perfil do utilizador
 ```
 
-### Raiz do Projeto
+### Raiz do Projecto
 ```
 fmlider.co.ao/
-├── README.md                          # Documentação principal
-├── API_DOCUMENTATION.md               # Documentação da API
-├── prd.md                             # Product Requirements
-├── sitemap.xml                        # Sitemap para SEO
-├── robots.txt                         # Arquivo robots
-├── .gitignore                         # Git ignore
-├── assets/
-│   └── img/                           # Imagens da empresa
-├── backend/                           # API REST
-├── frontend/                          # Aplicação Vue.js
+├── 📄 README.md                          # Documentação principal
+├── 📄 CONTEXT.md                         # Contexto do projecto
+├── 📄 AGENTS.md                          # Regras do projecto
+├── 📄 FEATURES.md                        # Lista de funcionalidades
+├── 📄 API_DOCUMENTATION.md               # Documentação da API
+├── 📄 SETUP_GUIDE.md                     # Este guia
+├── 📄 SETUP_SUPABASE.md                  # Configuração Supabase
+├── 📄 DELIVERY_CHECKLIST.md              # Checklist de entrega
+├── 📄 FINAL_STATUS_REPORT.md             # Relatório final
+├── 📄 PROJECT_COMPLETION_SUMMARY.md      # Resumo do projecto
+├── 📄 prd.md                             # Requisitos do produto
+├── 📄 sitemap.xml                        # Sitemap para SEO
+├── 📄 robots.txt                         # Ficheiro robots
+├── 📄 .gitignore                         # Git ignore
+├── 📂 assets/
+│   └── 🖼️ img/                           # Imagens da empresa
+├── 🗄️ backend/                           # API REST
+└── 💻 frontend/                          # Aplicação Vue.js
 ```
 
 ---
@@ -255,9 +283,9 @@ fmlider.co.ao/
 
 | Campo | Valor |
 |-------|-------|
-| Email | admin@fmlider.co.ao |
-| Senha | Admin@2026 |
-| Função | admin |
+| 📧 Email | admin@fmlider.co.ao |
+| 🔑 Senha | Admin@2026 |
+| 👤 Função | admin |
 
 ---
 
@@ -265,38 +293,38 @@ fmlider.co.ao/
 
 | Serviço | URL | Descrição |
 |---------|-----|-----------|
-| Frontend Dev | http://localhost:5173 | Aplicação Vue.js em desenvolvimento |
-| Frontend Prod | http://fmlider.local | Aplicação compilada |
-| API | http://localhost:8000/api | Endpoints da API |
-| Admin | http://localhost:5173/admin | Painel administrativo |
-| Database | localhost:3306 | MySQL |
+| 🖥️ Frontend Dev | http://localhost:5173 | Aplicação Vue.js em desenvolvimento |
+| 🖥️ Frontend Prod | http://fmlider.local | Aplicação compilada |
+| 📡 API | http://localhost:8000/api | Endpoints da API |
+| 🛡️ Admin | http://localhost:5173/admin | Painel administrativo |
+| 🗃️ Database | localhost:3306 | MySQL |
 
 ---
 
 ## 🧪 Testes
 
-### Teste Frontend (Hot Reload)
+### 🔧 Teste Frontend (Hot Reload)
 
 ```bash
 cd frontend
 npm run dev
-# Abrir http://localhost:5173
-# Editar um arquivo .vue e ver as mudanças em tempo real
+# 🌐 Abrir http://localhost:5173
+# ✏️ Editar um ficheiro .vue e ver as mudanças em tempo real
 ```
 
-### Teste API
+### 🔧 Teste API
 
 ```bash
-# Teste de login
+# 🔐 Teste de login
 curl -X POST http://localhost:8000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@fmlider.co.ao","password":"YOUR_ADMIN_PASSWORD"}'
 
-# Teste de serviços
+# 🔧 Teste de serviços
 curl http://localhost:8000/api/services
 ```
 
-### Teste de Banco de Dados
+### 🔧 Teste de Base de Dados
 
 ```bash
 mysql -u root -p fmlider
@@ -314,49 +342,49 @@ EXIT;
 ```bash
 cd frontend
 
-# Gerar build otimizado
+# 🏗️ Gerar build optimizado
 npm run build
 
-# Visualizar build antes de deploy
+# 👀 Visualizar build antes de deploy
 npm run preview
 
-# Arquivo gerado: dist/
+# 📂 Ficheiro gerado: dist/
 ```
 
 ### Deploy
 
-1. Fazer upload de `frontend/dist/` para o servidor web
-2. Fazer upload de `backend/` para o servidor
-3. Configurar MySQL na produção
-4. Atualizar variáveis de ambiente
-5. Testar endpoints
+1. 📤 Fazer upload de `frontend/dist/` para o servidor web
+2. 📤 Fazer upload de `backend/` para o servidor
+3. ⚙️ Configurar MySQL na produção
+4. 🔄 Atualizar variáveis de ambiente
+5. 🔧 Testar endpoints
 
 ---
 
-## ⚠️ Troubleshooting
+## ⚠️ Resolução de Problemas
 
-### Erro: "Cannot find module 'vue'"
+### ❌ Erro: "Cannot find module 'vue'"
 
 ```bash
 cd frontend
 npm install
 ```
 
-### Erro: "Connection refused" na API
+### ❌ Erro: "Connection refused" na API
 
 Verificar:
-1. Se o backend está rodando
-2. URLs de API estão corretas
+1. Se o backend está a funcionar
+2. Os URLs da API estão correctos
 3. CORS está configurado
 
-### Erro: "Database connection failed"
+### ❌ Erro: "Database connection failed"
 
 Verificar:
-1. MySQL está rodando
-2. Credenciais corretas
-3. Banco de dados foi criado
+1. MySQL está a funcionar
+2. Credenciais correctas
+3. A base de dados foi criada
 
-### Erro: "mod_rewrite not enabled"
+### ❌ Erro: "mod_rewrite not enabled"
 
 ```
 1. XAMPP > Apache > Config > httpd.conf
@@ -364,7 +392,7 @@ Verificar:
 3. Reiniciar Apache
 ```
 
-### Erro: "Imagens não aparecem no site"
+### ❌ Erro: "Imagens não aparecem no site"
 
 Verifique se as imagens foram copiadas para `frontend/public/assets/img/`:
 
@@ -386,11 +414,11 @@ npm run dev
 
 ## 📚 Recursos
 
-- [Vue.js 3 Documentation](https://v3.vuejs.org/)
-- [Vite Documentation](https://vitejs.dev/)
-- [Bootstrap 5 Documentation](https://getbootstrap.com/docs/5.0/)
-- [MySQL Documentation](https://dev.mysql.com/doc/)
-- [PHP Documentation](https://www.php.net/manual/)
+- [Documentação Vue.js 3](https://v3.vuejs.org/)
+- [Documentação Vite](https://vitejs.dev/)
+- [Documentação Bootstrap 5](https://getbootstrap.com/docs/5.0/)
+- [Documentação MySQL](https://dev.mysql.com/doc/)
+- [Documentação PHP](https://www.php.net/manual/)
 
 ---
 
@@ -398,7 +426,7 @@ npm run dev
 
 1. ✅ Backend API funcional
 2. ✅ Frontend Vue.js funcional
-3. ✅ Banco de dados configurado
+3. ✅ Base de dados configurada
 4. ⏳ Integração completa API-Frontend
 5. ⏳ Sistema de notificações
 6. ⏳ Dashboard analytics
@@ -407,5 +435,7 @@ npm run dev
 
 ---
 
-**Última Atualização**: Janeiro 2024  
-**Status**: ✅ Pronto para Desenvolvimento
+**📅 Última Actualização**: Julho 2025  
+**🏷️ Versão**: `2.2.1`  
+**📊 Estado**: ✅ Pronto para Desenvolvimento  
+**👨‍💻 Desenvolvido por**: Masukulu Miguel (CodingLifeDev) para o projecto **seefast-project**

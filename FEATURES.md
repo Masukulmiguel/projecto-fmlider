@@ -1,32 +1,45 @@
-# 🎉 FMLider Website - Features & Capabilities
+# 🎉 FMLider Website - Funcionalidades & Capacidades
+
+## 📋 Informações do Projecto
+
+| Campo | Valor |
+|-------|-------|
+| 👨‍💻 **Desenvolvedor** | Masukulu Miguel |
+| 🏠 **Organização** | CodingLifeDev |
+| 📦 **Projecto Pai** | seefast-project |
+| 📅 **Início** | Abril 2025 |
+| 🏷️ **Versão Actual** | `2.2.1` |
+| 🌍 **Idioma** | Português de Portugal (PT-PT) |
+
+---
 
 ## ✨ Sistema Completo Desenvolvido
 
-### Backend API REST (PHP Puro)
+### 🛡️ Backend API REST (PHP Puro)
 - ✅ 11 Modelos de Dados (User, Service, News, Gallery, Partner, Contact, Testimonial, FAQ, Banner, ActivityLog, Setting)
 - ✅ 10 Controladores API completos
 - ✅ 40+ Endpoints REST
 - ✅ Middleware de Autenticação
 - ✅ Middleware de Permissões
-- ✅ Sistema de Login/Logout/Registro
+- ✅ Sistema de Login/Logout/Registo
 - ✅ Recuperação de Senha
 - ✅ Upload de Imagens
 - ✅ CRUD completo para todos os módulos
-- ✅ Proteção CORS
+- ✅ Protecção CORS
 - ✅ Validação de Entrada
 - ✅ Tratamento de Erros
-- ✅ Logging de Atividades
+- ✅ Logging de Actividades
 
-### Banco de Dados (MySQL 8)
+### 🗃️ Base de Dados (MySQL 8)
 - ✅ 11 Tabelas bem estruturadas
 - ✅ Foreign Keys e Relacionamentos
-- ✅ Índices para otimização
+- ✅ Índices para optimização
 - ✅ Charset UTF-8mb4
 - ✅ Auto-increment IDs
 - ✅ Timestamps automáticos
 - ✅ Seeders com dados iniciais
 
-### Frontend Vue.js 3
+### 💻 Frontend Vue.js 3
 - ✅ Single Page Application moderna
 - ✅ Vue Router 4 com 23 rotas
 - ✅ Pinia State Management
@@ -36,146 +49,164 @@
 - ✅ Responsive Design
 - ✅ Mobile-first approach
 
-### Páginas Públicas (8)
-1. **Página Inicial**
+### 📄 Páginas Públicas (9)
+1. 🏠 **Página Inicial**
    - Hero carousel com 3 slides
-   - Seção sobre a empresa
+   - Secção sobre a empresa
    - 4 serviços em destaque
    - Números animados
    - Galeria de frota
-   - Seção Reachstacker
+   - Secção Reachstacker
    - Últimas notícias
    - Carrossel de parceiros
    - CTA de contacto
 
-2. **Sobre Nós**
+2. 📖 **Sobre Nós**
    - Histórico da empresa
    - Missão, Visão e Valores
    - Galeria de imagens
 
-3. **Serviços**
+3. 🔧 **Serviços**
    - Listagem de 4 serviços
    - Cards informativos
    - Links para detalhes
 
-4. **Detalhe do Serviço**
+4. 📄 **Detalhe do Serviço**
    - Informações completas
    - Imagem destacada
    - CTA de cotação
 
-5. **Frota**
+5. 🚛 **Frota**
    - Galeria categorizada
    - Filtros por tipo
    - Zoom de imagens
 
-6. **Notícias**
+6. 📰 **Notícias**
    - Listagem de notícias
    - Sidebar de categorias
    - Paginação
 
-7. **Detalhe da Notícia**
+7. 📄 **Detalhe da Notícia**
    - Conteúdo completo
    - Data de publicação
 
-8. **Galeria**
+8. 🖼️ **Galeria**
    - Grid de imagens
    - Hover effects
    - Responsiva
 
-9. **Contactos**
+9. 📞 **Contactos**
    - Informações de contacto
    - Formulário de contacto
    - Google Maps integrado
 
-### Autenticação (4 Páginas)
+### 🔐 Autenticação (4 Páginas)
 - ✅ Login com validação
-- ✅ Registro de utilizadores
+- ✅ Registo de utilizadores
 - ✅ Recuperação de senha
 - ✅ Redefinição de senha
 - ✅ Armazenamento de token
-- ✅ Proteção de rotas
+- ✅ Protecção de rotas
 
-### Painel Administrativo (10 Páginas)
-1. **Dashboard**
+### 🛡️ Painel Administrativo (15 Páginas)
+1. 📊 **Dashboard**
    - Estatísticas principais
    - Últimos contactos
-   - Atividades recentes
+   - Actividades recentes
    - Gráficos de dados
 
-2. **Gestão de Utilizadores**
+2. 👥 **Gestão de Utilizadores**
    - CRUD completo
    - Filtros e pesquisa
    - Atribuição de funções
 
-3. **Gestão de Serviços**
+3. 🔧 **Gestão de Serviços**
    - CRUD com imagens
-   - Status ativo/inativo
+   - Status activo/inactivo
    - Ordenação
 
-4. **Gestão de Notícias**
+4. 📰 **Gestão de Notícias**
    - Editor WYSIWYG ready
    - Categorias
    - Status publicado/rascunho
    - Agendamento
 
-5. **Gestão de Galeria**
+5. 🖼️ **Gestão de Galeria**
    - Upload múltiplo
    - Categorização
    - Edição em massa
    - Pré-visualização
 
-6. **Gestão de Parceiros**
+6. 🤝 **Gestão de Parceiros**
    - CRUD com logos
    - Links de website
    - Ordenação
 
-7. **Gestão de Contactos**
+7. 📞 **Gestão de Contactos**
    - Visualizar mensagens
    - Marcar como lida
    - Responder a contactos
    - Arquivar/deletar
 
-8. **Gestão de Testemunhos**
+8. ⭐ **Gestão de Testemunhos**
    - CRUD com fotos
    - Rating de 1-5
    - Status de publicação
 
-9. **Gestão de FAQs**
+9. ❓ **Gestão de FAQs**
    - CRUD de perguntas
    - Categorização
    - Ordenação
 
-10. **Gestão de Banners**
+10. 📢 **Gestão de Banners**
     - CRUD de banners
     - Upload de imagens
     - Links e status
 
-11. **Perfil do Utilizador**
+11. 🚛 **Gestão de Frota**
+    - CRUD completo
+    - Categorização
+    - Estado e ordem
+
+12. 📦 **Gestão de Contentores**
+    - Rastreamento de contentores
+    - Estados de entrega
+    - Notificações automáticas
+
+13. 🔔 **Sistema de Notificações**
+    - Notificações de estado
+    - Alertas de contentores
+    - Histórico de notificações
+
+14. ⚙️ **Configurações**
+    - Imagens de fundo auth
+    - Imagens de fundo serviços
+    - Configurações gerais
+
+15. 👤 **Perfil do Utilizador**
     - Edição de dados
     - Alteração de senha
     - Fotografia de perfil
 
-### Componentes Vue.js Reutilizáveis (7)
-1. **PublicHeader** - Navegação principal
-2. **PublicFooter** - Rodapé com links
-3. **ServiceCard** - Card de serviço
-4. **Counter** - Contador animado
-5. **GalleryCarousel** - Carrossel de imagens
-6. **NewsCard** - Card de notícia
-7. **PartnersCarousel** - Carrossel de parceiros
+### 🧩 Componentes Vue.js Reutilizáveis (9)
+1. 🧭 **PublicHeader** - Navegação principal
+2. 📎 **PublicFooter** - Rodapé com links
+3. 🃏 **ServiceCard** - Card de serviço
+4. 🔢 **Counter** - Contador animado
+5. 🎠 **GalleryCarousel** - Carrossel de imagens
+6. 📰 **NewsCard** - Card de notícia
+7. 🎠 **PartnersCarousel** - Carrossel de parceiros
+8. 🧭 **AdminSidebar** - Menu lateral navegável
+9. 🧭 **AdminNavbar** - Barra superior com utilizador
 
-### Componentes Admin (2)
-1. **AdminSidebar** - Menu lateral navegável
-2. **AdminNavbar** - Barra superior com utilizador
-
-### Armazenamento de Estado (Pinia)
+### 🗃️ Armazenamento de Estado (Pinia)
 - ✅ Auth Store com estado global
 - ✅ Persistência de token
 - ✅ Persistência de utilizador
 - ✅ Actions para login/logout
 - ✅ Getters para estado
 
-### Segurança Implementada
+### 🛡️ Segurança Implementada
 - ✅ CSRF Protection ready
 - ✅ XSS Protection
 - ✅ SQL Injection Prevention
@@ -185,10 +216,11 @@
 - ✅ Validação de formulários
 - ✅ Rate limiting ready
 - ✅ Activity logging structure
+- ✅ RLS Policies (Supabase)
 
-### SEO & Performance
+### 📊 SEO & Performance
 - ✅ Sitemap.xml completo
-- ✅ Robots.txt otimizado
+- ✅ Robots.txt optimizado
 - ✅ Meta tags dinâmicas
 - ✅ Open Graph support
 - ✅ Schema.org structured data ready
@@ -199,14 +231,14 @@
 - ✅ GZIP compression
 - ✅ Mobile responsiveness
 
-### Imagens da Empresa
+### 🖼️ Imagens da Empresa
 - ✅ Logo (PNG e JPEG)
 - ✅ 3 Banners promocionais
 - ✅ 4 Imagens de serviços
 - ✅ 3 Imagens de galeria
 - ✅ 4 Logos de parceiros (PNG e WebP)
 
-### Configuração & Deployment
+### ⚙️ Configuração & Deployment
 - ✅ .htaccess para routing
 - ✅ CORS headers configurado
 - ✅ Compressão GZIP
@@ -214,26 +246,28 @@
 - ✅ .gitignore completo
 - ✅ Pasta de uploads estruturada
 
-### Documentação
+### 📄 Documentação
 - ✅ README.md completo
 - ✅ API_DOCUMENTATION.md detalhado
 - ✅ SETUP_GUIDE.md com instruções
 - ✅ prd.md com especificações
-- ✅ FEATURES.md (este arquivo)
+- ✅ FEATURES.md (este ficheiro)
+- ✅ CONTEXT.md com contexto do projecto
+- ✅ AGENTS.md com regras do projecto
 
 ---
 
-## 📊 Estatísticas do Projeto
+## 📊 Estatísticas do Projecto
 
 | Métrica | Valor |
 |---------|-------|
-| Arquivos PHP | 21 |
-| Componentes Vue | 11 |
-| Páginas | 22 |
-| Rotas API | 40+ |
-| Tabelas DB | 11 |
-| Linhas de Código | 2000+ |
-| Endpoints CRUD | 30+ |
+| 📁 Ficheiros PHP | 21 |
+| 🧩 Componentes Vue | 11 |
+| 📄 Páginas | 22 |
+| 🔗 Rotas API | 40+ |
+| 🗃️ Tabelas DB | 11 |
+| 📝 Linhas de Código | 2000+ |
+| 🔧 Endpoints CRUD | 30+ |
 
 ---
 
@@ -254,7 +288,7 @@
 - Imagem destacada
 - Detalhes expandidos
 - CRUD no admin
-- Status ativo/inativo
+- Status activo/inactivo
 
 ### 📰 Notícias
 - Publicação de notícias
@@ -295,22 +329,29 @@
 
 ### 📢 Banners
 - Imagem promocional
-- Link de ação
+- Link de acção
 - Descrição
-- Status ativo/inativo
+- Status activo/inactivo
 - CRUD
 
 ### 👥 Utilizadores
-- Registro/Login
+- Registo/Login
 - Funções (admin, editor, operador)
 - CRUD no admin
 - Foto de perfil
 - Recuperação de senha
 - Alteração de senha
 
+### 🚛 Frota
+- CRUD completo
+- Categorização (Camiões, Contentores, Equipamentos)
+- Ordem de exibição
+- Estado activo/inactivo
+- Imagem com upload base64
+
 ### 📊 Dashboard
 - Estatísticas principais
-- Últimas atividades
+- Últimas actividades
 - Gráficos prontos para expansão
 
 ---
@@ -323,6 +364,9 @@
 - ✅ SMS (estrutura pronta)
 - ✅ Analytics (Google Analytics ready)
 - ✅ CDN (estrutura pronta)
+- ✅ Supabase (autenticação + BD)
+- ✅ Groq API (chatbot IA)
+- ✅ Vercel (deploy automático)
 
 ---
 
@@ -365,37 +409,37 @@
 
 ## 🚀 Próximas Funcionalidades
 
-1. **Email Notifications**
+1. 📧 **Email Notifications**
    - Confirmação de contacto
    - Notificações de admin
    - Newsletters
 
-2. **Dashboard Analytics**
+2. 📊 **Dashboard Analytics**
    - Gráficos de dados
    - Relatórios
    - Exportação
 
-3. **Two-Factor Authentication**
+3. 🔐 **Two-Factor Authentication**
    - SMS 2FA
    - Autenticator app
 
-4. **Real-time Chat**
+4. 💬 **Real-time Chat**
    - Suporte ao cliente
    - Notificações push
 
-5. **Sistema de Pagamentos**
+5. 💳 **Sistema de Pagamentos**
    - PayPal/Stripe integration
-   - Faturas
+   - Facturas
 
-6. **API Rate Limiting**
-   - Proteção contra abuso
+6. 🛡️ **API Rate Limiting**
+   - Protecção contra abuso
    - Por IP
 
-7. **Advanced Search**
+7. 🔍 **Advanced Search**
    - Busca global
    - Filtros avançados
 
-8. **Export/Import**
+8. 📤 **Export/Import**
    - CSV export
    - Bulk import
 
@@ -403,25 +447,25 @@
 
 ## 💾 Armazenamento & Performance
 
-- Imagens: ~500KB
-- Frontend Build: ~300KB (gzipped)
-- Backend Files: ~200KB
-- Database: ~1MB (inicial)
+- 🖼️ Imagens: ~500KB
+- 📦 Frontend Build: ~300KB (gzipped)
+- 📁 Backend Files: ~200KB
+- 🗃️ Database: ~1MB (inicial)
 
 ---
 
 ## 🌍 Tradução & Localização
 
 Pronto para suportar múltiplos idiomas:
-- Português (PT) - ✅ Já em PT
-- Português (BR)
-- Inglês
-- Francês
-- Espanhol
+- 🇵🇹 Português (PT) - ✅ Já em PT
+- 🇧🇷 Português (BR)
+- 🇬🇧 Inglês
+- 🇫🇷 Francês
+- 🇪🇸 Espanhol
 
 ---
 
-**Projeto Concluído**: ✅  
-**Data**: Janeiro 2025  
-**Versão**: 1.0  
-**Status**: Pronto para Produção
+**📅 Projecto Iniciado**: Abril 2025  
+**🏷️ Versão Actual**: `2.2.1`  
+**📊 Estado**: Pronto para Produção  
+**👨‍💻 Desenvolvido por**: Masukulu Miguel (CodingLifeDev) para o projecto **seefast-project**

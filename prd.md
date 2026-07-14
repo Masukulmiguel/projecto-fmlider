@@ -1,6 +1,17 @@
-# PRD - Conteúdo do site fmlider.co.ao
+# 📋 PRD - Conteúdo do site fmlider.co.ao
 
-## URL
+## 📋 Informações do Projecto
+
+| Campo | Valor |
+|-------|-------|
+| 👨‍💻 **Desenvolvedor** | Masukulu Miguel |
+| 🏠 **Organização** | CodingLifeDev |
+| 📦 **Projecto Pai** | seefast-project |
+| 📅 **Início** | Abril 2025 |
+| 🏷️ **Versão Actual** | `2.2.1` |
+| 🌍 **Idioma** | Português de Portugal (PT-PT) |
+
+## 🌐 URL
 https://fmlider.co.ao
 
 ## Visão Geral

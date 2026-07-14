@@ -1,46 +1,59 @@
-# FMLider API Documentation
+# 📡 FMLider - Documentação da API
 
-## Base URL
+## 📋 Informações do Projecto
+
+| Campo | Valor |
+|-------|-------|
+| 👨‍💻 **Desenvolvedor** | Masukulu Miguel |
+| 🏠 **Organização** | CodingLifeDev |
+| 📦 **Projecto Pai** | seefast-project |
+| 📅 **Início** | Abril 2025 |
+| 🏷️ **Versão Actual** | `2.2.1` |
+| 🌍 **Idioma** | Português de Portugal (PT-PT) |
+
+---
+
+## 🌐 URL Base
 
 ```
 http://localhost:8000/api
 ```
 
-## Authentication
+## 🔐 Autenticação
 
-All protected endpoints require a Bearer token in the Authorization header:
+Todos os endpoints protegidos requerem um token Bearer no cabeçalho Authorization:
 
 ```
-Authorization: Bearer YOUR_TOKEN_HERE
+Authorization: Bearer O_TEU_TOKEN_AQUI
 ```
 
-## Response Format
+## 📋 Formato de Resposta
 
-All responses are in JSON format:
+Todas as respostas são em formato JSON:
 
 ```json
 {
     "success": true,
     "data": {},
-    "message": "Success message"
+    "message": "Mensagem de sucesso"
 }
 ```
 
-Error responses:
+Respostas de erro:
 
 ```json
 {
     "success": false,
-    "error": "Error message",
+    "error": "Mensagem de erro",
     "code": 400
 }
 ```
 
 ---
 
-## Public Endpoints
+## 🌍 Endpoints Públicos
 
-### Authentication
+### 🔐 Autenticação
 
 #### Login
 ```
@@ -49,10 +62,10 @@ Content-Type: application/json
 
 {
     "email": "admin@fmlider.co.ao",
-    "password": "YOUR_ADMIN_PASSWORD"
+    "password": "A_TUA_SENHA"
 }
 
-Response:
+Resposta:
 {
     "success": true,
     "token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
@@ -65,49 +78,49 @@ Response:
 }
 ```
 
-#### Register
+#### Registo
 ```
 POST /auth/register
 Content-Type: application/json
 
 {
-    "name": "User Name",
-    "email": "user@example.com",
-    "password": "Password123"
+    "name": "Nome do Utilizador",
+    "email": "utilizador@exemplo.com",
+    "password": "Senha123"
 }
 
-Response:
+Resposta:
 {
     "success": true,
-    "message": "User registered successfully"
+    "message": "Utilizador registado com sucesso"
 }
 ```
 
-#### Forgot Password
+#### Esqueci a Senha
 ```
 POST /auth/forgot-password
 Content-Type: application/json
 
 {
-    "email": "user@example.com"
+    "email": "utilizador@exemplo.com"
 }
 
-Response:
+Resposta:
 {
     "success": true,
-    "message": "Password reset link sent to email"
+    "message": "Link de redefinição de senha enviado para o email"
 }
 ```
 
 ---
 
-### Services
+### 🔧 Serviços
 
-#### Get All Services
+#### Obter Todos os Serviços
 ```
 GET /services
 
-Response:
+Resposta:
 {
     "success": true,
     "services": [
@@ -123,11 +136,11 @@ Response:
 }
 ```
 
-#### Get Service by ID
+#### Obter Serviço por ID
 ```
 GET /services/{id}
 
-Response:
+Resposta:
 {
     "success": true,
     "service": { ... }
@@ -136,18 +149,18 @@ Response:
 
 ---
 
-### News
+### 📰 Notícias
 
-#### Get All News
+#### Obter Todas as Notícias
 ```
 GET /news
 
-Query Parameters:
-- page: int (default: 1)
-- limit: int (default: 10)
-- category: string (optional)
+Parâmetros de Query:
+- page: int (predefinido: 1)
+- limit: int (predefinido: 10)
+- category: string (opcional)
 
-Response:
+Resposta:
 {
     "success": true,
     "news": [ ... ],
@@ -156,11 +169,11 @@ Response:
 }
 ```
 
-#### Get News by ID
+#### Obter Notícia por ID
 ```
 GET /news/{id}
 
-Response:
+Resposta:
 {
     "success": true,
     "news": { ... }
@@ -169,17 +182,17 @@ Response:
 
 ---
 
-### Gallery
+### 🖼️ Galeria
 
-#### Get All Gallery Items
+#### Obter Todos os Itens da Galeria
 ```
 GET /gallery
 
-Query Parameters:
+Parâmetros de Query:
 - category: string (trucks, containers, equipment)
-- limit: int (default: 20)
+- limit: int (predefinido: 20)
 
-Response:
+Resposta:
 {
     "success": true,
     "gallery": [ ... ]
@@ -188,13 +201,13 @@ Response:
 
 ---
 
-### Partners
+### 🤝 Parceiros
 
-#### Get All Partners
+#### Obter Todos os Parceiros
 ```
 GET /partners
 
-Response:
+Resposta:
 {
     "success": true,
     "partners": [
@@ -210,13 +223,13 @@ Response:
 
 ---
 
-### Testimonials
+### ⭐ Testemunhos
 
-#### Get All Testimonials
+#### Obter Todos os Testemunhos
 ```
 GET /testimonials
 
-Response:
+Resposta:
 {
     "success": true,
     "testimonials": [ ... ]
@@ -225,16 +238,16 @@ Response:
 
 ---
 
-### FAQs
+### ❓ FAQs
 
-#### Get All FAQs
+#### Obter Todas as FAQs
 ```
 GET /faqs
 
-Query Parameters:
-- category: string (optional)
+Parâmetros de Query:
+- category: string (opcional)
 
-Response:
+Resposta:
 {
     "success": true,
     "faqs": [ ... ]
@@ -243,41 +256,41 @@ Response:
 
 ---
 
-### Contacts
+### 📞 Contactos
 
-#### Submit Contact Form
+#### Enviar Formulário de Contacto
 ```
 POST /contacts
 Content-Type: application/json
 
 {
-    "name": "John Doe",
-    "company": "Company Name",
+    "name": "João Silva",
+    "company": "Nome da Empresa",
     "phone": "+244 935141747",
-    "email": "john@example.com",
-    "subject": "Inquiry",
-    "message": "I would like to know more about..."
+    "email": "joao@exemplo.com",
+    "subject": "Pedido de Informação",
+    "message": "Gostaria de saber mais sobre..."
 }
 
-Response:
+Resposta:
 {
     "success": true,
-    "message": "Contact message received. We will contact you soon."
+    "message": "Mensagem de contacto recebida. Entraremos em contacto em breve."
 }
 ```
 
 ---
 
-## Protected Endpoints (Require Authentication)
+## 🔒 Endpoints Protegidos (Requerem Autenticação)
 
-### Auth - User Profile
+### 🔐 Auth - Perfil do Utilizador
 
-#### Get Profile
+#### Obter Perfil
 ```
 GET /auth/profile
 Authorization: Bearer {token}
 
-Response:
+Resposta:
 {
     "success": true,
     "user": {
@@ -291,40 +304,40 @@ Response:
 }
 ```
 
-#### Update Profile
+#### Actualizar Perfil
 ```
 PUT /auth/profile
 Authorization: Bearer {token}
 Content-Type: application/json
 
 {
-    "name": "New Name",
+    "name": "Novo Nome",
     "phone": "+244 935141747"
 }
 
-Response:
+Resposta:
 {
     "success": true,
-    "message": "Profile updated"
+    "message": "Perfil actualizado"
 }
 ```
 
-#### Change Password
+#### Alterar Senha
 ```
 POST /auth/change-password
 Authorization: Bearer {token}
 Content-Type: application/json
 
 {
-    "current_password": "CurrentPassword",
-    "new_password": "NewPassword123",
-    "new_password_confirm": "NewPassword123"
+    "current_password": "SenhaAtual",
+    "new_password": "NovaSenha123",
+    "new_password_confirm": "NovaSenha123"
 }
 
-Response:
+Resposta:
 {
     "success": true,
-    "message": "Password changed successfully"
+    "message": "Senha alterada com sucesso"
 }
 ```
 
@@ -333,52 +346,52 @@ Response:
 POST /auth/logout
 Authorization: Bearer {token}
 
-Response:
+Resposta:
 {
     "success": true,
-    "message": "Logged out successfully"
+    "message": "Sessão terminada com sucesso"
 }
 ```
 
 ---
 
-### Admin - Users
+### 🛡️ Admin - Utilizadores
 
-#### Get All Users
+#### Obter Todos os Utilizadores
 ```
 GET /admin/users
 Authorization: Bearer {admin_token}
 
-Response:
+Resposta:
 {
     "success": true,
     "users": [ ... ]
 }
 ```
 
-#### Create User
+#### Criar Utilizador
 ```
 POST /admin/users
 Authorization: Bearer {admin_token}
 Content-Type: application/json
 
 {
-    "name": "New User",
-    "email": "newuser@example.com",
+    "name": "Novo Utilizador",
+    "email": "novoutilizador@exemplo.com",
     "phone": "+244 935141747",
     "role": "editor",
-    "password": "Password123"
+    "password": "Senha123"
 }
 
-Response:
+Resposta:
 {
     "success": true,
-    "message": "User created",
+    "message": "Utilizador criado",
     "user": { ... }
 }
 ```
 
-#### Update User
+#### Actualizar Utilizador
 ```
 PUT /admin/users/{id}
 Authorization: Bearer {admin_token}
@@ -386,46 +399,46 @@ Content-Type: application/json
 
 { ... }
 
-Response:
+Resposta:
 {
     "success": true,
-    "message": "User updated"
+    "message": "Utilizador actualizado"
 }
 ```
 
-#### Delete User
+#### Eliminar Utilizador
 ```
 DELETE /admin/users/{id}
 Authorization: Bearer {admin_token}
 
-Response:
+Resposta:
 {
     "success": true,
-    "message": "User deleted"
+    "message": "Utilizador eliminado"
 }
 ```
 
 ---
 
-### Admin - Services CRUD
+### 🛡️ Admin - CRUD de Serviços
 
-#### Create Service
+#### Criar Serviço
 ```
 POST /admin/services
 Authorization: Bearer {admin_token}
 Content-Type: application/json
 
 {
-    "title": "New Service",
-    "slug": "new-service",
-    "description": "Description",
-    "content": "Full content",
+    "title": "Novo Serviço",
+    "slug": "novo-servico",
+    "description": "Descrição",
+    "content": "Conteúdo completo",
     "image": "image.jpg",
     "status": 1
 }
 ```
 
-#### Update Service
+#### Actualizar Serviço
 ```
 PUT /admin/services/{id}
 Authorization: Bearer {admin_token}
@@ -434,7 +447,7 @@ Content-Type: application/json
 { ... }
 ```
 
-#### Delete Service
+#### Eliminar Serviço
 ```
 DELETE /admin/services/{id}
 Authorization: Bearer {admin_token}
@@ -442,26 +455,26 @@ Authorization: Bearer {admin_token}
 
 ---
 
-### Admin - News CRUD
+### 🛡️ Admin - CRUD de Notícias
 
-#### Create News
+#### Criar Notícia
 ```
 POST /admin/news
 Authorization: Bearer {admin_token}
 Content-Type: application/json
 
 {
-    "title": "News Title",
-    "slug": "news-slug",
+    "title": "Título da Notícia",
+    "slug": "slug-da-noticia",
     "image": "image.jpg",
-    "description": "Short description",
-    "content": "Full content",
+    "description": "Descrição curta",
+    "content": "Conteúdo completo",
     "category": "Investimentos",
     "status": "published"
 }
 ```
 
-#### Update News
+#### Actualizar Notícia
 ```
 PUT /admin/news/{id}
 Authorization: Bearer {admin_token}
@@ -470,7 +483,7 @@ Content-Type: application/json
 { ... }
 ```
 
-#### Delete News
+#### Eliminar Notícia
 ```
 DELETE /admin/news/{id}
 Authorization: Bearer {admin_token}
@@ -478,36 +491,36 @@ Authorization: Bearer {admin_token}
 
 ---
 
-### Admin - Gallery
+### 🛡️ Admin - Galeria
 
-#### Upload Image
+#### Upload de Imagem
 ```
 POST /admin/gallery/upload
 Authorization: Bearer {admin_token}
 Content-Type: multipart/form-data
 
-file: [image file]
+file: [ficheiro de imagem]
 category: trucks
-title: Image Title
-alt_text: Alt text
+title: Título da Imagem
+alt_text: Texto alternativo
 ```
 
-#### Create Gallery Item
+#### Criar Item da Galeria
 ```
 POST /admin/gallery
 Authorization: Bearer {admin_token}
 Content-Type: application/json
 
 {
-    "title": "Gallery Item",
+    "title": "Item da Galeria",
     "image": "image.jpg",
     "category": "trucks",
-    "description": "Description",
-    "alt_text": "Alt text"
+    "description": "Descrição",
+    "alt_text": "Texto alternativo"
 }
 ```
 
-#### Delete Gallery Item
+#### Eliminar Item da Galeria
 ```
 DELETE /admin/gallery/{id}
 Authorization: Bearer {admin_token}
@@ -515,42 +528,42 @@ Authorization: Bearer {admin_token}
 
 ---
 
-### Admin - Contacts
+### 🛡️ Admin - Contactos
 
-#### Get All Contacts
+#### Obter Todos os Contactos
 ```
 GET /admin/contacts
 Authorization: Bearer {admin_token}
 
-Query Parameters:
-- is_read: 0|1 (optional)
-- page: int (default: 1)
+Parâmetros de Query:
+- is_read: 0|1 (opcional)
+- page: int (predefinido: 1)
 ```
 
-#### Get Contact Details
+#### Obter Detalhes do Contacto
 ```
 GET /admin/contacts/{id}
 Authorization: Bearer {admin_token}
 ```
 
-#### Mark as Read
+#### Marcar como Lido
 ```
 PUT /admin/contacts/{id}/mark-read
 Authorization: Bearer {admin_token}
 ```
 
-#### Reply to Contact
+#### Responder ao Contacto
 ```
 POST /admin/contacts/{id}/reply
 Authorization: Bearer {admin_token}
 Content-Type: application/json
 
 {
-    "reply_message": "Thank you for contacting us..."
+    "reply_message": "Obrigado por nos contactar..."
 }
 ```
 
-#### Delete Contact
+#### Eliminar Contacto
 ```
 DELETE /admin/contacts/{id}
 Authorization: Bearer {admin_token}
@@ -558,57 +571,57 @@ Authorization: Bearer {admin_token}
 
 ---
 
-### Admin - Partners CRUD
+### 🛡️ Admin - CRUD de Parceiros
 
-Similar to Services, Partners support:
-- `POST /admin/partners` - Create
-- `PUT /admin/partners/{id}` - Update
-- `DELETE /admin/partners/{id}` - Delete
-
----
-
-### Admin - Testimonials CRUD
-
-Similar to Services, Testimonials support:
-- `POST /admin/testimonials` - Create
-- `PUT /admin/testimonials/{id}` - Update
-- `DELETE /admin/testimonials/{id}` - Delete
+Semelhante aos Serviços, os Parceiros suportam:
+- `POST /admin/partners` - Criar
+- `PUT /admin/partners/{id}` - Actualizar
+- `DELETE /admin/partners/{id}` - Eliminar
 
 ---
 
-### Admin - FAQs CRUD
+### 🛡️ Admin - CRUD de Testemunhos
 
-Similar to Services, FAQs support:
-- `POST /admin/faqs` - Create
-- `PUT /admin/faqs/{id}` - Update
-- `DELETE /admin/faqs/{id}` - Delete
+Semelhante aos Serviços, os Testemunhos suportam:
+- `POST /admin/testimonials` - Criar
+- `PUT /admin/testimonials/{id}` - Actualizar
+- `DELETE /admin/testimonials/{id}` - Eliminar
 
 ---
 
-### Admin - Banners CRUD
+### 🛡️ Admin - CRUD de FAQs
 
-#### Get All Banners
+Semelhante aos Serviços, as FAQs suportam:
+- `POST /admin/faqs` - Criar
+- `PUT /admin/faqs/{id}` - Actualizar
+- `DELETE /admin/faqs/{id}` - Eliminar
+
+---
+
+### 🛡️ Admin - CRUD de Banners
+
+#### Obter Todos os Banners
 ```
 GET /admin/banners
 Authorization: Bearer {admin_token}
 ```
 
-#### Create Banner
+#### Criar Banner
 ```
 POST /admin/banners
 Authorization: Bearer {admin_token}
 Content-Type: application/json
 
 {
-    "title": "Banner Title",
-    "description": "Description",
+    "title": "Título do Banner",
+    "description": "Descrição",
     "image": "banner.jpg",
     "link": "/servicos",
     "status": 1
 }
 ```
 
-#### Update Banner
+#### Actualizar Banner
 ```
 PUT /admin/banners/{id}
 Authorization: Bearer {admin_token}
@@ -617,7 +630,7 @@ Content-Type: application/json
 { ... }
 ```
 
-#### Delete Banner
+#### Eliminar Banner
 ```
 DELETE /admin/banners/{id}
 Authorization: Bearer {admin_token}
@@ -625,24 +638,24 @@ Authorization: Bearer {admin_token}
 
 ---
 
-## Error Codes
+## 📋 Códigos de Erro
 
-| Code | Description |
-|------|-------------|
-| 200 | Success |
-| 201 | Created |
-| 400 | Bad Request |
-| 401 | Unauthorized |
-| 403 | Forbidden |
-| 404 | Not Found |
-| 422 | Validation Error |
-| 500 | Internal Server Error |
+| Código | Descrição |
+|--------|-----------|
+| 200 | Sucesso |
+| 201 | Criado |
+| 400 | Pedido Inválido |
+| 401 | Não Autorizado |
+| 403 | Proibido |
+| 404 | Não Encontrado |
+| 422 | Erro de Validação |
+| 500 | Erro Interno do Servidor |
 
 ---
 
-## Rate Limiting
+## 🛡️ Rate Limiting
 
-Currently not implemented but can be added to `/api/config.php`:
+Actualmente não implementado mas pode ser adicionado a `/api/config.php`:
 
 ```
 X-RateLimit-Limit: 100
@@ -652,9 +665,9 @@ X-RateLimit-Reset: 1234567890
 
 ---
 
-## CORS Headers
+## 🌐 Headers CORS
 
-All endpoints return these headers:
+Todos os endpoints devolvem estes headers:
 
 ```
 Access-Control-Allow-Origin: *
@@ -664,20 +677,20 @@ Access-Control-Allow-Headers: Content-Type, Authorization
 
 ---
 
-## Examples
+## 📝 Exemplos
 
 ### JavaScript/Axios
 
 ```javascript
-// GET request
+// 📡 Pedido GET
 axios.get('http://localhost:8000/api/services')
     .then(response => console.log(response.data))
     .catch(error => console.error(error));
 
-// POST request with token
+// 📡 Pedido POST com token
 axios.post('http://localhost:8000/api/auth/login', {
     email: 'admin@fmlider.co.ao',
-    password: 'YOUR_ADMIN_PASSWORD'
+    password: 'ADMIN_PASSWORD'
 }, {
     headers: { 'Content-Type': 'application/json' }
 })
@@ -685,7 +698,7 @@ axios.post('http://localhost:8000/api/auth/login', {
         localStorage.setItem('token', response.data.token);
     });
 
-// Request with auth token
+// 📡 Pedido com token de auth
 const token = localStorage.getItem('token');
 axios.get('http://localhost:8000/api/auth/profile', {
     headers: { 'Authorization': `Bearer ${token}` }
@@ -695,21 +708,22 @@ axios.get('http://localhost:8000/api/auth/profile', {
 ### cURL
 
 ```bash
-# GET request
+# 📡 Pedido GET
 curl -X GET http://localhost:8000/api/services
 
-# POST request
+# 📡 Pedido POST
 curl -X POST http://localhost:8000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@fmlider.co.ao","password":"Admin@2026"}'
 
-# Request with token
+# 📡 Pedido com token
 curl -X GET http://localhost:8000/api/auth/profile \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE"
+  -H "Authorization: Bearer O_TEU_TOKEN_AQUI"
 ```
 
 ---
 
-**API Version**: 1.0  
-**Last Updated**: January 2024  
-**Status**: Active
+**🏷️ Versão da API**: `2.2.1`  
+**📅 Última Actualização**: Julho 2025  
+**📊 Estado**: Activo  
+**👨‍💻 Desenvolvido por**: Masukulu Miguel (CodingLifeDev) para o projecto **seefast-project**

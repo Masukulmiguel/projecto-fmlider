@@ -1,41 +1,80 @@
-# FMLider Transitário & Logística - Website
+# 🚀 FMLider Transitário & Logística - Website Corporativo
 
-Um website corporativo premium para FMLider Transitário & Logística desenvolvido com Vue.js 3, PHP puro, e MySQL.
+Um website corporativo premium para a **FMLider Transitário & Logística** desenvolvido com Vue.js 3, PHP puro e MySQL.
 
-## 🌐 Site ao Vivo
+---
 
-**https://fmlider-66.vercel.app/**
+## 📋 Informações do Projecto
 
-## 🚀 Características
+| Campo | Valor |
+|-------|-------|
+| 🏢 **Empresa** | FMLider Transitário & Logística |
+| 👨‍💻 **Desenvolvedor** | Masukulu Miguel |
+| 🏠 **Organização** | [CodingLifeDev](https://github.com/codinglifedev) |
+| 📦 **Projecto Pai** | seefast-project |
+| 📅 **Início** | Abril 2025 |
+| 🏷️ **Versão Actual** | `2.2.1` |
+| 🌍 **Idioma** | Português de Portugal (PT-PT) |
+| 🌐 **Site ao Vivo** | [https://fmlider.co.ao](https://fmlider.co.ao) |
+| 📂 **Repositório** | [GitHub](https://github.com/Masukulmiguel/projecto-fmlider) |
+| 🚀 **Deploy** | Vercel (frontend) |
 
-- **Frontend Moderno**: Vue.js 3 com Vite, Bootstrap 5, e design responsivo
-- **Backend Robusto**: Laravel-like API REST em PHP puro
-- **Banco de Dados**: MySQL 8 com migrations completas
-- **Autenticação Segura**: Sistema de login, registro e recuperação de senha
-- **Painel Administrativo**: Dashboard completo com CRUD para todos os módulos
-- **SEO Otimizado**: Sitemap, robots.txt, meta tags, Schema.org
-- **Segurança**: CSRF, XSS, SQL Injection protections
-- **Responsivo**: Mobile-first, funciona em todos os dispositivos
-- **Lazy Loading**: Carregamento otimizado de imagens
-- **Animações Suaves**: Transições e efeitos CSS3
+---
+
+## ✨ Funcionalidades Principais
+
+### 🖥️ Frontend Moderno
+- ⚡ Vue.js 3 + Vite + Bootstrap 5
+- 📱 Design responsivo mobile-first
+- 🎨 UI/UX profissional inspirado em DHL, Maersk, MSC
+- 🌐 Internacionalização PT/EN/FR
+- 🔒 Autenticação via Supabase
+- 🤖 Chatbot com IA (Groq API)
+- 📍 Rastreamento de contentores e BLs
+- 🔍 Lookup de BI/NIF
+
+### 🛡️ Backend Robusto
+- 🐘 PHP puro (Laravel-like API REST)
+- 🗃️ MySQL 8 com migrations completas
+- 🔑 Autenticação Bearer Token
+- 🛡️ Protecção CSRF, XSS, SQL Injection
+- 📝 Activity Logging completo
+- 📤 Upload de imagens (base64 + Supabase Storage)
+
+### 📊 Painel Administrativo
+- 📈 Dashboard com estatísticas
+- 👥 Gestão de utilizadores
+- 📰 Gestão de notícias
+- 🖼️ Gestão de galeria
+- 🤝 Gestão de parceiros
+- 📞 Gestão de contactos
+- ⭐ Gestão de testemunhos
+- ❓ Gestão de FAQs
+- 📢 Gestão de banners
+- 🚛 Gestão de frota
+- 📦 Gestão de contentores
+- 🔔 Sistema de notificações
+
+---
 
 ## 📋 Requisitos
 
-- PHP 7.4+
-- MySQL 8.0+
-- Node.js 14+
-- Composer (opcional)
+- 🐘 PHP 7.4+
+- 🗃️ MySQL 8.0+
+- 📦 Node.js 14+
+- 📦 npm 6+
 
-## 📦 Instalação
+---
 
-### 1. Preparar o Banco de Dados
+## 📦 Instalação Rápida
+
+### 1️⃣ Preparar a Base de Dados
 
 ```bash
-# Criar a base de dados
 mysql -u root -p < backend/database/migrations/schema.sql
 ```
 
-### 2. Frontend
+### 2️⃣ Frontend
 
 ```bash
 cd frontend
@@ -50,112 +89,135 @@ npm run dev
 npm run build
 ```
 
-### 3. Backend
+### 3️⃣ Backend
 
-O backend está pronto para usar em `http://localhost:8000/api`
+```bash
+# O backend está pronto para usar em:
+# http://localhost:8000/api
+```
 
-## 🏗️ Estrutura do Projeto
+---
+
+## 🏗️ Estrutura do Projecto
 
 ```
 fmlider.co.ao/
-├── assets/              # Imagens e recursos estáticos
-│   └── img/            # Imagens da empresa
-├── backend/            # API REST em PHP
-│   ├── app/
-│   │   ├── Models/     # Modelos de dados
-│   │   ├── Controllers/ # Controladores da API
-│   │   └── Middleware/ # Middleware de autenticação
-│   ├── database/
-│   │   ├── migrations/ # SQL migrations
-│   │   └── seeders/    # Data seeders
-│   ├── routes/         # Definição de rotas
-│   ├── index.php       # Entry point da API
-│   └── .htaccess       # Configuração Apache
-├── frontend/           # Aplicação Vue.js 3
-│   ├── src/
-│   │   ├── components/ # Componentes reutilizáveis
-│   │   ├── pages/      # Páginas públicas
-│   │   ├── admin/      # Painel administrativo
-│   │   ├── stores/     # Estado global (Pinia)
-│   │   ├── router/     # Configuração de rotas
-│   │   └── main.js     # Entry point
-│   ├── vite.config.js  # Configuração Vite
-│   └── package.json    # Dependências Node
-└── prd.md             # Product Requirements Document
+├── 📄 README.md                    # Este ficheiro
+├── 📄 CONTEXT.md                   # Contexto do projecto
+├── 📄 AGENTS.md                    # Regras do projecto
+├── 📄 FEATURES.md                  # Lista de funcionalidades
+├── 📄 API_DOCUMENTATION.md         # Documentação da API
+├── 📄 SETUP_GUIDE.md              # Guia de instalação
+├── 📄 SETUP_SUPABASE.md           # Configuração Supabase
+├── 📄 DELIVERY_CHECKLIST.md        # Checklist de entrega
+├── 📄 FINAL_STATUS_REPORT.md       # Relatório final
+├── 📄 PROJECT_COMPLETION_SUMMARY.md # Resumo do projecto
+├── 📄 prd.md                       # Requisitos do produto
+├── 🖼️ assets/                      # Imagens e recursos
+├── 🗄️ backend/                     # API REST em PHP
+│   ├── 📂 app/
+│   │   ├── 📂 Models/              # Modelos de dados
+│   │   ├── 📂 Controllers/         # Controladores da API
+│   │   └── 📂 Middleware/          # Middleware de auth
+│   ├── 📂 database/                # Migrations SQL
+│   ├── 📂 routes/                  # Definição de rotas
+│   ├── 📄 index.php                # Entry point da API
+│   └── 📄 .htaccess               # Configuração Apache
+├── 💻 frontend/                    # Aplicação Vue.js 3
+│   ├── 📂 src/
+│   │   ├── 📂 components/          # Componentes reutilizáveis
+│   │   ├── 📂 pages/               # Páginas públicas
+│   │   ├── 📂 admin/               # Painel administrativo
+│   │   ├── 📂 stores/              # Estado global (Pinia)
+│   │   ├── 📂 composable/          # Composables Vue
+│   │   ├── 📂 locales/             # Internacionalização
+│   │   └── 📄 main.js              # Entry point
+│   ├── 📄 vite.config.js           # Configuração Vite
+│   └── 📄 package.json             # Dependências Node
+└── 📄 prd.md                       # Requisitos do produto
 ```
 
+---
 
 ## 🌐 Endpoints da API
 
-### Públicos
+### 🌍 Públicos
 
 ```
-GET    /api/services              - Lista de serviços
-GET    /api/news                  - Notícias
-GET    /api/gallery               - Galeria
-GET    /api/partners              - Parceiros
-GET    /api/testimonials          - Testemunhos
-GET    /api/faqs                  - FAQs
-POST   /api/contacts              - Enviar contacto
+GET    /api/services              - 📋 Lista de serviços
+GET    /api/news                  - 📰 Notícias
+GET    /api/gallery               - 🖼️ Galeria
+GET    /api/partners              - 🤝 Parceiros
+GET    /api/testimonials          - ⭐ Testemunhos
+GET    /api/faqs                  - ❓ FAQs
+POST   /api/contacts              - 📞 Enviar contacto
 ```
 
-### Autenticação
+### 🔐 Autenticação
 
 ```
-POST   /api/auth/login            - Login
-POST   /api/auth/register         - Registro
-POST   /api/auth/forgot-password  - Recuperar senha
-GET    /api/auth/profile          - Perfil do utilizador
+POST   /api/auth/login            - 🔑 Login
+POST   /api/auth/register         - 📝 Registo
+POST   /api/auth/forgot-password  - 🔄 Recuperar senha
+GET    /api/auth/profile          - 👤 Perfil do utilizador
 ```
 
-### Admin (Requer autenticação)
+### 🛡️ Admin (Requer autenticação)
 
 ```
 CRUD completo para:
-- /api/admin/users
-- /api/admin/services
-- /api/admin/news
-- /api/admin/gallery
-- /api/admin/partners
-- /api/admin/contacts
-- /api/admin/testimonials
-- /api/admin/faqs
-- /api/admin/banners
+- /api/admin/users               - 👥 Utilizadores
+- /api/admin/services            - 🔧 Serviços
+- /api/admin/news                - 📰 Notícias
+- /api/admin/gallery             - 🖼️ Galeria
+- /api/admin/partners            - 🤝 Parceiros
+- /api/admin/contacts            - 📞 Contactos
+- /api/admin/testimonials        - ⭐ Testemunhos
+- /api/admin/faqs                - ❓ FAQs
+- /api/admin/banners             - 📢 Banners
 ```
+
+---
 
 ## 🎨 Identidade Visual
 
-- **Cor Primária**: Azul #007bff
-- **Cores Secundárias**: Branco, Preto
-- **Tipografia**: Bootstrap defaults
-- **Inspiração**: DHL, Maersk, MSC
+- 🎨 **Cor Primária**: Azul #1a365d
+- ✨ **Cor Secundária**: Dourado #d4af37
+- ⚪ **Fundo**: Branco #ffffff
+- 🔤 **Tipografia**: Bootstrap defaults
+- 🎯 **Inspiração**: DHL, Maersk, MSC
+
+---
 
 ## 📱 Páginas Principais
 
-### Público
+### 🌍 Público
+- 🏠 **Início**: Hero carousel, serviços, números, frota, notícias
+- 📖 **Sobre Nós**: História, missão, visão, valores
+- 🔧 **Serviços**: Listagem de serviços principais
+- 🚛 **Frota**: Galeria de camiões, contentores, equipamentos
+- 📰 **Notícias**: Blog de notícias e actualizações
+- 🖼️ **Galeria**: Galeria de imagens da empresa
+- 📞 **Contactos**: Formulário de contacto com mapa
+- 🔑 **Login/Registo**: Sistema de autenticação
 
-- **Início**: Hero carousel, serviços, números, frota, notícias
-- **Sobre Nós**: História, missão, visão, valores
-- **Serviços**: Listagem de 4 serviços principais
-- **Frota**: Galeria de camiões, contentores, equipamentos
-- **Notícias**: Blog de notícias e atualizações
-- **Galeria**: Galeria de imagens da empresa
-- **Contactos**: Formulário de contacto com mapa
-- **Login/Registro**: Sistema de autenticação
+### 🛡️ Admin
+- 📊 **Dashboard**: Estatísticas e actividades recentes
+- 👥 **Utilizadores**: CRUD de utilizadores
+- 🔧 **Serviços**: Gestão de serviços
+- 📰 **Notícias**: Publicação de notícias
+- 🖼️ **Galeria**: Upload e gestão de imagens
+- 🤝 **Parceiros**: Gestão de parceiros
+- 📞 **Contactos**: Visualização e resposta a mensagens
+- ⭐ **Testemunhos**: Gestão de testemunhos
+- ❓ **FAQs**: Gestão de perguntas frequentes
+- 📢 **Banners**: Gestão de banners promocionais
+- 🚛 **Frota**: Gestão de frota
+- 📦 **Contentores**: Gestão de contentores
+- 🔔 **Notificações**: Sistema de notificações
+- 👤 **Perfil**: Edição de dados e alteração de senha
 
-### Admin
-
-- **Dashboard**: Estatísticas e atividades recentes
-- **Utilizadores**: CRUD de utilizadores
-- **Serviços**: Gestão de serviços
-- **Notícias**: Publicação de notícias
-- **Galeria**: Upload e gestão de imagens
-- **Parceiros**: Gestão de parceiros
-- **Contactos**: Visualização e resposta a mensagens
-- **Testemunhos**: Gestão de testemunhos
-- **FAQs**: Gestão de perguntas frequentes
-- **Banners**: Gestão de banners promocionais
-- **Perfil**: Edição de dados e alteração de senha
+---
 
 ## 🔐 Segurança
 
@@ -165,17 +227,22 @@ CRUD completo para:
 - ✅ Password Hashing (BCrypt)
 - ✅ Bearer Token Authentication
 - ✅ CORS Configured
-- ✅ Rate Limiting Ready
+- ✅ Rate Limiting
 - ✅ Activity Logging
+- ✅ RLS Policies (Supabase)
+
+---
 
 ## ⚡ Performance
 
-- Lazy loading de imagens
-- Compressão GZIP habilitada
-- Caching de imagens
-- Minificação de CSS/JS
-- Carregamento assíncrono
-- Otimização de bundle
+- ⚡ Lazy loading de imagens
+- 📦 Compressão GZIP habilitada
+- 💾 Caching de imagens
+- 📦 Minificação de CSS/JS
+- 🔄 Carregamento assíncrono
+- 🎯 Otimização de bundle
+
+---
 
 ## 📊 SEO
 
@@ -188,134 +255,43 @@ CRUD completo para:
 - ✅ Breadcrumbs
 - ✅ Mobile-friendly
 
-## 🚀 Deployment
+---
 
-### Produção
-
-```bash
-# Frontend
-cd frontend
-npm run build
-# Fazer upload de 'dist' para o servidor
-
-# Backend
-# Upload de todos os arquivos via FTP/SFTP
-```
-
-### Nginx Configuration
-
-```nginx
-server {
-    listen 80;
-    server_name fmlider.co.ao;
-    
-    root /var/www/fmlider.co.ao;
-    
-    location /api {
-        try_files $uri $uri/ /backend/index.php?$query_string;
-    }
-    
-    location / {
-        try_files $uri $uri/ /frontend/index.html;
-    }
-}
-```
-
-## 📝 Configuração MySQL
-
-```sql
--- Criar base de dados
-CREATE DATABASE fmlider CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- Usar a base de dados
-USE fmlider;
-
--- Importar schema
-SOURCE backend/database/migrations/schema.sql;
-```
-
-## 🛠️ Desenvolvimento
-
-### Variáveis de Ambiente
-
-Backend (.env):
-```
-DB_HOST=localhost
-DB_NAME=fmlider
-DB_USER=root
-DB_PASS=
-
-APP_KEY=your-secret-key
-APP_URL=http://localhost:8000
-```
-
-Frontend (.env):
-```
-VITE_API_URL=http://localhost:8000/api
-```
-
-### Hot Reload (Frontend)
+## 🛠️ Comandos Úteis
 
 ```bash
-cd frontend
-npm run dev
+# 🚀 Iniciar frontend em desenvolvimento
+cd frontend && npm run dev
+
+# 🏗️ Build para produção
+cd frontend && npm run build
+
+# 📦 Instalar dependências
+cd frontend && npm install
 ```
 
-### Scripts Úteis
+---
 
-```bash
-# Frontend
-npm install     # Instalar dependências
-npm run dev     # Desenvolvimento
-npm run build   # Build de produção
-npm run preview # Preview do build
+## 📞 Contactos do Desenvolvedor
 
-# Backend
-# Nenhum script necessário (PHP puro)
-```
+| Campo | Valor |
+|-------|-------|
+| 👨‍💻 **Nome** | Masukulu Miguel |
+| 🏠 **Organização** | CodingLifeDev |
+| 📧 **Email** | masukulum@gmail.com |
+| 📱 **Telefone** | +244 935603163 |
+| 🌐 **GitHub** | [Masukulmiguel](https://github.com/Masukulmiguel) |
 
-## 📄 Documentação
-
-- Product Requirements Document: [prd.md](prd.md)
-- API Routes: [backend/routes/api.php](backend/routes/api.php)
-- Database Schema: [backend/database/migrations/schema.sql](backend/database/migrations/schema.sql)
-
-## 🐛 Troubleshooting
-
-### A API não responde
-
-```
-1. Verificar se o backend está acessível em http://localhost:8000/api
-2. Verificar o arquivo .htaccess no backend
-3. Verificar se mod_rewrite está ativado no Apache
-```
-
-### Frontend não carrega dados
-
-```
-1. Verificar na console do browser os erros CORS
-2. Certificar que a API está rodando
-3. Verificar VITE_API_URL no .env
-```
-
-### Banco de dados não funciona
-
-```
-1. Verificar se MySQL está rodando
-2. Executar schema.sql
-3. Verificar as credenciais de acesso
-4. Verificar privilégios do utilizador MySQL
-```
-
-## 📞 Suporte
-
-Para dúvidas ou problemas:
-- Email: masukulum@gmail.com
-- Telefone: +244 935603163
+---
 
 ## 📜 Licença
 
-© 2024 FMLider Transitário & Logística. Todos os direitos reservados.
+© 2025 FMLider Transitário & Logística. Todos os direitos reservados.
+
+Desenvolvido com ❤️ por **Masukulu Miguel** para o projecto **seefast-project**.
 
 ---
-**Desenvolvedor Masukulu Miguel**
+
+**🏷️ Versão Actual**: `2.2.1`  
+**📅 Última Actualização**: Julho 2025  
+**🌍 Idioma**: Português de Portugal (PT-PT)
