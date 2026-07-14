@@ -1,7 +1,7 @@
 <template>
   <div class="service-detail-page">
     <!-- Hero -->
-    <section class="sd-hero" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(${service.image})` }">
+    <section class="sd-hero" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(${service.image || defaultBg})` }">
       <div class="container position-relative">
         <router-link to="/servicos" class="sd-back">
           <i class="bi bi-arrow-left"></i> {{ t('service_detail.back') }}
@@ -71,6 +71,8 @@ import { useI18n } from '@/composables/useI18n'
 
 const route = useRoute()
 const { t } = useI18n()
+
+const defaultBg = '/assets/img/servico/service1.jpg'
 
 const allServices = computed(() => ({
   'desembaraco-aduaneiro': {

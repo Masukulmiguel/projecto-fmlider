@@ -121,13 +121,40 @@
       <div class="card-body">
         <p class="text-muted small mb-3">Troque as imagens de fundo das páginas de login, registo e redefinição de senha.</p>
         <div class="row g-3">
-          <div v-for="item in authImages" :key="item.key" class="col-md-4">
+          <div v-for="item in authImages" :key="item.key" class="col-6 col-md-4 col-lg-3">
             <div class="auth-bg-card">
               <div class="auth-bg-preview" :style="{ backgroundImage: `url(${item.url})` }">
                 <div class="auth-bg-label">{{ item.label }}</div>
               </div>
               <div class="auth-bg-actions">
-                <input :ref="el => { if (el) fileRefs[item.key] = el }" type="file" accept="image/*" class="d-none" @change="e => uploadBg(item.key, e)">
+                <input :ref="el => { if (el) fileRefs[item.key] = el }" type="file" accept="image/*" class="d-none" @change="e => uploadBg(item.key, 'auth', e)">
+                <button class="btn btn-sm btn-outline-primary w-100" @click="fileRefs[item.key]?.click()" :disabled="uploadingKey === item.key">
+                  <span v-if="uploadingKey === item.key" class="spinner-border spinner-border-sm me-1"></span>
+                  <i v-else class="bi bi-camera-fill me-1"></i>
+                  {{ uploadingKey === item.key ? 'A enviar...' : 'Trocar Imagem' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Service Hero Background -->
+    <div class="card border-0 shadow-sm mt-4">
+      <div class="card-header bg-white d-flex align-items-center justify-content-between">
+        <h6 class="mb-0"><i class="bi bi-briefcase me-2"></i>Imagem de Fundo (Serviço)</h6>
+      </div>
+      <div class="card-body">
+        <p class="text-muted small mb-3">Imagem de fundo do hero da página de detalhe do serviço (quando não há imagem definida).</p>
+        <div class="row g-3">
+          <div v-for="item in serviceImages" :key="item.key" class="col-6 col-md-4 col-lg-3">
+            <div class="auth-bg-card">
+              <div class="auth-bg-preview" :style="{ backgroundImage: `url(${item.url})` }">
+                <div class="auth-bg-label">{{ item.label }}</div>
+              </div>
+              <div class="auth-bg-actions">
+                <input :ref="el => { if (el) fileRefs[item.key] = el }" type="file" accept="image/*" class="d-none" @change="e => uploadBg(item.key, 'services', e)">
                 <button class="btn btn-sm btn-outline-primary w-100" @click="fileRefs[item.key]?.click()" :disabled="uploadingKey === item.key">
                   <span v-if="uploadingKey === item.key" class="spinner-border spinner-border-sm me-1"></span>
                   <i v-else class="bi bi-camera-fill me-1"></i>
@@ -179,37 +206,47 @@ const authImages = ref([
   { key: 'forgot_bg', label: 'Esqueci Senha', url: '/assets/img/auth/bg3.jpg' },
 ])
 
+const serviceImages = ref([
+  { key: 'service_hero', label: 'Hero Serviços', section: 'services', url: '/assets/img/servico/service1.jpg' },
+])
+
 const loadAuthImages = async () => {
-  const { data } = await supabase.from('site_images').select('key, image_url').eq('section', 'auth').eq('status', 1)
+  const { data } = await supabase.from('site_images').select('key, image_url').eq('status', 1)
   if (data) {
     data.forEach(row => {
-      const img = authImages.value.find(i => i.key === row.key)
-      if (img && row.image_url) img.url = row.image_url
+      if (row.section === 'auth') {
+        const img = authImages.value.find(i => i.key === row.key)
+        if (img && row.image_url) img.url = row.image_url
+      }
+      if (row.section === 'services') {
+        const img = serviceImages.value.find(i => i.key === row.key)
+        if (img && row.image_url) img.url = row.image_url
+      }
     })
   }
 }
 
-const uploadBg = async (key, e) => {
+const uploadBg = async (key, section, e) => {
   const file = e.target.files?.[0]
   if (!file) return
   uploadingKey.value = key
   try {
     const ext = file.name.split('.').pop()
-    const path = `site/auth_${key}_${Date.now()}.${ext}`
+    const path = `site/${section}_${key}_${Date.now()}.${ext}`
     const { error: uploadErr } = await supabase.storage.from('uploads').upload(path, file, { contentType: file.type, upsert: true })
     if (uploadErr) throw uploadErr
     const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(path)
     const imageUrl = urlData?.publicUrl
     if (!imageUrl) throw new Error('No URL')
     const { error: upsertErr } = await supabase.from('site_images').upsert({
-      section: 'auth',
+      section,
       key,
       image_url: imageUrl,
       alt_text: key,
       status: 1,
     }, { onConflict: 'section,key' })
     if (upsertErr) throw upsertErr
-    const img = authImages.value.find(i => i.key === key)
+    const img = [...authImages.value, ...serviceImages.value].find(i => i.key === key)
     if (img) img.url = imageUrl
     message.value = { type: 'success', text: `Imagem "${key}" atualizada com sucesso!` }
   } catch (err) {
