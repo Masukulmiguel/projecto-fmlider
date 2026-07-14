@@ -673,14 +673,6 @@ onBeforeUnmount(() => {
   margin: 0 auto;
 }
 
-.modal-backdrop {
-  z-index: 1040;
-}
-
-.modal {
-  z-index: 1050;
-}
-
 @media (max-width: 575.98px) {
   .service-row {
     flex-wrap: wrap;
