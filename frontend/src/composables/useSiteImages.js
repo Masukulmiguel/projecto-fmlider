@@ -42,6 +42,11 @@ export function useSiteImages() {
     return siteImagesCache.value[section]?.[key]?.alt || fallback
   }
 
+  const invalidate = () => {
+    loaded.value = false
+    siteImagesCache.value = {}
+  }
+
   return {
     siteImages: siteImagesCache,
     loaded,
@@ -49,5 +54,6 @@ export function useSiteImages() {
     fetchAll,
     getImage,
     getAlt,
+    invalidate,
   }
 }

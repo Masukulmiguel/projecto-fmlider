@@ -173,8 +173,10 @@
 import { ref, reactive, onMounted } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useI18n } from '@/composables/useI18n'
+import { useSiteImages } from '@/composables/useSiteImages'
 
 const { t } = useI18n()
+const { invalidate } = useSiteImages()
 
 const loading = ref(true)
 const saving = ref(false)
@@ -211,7 +213,8 @@ const serviceImages = ref([
 ])
 
 const loadAuthImages = async () => {
-  const { data } = await supabase.from('site_images').select('key, image_url').eq('status', 1)
+  const { data, error } = await supabase.from('site_images').select('section, key, image_url').eq('status', 1)
+  if (error) console.error('loadAuthImages error:', error)
   if (data) {
     data.forEach(row => {
       if (row.section === 'auth') {
@@ -248,6 +251,7 @@ const uploadBg = async (key, section, e) => {
     if (upsertErr) throw upsertErr
     const img = [...authImages.value, ...serviceImages.value].find(i => i.key === key)
     if (img) img.url = imageUrl
+    invalidate()
     message.value = { type: 'success', text: `Imagem "${key}" atualizada com sucesso!` }
   } catch (err) {
     message.value = { type: 'danger', text: err.message || 'Erro ao enviar imagem.' }
