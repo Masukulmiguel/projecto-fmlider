@@ -3,7 +3,7 @@
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
       <div>
         <h4 class="mb-1 fw-semibold">{{ t('admin.faqs_title') }}</h4>
-        <p class="text-muted mb-0 small">{{ t('admin.faqs_subtitle') }}</p>
+        <p class="text-muted mb-0 small">Perguntas frequentes do site</p>
       </div>
       <button class="btn-add" @click="openModal()">
         <i class="bi bi-plus-lg"></i>
