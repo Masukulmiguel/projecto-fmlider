@@ -26,7 +26,7 @@
               <!-- Icon -->
               <div class="forgot-icon-wrapper">
                 <div class="forgot-icon">
-                  <i class="bi bi-envelope-lock-fill"></i>
+                  <i class="bi bi-key-fill"></i>
                 </div>
               </div>
 
