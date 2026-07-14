@@ -490,3 +490,59 @@ a:hover { color: var(--accent-hover); }
   align-items: center;
   justify-content: flex-end;
 }
+
+/* ============================================
+   Responsive Utilities — All Devices
+   ============================================ */
+
+/* Small phones (up to 360px) */
+@media (max-width: 360px) {
+  .fml-section { padding: 2rem 0; }
+  .section-title { font-size: 1.5rem; }
+  .section-subtitle { font-size: 0.9rem; }
+  .btn { padding: 0.55rem 1.2rem; font-size: 0.85rem; }
+}
+
+/* Phones (361px - 576px) */
+@media (min-width: 361px) and (max-width: 576px) {
+  .fml-section { padding: 2.5rem 0; }
+}
+
+/* Tablets (577px - 991px) */
+@media (min-width: 577px) and (max-width: 991px) {
+  .fml-section { padding: 3.5rem 0; }
+}
+
+/* Small desktops (992px - 1199px) */
+@media (min-width: 992px) and (max-width: 1199px) {
+  .fml-section { padding: 4rem 0; }
+}
+
+/* Fix overflow on all elements */
+img, video { max-width: 100%; height: auto; }
+table { width: 100%; overflow-x: auto; display: block; }
+.grid-container, .row { overflow: visible; }
+
+/* Tables scroll on mobile */
+@media (max-width: 768px) {
+  .table-responsive-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  table { font-size: 0.85rem; }
+  .card-body { padding: 0.75rem; }
+}
+
+/* Forms on mobile */
+@media (max-width: 576px) {
+  .form-control, .form-select {
+    font-size: 16px !important;
+    padding: 0.75rem 0.75rem;
+  }
+  .modal-content { width: 95% !important; margin: 1rem auto; }
+}
+
+/* Large screens / TV (1400px+) */
+@media (min-width: 1400px) {
+  .container { max-width: 1320px; }
+}

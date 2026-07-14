@@ -12,7 +12,7 @@
       <ClienteNavbar v-else-if="isClienteRoute" @toggle-sidebar="sidebarOpen = !sidebarOpen" :collapsed="sidebarCollapsed" />
       <PublicHeader v-else />
 
-      <main>
+      <main :class="{ 'public-main': !isAdminRoute && !isClienteRoute && !isFuncionarioRoute, 'dashboard-main': isAdminRoute || isClienteRoute || isFuncionarioRoute }">
         <RouterView />
       </main>
 
@@ -134,6 +134,13 @@ watch(() => route.fullPath, () => {
 main {
   min-height: calc(100vh - 64px);
   padding: 0;
+}
+
+.public-main {
+  padding-top: var(--fml-header-h, 76px);
+}
+
+.dashboard-main {
   padding-top: 60px;
 }
 
@@ -150,6 +157,15 @@ main {
   .cliente-content,
   .funcionario-content {
     margin-left: 0;
+  }
+  .public-main {
+    padding-top: 60px;
+  }
+  .dashboard-main {
+    padding-top: 0;
+  }
+  main {
+    min-height: auto;
   }
 }
 

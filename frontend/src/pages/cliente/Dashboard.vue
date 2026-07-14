@@ -25,8 +25,8 @@
       </div>
     </div>
 
-    <div class="row g-4 mb-4">
-      <div class="col-md-6 col-xl-3">
+    <div class="row g-3 g-md-4 mb-4">
+      <div class="col-6 col-xl-3">
         <router-link to="/documentos" class="stat-tile-link">
           <div class="stat-tile">
             <div class="stat-tile-icon bg-info-soft"><i class="bi bi-file-earmark-text-fill"></i></div>
@@ -38,7 +38,7 @@
           </div>
         </router-link>
       </div>
-      <div class="col-md-6 col-xl-3">
+      <div class="col-6 col-xl-3">
         <router-link to="/contactos" class="stat-tile-link">
           <div class="stat-tile">
             <div class="stat-tile-icon bg-warning-soft"><i class="bi bi-person-rolodex"></i></div>
@@ -50,7 +50,7 @@
           </div>
         </router-link>
       </div>
-      <div class="col-md-6 col-xl-3">
+      <div class="col-6 col-xl-3">
         <router-link to="/licenciamentos" class="stat-tile-link">
           <div class="stat-tile">
             <div class="stat-tile-icon bg-purple-soft"><i class="bi bi-file-earmark-medical"></i></div>
@@ -64,7 +64,7 @@
           </div>
         </router-link>
       </div>
-      <div class="col-md-6 col-xl-3">
+      <div class="col-6 col-xl-3">
         <router-link to="/contentores" class="stat-tile-link">
           <div class="stat-tile">
             <div class="stat-tile-icon bg-info-soft"><i class="bi bi-box-seam"></i></div>
@@ -76,7 +76,7 @@
           </div>
         </router-link>
       </div>
-      <div class="col-md-6 col-xl-3">
+      <div class="col-6 col-xl-3">
         <router-link to="/processos" class="stat-tile-link">
           <div class="stat-tile">
             <div class="stat-tile-icon bg-warning-soft"><i class="bi bi-clipboard2-data"></i></div>
@@ -537,17 +537,25 @@ onMounted(async () => {
 @media (max-width: 576px) {
   .welcome-card { padding: 1rem; }
   .welcome-card h2 { font-size: 1.1rem; }
-  .stat-tile { padding: 1rem; gap: 0.75rem; }
-  .stat-tile-icon { width: 42px; height: 42px; border-radius: 10px; font-size: 1.15rem; }
-  .stat-tile-label { font-size: 0.72rem; }
-  .stat-tile-value { font-size: 1.4rem; }
-  .stat-tile-meta { font-size: 0.7rem; }
+  .stat-tile { padding: 0.85rem; gap: 0.6rem; }
+  .stat-tile-icon { width: 40px; height: 40px; border-radius: 10px; font-size: 1.1rem; }
+  .stat-tile-label { font-size: 0.68rem; letter-spacing: 0.3px; }
+  .stat-tile-value { font-size: 1.3rem; }
+  .stat-tile-meta { font-size: 0.65rem; }
   .card { border-radius: 10px; }
   .quick-actions { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
-  .quick-action { padding: 1rem 0.75rem; font-size: 0.78rem; }
-  .quick-action i { font-size: 1.2rem; }
-  .recent-list li { padding: 0.65rem 0; gap: 0.5rem; }
-  .tracking-code { font-size: 0.72rem; }
-  .route-mini { font-size: 0.8rem; }
+  .quick-action { padding: 0.85rem 0.6rem; font-size: 0.75rem; gap: 0.35rem; }
+  .quick-action i { font-size: 1.15rem; }
+  .recent-list li { padding: 0.6rem 0; gap: 0.4rem; }
+  .tracking-code { font-size: 0.68rem; }
+  .route-mini { font-size: 0.78rem; }
+  .logo-box { width: 50px; height: 50px; }
+}
+
+/* Medium phones & small tablets */
+@media (min-width: 577px) and (max-width: 768px) {
+  .stat-tile { padding: 1.1rem; gap: 0.85rem; }
+  .stat-tile-icon { width: 48px; height: 48px; font-size: 1.3rem; }
+  .stat-tile-value { font-size: 1.6rem; }
 }
 </style>

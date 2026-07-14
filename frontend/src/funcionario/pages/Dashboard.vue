@@ -16,7 +16,7 @@
 
     <!-- Stats Cards -->
     <div class="row g-3 mb-4">
-      <div v-if="can('clients.view')" class="col-md-6 col-xl-3">
+      <div v-if="can('clients.view')" class="col-6 col-xl-3">
         <router-link to="/funcionario/clientes" class="stat-card-link">
           <div class="stat-card fml-fade-up stagger-3 hover-lift">
             <div class="stat-icon stat-cyan">
@@ -30,7 +30,7 @@
           </div>
         </router-link>
       </div>
-      <div v-if="can('documentos.view')" class="col-md-6 col-xl-3">
+      <div v-if="can('documentos.view')" class="col-6 col-xl-3">
         <router-link to="/funcionario/documentos" class="stat-card-link">
           <div class="stat-card fml-fade-up stagger-4 hover-lift">
             <div class="stat-icon stat-amber">
@@ -44,7 +44,7 @@
           </div>
         </router-link>
       </div>
-      <div v-if="can('entregas.view')" class="col-md-6 col-xl-3">
+      <div v-if="can('entregas.view')" class="col-6 col-xl-3">
         <router-link to="/funcionario/entregas" class="stat-card-link">
           <div class="stat-card fml-fade-up stagger-4 hover-lift">
             <div class="stat-icon stat-red">
@@ -58,7 +58,7 @@
           </div>
         </router-link>
       </div>
-      <div v-if="can('contentores.view') || can('documentos.view')" class="col-md-6 col-xl-3">
+      <div v-if="can('contentores.view') || can('documentos.view')" class="col-6 col-xl-3">
         <router-link to="/funcionario/contentores" class="stat-card-link">
           <div class="stat-card fml-fade-up stagger-4 hover-lift">
             <div class="stat-icon stat-cyan">
@@ -72,7 +72,7 @@
           </div>
         </router-link>
       </div>
-      <div class="col-md-6 col-xl-3">
+      <div class="col-6 col-xl-3">
         <router-link to="/funcionario/licenciamentos" class="stat-card-link">
           <div class="stat-card fml-fade-up stagger-4 hover-lift">
             <div class="stat-icon stat-purple">
@@ -86,7 +86,7 @@
           </div>
         </router-link>
       </div>
-      <div class="col-md-6 col-xl-3">
+      <div class="col-6 col-xl-3">
         <router-link to="/funcionario/processos" class="stat-card-link">
           <div class="stat-card fml-fade-up stagger-4 hover-lift">
             <div class="stat-icon stat-amber">
@@ -507,16 +507,22 @@ onMounted(load)
   .welcome-banner { padding: 1.5rem; }
   .welcome-content { flex-direction: column; text-align: center; gap: 1rem; }
   .welcome-text h1 { font-size: 1.4rem; }
+  .activity-item { padding: 0.75rem 1rem; }
+  .activity-time { white-space: normal; }
 }
 
 @media (max-width: 576px) {
-  .stat-card { padding: 1rem; gap: 0.75rem; }
-  .stat-icon { width: 42px; height: 42px; border-radius: 10px; font-size: 1.15rem; }
-  .stat-label { font-size: 0.72rem; }
-  .stat-value { font-size: 1.4rem; }
-  .stat-meta { font-size: 0.7rem; }
+  .stat-card { padding: 0.85rem; gap: 0.65rem; }
+  .stat-icon { width: 40px; height: 40px; border-radius: 10px; font-size: 1.1rem; }
+  .stat-label { font-size: 0.68rem; }
+  .stat-value { font-size: 1.3rem; }
+  .stat-meta { font-size: 0.65rem; }
   .welcome-banner { padding: 1rem; }
   .welcome-text h1 { font-size: 1.2rem; }
   .content-card { border-radius: 12px; }
+  .activity-item { padding: 0.65rem 0.75rem; }
+  .activity-icon { width: 34px; height: 34px; }
+  .action-btn { padding: 0.75rem 0.85rem; }
+  .action-icon { width: 34px; height: 34px; }
 }
 </style>

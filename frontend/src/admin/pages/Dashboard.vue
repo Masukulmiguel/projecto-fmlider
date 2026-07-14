@@ -1140,14 +1140,19 @@ onUnmounted(() => {
   .welcome-title {
     font-size: 1.25rem;
   }
+
+  .header-right {
+    flex-wrap: wrap;
+  }
 }
 
 @media (max-width: 576px) {
-  .stat-card { padding: 1rem; gap: 0.75rem; }
-  .stat-icon { width: 42px; height: 42px; border-radius: 10px; font-size: 1.15rem; }
-  .stat-label { font-size: 0.72rem; }
-  .stat-value { font-size: 1.4rem; }
+  .stat-card { padding: 0.85rem; gap: 0.65rem; }
+  .stat-icon { width: 40px; height: 40px; border-radius: 10px; font-size: 1.1rem; }
+  .stat-label { font-size: 0.68rem; }
+  .stat-value { font-size: 1.3rem; }
   .admin-dashboard { padding: 12px; }
   .welcome-title { font-size: 1.1rem; }
+  .stats-grid { gap: 10px; }
 }
 </style>
