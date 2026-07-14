@@ -85,7 +85,7 @@ import { useSiteImages } from '@/composables/useSiteImages'
 
 const router = useRouter()
 const { getImage, fetchAll } = useSiteImages()
-const bg = ref('/assets/img/auth/bg1.jpg')
+const bg = ref('/assets/img/auth/reset_bg.jpg')
 
 const form = ref({
   password: '',
@@ -100,7 +100,7 @@ const showPassword = ref(false)
 
 onMounted(async () => {
   await fetchAll()
-  bg.value = getImage('auth', 'reset_bg', '/assets/img/auth/bg1.jpg')
+  bg.value = getImage('auth', 'reset_bg', '/assets/img/auth/reset_bg.jpg')
 
   const { data: { session } } = await supabase.auth.getSession()
 
