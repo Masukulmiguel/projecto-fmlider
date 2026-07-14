@@ -193,6 +193,7 @@ const sectionLabels = computed(() => ({
   services: t('admin.site_images_section_services'),
   news: t('admin.site_images_section_news'),
   gallery: t('admin.site_images_section_gallery'),
+  auth: 'Autenticação',
 }))
 
 const form = reactive({

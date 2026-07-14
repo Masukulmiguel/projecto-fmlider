@@ -1,9 +1,9 @@
 <template>
   <div class="register-page">
     <div class="bg-slideshow">
-      <div class="bg-slide bg-slide-1"></div>
-      <div class="bg-slide bg-slide-2"></div>
-      <div class="bg-slide bg-slide-3"></div>
+      <div class="bg-slide" :style="{ backgroundImage: `url(${bg1})` }" style="animation-delay: 0s"></div>
+      <div class="bg-slide" :style="{ backgroundImage: `url(${bg2})` }" style="animation-delay: 6s"></div>
+      <div class="bg-slide" :style="{ backgroundImage: `url(${bg3})` }" style="animation-delay: 12s"></div>
       <div class="bg-overlay"></div>
     </div>
 
@@ -142,10 +142,16 @@ import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useI18n } from '@/composables/useI18n'
+import { useSiteImages } from '@/composables/useSiteImages'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const { t } = useI18n()
+const { getImage, fetchAll } = useSiteImages()
+
+const bg1 = ref('/assets/img/logo.png')
+const bg2 = ref('/assets/img/construcao2020/image1.jpeg')
+const bg3 = ref('/assets/img/construcao2020/image2.jpeg')
 
 const form = reactive({
   username: '',
@@ -190,7 +196,11 @@ const eraseSubtitle = (text) => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await fetchAll()
+  bg1.value = getImage('auth', 'login_bg_1', '/assets/img/logo.png')
+  bg2.value = getImage('auth', 'login_bg_2', '/assets/img/construcao2020/image1.jpeg')
+  bg3.value = getImage('auth', 'login_bg_3', '/assets/img/construcao2020/image2.jpeg')
   typeSubtitle(subtitles.value[0])
 })
 
@@ -253,10 +263,6 @@ const handleRegister = async () => {
   opacity: 0;
   transform: scale(1.15);
 }
-
-.bg-slide-1 { background-image: url('/assets/img/logo.png'); animation-delay: 0s; }
-.bg-slide-2 { background-image: url('/assets/img/construcao2020/image1.jpeg'); animation-delay: 6s; }
-  .bg-slide-3 { background-image: url('/assets/img/construcao2020/image2.jpeg'); animation-delay: 12s; }
 
 @keyframes kenBurns {
   0% { opacity: 0; transform: scale(1.15); }

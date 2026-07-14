@@ -1,5 +1,5 @@
 <template>
-  <div class="reset-page min-vh-100 d-flex align-items-center justify-content-center">
+  <div class="reset-page min-vh-100 d-flex align-items-center justify-content-center" :style="{ backgroundImage: `url(${bg})` }">
     <div class="reset-overlay"></div>
     <div class="container position-relative" style="z-index: 2;">
       <div class="row justify-content-center">
@@ -81,8 +81,11 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabase'
+import { useSiteImages } from '@/composables/useSiteImages'
 
 const router = useRouter()
+const { getImage, fetchAll } = useSiteImages()
+const bg = ref('https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=1920&q=80')
 
 const form = ref({
   password: '',
@@ -96,6 +99,9 @@ const successMessage = ref('')
 const showPassword = ref(false)
 
 onMounted(async () => {
+  await fetchAll()
+  bg.value = getImage('auth', 'reset_bg', 'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=1920&q=80')
+
   const { data: { session } } = await supabase.auth.getSession()
 
   if (session) {
@@ -150,7 +156,9 @@ const handleResetPassword = async () => {
 
 <style scoped>
 .reset-page {
-  background: url('https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=1920&q=80') center/cover no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   position: relative;
 }
 
