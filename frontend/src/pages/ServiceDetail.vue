@@ -1,7 +1,7 @@
 <template>
   <div class="service-detail-page">
     <!-- Hero -->
-    <section class="sd-hero" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(${service.image || defaultBg})` }">
+    <section class="sd-hero" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.72) 0%, rgba(30,58,138,0.55) 50%, rgba(15,23,42,0.72) 100%), url('${encodeURI(service.image || defaultBg)}')` }">
       <div class="container position-relative">
         <router-link to="/servicos" class="sd-back">
           <i class="bi bi-arrow-left"></i> {{ t('service_detail.back') }}
