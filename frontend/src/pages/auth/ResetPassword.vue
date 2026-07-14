@@ -1,75 +1,114 @@
 <template>
-  <div class="reset-page min-vh-100 d-flex align-items-center justify-content-center" :style="{ backgroundImage: `url(${bg})` }">
+  <div class="reset-page">
+    <!-- Background -->
+    <div class="reset-bg" :style="{ backgroundImage: `url(${bg})` }"></div>
     <div class="reset-overlay"></div>
-    <div class="container position-relative" style="z-index: 2;">
-      <div class="row justify-content-center">
-        <div class="col-md-5 col-lg-4">
-          <div class="card border-0 shadow-lg">
-            <div class="card-body p-4 p-md-5">
-              <div class="text-center mb-4">
-                <div class="reset-icon mx-auto mb-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="#1a365d" viewBox="0 0 16 16">
+
+    <!-- Floating shapes -->
+    <div class="floating-shape shape-1"></div>
+    <div class="floating-shape shape-2"></div>
+
+    <!-- Content -->
+    <div class="reset-content">
+      <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100">
+          <div class="col-md-5 col-lg-4">
+
+            <!-- Logo -->
+            <div class="text-center mb-4 animate-item">
+              <div class="reset-logo">
+                <img src="/assets/img/logo.png" alt="FMLider" class="logo-img">
+              </div>
+            </div>
+
+            <!-- Card -->
+            <div class="reset-card animate-item delay-1">
+              <!-- Icon -->
+              <div class="reset-icon-wrapper">
+                <div class="reset-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/>
                   </svg>
                 </div>
-                <h1 class="h4 fw-bold text-dark mb-2">Redefinir Senha</h1>
-                <p class="text-muted small mb-0">Insira a sua nova senha abaixo</p>
               </div>
 
-              <div v-if="errorMessage" class="alert alert-danger d-flex align-items-center py-2" role="alert">
-                <svg class="flex-shrink-0 me-2" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
-                </svg>
+              <!-- Title -->
+              <div class="text-center mb-4">
+                <h1 class="reset-title">Esqueceu a Senha?</h1>
+                <p class="reset-subtitle">Não se preocupe! Insira o seu email e enviaremos instruções para redefinir a sua senha.</p>
+              </div>
+
+              <!-- Error -->
+              <div v-if="errorMessage" class="alert-custom alert-error animate-shake">
+                <i class="bi bi-exclamation-triangle-fill"></i>
                 <span>{{ errorMessage }}</span>
               </div>
-              <div v-if="successMessage" class="alert alert-success d-flex align-items-center py-2" role="alert">
-                <svg class="flex-shrink-0 me-2" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
-                </svg>
+
+              <!-- Success -->
+              <div v-if="successMessage" class="alert-custom alert-success">
+                <i class="bi bi-check-circle-fill"></i>
                 <span>{{ successMessage }}</span>
               </div>
 
-              <div v-if="!sessionReady && !errorMessage" class="text-center py-4">
-                <div class="spinner-border text-primary mb-3" role="status" style="width: 2.5rem; height: 2.5rem;">
-                  <span class="visually-hidden">A processar...</span>
+              <!-- Loading -->
+              <div v-if="!sessionReady && !errorMessage" class="loading-state">
+                <div class="spinner-wrapper">
+                  <div class="spinner-ring"></div>
+                  <i class="bi bi-shield-lock-fill spinner-icon"></i>
                 </div>
-                <p class="text-muted small mb-0">A validar o link de redefinição...</p>
+                <p class="loading-text">A validar o link de redefinição...</p>
               </div>
 
-              <form v-if="sessionReady" @submit.prevent="handleResetPassword">
-                <div class="mb-3">
-                  <label for="password" class="form-label fw-semibold small">Nova Senha</label>
-                  <div class="input-group">
-                    <span class="input-group-text bg-light border-end-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#6c757d" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/></svg></span>
-                    <input :type="showPassword ? 'text' : 'password'" class="form-control border-start-0 bg-light" id="password" v-model="form.password" required minlength="6" placeholder="Mínimo 6 caracteres">
-                    <button type="button" class="btn btn-outline-secondary border-start-0" @click="showPassword = !showPassword" tabindex="-1">
-                      <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/></svg>
-                      <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7.028 7.028 0 0 0-2.79.948.826.826 0 0 0-.21.133.672.672 0 0 1-.943 0A6.944 6.944 0 0 1 1 13.011C.224 11.61 0 10.98 0 10c0-2.12 1.225-4.66 2.69-6.42.487-.563 1.055-.98 1.653-1.249C5.263 1.714 6.627 1.2 8 1.2c1.373 0 2.737.514 3.657 1.332.598.27 1.166.687 1.653 1.249C14.775 5.34 16 7.88 16 10c0 .98-.224 1.61-.641 2.09-.333.374-.76.594-1.157.684a4.49 4.49 0 0 1-.98.088A7.02 7.02 0 0 1 8 13.5c-1.158 0-2.234-.29-3.159-.806-.346-.2-.56-.378-.654-.475z"/></svg>
+              <!-- Reset Form -->
+              <form v-if="sessionReady" @submit.prevent="handleResetPassword" class="reset-form">
+                <div class="input-group-custom">
+                  <label class="input-label">Nova Senha</label>
+                  <div class="input-wrapper">
+                    <i class="bi bi-lock-fill input-icon"></i>
+                    <input
+                      :type="showPassword ? 'text' : 'password'"
+                      class="input-field"
+                      v-model="form.password"
+                      required
+                      minlength="6"
+                      placeholder="Mínimo 6 caracteres"
+                    >
+                    <button type="button" class="toggle-pass" @click="showPassword = !showPassword" tabindex="-1">
+                      <i :class="showPassword ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill'"></i>
                     </button>
                   </div>
                 </div>
-                <div class="mb-4">
-                  <label for="password_confirm" class="form-label fw-semibold small">Confirmar Senha</label>
-                  <div class="input-group">
-                    <span class="input-group-text bg-light border-end-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#6c757d" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/></svg></span>
-                    <input :type="showPassword ? 'text' : 'password'" class="form-control border-start-0 bg-light" id="password_confirm" v-model="form.password_confirm" required placeholder="Confirme a nova senha">
+
+                <div class="input-group-custom">
+                  <label class="input-label">Confirmar Senha</label>
+                  <div class="input-wrapper">
+                    <i class="bi bi-shield-lock-fill input-icon"></i>
+                    <input
+                      :type="showPassword ? 'text' : 'password'"
+                      class="input-field"
+                      v-model="form.password_confirm"
+                      required
+                      placeholder="Confirme a nova senha"
+                    >
                   </div>
                 </div>
-                <button type="submit" class="btn btn-lg w-100 fw-semibold d-flex align-items-center justify-content-center gap-2" :disabled="loading" style="background: #1a365d; border-color: #1a365d; color: #fff;">
-                  <span v-if="loading" class="spinner-border spinner-border-sm"></span>
-                  <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/></svg>
+
+                <button type="submit" class="btn-reset" :disabled="loading">
+                  <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
+                  <i v-else class="bi bi-arrow-repeat me-2"></i>
                   Redefinir Senha
                 </button>
               </form>
 
-              <div class="text-center mt-3 pt-3 border-top">
-                <router-link to="/login" class="text-decoration-none small d-inline-flex align-items-center gap-1" style="color: #1a365d;">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
-                  </svg>
-                  Voltar ao Login
+              <!-- Back to login -->
+              <div class="back-login">
+                <router-link to="/login" class="back-link">
+                  <i class="bi bi-arrow-left"></i>
+                  <span>Voltar ao Login</span>
                 </router-link>
               </div>
             </div>
+
           </div>
         </div>
       </div>
@@ -87,11 +126,7 @@ const router = useRouter()
 const { getImage, fetchAll } = useSiteImages()
 const bg = ref('/assets/img/auth/reset_bg.jpg')
 
-const form = ref({
-  password: '',
-  password_confirm: ''
-})
-
+const form = ref({ password: '', password_confirm: '' })
 const sessionReady = ref(false)
 const loading = ref(false)
 const errorMessage = ref('')
@@ -103,7 +138,6 @@ onMounted(async () => {
   bg.value = getImage('auth', 'reset_bg', '/assets/img/auth/reset_bg.jpg')
 
   const { data: { session } } = await supabase.auth.getSession()
-
   if (session) {
     window.history.replaceState({}, '', '/redefinir-senha')
     sessionReady.value = true
@@ -133,16 +167,13 @@ const handleResetPassword = async () => {
     errorMessage.value = 'As senhas não coincidem.'
     return
   }
-
   if (form.value.password.length < 6) {
     errorMessage.value = 'A senha deve ter pelo menos 6 caracteres.'
     return
   }
 
   loading.value = true
-  const { error } = await supabase.auth.updateUser({
-    password: form.value.password
-  })
+  const { error } = await supabase.auth.updateUser({ password: form.value.password })
   loading.value = false
 
   if (error) {
@@ -156,45 +187,258 @@ const handleResetPassword = async () => {
 
 <style scoped>
 .reset-page {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background */
+.reset-bg {
+  position: absolute;
+  inset: 0;
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
+  animation: zoomBg 20s ease-in-out infinite alternate;
+}
+@keyframes zoomBg {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
 }
 
 .reset-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(26, 54, 93, 0.85) 0%, rgba(45, 74, 122, 0.9) 100%);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.88) 0%, rgba(30, 58, 138, 0.82) 100%);
   z-index: 1;
 }
 
-.card {
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.95);
+/* Floating shapes */
+.floating-shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.04;
+  background: #fff;
+  z-index: 1;
+}
+.shape-1 { width: 400px; height: 400px; top: -100px; right: -100px; animation: float1 18s ease-in-out infinite; }
+.shape-2 { width: 250px; height: 250px; bottom: -60px; left: -60px; animation: float2 14s ease-in-out infinite; }
+@keyframes float1 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-30px, 30px); } }
+@keyframes float2 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(20px, -20px); } }
+
+/* Content */
+.reset-content {
+  position: relative;
+  z-index: 2;
 }
 
-.reset-icon {
+/* Logo */
+.reset-logo {
   width: 72px;
   height: 72px;
-  background: linear-gradient(135deg, #e8f0fe 0%, #d4e4f7 100%);
-  border-radius: 50%;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+.logo-img { width: 100%; height: 100%; object-fit: contain; }
+
+/* Card */
+.reset-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 24px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+}
+
+/* Icon */
+.reset-icon-wrapper { text-align: center; margin-bottom: 1.5rem; }
+.reset-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+  color: var(--fml-blue-2, #2563eb);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+/* Typography */
+.reset-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.5rem;
+}
+.reset-subtitle {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Alerts */
+.alert-custom {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 1.25rem;
+}
+.alert-error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+.alert-success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+
+/* Loading */
+.loading-state { text-align: center; padding: 2rem 0; }
+.spinner-wrapper {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+.spinner-ring {
+  position: absolute;
+  inset: 0;
+  border: 3px solid #e2e8f0;
+  border-top-color: var(--fml-blue-2, #2563eb);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+.spinner-icon {
+  font-size: 1.4rem;
+  color: var(--fml-blue-2, #2563eb);
+  z-index: 1;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { color: #94a3b8; font-size: 0.85rem; margin: 0; }
 
-.form-control:focus {
-  border-color: #1a365d;
-  box-shadow: 0 0 0 0.2rem rgba(26, 54, 93, 0.15);
+/* Form */
+.reset-form { display: flex; flex-direction: column; gap: 1.1rem; }
+
+.input-group-custom { display: flex; flex-direction: column; gap: 0.4rem; }
+.input-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+  letter-spacing: 0.3px;
+}
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-icon {
+  position: absolute;
+  left: 14px;
+  color: #94a3b8;
+  font-size: 0.95rem;
+  z-index: 1;
+}
+.input-field {
+  width: 100%;
+  padding: 0.85rem 2.8rem 0.85rem 2.8rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  color: #0f172a;
+  background: #f8fafc;
+  transition: all 0.2s;
+  outline: none;
+}
+.input-field:focus {
+  border-color: var(--fml-blue-2, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  background: #fff;
+}
+.input-field::placeholder { color: #cbd5e1; }
+
+.toggle-pass {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 1rem;
+  transition: color 0.2s;
+}
+.toggle-pass:hover { color: #475569; }
+
+/* Button */
+.btn-reset {
+  width: 100%;
+  padding: 0.9rem;
+  background: linear-gradient(135deg, var(--fml-blue, #1e3a8a), var(--fml-blue-2, #2563eb));
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.btn-reset:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
+}
+.btn-reset:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.form-control {
-  border-color: #dee2e6;
+/* Back link */
+.back-login {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #f1f5f9;
 }
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.back-link:hover { color: var(--fml-blue-2, #2563eb); }
 
-.input-group-text {
-  border-color: #dee2e6;
+/* Animations */
+.animate-item { opacity: 0; transform: translateY(20px); animation: fadeUp 0.6s ease forwards; }
+.delay-1 { animation-delay: 0.15s; }
+@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+.animate-shake { animation: shake 0.4s ease; }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+/* Mobile */
+@media (max-width: 576px) {
+  .reset-card { padding: 2rem 1.5rem; border-radius: 20px; }
+  .reset-title { font-size: 1.3rem; }
+  .reset-logo { width: 60px; height: 60px; border-radius: 16px; }
 }
 </style>
