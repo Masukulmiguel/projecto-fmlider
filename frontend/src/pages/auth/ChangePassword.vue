@@ -6,8 +6,6 @@
       <div class="bg-overlay"></div>
     </div>
 
-    <BgImageEditor section="auth" image-key="login_bg_1" />
-
     <div class="container change-container">
       <div class="row align-items-center justify-content-center min-vh-100">
         <div class="col-md-7 col-lg-5">

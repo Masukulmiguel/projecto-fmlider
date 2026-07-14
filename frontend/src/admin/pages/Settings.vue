@@ -112,6 +112,33 @@
       <div class="spinner-border text-primary"></div>
       <p class="mt-3 text-muted">{{ t('common.loading') }}</p>
     </div>
+
+    <!-- Auth Background Images -->
+    <div class="card border-0 shadow-sm mt-4">
+      <div class="card-header bg-white d-flex align-items-center justify-content-between">
+        <h6 class="mb-0"><i class="bi bi-image me-2"></i>Imagens de Fundo (Auth)</h6>
+      </div>
+      <div class="card-body">
+        <p class="text-muted small mb-3">Troque as imagens de fundo das páginas de login, registo e redefinição de senha.</p>
+        <div class="row g-3">
+          <div v-for="item in authImages" :key="item.key" class="col-md-4">
+            <div class="auth-bg-card">
+              <div class="auth-bg-preview" :style="{ backgroundImage: `url(${item.url})` }">
+                <div class="auth-bg-label">{{ item.label }}</div>
+              </div>
+              <div class="auth-bg-actions">
+                <input :ref="el => { if (el) fileRefs[item.key] = el }" type="file" accept="image/*" class="d-none" @change="e => uploadBg(item.key, e)">
+                <button class="btn btn-sm btn-outline-primary w-100" @click="fileRefs[item.key]?.click()" :disabled="uploadingKey === item.key">
+                  <span v-if="uploadingKey === item.key" class="spinner-border spinner-border-sm me-1"></span>
+                  <i v-else class="bi bi-camera-fill me-1"></i>
+                  {{ uploadingKey === item.key ? 'A enviar...' : 'Trocar Imagem' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -141,6 +168,57 @@ const form = reactive({
   meta_title: '',
   meta_description: ''
 })
+
+const fileRefs = ref({})
+const uploadingKey = ref(null)
+const authImages = ref([
+  { key: 'login_bg_1', label: 'Login 1', url: '/assets/img/auth/bg1.jpg' },
+  { key: 'login_bg_2', label: 'Login 2', url: '/assets/img/auth/bg2.jpg' },
+  { key: 'login_bg_3', label: 'Login 3', url: '/assets/img/auth/bg3.jpg' },
+  { key: 'reset_bg', label: 'Redefinir Senha', url: '/assets/img/auth/reset_bg.jpg' },
+  { key: 'forgot_bg', label: 'Esqueci Senha', url: '/assets/img/auth/bg3.jpg' },
+])
+
+const loadAuthImages = async () => {
+  const { data } = await supabase.from('site_images').select('key, image_url').eq('section', 'auth').eq('status', 1)
+  if (data) {
+    data.forEach(row => {
+      const img = authImages.value.find(i => i.key === row.key)
+      if (img && row.image_url) img.url = row.image_url
+    })
+  }
+}
+
+const uploadBg = async (key, e) => {
+  const file = e.target.files?.[0]
+  if (!file) return
+  uploadingKey.value = key
+  try {
+    const ext = file.name.split('.').pop()
+    const path = `site/auth_${key}_${Date.now()}.${ext}`
+    const { error: uploadErr } = await supabase.storage.from('uploads').upload(path, file, { contentType: file.type, upsert: true })
+    if (uploadErr) throw uploadErr
+    const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(path)
+    const imageUrl = urlData?.publicUrl
+    if (!imageUrl) throw new Error('No URL')
+    const { error: upsertErr } = await supabase.from('site_images').upsert({
+      section: 'auth',
+      key,
+      image_url: imageUrl,
+      alt_text: key,
+      status: 1,
+    }, { onConflict: 'section,key' })
+    if (upsertErr) throw upsertErr
+    const img = authImages.value.find(i => i.key === key)
+    if (img) img.url = imageUrl
+    message.value = { type: 'success', text: `Imagem "${key}" atualizada com sucesso!` }
+  } catch (err) {
+    message.value = { type: 'danger', text: err.message || 'Erro ao enviar imagem.' }
+  } finally {
+    uploadingKey.value = null
+    e.target.value = ''
+  }
+}
 
 const fetchSettings = async () => {
   loading.value = true
@@ -175,5 +253,42 @@ const saveSettings = async () => {
   }
 }
 
-onMounted(fetchSettings)
+onMounted(() => {
+  fetchSettings()
+  loadAuthImages()
+})
 </script>
+
+<style scoped>
+.auth-bg-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+.auth-bg-card:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 2px 12px rgba(59, 130, 246, 0.1);
+}
+.auth-bg-preview {
+  height: 140px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+.auth-bg-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.4rem 0.75rem;
+  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.auth-bg-actions {
+  padding: 0.5rem;
+  background: #fff;
+}
+</style>

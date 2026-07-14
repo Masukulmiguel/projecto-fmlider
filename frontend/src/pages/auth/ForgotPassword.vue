@@ -8,9 +8,6 @@
     <div class="floating-shape shape-1"></div>
     <div class="floating-shape shape-2"></div>
 
-    <!-- Admin bg editor -->
-    <BgImageEditor section="auth" image-key="forgot_bg" />
-
     <!-- Content -->
     <div class="forgot-content">
       <div class="container">

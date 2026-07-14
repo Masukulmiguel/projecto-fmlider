@@ -11,8 +11,6 @@
     <div class="floating-shape shape-2"></div>
     <div class="floating-shape shape-3"></div>
 
-    <BgImageEditor section="auth" image-key="login_bg_1" />
-
     <div class="container login-container">
       <div class="row align-items-center justify-content-center min-vh-100">
         <div class="col-lg-10 col-xl-9">
