@@ -87,7 +87,7 @@
             <div class="avatar" :style="avatarStyle(c.name)">
               <img v-if="c.photo" :src="c.photo" :alt="c.name" />
               <span v-else>{{ initials(c.name) }}</span>
-              <span v-if="c.online" class="online-dot"></span>
+              <span v-if="c.online || isUserOnline(c.id)" class="online-dot"></span>
             </div>
             <div class="conv-info">
               <div class="conv-row-top">
@@ -118,7 +118,7 @@
           </div>
           <div class="ch-info">
             <h6 class="mb-0">{{ selected.name }}</h6>
-            <span class="ch-status"><span class="status-dot"></span> Online</span>
+            <span class="ch-status"><span class="status-dot" :class="{ 'is-online': isUserOnline(selected?.id) }"></span> {{ isUserOnline(selected?.id) ? 'Online' : 'Offline' }}</span>
           </div>
         </div>
         <div class="ch-actions">
@@ -335,6 +335,7 @@ import { useChatStore } from '@/stores/chatStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useI18n } from '@/composables/useI18n'
 import { useChatCall } from '@/composables/useChatCall'
+import { usePresence } from '@/composables/usePresence'
 import { supabase } from '@/lib/supabase'
 
 const { t, locale } = useI18n()
@@ -348,6 +349,7 @@ const emit = defineEmits(['select', 'back', 'sent'])
 const chatStore = useChatStore()
 const authStore = useAuthStore()
 const call = useChatCall()
+const { isUserOnline } = usePresence()
 
 const input = ref('')
 const search = ref('')
@@ -751,7 +753,8 @@ watch(() => props.selected, (sel) => {
 .ch-left { display: flex; align-items: center; gap: 10px; }
 .ch-info h6 { font-weight: 700; font-size: 0.95rem; color: #050505; }
 .ch-status { font-size: 0.75rem; color: #65676b; display: flex; align-items: center; gap: 4px; }
-.status-dot { width: 8px; height: 8px; border-radius: 50%; background: #31a24c; display: inline-block; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; display: inline-block; }
+.status-dot.is-online { background: #31a24c; }
 .ch-actions { display: flex; gap: 2px; align-items: center; }
 
 .btn-icon { width: 36px; height: 36px; border-radius: 50%; border: none; background: transparent; color: #0084ff; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.1rem; transition: all 0.2s; position: relative; }

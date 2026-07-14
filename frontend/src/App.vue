@@ -28,6 +28,7 @@ import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
+import { usePresence } from '@/composables/usePresence'
 import PublicHeader from '@/components/PublicHeader.vue'
 import PublicFooter from '@/components/PublicFooter.vue'
 import AdminSidebar from '@/admin/components/AdminSidebar.vue'
@@ -46,6 +47,7 @@ import { trackVisitor } from '@/utils/visitor'
 const route = useRoute()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
+const { goOffline } = usePresence()
 const sidebarOpen = ref(false)
 const sidebarCollapsed = ref(false)
 
@@ -72,10 +74,18 @@ const checkWidth = () => {
   }
 }
 
-onMounted(() => {
+const handleBeforeUnload = () => {
+  if (authStore.isAuthenticated) {
+    goOffline()
+    authStore.logout()
+  }
+}
+
+onMounted(async () => {
   themeStore.applyTheme()
   checkWidth()
   window.addEventListener('resize', checkWidth)
+  window.addEventListener('beforeunload', handleBeforeUnload)
   if (!isAdminRoute.value && !isClienteRoute.value && !isFuncionarioRoute.value) {
     trackVisitor()
   }
@@ -83,6 +93,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', checkWidth)
+  window.removeEventListener('beforeunload', handleBeforeUnload)
 })
 
 watch(() => route.fullPath, () => {

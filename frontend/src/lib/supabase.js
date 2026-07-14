@@ -5,11 +5,12 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
-    autoRefreshToken: true,
+    autoRefreshToken: false,
     persistSession: true,
     detectSessionInUrl: true,
     flowType: 'implicit',
     storageKey: 'fmlider_auth',
+    storage: typeof window !== 'undefined' ? window.sessionStorage : undefined,
   },
   global: {
     headers: {
