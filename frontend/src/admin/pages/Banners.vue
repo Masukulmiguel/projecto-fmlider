@@ -1,157 +1,159 @@
 <template>
   <div class="admin-page p-4 p-md-5">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-      <h2 class="mb-0">{{ t('admin.banners_title') }}</h2>
-      <button class="btn btn-primary" @click="openCreateModal">+ {{ t('admin.banners_new') }}</button>
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+      <div>
+        <h1 class="page-title"><i class="bi bi-images me-2"></i>{{ t('admin.banners_title') }}</h1>
+        <p class="text-muted mb-0">{{ t('admin.banners_description_text') }}</p>
+      </div>
+      <button class="btn btn-primary" @click="openCreateModal">
+        <i class="bi bi-plus-lg me-1"></i> {{ t('admin.banners_new') }}
+      </button>
     </div>
 
-    <div class="card">
+    <div v-if="loading" class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+    </div>
+
+    <div v-else-if="banners.length === 0" class="card empty-card">
+      <div class="card-body text-center py-5">
+        <i class="bi bi-images" style="font-size: 3rem; color: #94a3b8;"></i>
+        <h5 class="mt-3 text-muted">{{ t('admin.banners_empty') }}</h5>
+        <p class="text-muted mb-3">{{ t('admin.banners_add_first') }}</p>
+        <button class="btn btn-primary" @click="openCreateModal">
+          <i class="bi bi-plus-lg me-1"></i> {{ t('admin.banners_new') }}
+        </button>
+      </div>
+    </div>
+
+    <div v-else class="card">
       <div class="card-body p-0">
-        <div v-if="loading" class="text-center py-5">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">{{ t('common.loading') }}</span>
+        <div
+          v-for="banner in sortedBanners"
+          :key="banner.id"
+          class="banner-row"
+        >
+          <div class="row-col-order">
+            <span class="order-num">{{ banner.order_by ?? 0 }}</span>
           </div>
-        </div>
 
-        <div v-else-if="banners.length === 0" class="text-center py-5 text-muted">
-          {{ t('admin.banners_empty') }}
-        </div>
+          <div class="row-col-thumb">
+            <div class="thumb-wrap">
+              <img
+                v-if="banner.image"
+                :src="banner.image"
+                :alt="banner.title"
+                class="thumb-img"
+              />
+              <div v-else class="thumb-placeholder">
+                <i class="bi bi-image"></i>
+              </div>
+            </div>
+          </div>
 
-        <div v-else class="table-responsive">
-        <table class="table table-hover mb-0">
-          <thead class="table-light">
-            <tr>
-              <th>{{ t('admin.services_title_col') }}</th>
-              <th>{{ t('admin.services_image') }}</th>
-              <th>{{ t('admin.services_status') }}</th>
-              <th>{{ t('admin.services_order') }}</th>
-              <th class="text-end">{{ t('admin.actions_col') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="banner in banners" :key="banner.id">
-              <td class="align-middle">{{ banner.title }}</td>
-              <td class="align-middle">
-                <img
-                  v-if="banner.image"
-                  :src="banner.image"
-                  :alt="banner.title"
-                  class="banner-thumb"
-                />
-                <span v-else class="text-muted">{{ t('admin.banners_no_image') }}</span>
-              </td>
-              <td class="align-middle">
-                <span
-                  :class="banner.status ? 'badge bg-success' : 'badge bg-secondary'"
-                >
-                  {{ banner.status ? t('admin.banners_active') : t('admin.banners_inactive') }}
-                </span>
-              </td>
-              <td class="align-middle">{{ banner.order_by }}</td>
-              <td class="align-middle text-end">
-                <div class="action-buttons">
-                  <button class="btn-icon btn-edit" @click="openEditModal(banner)" :title="t('common.edit')">
-                    <i class="bi bi-pencil-square"></i>
-                  </button>
-                  <button class="btn-icon btn-delete" @click="confirmDelete(banner)" :title="t('common.delete')">
-                    <i class="bi bi-trash3"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+          <div class="row-col-title">
+            <span class="title-text">{{ banner.title }}</span>
+            <span v-if="banner.subtitle" class="subtitle-text">{{ banner.subtitle }}</span>
+          </div>
+
+          <div class="row-col-status">
+            <span class="status-dot" :class="banner.status ? 'active' : 'inactive'"></span>
+            <span class="status-label">{{ banner.status ? t('admin.banners_active') : t('admin.banners_inactive') }}</span>
+          </div>
+
+          <div class="row-col-actions">
+            <button class="btn-icon btn-edit" @click="openEditModal(banner)" :title="t('common.edit')">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn-icon btn-delete" @click="confirmDelete(banner)" :title="t('common.delete')">
+              <i class="bi bi-trash3"></i>
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Create/Edit Modal -->
     <div
       class="modal fade"
       ref="bannerModal"
       tabindex="-1"
       aria-hidden="true"
     >
-      <div class="modal-dialog modal-lg">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">
-                  {{ editing ? t('admin.banners_title') : t('admin.banners_new') }}
+              <i class="bi bi-images me-2"></i>{{ editing ? t('admin.banners_edit') : t('admin.banners_new') }}
             </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
-            <form @submit.prevent="submitForm">
-              <div class="mb-3">
-                <label for="bannerTitle" class="form-label">{{ t('admin.services_title_col') }} *</label>
-                <input
-                  id="bannerTitle"
-                  v-model="form.title"
-                  type="text"
-                  class="form-control"
-                  required
-                />
-              </div>
-
-              <div class="mb-3">
-                <label for="bannerDescription" class="form-label">{{ t('admin.settings_description') }}</label>
-                <textarea
-                  id="bannerDescription"
-                  v-model="form.description"
-                  class="form-control"
-                  rows="3"
-                ></textarea>
-              </div>
-
-              <div class="mb-3">
-                <label for="bannerImage" class="form-label">{{ t('admin.services_image') }}</label>
-                <input
-                  id="bannerImage"
-                  ref="imageInput"
-                  type="file"
-                  class="form-control"
-                  accept="image/*"
-                  @change="handleImageChange"
-                />
-                <div v-if="imagePreview || form.image" class="mt-2">
-                  <img
-                    :src="imagePreview || form.image"
-                    alt="Preview"
-                    class="banner-preview"
+          <form @submit.prevent="submitForm" novalidate>
+            <div class="modal-body">
+              <div class="row g-3">
+                <div class="col-md-8">
+                  <label class="form-label">{{ t('admin.banners_title_col') }} *</label>
+                  <input
+                    v-model="form.title"
+                    type="text"
+                    class="form-control"
+                    required
                   />
                 </div>
-              </div>
-
-              <div class="mb-3">
-                <label for="bannerLink" class="form-label">{{ t('admin.banners_link_label') }}</label>
-                <input
-                  id="bannerLink"
-                  v-model="form.link"
-                  type="url"
-                  class="form-control"
-                  placeholder="https://..."
-                />
-              </div>
-
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label for="bannerOrder" class="form-label">{{ t('admin.services_order') }}</label>
+                <div class="col-md-4">
+                  <label class="form-label">{{ t('admin.banners_subtitle') }}</label>
                   <input
-                    id="bannerOrder"
+                    v-model="form.subtitle"
+                    type="text"
+                    class="form-control"
+                  />
+                </div>
+                <div class="col-12">
+                  <label class="form-label">{{ t('admin.banners_image') }}</label>
+                  <div class="upload-zone" @click="triggerFileInput" @dragover.prevent @drop.prevent="handleDrop">
+                    <input
+                      ref="fileInput"
+                      type="file"
+                      accept="image/*"
+                      class="d-none"
+                      @change="handleImageChange"
+                    />
+                    <div v-if="imagePreview || form.image" class="preview-wrap">
+                      <img :src="imagePreview || form.image" alt="Preview" class="preview-img" />
+                      <button
+                        type="button"
+                        class="btn-remove-img"
+                        @click.stop="removeImage"
+                        :title="t('admin.banners_remove_image')"
+                      >
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </div>
+                    <div v-else class="upload-placeholder">
+                      <i class="bi bi-cloud-arrow-up"></i>
+                      <p class="mb-0 mt-1">{{ t('admin.banners_upload_hint') }}</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label">{{ t('admin.banners_link_label') }}</label>
+                  <input
+                    v-model="form.link"
+                    type="url"
+                    class="form-control"
+                    placeholder="https://..."
+                  />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">{{ t('admin.banners_order') }}</label>
+                  <input
                     v-model.number="form.order_by"
                     type="number"
                     class="form-control"
                     min="0"
                   />
                 </div>
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">{{ t('admin.services_status') }}</label>
-                  <div class="form-check form-switch mt-2">
+                <div class="col-12">
+                  <label class="form-label">{{ t('admin.banners_status') }}</label>
+                  <div class="form-check form-switch mt-1">
                     <input
                       id="bannerStatus"
                       v-model="form.status"
@@ -164,73 +166,43 @@
                   </div>
                 </div>
               </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              {{ t('common.cancel') }}
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              :disabled="submitting"
-              @click="submitForm"
-            >
-              <span
-                v-if="submitting"
-                class="spinner-border spinner-border-sm me-1"
-              ></span>
-              {{ editing ? t('common.save') : t('admin.banners_create') }}
-            </button>
-          </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
+              <button type="submit" class="btn btn-primary" :disabled="submitting">
+                <span v-if="submitting" class="spinner-border spinner-border-sm me-2"></span>
+                {{ editing ? t('common.save') : t('admin.banners_create') }}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
     <div
       class="modal fade"
       ref="deleteModal"
       tabindex="-1"
       aria-hidden="true"
     >
-      <div class="modal-dialog">
+      <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">{{ t('common.confirm') }}</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
+          <div class="modal-body text-center py-4">
+            <div class="delete-icon-circle">
+              <i class="bi bi-trash3"></i>
+            </div>
+            <h5 class="mt-3 mb-1">{{ t('common.confirm') }}</h5>
+            <p class="text-muted mb-0">
+              {{ t('admin.banners_confirm_delete') }}
+              <strong>{{ bannerToDelete?.title }}</strong>?
+            </p>
           </div>
-          <div class="modal-body">
-            {{ t('admin.banners_confirm_delete') }}
-            <strong>{{ bannerToDelete?.title }}</strong>?
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
+          <div class="modal-footer justify-content-center border-0 pt-0">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
               {{ t('common.cancel') }}
             </button>
-            <button
-              type="button"
-              class="btn btn-danger"
-              :disabled="deleting"
-              @click="deleteBanner"
-            >
-              <span
-                v-if="deleting"
-                class="spinner-border spinner-border-sm me-1"
-              ></span>
+            <button type="button" class="btn btn-danger" :disabled="deleting" @click="deleteBanner">
+              <span v-if="deleting" class="spinner-border spinner-border-sm me-1"></span>
               {{ t('common.delete') }}
             </button>
           </div>
@@ -241,7 +213,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { Modal } from 'bootstrap'
 import { useI18n } from '@/composables/useI18n'
@@ -257,29 +229,48 @@ const deleting = ref(false)
 const editing = ref(false)
 const editingId = ref(null)
 const bannerToDelete = ref(null)
-const imageFile = ref(null)
 const imagePreview = ref(null)
+const imageBase64 = ref(null)
 
 const bannerModal = ref(null)
 const deleteModal = ref(null)
-const imageInput = ref(null)
+const fileInput = ref(null)
 
 let bannerModalInstance = null
 let deleteModalInstance = null
 
-const form = reactive({
+const MAX_SIZE = 2 * 1024 * 1024
+
+const defaultForm = () => ({
   title: '',
-  description: '',
+  subtitle: '',
   image: '',
   link: '',
   status: true,
   order_by: 0,
 })
+const form = reactive(defaultForm())
+
+const sortedBanners = computed(() =>
+  [...banners.value].sort((a, b) => (a.order_by ?? 0) - (b.order_by ?? 0))
+)
+
+async function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
 
 async function fetchBanners() {
   loading.value = true
   try {
-    const { data, error } = await supabase.from('banners').select('*').order('order_by', { ascending: true })
+    const { data, error } = await supabase
+      .from('banners')
+      .select('*')
+      .order('order_by', { ascending: true })
     if (!error) banners.value = data
   } catch (err) {
     console.error('Erro ao buscar banners:', err)
@@ -290,14 +281,9 @@ async function fetchBanners() {
 }
 
 function resetForm() {
-  form.title = ''
-  form.description = ''
-  form.image = ''
-  form.link = ''
-  form.status = true
-  form.order_by = 0
-  imageFile.value = null
+  Object.assign(form, defaultForm())
   imagePreview.value = null
+  imageBase64.value = null
   editing.value = false
   editingId.value = null
 }
@@ -311,36 +297,47 @@ function openEditModal(banner) {
   editing.value = true
   editingId.value = banner.id
   form.title = banner.title || ''
-  form.description = banner.description || ''
+  form.subtitle = banner.subtitle || ''
   form.image = banner.image || ''
   form.link = banner.link || ''
   form.status = banner.status ?? true
   form.order_by = banner.order_by || 0
-  imageFile.value = null
   imagePreview.value = null
+  imageBase64.value = null
   bannerModalInstance.show()
 }
 
-function handleImageChange(event) {
-  const file = event.target.files[0]
-  if (!file) return
-  imageFile.value = file
-  imagePreview.value = URL.createObjectURL(file)
+function triggerFileInput() {
+  fileInput.value?.click()
 }
 
-async function uploadImage() {
-  if (!imageFile.value) return form.image
-  const fileExt = imageFile.value.name.split('.').pop()
-  const fileName = `banners/${Date.now()}.${fileExt}`
-  console.log('Uploading to bucket: uploads, file:', fileName)
-  const { data, error } = await supabase.storage.from('uploads').upload(fileName, imageFile.value)
-  if (error) {
-    console.error('Storage upload error:', error)
-    throw error
+async function handleImageChange(event) {
+  const file = event.target.files[0]
+  if (!file) return
+  if (file.size > MAX_SIZE) {
+    toast.warning(t('admin.banners_image_too_large'))
+    return
   }
-  const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(fileName)
-  console.log('Uploaded URL:', urlData.publicUrl)
-  return urlData.publicUrl
+  imageBase64.value = await fileToBase64(file)
+  imagePreview.value = imageBase64.value
+}
+
+async function handleDrop(event) {
+  const file = event.dataTransfer.files[0]
+  if (!file || !file.type.startsWith('image/')) return
+  if (file.size > MAX_SIZE) {
+    toast.warning(t('admin.banners_image_too_large'))
+    return
+  }
+  imageBase64.value = await fileToBase64(file)
+  imagePreview.value = imageBase64.value
+}
+
+function removeImage() {
+  form.image = ''
+  imagePreview.value = null
+  imageBase64.value = null
+  if (fileInput.value) fileInput.value.value = ''
 }
 
 async function submitForm() {
@@ -351,12 +348,12 @@ async function submitForm() {
   submitting.value = true
   try {
     let imagePath = form.image
-    if (imageFile.value) {
-      imagePath = await uploadImage()
+    if (imageBase64.value) {
+      imagePath = imageBase64.value
     }
     const payload = {
-      title: form.title,
-      description: form.description,
+      title: form.title.trim(),
+      subtitle: form.subtitle,
       image: imagePath,
       link: form.link,
       status: form.status ? 1 : 0,
@@ -371,9 +368,10 @@ async function submitForm() {
     }
     bannerModalInstance.hide()
     await fetchBanners()
+    toast.success(editing.value ? t('admin.banners_updated') : t('admin.banners_created'))
   } catch (err) {
     console.error('Erro ao salvar banner:', err)
-    toast.error(t('admin.error_saving_banner') + '\n' + (err?.message || err?.error?.message || JSON.stringify(err)))
+    toast.error(t('admin.error_saving_banner'))
   } finally {
     submitting.value = false
   }
@@ -392,6 +390,7 @@ async function deleteBanner() {
     if (error) throw error
     deleteModalInstance.hide()
     await fetchBanners()
+    toast.success(t('admin.banners_deleted'))
   } catch (err) {
     console.error('Erro ao deletar banner:', err)
     toast.error(t('admin.error_deleting_banner'))
@@ -415,20 +414,270 @@ onBeforeUnmount(() => {
 <style scoped>
 .admin-page {
   background: #f8f9fa;
+  min-height: 100vh;
 }
+
+.page-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  color: #0f172a;
+}
+
 .card {
   border: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
-.banner-thumb {
-  width: 80px;
-  height: 45px;
+
+.empty-card {
+  box-shadow: none;
+  border: 1px dashed #e2e8f0;
+}
+
+.banner-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s;
+}
+
+.banner-row:last-child {
+  border-bottom: none;
+}
+
+.banner-row:hover {
+  background: #f8fafc;
+}
+
+.row-col-order {
+  width: 36px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.order-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.row-col-thumb {
+  flex-shrink: 0;
+}
+
+.thumb-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thumb-img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 4px;
 }
-.banner-preview {
-  max-width: 100%;
-  max-height: 200px;
-  border-radius: 4px;
+
+.thumb-placeholder {
+  color: #94a3b8;
+  font-size: 1.1rem;
+}
+
+.row-col-title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.title-text {
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subtitle-text {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row-col-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot.active {
+  background: #22c55e;
+}
+
+.status-dot.inactive {
+  background: #cbd5e1;
+}
+
+.status-label {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.row-col-actions {
+  display: inline-flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.btn-icon:hover {
+  transform: translateY(-1px);
+}
+
+.btn-icon.btn-edit {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+
+.btn-icon.btn-edit:hover {
+  background: #dbeafe;
+}
+
+.btn-icon.btn-delete {
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+.btn-icon.btn-delete:hover {
+  background: #fee2e2;
+}
+
+.upload-zone {
+  border: 2px dashed #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.upload-zone:hover {
+  border-color: #3b82f6;
+  background: #f8fafc;
+}
+
+.upload-placeholder {
+  color: #94a3b8;
+}
+
+.upload-placeholder i {
+  font-size: 2rem;
+}
+
+.preview-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.preview-img {
+  max-width: 200px;
+  max-height: 140px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.btn-remove-img {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.delete-icon-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #fef2f2;
+  color: #ef4444;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  margin: 0 auto;
+}
+
+.modal-backdrop {
+  z-index: 1040;
+}
+
+.modal {
+  z-index: 1050;
+}
+
+@media (max-width: 575.98px) {
+  .banner-row {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .row-col-order {
+    width: auto;
+  }
+
+  .row-col-title {
+    flex-basis: calc(100% - 100px);
+  }
+
+  .row-col-status {
+    width: auto;
+  }
 }
 </style>

@@ -2,110 +2,87 @@
   <div class="admin-page p-4 p-md-5">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
       <div>
-        <h1 class="page-title"><i class="bi bi-person-badge-fill me-2"></i>{{ t('admin.employees_title') }}</h1>
-        <p class="text-muted mb-0">{{ t('admin.employees_description') }}</p>
+        <h1 class="page-title">{{ t('admin.employees_title') }}</h1>
+        <p class="page-subtitle mb-0">{{ t('admin.employees_description') }}</p>
       </div>
       <button class="btn btn-primary" @click="openForm()">
         <i class="bi bi-plus-lg me-1"></i> {{ t('admin.employees_new') }}
       </button>
     </div>
 
-    <div v-if="loading" class="text-center py-5"><div class="spinner-border text-primary"></div></div>
-    <div v-else class="card">
-      <div class="card-body p-0">
-        <div class="table-responsive">
-          <table class="table table-hover mb-0 align-middle">
-            <thead>
-              <tr>
-                <th>{{ t('admin.employees_col_employee') }}</th>
-                <th>BI</th>
-                <th>Departamento</th>
-                <th>{{ t('admin.employees_position') }}</th>
-                <th>Email</th>
-                <th>{{ t('admin.services_status') }}</th>
-                <th>{{ t('admin.employees_permissions') }}</th>
-                <th>{{ t('admin.last_login') }}</th>
-                <th class="text-end">{{ t('admin.employees_col_actions') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="items.length === 0">
-                <td colspan="9" class="text-center py-4 text-muted">
-                  <i class="bi bi-person-badge me-2" style="font-size: 1.5rem; opacity: 0.4;"></i>Nenhum funcionário registado
-                </td>
-              </tr>
-              <tr v-for="f in items" :key="f.id">
-                <td>
-                  <div class="d-flex align-items-center gap-2">
-                    <div class="avatar-sm">
-                      <img v-if="f.photo" :src="f.photo" :alt="f.name">
-                      <span v-else>{{ initials(f.name) }}</span>
-                    </div>
-                    <div>
-                      <strong>{{ f.name }}</strong>
-                      <small class="d-block text-muted">@{{ f.username }}</small>
-                    </div>
-                  </div>
-                </td>
-                <td><code class="tracking-code">{{ f.bi || '' }}</code></td>
-                <td><span class="badge bg-info">{{ f.position || '' }}</span></td>
-                <td><span class="badge bg-secondary"><i class="bi bi-building me-1"></i>{{ deptLabels[f.departamento] || '' }}</span></td>
-                <td>{{ f.email }}</td>
-                <td>
-                  <span v-if="isLocked(f)" class="badge bg-danger" :title="lockTooltip(f)">
-                    <i class="bi bi-lock-fill me-1"></i>{{ t('admin.employees_status_locked') }}
-                  </span>
-                  <span v-else-if="f.status === 0" class="badge bg-secondary">
-                    <i class="bi bi-slash-circle me-1"></i>{{ t('admin.employees_status_disabled') }}
-                  </span>
-                  <span v-else-if="f.password_must_change" class="badge bg-warning text-dark">
-                    <i class="bi bi-key me-1"></i>{{ t('admin.employees_status_password_change') }}
-                  </span>
-                  <span v-else class="badge bg-success">
-                    <i class="bi bi-check-circle me-1"></i>{{ t('admin.employees_status_active') }}
-                  </span>
-                </td>
-                <td>
-                  <span class="text-muted small">{{ (f.permissions || []).length }} de {{ allPermissions.length }}</span>
-                </td>
-                <td><small class="text-muted">{{ f.last_login ? formatDate(f.last_login) : t('admin.employees_never') }}</small></td>
-                <td class="text-end">
-                  <div class="action-buttons">
-                    <button v-if="isLocked(f)" class="btn btn-sm btn-outline-success" @click="unlockUser(f)" :title="t('admin.employees_action_unlock')">
-                      <i class="bi bi-unlock-fill"></i>
-                    </button>
-                    <button v-else class="btn btn-sm btn-outline-warning" @click="openLockModal(f)" :title="t('admin.employees_action_lock')">
-                      <i class="bi bi-lock-fill"></i>
-                    </button>
-                    <button class="btn-icon btn-edit" @click="openForm(f)" :title="t('admin.employees_action_edit')">
-                      <i class="bi bi-pencil-square"></i>
-                    </button>
-                    <button class="btn-icon btn-delete" @click="confirmDelete(f)" :title="t('admin.employees_action_delete')">
-                      <i class="bi bi-trash3"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+    <div v-if="loading" class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+    </div>
+
+    <div v-else-if="items.length === 0" class="empty-state">
+      <div class="empty-icon"><i class="bi bi-person-badge"></i></div>
+      <p>{{ t('admin.employees_add_first') }}</p>
+      <button class="btn btn-primary btn-sm" @click="openForm()">
+        <i class="bi bi-plus-lg me-1"></i> {{ t('admin.employees_new') }}
+      </button>
+    </div>
+
+    <div v-else class="section-group">
+      <div v-for="f in items" :key="f.id" class="employee-row">
+        <div class="employee-info">
+          <div class="employee-avatar">
+            <img v-if="f.photo" :src="f.photo" :alt="f.name">
+            <span v-else class="avatar-initials">{{ initials(f.name) }}</span>
+          </div>
+          <div class="employee-details">
+            <div class="employee-name">{{ f.name }}</div>
+            <div class="employee-email">{{ f.email }}</div>
+          </div>
+        </div>
+
+        <div class="employee-meta">
+          <span class="meta-dept">
+            <i class="bi bi-building"></i> {{ deptLabels[f.departamento] || f.departamento || '—' }}
+          </span>
+          <span class="meta-role">{{ f.position || '—' }}</span>
+        </div>
+
+        <div class="employee-status">
+          <span class="status-dot" :class="{ active: isActive(f) }"></span>
+          <span class="status-label">{{ statusLabel(f) }}</span>
+        </div>
+
+        <div class="employee-login">
+          <small>{{ f.last_login ? formatDate(f.last_login) : t('admin.employees_never') }}</small>
+        </div>
+
+        <div class="employee-actions">
+          <button class="btn-icon btn-edit" @click="openForm(f)" :title="t('admin.employees_action_edit')">
+            <i class="bi bi-pencil-square"></i>
+          </button>
+          <button class="btn-icon btn-delete" @click="openDeleteModal(f)" :title="t('admin.employees_action_delete')">
+            <i class="bi bi-trash3"></i>
+          </button>
         </div>
       </div>
     </div>
 
-    <div class="modal fade show d-block" v-if="showForm" @click.self="closeForm" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">
-              <i class="bi bi-person-badge-fill me-2"></i>{{ editing ? t('admin.employees_edit_title') : t('admin.employees_new_title') }}
+    <!-- Create/Edit Modal -->
+    <div v-if="showForm" class="modal-backdrop-custom" @click.self="closeForm">
+      <div class="modal-dialog-centered-custom">
+        <div class="modal-box">
+          <div class="modal-box-header">
+            <h5>
+              <i class="bi bi-person-badge-fill me-2"></i>
+              {{ editing ? t('admin.employees_edit_title') : t('admin.employees_new_title') }}
             </h5>
-            <button type="button" class="btn-close" @click="closeForm"></button>
+            <button type="button" class="btn-close-modal" @click="closeForm">
+              <i class="bi bi-x-lg"></i>
+            </button>
           </div>
           <form @submit.prevent="handleSubmit" novalidate>
-            <div class="modal-body">
-              <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+            <div class="modal-box-body">
+              <div v-if="errorMessage" class="alert alert-danger alert-sm">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ errorMessage }}
+              </div>
+
               <div class="row g-3">
-                <div class="col-md-6">
+                <div class="col-12">
                   <label class="form-label">{{ t('admin.employees_full_name') }}</label>
                   <input v-model="form.name" type="text" class="form-control" required>
                 </div>
@@ -120,6 +97,10 @@
                 <div class="col-md-6">
                   <label class="form-label">{{ t('admin.employees_phone') }}</label>
                   <input v-model="form.phone" type="text" class="form-control">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">{{ t('admin.employees_position_label') }}</label>
+                  <input v-model="form.position" type="text" class="form-control" :placeholder="t('admin.employees_position_placeholder')">
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Bilhete de Identidade</label>
@@ -139,11 +120,7 @@
                   </div>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">{{ t('admin.employees_position_label') }}</label>
-                  <input v-model="form.position" type="text" class="form-control" :placeholder="t('admin.employees_position_placeholder')">
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label fw-bold">Departamento *</label>
+                  <label class="form-label">Departamento *</label>
                   <select v-model="form.departamento" class="form-select" @change="onDepartamentoChange" required>
                     <option value="">Selecione o departamento</option>
                     <option value="certificacao">Certificação</option>
@@ -155,15 +132,44 @@
                   </select>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">
-                    {{ editing ? t('admin.employees_new_password') : t('admin.employees_password_label') }}
-                  </label>
+                  <label class="form-label">{{ editing ? t('admin.employees_new_password') : t('admin.employees_password_label') }}</label>
                   <input v-model="form.password" type="password" class="form-control" :required="!editing" minlength="6">
                 </div>
+                <div class="col-md-6">
+                  <label class="form-label">{{ t('admin.employees_position') }}</label>
+                  <input v-model="form.role_label" type="text" class="form-control" placeholder="Ex: Gerente">
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label fw-bold mb-2">Foto do funcionário</label>
+                  <div class="photo-upload-area" @click="triggerFileInput" @dragover.prevent @drop.prevent="onDrop">
+                    <input ref="fileInput" type="file" accept="image/*" class="d-none" @change="onFileChange">
+                    <template v-if="form.photo">
+                      <img :src="form.photo" class="photo-preview" alt="Pré-visualização">
+                      <button type="button" class="photo-remove-btn" @click.stop="removePhoto" title="Remover foto">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </template>
+                    <template v-else>
+                      <div class="photo-placeholder">
+                        <i class="bi bi-camera"></i>
+                        <span>Clique ou arraste uma foto</span>
+                        <small>Max. 2 MB</small>
+                      </div>
+                    </template>
+                  </div>
+                  <div v-if="photoError" class="text-danger small mt-1">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ photoError }}
+                  </div>
+                </div>
+
                 <div class="col-12">
                   <label class="form-label fw-bold">{{ t('admin.employees_access_permissions') }}</label>
-                  <div class="perm-dept-info mb-2" v-if="form.departamento">
-                    <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Permissões atribuídas automaticamente pelo departamento: <strong>{{ deptLabels[form.departamento] }}</strong></small>
+                  <div v-if="form.departamento" class="perm-dept-info mb-2">
+                    <small class="text-muted">
+                      <i class="bi bi-info-circle me-1"></i>
+                      Permissões do departamento: <strong>{{ deptLabels[form.departamento] }}</strong>
+                    </small>
                   </div>
                   <div class="perm-grid">
                     <label v-for="group in permissionGroups" :key="group.label" class="perm-group">
@@ -181,7 +187,7 @@
                 </div>
               </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-box-footer">
               <button type="button" class="btn btn-outline-secondary" @click="closeForm">{{ t('common.cancel') }}</button>
               <button type="submit" class="btn btn-primary" :disabled="saving">
                 <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
@@ -192,74 +198,65 @@
         </div>
       </div>
     </div>
-    <div class="modal-backdrop fade show" v-if="showForm"></div>
 
-    <div class="modal fade show d-block" v-if="lockTarget" @click.self="closeLockModal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">
-              <i class="bi bi-lock-fill me-2 text-warning"></i>{{ t('admin.employees_lock_title') }}
-            </h5>
-            <button type="button" class="btn-close" @click="closeLockModal"></button>
+    <!-- Delete Confirmation Modal -->
+    <div v-if="showDeleteModal" class="modal-backdrop-custom" @click.self="closeDeleteModal">
+      <div class="modal-dialog-centered-custom">
+        <div class="modal-box modal-sm">
+          <div class="delete-modal-body">
+            <div class="delete-icon-circle">
+              <i class="bi bi-trash3"></i>
+            </div>
+            <h5>{{ t('admin.employees_delete_confirm') }}</h5>
+            <p class="text-muted mb-1">
+              <strong>{{ deleteTarget?.name }}</strong>
+            </p>
+            <p class="text-muted small mb-0">{{ t('admin.employees_delete_warning') }}</p>
           </div>
-          <form @submit.prevent="submitLock">
-            <div class="modal-body">
-              <div v-if="lockError" class="alert alert-danger">{{ lockError }}</div>
-              <p class="text-muted small">
-                {{ t('admin.lock_title') }} <strong>{{ lockTarget.name }}</strong> ({{ lockTarget.email }}) {{ t('admin.lock_will_prevent') }}
-              </p>
-              <div class="mb-3">
-                <label class="form-label">{{ t('admin.lock_duration') }}</label>
-                <select v-model.number="lockForm.duration_hours" class="form-select">
-                  <option :value="1">{{ t('admin.employees_lock_1h') }}</option>
-                  <option :value="6">{{ t('admin.employees_lock_6h') }}</option>
-                  <option :value="12">{{ t('admin.employees_lock_12h') }}</option>
-                  <option :value="24">{{ t('admin.employees_lock_24h_default') }}</option>
-                  <option :value="48">{{ t('admin.employees_lock_2d') }}</option>
-                  <option :value="168">{{ t('admin.employees_lock_7d') }}</option>
-                </select>
-              </div>
-              <div class="mb-3">
-                <label class="form-label">{{ t('admin.employees_lock_reason') }}</label>
-                <textarea v-model="lockForm.reason" class="form-control" rows="3" :placeholder="t('admin.lock_reason_placeholder')"></textarea>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-outline-secondary" @click="closeLockModal">{{ t('common.cancel') }}</button>
-              <button type="submit" class="btn btn-warning" :disabled="locking">
-                <span v-if="locking" class="spinner-border spinner-border-sm me-2"></span>
-                <i v-else class="bi bi-lock-fill me-1"></i>
-                {{ t('admin.lock_title') }}
-              </button>
-            </div>
-          </form>
+          <div class="modal-box-footer">
+            <button type="button" class="btn btn-outline-secondary" @click="closeDeleteModal">{{ t('common.cancel') }}</button>
+            <button type="button" class="btn btn-danger" @click="handleDelete" :disabled="deleting">
+              <span v-if="deleting" class="spinner-border spinner-border-sm me-2"></span>
+              <i class="bi bi-trash3 me-1"></i> Eliminar
+            </button>
+          </div>
         </div>
       </div>
     </div>
-    <div class="modal-backdrop fade show" v-if="lockTarget"></div>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { Modal } from 'bootstrap'
 import { supabase } from '@/lib/supabase'
 import { useI18n } from '@/composables/useI18n'
 import { useToast } from '@/composables/useToast'
-import { useConfirm } from '@/composables/useConfirm'
 
 const { t } = useI18n()
 const toast = useToast()
-const { confirm } = useConfirm()
 
 const items = ref([])
-const allPermissions = ref([])
 const loading = ref(false)
 const saving = ref(false)
+const deleting = ref(false)
 const showForm = ref(false)
 const editing = ref(null)
 const errorMessage = ref('')
-const form = reactive({ name: '', username: '', email: '', phone: '', position: '', departamento: '', password: '', permissions: [], bi: '' })
+
+const form = reactive({
+  name: '',
+  username: '',
+  email: '',
+  phone: '',
+  position: '',
+  role_label: '',
+  departamento: '',
+  password: '',
+  permissions: [],
+  bi: '',
+  photo: ''
+})
 
 const deptLabels = {
   certificacao: 'Certificação',
@@ -284,22 +281,25 @@ const onDepartamentoChange = () => {
     form.permissions = [...deptPermissions[form.departamento]]
   }
 }
-const lockTarget = ref(null)
-const lockForm = reactive({ duration_hours: 24, reason: '' })
-const locking = ref(false)
-const lockError = ref('')
 
 const PERM_LABELS = {
   'dashboard.view': 'Dashboard',
-  'clients.view': t('admin.perm_view_clients'), 'clients.manage': t('admin.perm_manage_clients'),
-  'embarques.view': t('admin.perm_view_shipments'), 'embarques.manage': t('admin.perm_manage_shipments'),
-  'cotacoes.view': t('admin.perm_view_quotes'), 'cotacoes.manage': t('admin.perm_manage_quotes'),
-  'documentos.view': t('admin.perm_view_documents'), 'documentos.manage': t('admin.perm_manage_documents'),
-  'contactos.view': t('admin.perm_view_contacts'), 'contactos.manage': t('admin.perm_manage_contacts'),
-  'chat.view': t('admin.perm_view_chat'), 'chat.reply': t('admin.perm_reply_chat'),
-  'licenciamentos.view': 'Ver Licenciamentos', 'licenciamentos.manage': 'Gerir Licenciamentos',
+  'clients.view': t('admin.perm_view_clients'),
+  'clients.manage': t('admin.perm_manage_clients'),
+  'embarques.view': t('admin.perm_view_shipments'),
+  'embarques.manage': t('admin.perm_manage_shipments'),
+  'cotacoes.view': t('admin.perm_view_quotes'),
+  'cotacoes.manage': t('admin.perm_manage_quotes'),
+  'documentos.view': t('admin.perm_view_documents'),
+  'documentos.manage': t('admin.perm_manage_documents'),
+  'contactos.view': t('admin.perm_view_contacts'),
+  'contactos.manage': t('admin.perm_manage_contacts'),
+  'chat.view': t('admin.perm_view_chat'),
+  'chat.reply': t('admin.perm_reply_chat'),
+  'licenciamentos.view': 'Ver Licenciamentos',
+  'licenciamentos.manage': 'Gerir Licenciamentos',
   'visitors.view': t('admin.perm_view_visitors'),
-  'content.manage': t('admin.perm_manage_content'),
+  'content.manage': t('admin.perm_manage_content')
 }
 
 const permissionGroups = [
@@ -310,12 +310,18 @@ const permissionGroups = [
   { label: t('admin.perm_group_clients'), icon: 'bi-people-fill', perms: ['clients.view', 'clients.manage'] },
   { label: t('admin.perm_group_contacts'), icon: 'bi-person-rolodex', perms: ['contactos.view', 'contactos.manage'] },
   { label: t('admin.perm_group_chat'), icon: 'bi-chat-dots-fill', perms: ['chat.view', 'chat.reply'] },
-  { label: t('admin.perm_group_others'), icon: 'bi-three-dots', perms: ['dashboard.view', 'visitors.view', 'content.manage'] },
+  { label: t('admin.perm_group_others'), icon: 'bi-three-dots', perms: ['dashboard.view', 'visitors.view', 'content.manage'] }
 ]
 
 const permLabel = (code) => PERM_LABELS[code] || code
 const initials = (n) => (n || '?').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase()
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' }) : t('admin.employees_never')
+const isActive = (f) => f.status === 1 && !f.locked_at
+const statusLabel = (f) => {
+  if (f.locked_at) return t('admin.employees_status_locked')
+  if (f.status === 0) return t('admin.employees_status_disabled')
+  return t('admin.employees_status_active')
+}
 
 const isValidBiFormat = (bi) => /^\d{9}[A-Z]{2}\d{3}$/.test(bi.toUpperCase())
 const consultingBi = ref(false)
@@ -338,7 +344,6 @@ const consultarBI = async () => {
   biLookupStatus.value = ''
   biLookupMessage.value = ''
   const bi = form.bi.toUpperCase()
-
   try {
     const res = await fetch(`/api/bi-lookup/${bi}`, { signal: AbortSignal.timeout(15000) })
     const data = await res.json()
@@ -364,134 +369,124 @@ const consultarBI = async () => {
   }
 }
 
-const isLocked = (u) => {
-  if (!u.locked_at) return false
-  const lockedTs = new Date(u.locked_at).getTime()
-  return (Date.now() - lockedTs) < 24 * 3600 * 1000
-}
-const lockTooltip = (u) => {
-  if (!u.locked_at) return ''
-  const remaining = (new Date(u.locked_at).getTime() + 24 * 3600 * 1000) - Date.now()
-  if (remaining <= 0) return 'Bloqueio expirado (aguarde nova tentativa)'
-  const hours = Math.floor(remaining / 3600000)
-  const minutes = Math.floor((remaining % 3600000) / 60000)
-  return `Bloqueado · expira em ${hours}h ${minutes}min${u.locked_reason ? ' · ' + u.locked_reason : ''}`
+const fileToBase64 = (file) => new Promise((resolve, reject) => {
+  const reader = new FileReader()
+  reader.readAsDataURL(file)
+  reader.onload = () => resolve(reader.result)
+  reader.onerror = (err) => reject(err)
+})
+
+const fileInput = ref(null)
+const photoError = ref('')
+
+const triggerFileInput = () => {
+  fileInput.value?.click()
 }
 
-const openLockModal = (u) => {
-  lockTarget.value = u
-  lockForm.duration_hours = 24
-  lockForm.reason = ''
-  lockError.value = ''
+const onFileChange = async (e) => {
+  const file = e.target.files?.[0]
+  if (!file) return
+  await processPhoto(file)
+  if (fileInput.value) fileInput.value.value = ''
 }
-const closeLockModal = () => {
-  lockTarget.value = null
-  lockError.value = ''
+
+const onDrop = async (e) => {
+  const file = e.dataTransfer.files?.[0]
+  if (!file || !file.type.startsWith('image/')) return
+  await processPhoto(file)
 }
-const submitLock = async () => {
-  if (!lockForm.reason.trim()) {
-    lockError.value = t('admin.employees_lock_reason_required')
+
+const processPhoto = async (file) => {
+  photoError.value = ''
+  if (file.size > 2 * 1024 * 1024) {
+    photoError.value = 'A imagem deve ter no máximo 2 MB.'
     return
   }
-  locking.value = true
-  lockError.value = ''
-  const lockUntil = new Date(Date.now() + lockForm.duration_hours * 3600 * 1000).toISOString()
-  const { error } = await supabase.from('users').update({ locked_at: lockUntil, locked_reason: lockForm.reason.trim() }).eq('id', lockTarget.value.id)
-  locking.value = false
-  if (error) {
-    lockError.value = error.message || t('admin.lock_error')
+  if (!file.type.startsWith('image/')) {
+    photoError.value = 'Apenas ficheiros de imagem são aceites.'
     return
   }
-  closeLockModal()
-  await fetchList()
+  try {
+    const base64 = await fileToBase64(file)
+    form.photo = base64
+  } catch {
+    photoError.value = 'Erro ao processar a imagem.'
+  }
 }
-const unlockUser = async (u) => {
-  if (!await confirm({ title: 'Desbloquear funcionário', message: `${t('admin.employees_lock_confirm')} "${u.name}"?`, type: 'info', confirmText: 'Desbloquear', cancelText: 'Cancelar' })) return
-  const { error } = await supabase.from('users').update({ locked_at: null, locked_reason: null }).eq('id', u.id)
-  if (error) {
-    toast.error(error.message || t('admin.unlock_error'))
-    return
-  }
-  await fetchList()
+
+const removePhoto = () => {
+  form.photo = ''
+  photoError.value = ''
 }
 
 const fetchList = async () => {
   loading.value = true
   try {
-    const { data, error } = await supabase.from('users').select('id, auth_id, created_at, updated_at, name, email, username, phone, bi, role, position, departamento, permissions, approval_status, status, photo, password_must_change, password_changed_at, locked_at, locked_reason').eq('role', 'funcionario').order('created_at', { ascending: false })
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, auth_id, created_at, updated_at, name, email, username, phone, bi, role, position, departamento, permissions, approval_status, status, photo, password_must_change, password_changed_at, locked_at, locked_reason')
+      .eq('role', 'funcionario')
+      .order('created_at', { ascending: false })
     if (!error) items.value = data
-  } finally { loading.value = false }
-}
-
-const fetchPerms = async () => {
-  allPermissions.value = Object.keys(PERM_LABELS)
+  } finally {
+    loading.value = false
+  }
 }
 
 const openForm = (item = null) => {
   editing.value = item
+  errorMessage.value = ''
+  biLookupStatus.value = ''
+  biLookupMessage.value = ''
+  photoError.value = ''
+
   if (item) {
     form.name = item.name
     form.username = item.username
     form.email = item.email
     form.phone = item.phone || ''
     form.position = item.position || ''
+    form.role_label = ''
     form.departamento = item.departamento || ''
     form.password = ''
     form.permissions = Array.isArray(item.permissions) ? [...item.permissions] : []
     form.bi = item.bi || ''
+    form.photo = item.photo || ''
   } else {
     form.name = ''
     form.username = ''
     form.email = ''
     form.phone = ''
     form.position = ''
+    form.role_label = ''
     form.departamento = ''
     form.password = ''
     form.permissions = []
     form.bi = ''
+    form.photo = ''
   }
-  errorMessage.value = ''
-  biLookupStatus.value = ''
-  biLookupMessage.value = ''
+
   showForm.value = true
+  document.body.style.overflow = 'hidden'
 }
 
-const closeForm = () => { showForm.value = false; editing.value = null }
+const closeForm = () => {
+  showForm.value = false
+  editing.value = null
+  document.body.style.overflow = ''
+}
 
 const handleSubmit = async () => {
   errorMessage.value = ''
-  if (!form.name.trim()) {
-    errorMessage.value = 'O nome completo é obrigatório.'
-    return
-  }
-  if (!form.username.trim()) {
-    errorMessage.value = 'O username é obrigatório.'
-    return
-  }
-  if (!form.email.trim()) {
-    errorMessage.value = 'O email é obrigatório.'
-    return
-  }
-  if (!form.departamento) {
-    errorMessage.value = 'Selecione o departamento.'
-    return
-  }
-  if (!editing.value && !form.password) {
-    errorMessage.value = t('admin.employees_password_required')
-    return
-  }
-  if (!editing.value && form.password && form.password.length < 12) {
-    errorMessage.value = 'A senha deve ter pelo menos 12 caracteres.'
-    return
-  }
-  if (form.bi && !isValidBiFormat(form.bi)) {
-    errorMessage.value = 'Formato de BI inválido. Use 14 caracteres (ex: 006151112LA041).'
-    return
-  }
-  if (!editing.value && form.permissions.length === 0) {
-    errorMessage.value = t('admin.employees_select_permissions')
-    return
-  }
+  if (!form.name.trim()) { errorMessage.value = 'O nome completo é obrigatório.'; return }
+  if (!form.username.trim()) { errorMessage.value = 'O username é obrigatório.'; return }
+  if (!form.email.trim()) { errorMessage.value = 'O email é obrigatório.'; return }
+  if (!form.departamento) { errorMessage.value = 'Selecione o departamento.'; return }
+  if (!editing.value && !form.password) { errorMessage.value = t('admin.employees_password_required'); return }
+  if (!editing.value && form.password && form.password.length < 12) { errorMessage.value = 'A senha deve ter pelo menos 12 caracteres.'; return }
+  if (form.bi && !isValidBiFormat(form.bi)) { errorMessage.value = 'Formato de BI inválido. Use 14 caracteres (ex: 006151112LA041).'; return }
+  if (!editing.value && form.permissions.length === 0) { errorMessage.value = t('admin.employees_select_permissions'); return }
+
   saving.value = true
   try {
     if (form.bi) {
@@ -501,6 +496,7 @@ const handleSubmit = async () => {
         throw new Error(`Este BI já está registado para "${existingBi.name}".`)
       }
     }
+
     if (editing.value) {
       const payload = {
         name: form.name,
@@ -510,6 +506,7 @@ const handleSubmit = async () => {
         departamento: form.departamento,
         permissions: form.permissions,
         bi: form.bi ? form.bi.toUpperCase() : null,
+        photo: form.photo || null
       }
       const { error } = await supabase.from('users').update(payload).eq('id', editing.value.id)
       if (error) throw error
@@ -521,25 +518,22 @@ const handleSubmit = async () => {
             { password: form.password }
           )
           if (authError) {
-            console.warn('Senha atualizada apenas em public.users. Use "Redefinir senha" no Auth se necessário.')
+            console.warn('Senha atualizada apenas em public.users.')
           }
         } catch (e) {
           console.warn('Admin API indisponível para atualizar senha no Auth.')
         }
       }
+
+      toast.success('Funcionário atualizado com sucesso!')
     } else {
       const { data: existing } = await supabase.from('users').select('id, email').eq('email', form.email).maybeSingle()
-      if (existing) {
-        throw new Error(t('admin.employees_email_exists'))
-      }
+      if (existing) throw new Error(t('admin.employees_email_exists'))
 
       const { data: existingUser } = await supabase.from('users').select('id, username').eq('username', form.username).maybeSingle()
-      if (existingUser) {
-        throw new Error(t('admin.employees_username_exists'))
-      }
+      if (existingUser) throw new Error(t('admin.employees_username_exists'))
 
       let authUserId = null
-
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: form.email,
         password: form.password,
@@ -554,8 +548,8 @@ const handleSubmit = async () => {
           approval_status: 'approved',
           permissions: form.permissions,
           company_completed: true,
-          must_change_password: true,
-        },
+          must_change_password: true
+        }
       })
 
       if (authError) {
@@ -573,9 +567,9 @@ const handleSubmit = async () => {
               approval_status: 'approved',
               permissions: form.permissions,
               company_completed: true,
-              must_change_password: true,
-            },
-          },
+              must_change_password: true
+            }
+          }
         })
         if (authError2) throw authError2
         authUserId = authData2.user?.id
@@ -599,56 +593,454 @@ const handleSubmit = async () => {
           permissions: JSON.stringify(form.permissions),
           password_must_change: true,
           password: 'supabase_auth_managed',
+          photo: form.photo || null
         })
         if (dbError) throw dbError
       }
+
+      toast.success('Funcionário criado com sucesso!')
     }
+
     closeForm()
     await fetchList()
   } catch (e) {
     errorMessage.value = e.message || t('admin.employees_create_error')
-  } finally { saving.value = false }
-}
-
-const confirmDelete = async (item) => {
-  if (!await confirm({ title: 'Eliminar funcionário', message: `${t('admin.employees_delete_confirm')} "${item.name}"? ${t('admin.employees_delete_warning')}`, type: 'danger', confirmText: 'Eliminar', cancelText: 'Cancelar' })) return
-  try {
-    const { error } = await supabase.from('users').delete().eq('id', item.id)
-    if (error) throw error
-    await fetchList()
-  } catch (e) {
-    toast.error(e.message || t('admin.error_delete'))
+  } finally {
+    saving.value = false
   }
 }
 
-onMounted(async () => {
-  await fetchPerms()
-  await fetchList()
+const showDeleteModal = ref(false)
+const deleteTarget = ref(null)
+
+const openDeleteModal = (f) => {
+  deleteTarget.value = f
+  showDeleteModal.value = true
+  document.body.style.overflow = 'hidden'
+}
+
+const closeDeleteModal = () => {
+  showDeleteModal.value = false
+  deleteTarget.value = null
+  document.body.style.overflow = ''
+}
+
+const handleDelete = async () => {
+  if (!deleteTarget.value) return
+  deleting.value = true
+  try {
+    const { error } = await supabase.from('users').delete().eq('id', deleteTarget.value.id)
+    if (error) throw error
+    toast.success('Funcionário eliminado com sucesso!')
+    closeDeleteModal()
+    await fetchList()
+  } catch (e) {
+    toast.error(e.message || t('admin.error_delete'))
+  } finally {
+    deleting.value = false
+  }
+}
+
+onMounted(() => {
+  fetchList()
 })
 </script>
 
 <style scoped>
-.admin-page { background: #f8f9fa; min-height: 100vh; }
-.page-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.25rem; color: #0f172a; }
-.tracking-code { background: #f1f5f9; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; color: #334155; }
-.input-group .btn { z-index: 0; }
+.admin-page {
+  background: #f8f9fa;
+  min-height: 100vh;
+}
 
-.card { border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
-.empty-card { border: none; }
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
+}
 
-.avatar-sm {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #0f766e, #134e4a);
-  color: white;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.78rem; font-weight: 600;
-  flex-shrink: 0;
+.page-subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: #94a3b8;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.4;
+}
+
+.empty-state p {
+  margin-bottom: 1.25rem;
+  font-size: 0.95rem;
+}
+
+.section-group {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   overflow: hidden;
 }
-.avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
 
-.action-buttons { display: inline-flex; gap: 0.4rem; }
+.employee-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s;
+}
+
+.employee-row:last-child {
+  border-bottom: none;
+}
+
+.employee-row:hover {
+  background: #f8fafc;
+}
+
+.employee-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  flex: 1.4;
+}
+
+.employee-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.employee-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-initials {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.employee-details {
+  min-width: 0;
+}
+
+.employee-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.employee-email {
+  font-size: 0.8rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.employee-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 180px;
+}
+
+.meta-dept {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #eff6ff;
+  color: #1e40af;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.meta-dept i {
+  font-size: 0.7rem;
+}
+
+.meta-role {
+  font-size: 0.8rem;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.employee-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 100px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  flex-shrink: 0;
+}
+
+.status-dot.active {
+  background: #22c55e;
+}
+
+.status-label {
+  font-size: 0.8rem;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.employee-login {
+  min-width: 100px;
+  text-align: right;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.employee-actions {
+  display: flex;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 0.85rem;
+}
+
+.btn-edit {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+
+.btn-edit:hover {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.btn-delete {
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+.btn-delete:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Modals */
+.modal-backdrop-custom {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1040;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-dialog-centered-custom {
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+}
+
+.modal-box {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-box.modal-sm {
+  max-width: 400px;
+}
+
+.modal-box-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.modal-box-header h5 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.btn-close-modal {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: #f1f5f9;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-close-modal:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.modal-box-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.modal-box-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.delete-modal-body {
+  padding: 2rem 1.5rem 1rem;
+  text-align: center;
+}
+
+.delete-icon-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #fef2f2;
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  margin: 0 auto 1rem;
+}
+
+.delete-modal-body h5 {
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+}
+
+/* Photo Upload */
+.photo-upload-area {
+  width: 140px;
+  height: 140px;
+  border: 2px dashed #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photo-upload-area:hover {
+  border-color: #3b82f6;
+  background: #f8fafc;
+}
+
+.photo-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.photo-placeholder i {
+  font-size: 1.5rem;
+  opacity: 0.5;
+}
+
+.photo-placeholder small {
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
+.photo-remove-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.photo-remove-btn:hover {
+  background: #ef4444;
+}
+
+/* Permissions */
+.perm-dept-info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
 
 .perm-grid {
   display: grid;
@@ -658,25 +1050,37 @@ onMounted(async () => {
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   padding: 1rem;
-  max-height: 360px;
+  max-height: 320px;
   overflow-y: auto;
 }
+
 .perm-group {
-  background: white;
+  background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   padding: 0.75rem;
 }
+
 .perm-group-title {
   font-weight: 600;
   color: #0f766e;
   font-size: 0.85rem;
   margin-bottom: 0.5rem;
-  display: flex; align-items: center; gap: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
-.perm-items { display: flex; flex-direction: column; gap: 4px; }
+
+.perm-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .perm-item {
-  display: flex; align-items: center; gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 0.82rem;
   color: #475569;
   cursor: pointer;
@@ -684,13 +1088,75 @@ onMounted(async () => {
   border-radius: 4px;
   transition: background 0.15s;
 }
-.perm-item:hover { background: #f1f5f9; }
-.perm-item input { margin: 0; }
 
-.modal-backdrop { z-index: 1040; }
-.modal { z-index: 1050; }
+.perm-item:hover {
+  background: #f1f5f9;
+}
+
+.perm-item input {
+  margin: 0;
+}
+
+.alert-sm {
+  font-size: 0.85rem;
+  padding: 0.6rem 0.85rem;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .employee-row {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .employee-meta,
+  .employee-status,
+  .employee-login {
+    min-width: 0;
+  }
+
+  .employee-login {
+    text-align: left;
+  }
+}
 
 @media (max-width: 768px) {
-  .perm-grid { grid-template-columns: 1fr; }
+  .employee-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .employee-info {
+    width: 100%;
+  }
+
+  .employee-meta {
+    width: 100%;
+  }
+
+  .employee-status {
+    width: 100%;
+  }
+
+  .employee-login {
+    width: 100%;
+    text-align: left;
+  }
+
+  .employee-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .perm-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-dialog-centered-custom {
+    max-width: 100%;
+    margin: 0.5rem;
+  }
 }
 </style>
