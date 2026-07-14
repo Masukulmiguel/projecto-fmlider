@@ -122,36 +122,6 @@
       </div>
     </div>
 
-    <div class="row g-4 mb-4">
-      <div class="col-lg-12">
-        <div class="card h-100">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-bell-fill me-2 text-warning"></i>{{ t('cliente.dashboard_notifications') || 'Notificações' }}</h5>
-            <button v-if="notifications.length > 0" class="btn btn-sm btn-outline-primary" @click="markAllNotificationsRead">{{ t('cliente.dashboard_mark_all_read') || 'Marcar todas como lidas' }}</button>
-          </div>
-          <div class="card-body">
-            <div v-if="notifications.length === 0" class="empty-mini">
-              <i class="bi bi-bell-slash"></i>
-              <p class="mb-0">{{ t('cliente.dashboard_no_notifications') || 'Sem notificações' }}</p>
-            </div>
-            <ul v-else class="notification-list">
-              <li v-for="n in notifications" :key="n.id" :class="{ 'unread': !n.is_read }" @click="handleNotificationClick(n)">
-                <div class="notif-icon" :class="'notif-icon-' + (n.type || 'default')">
-                  <i :class="n.icon || 'bi bi-bell-fill'"></i>
-                </div>
-                <div class="notif-content">
-                  <div class="notif-title">{{ n.title }}</div>
-                  <div class="notif-body">{{ n.body }}</div>
-                  <div class="notif-time">{{ formatRelativeTime(n.created_at) }}</div>
-                </div>
-                <div v-if="!n.is_read" class="unread-dot"></div>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div class="row g-4">
       <div class="col-lg-12">
         <div class="card h-100">
@@ -199,49 +169,6 @@ const router = useRouter()
 
 const counts = reactive({ documentos: 0, contactos: 0, licenciamentos: 0, licenciamentos_aprovado: 0, contentores: 0, contentores_entregue: 0, processos: 0, processos_pendente: 0 })
 const licenciamentos = ref([])
-const notifications = ref([])
-
-const loadNotifications = async () => {
-  try {
-    const userId = authStore.user?.id
-    if (!userId) return
-    const { data, error } = await supabase
-      .from('notifications')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(20)
-    if (!error && data) notifications.value = data
-  } catch (e) { /* silent */ }
-}
-
-const markAllNotificationsRead = async () => {
-  try {
-    const userId = authStore.user?.id
-    if (!userId) return
-    await supabase.from('notifications').update({ is_read: true }).eq('user_id', userId).eq('is_read', false)
-    await loadNotifications()
-  } catch (e) { /* silent */ }
-}
-
-const handleNotificationClick = async (n) => {
-  if (!n.is_read) {
-    await supabase.from('notifications').update({ is_read: true }).eq('id', n.id)
-    n.is_read = true
-  }
-}
-
-const formatRelativeTime = (iso) => {
-  if (!iso) return ''
-  const diff = Date.now() - new Date(iso).getTime()
-  const mins = Math.floor(diff / 60000)
-  if (mins < 1) return 'Agora'
-  if (mins < 60) return `${mins}min`
-  const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `${hrs}h`
-  const days = Math.floor(hrs / 24)
-  return `${days}d`
-}
 
 const goToDocumentos = () => router.push('/documentos')
 
@@ -379,7 +306,7 @@ const licencMonthlyOptions = {
 
 onMounted(async () => {
   if (!companyStore.company) await companyStore.fetch()
-  await Promise.all([loadCounts(), loadNotifications()])
+  await Promise.all([loadCounts()])
 })
 </script>
 
@@ -500,39 +427,6 @@ onMounted(async () => {
   transform: translateY(-2px);
 }
 .quick-action i { font-size: 1.5rem; }
-
-.empty-mini { text-align: center; color: #94a3b8; padding: 2rem 1rem; }
-.empty-mini i { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
-
-.notification-list { list-style: none; padding: 0; margin: 0; }
-.notification-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #f1f5f9;
-  cursor: pointer;
-  transition: background 0.15s;
-  border-radius: 8px;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-}
-.notification-list li:hover { background: #f8fafc; }
-.notification-list li:last-child { border-bottom: none; }
-.notification-list li.unread { background: #eff6ff; }
-.notification-list li.unread:hover { background: #dbeafe; }
-.notif-icon {
-  width: 36px; height: 36px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; flex-shrink: 0; margin-top: 2px;
-}
-.notif-icon-container_status { background: #dbeafe; color: #1d4ed8; }
-.notif-icon-default { background: #f1f5f9; color: #64748b; }
-.notif-content { flex: 1; min-width: 0; }
-.notif-title { font-weight: 600; font-size: 0.85rem; color: #1e293b; }
-.notif-body { font-size: 0.8rem; color: #64748b; margin-top: 2px; line-height: 1.4; }
-.notif-time { font-size: 0.72rem; color: #94a3b8; margin-top: 4px; }
-.unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #2563eb; flex-shrink: 0; margin-top: 6px; }
 
 @media (max-width: 576px) {
   .welcome-card { padding: 1rem; }
