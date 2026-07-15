@@ -232,6 +232,8 @@ onMounted(fetchData)
 .toast-error { background: #dc2626; }
 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 @media (max-width: 768px) {
+  .admin-page { padding: 1rem !important; }
+  .page-header h2 { font-size: 1.1rem; }
   .modal-overlay { padding: 0.5rem; }
   .modal-content { border-radius: 12px; }
   .modal-header { padding: 0.85rem 1rem; }
@@ -239,5 +241,8 @@ onMounted(fetchData)
   .modal-body { padding: 1rem; }
   .modal-footer { padding: 0.75rem 1rem; gap: 0.4rem; flex-wrap: wrap; }
   .modal-footer .btn { flex: 1; min-width: 0; }
+}
+@media (max-width: 480px) {
+  .admin-page { padding: 0.75rem !important; }
 }
 </style>

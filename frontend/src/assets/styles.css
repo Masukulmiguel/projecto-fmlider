@@ -546,3 +546,161 @@ table { width: 100%; overflow-x: auto; display: block; }
 @media (min-width: 1400px) {
   .container { max-width: 1320px; }
 }
+
+/* ============================================
+   Dashboard Mobile — Global Admin/Cliente/Func
+   ============================================ */
+
+/* Tablets (max 768px) */
+@media (max-width: 768px) {
+  /* Page wrappers */
+  .admin-page, .admin-dashboard, .logistica-dashboard, .cliente-dashboard {
+    padding: 1rem !important;
+  }
+
+  /* Page headers */
+  .page-header { margin-bottom: 1rem !important; }
+  .page-header h2, .page-header h1 { font-size: 1.15rem !important; }
+  .page-title { font-size: 1.15rem !important; }
+  .page-header p { font-size: 0.8rem !important; }
+
+  /* Stats grids: 2 columns */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.65rem !important;
+  }
+
+  /* Stat cards: compact */
+  .stat-card, .stat-tile {
+    padding: 0.75rem !important;
+    gap: 0.5rem !important;
+    border-radius: 10px !important;
+  }
+  .stat-icon, .stat-tile-icon {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 8px !important;
+    font-size: 1rem !important;
+  }
+  .stat-value, .stat-tile-value {
+    font-size: 1.15rem !important;
+    line-height: 1.2 !important;
+  }
+  .stat-label, .stat-tile-label {
+    font-size: 0.65rem !important;
+  }
+  .stat-tile-meta {
+    font-size: 0.6rem !important;
+  }
+
+  /* Welcome cards */
+  .welcome-card {
+    padding: 0.85rem !important;
+  }
+  .welcome-title {
+    font-size: 1rem !important;
+  }
+
+  /* Dashboard header */
+  .dashboard-header {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+  .header-right {
+    flex-wrap: wrap !important;
+  }
+
+  /* Cards */
+  .card { border-radius: 10px !important; }
+  .card-header { padding: 0.75rem 1rem !important; }
+  .card-body { padding: 0.75rem !important; }
+
+  /* Quick actions */
+  .quick-actions {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+  .quick-action {
+    padding: 0.75rem 0.5rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Filters / search */
+  .filters {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+  .search-box {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Tables */
+  .table-responsive-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  table { font-size: 0.78rem !important; }
+  th, td { padding: 0.4rem 0.5rem !important; white-space: nowrap; }
+
+  /* Lists */
+  .recent-list li { padding: 0.5rem 0 !important; }
+
+  /* Buttons */
+  .btn-sm { padding: 0.3rem 0.6rem !important; font-size: 0.75rem !important; }
+
+  /* Logo boxes */
+  .logo-box { width: 44px !important; height: 44px !important; }
+}
+
+/* Small phones (max 480px) */
+@media (max-width: 480px) {
+  /* Page wrappers: extra compact */
+  .admin-page, .admin-dashboard, .logistica-dashboard, .cliente-dashboard {
+    padding: 0.75rem !important;
+  }
+
+  /* Page headers */
+  .page-header h2, .page-header h1 { font-size: 1rem !important; }
+  .page-title { font-size: 1rem !important; }
+
+  /* Stats grids: single column */
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Stat cards: minimal */
+  .stat-card, .stat-tile {
+    padding: 0.6rem !important;
+    gap: 0.4rem !important;
+  }
+  .stat-icon, .stat-tile-icon {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+    font-size: 0.9rem !important;
+  }
+  .stat-value, .stat-tile-value {
+    font-size: 1rem !important;
+  }
+  .stat-label, .stat-tile-label {
+    font-size: 0.6rem !important;
+  }
+
+  /* Welcome cards */
+  .welcome-card { padding: 0.7rem !important; }
+
+  /* Quick actions */
+  .quick-action { padding: 0.6rem 0.4rem !important; font-size: 0.7rem !important; }
+
+  /* Tables */
+  table { font-size: 0.72rem !important; }
+  th, td { padding: 0.3rem 0.4rem !important; }
+
+  /* Modals */
+  .modal-overlay { padding: 0.35rem !important; }
+  .modal-header { padding: 0.7rem 0.85rem !important; }
+  .modal-body { padding: 0.75rem !important; }
+  .modal-footer { padding: 0.6rem 0.85rem !important; }
+}

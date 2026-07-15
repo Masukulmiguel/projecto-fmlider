@@ -821,9 +821,24 @@ onMounted(async () => {
 .timeline-mini-dot.active { background: #d4af37; }
 .timeline-mini-content { font-size: 0.85rem; }
 @media (max-width: 768px) {
-  .admin-page { padding: 16px !important; }
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .admin-page { padding: 12px !important; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .stat-card { padding: 0.65rem; gap: 0.4rem; }
+  .stat-icon { width: 32px; height: 32px; border-radius: 8px; font-size: 0.9rem; }
+  .stat-value { font-size: 1rem; }
+  .stat-label { font-size: 0.6rem; }
   .filters { flex-direction: column; }
   .detail-grid { grid-template-columns: 1fr; }
+  .page-header h2 { font-size: 1.1rem; }
+  .table th, .table td { padding: 0.35rem 0.45rem; font-size: 0.78rem; }
+}
+
+@media (max-width: 480px) {
+  .admin-page { padding: 0.75rem !important; }
+  .stats-grid { grid-template-columns: 1fr; gap: 6px; }
+  .stat-card { padding: 0.55rem; }
+  .stat-icon { width: 28px; height: 28px; }
+  .stat-value { font-size: 0.9rem; }
+  .page-header h2 { font-size: 1rem; }
 }
 </style>

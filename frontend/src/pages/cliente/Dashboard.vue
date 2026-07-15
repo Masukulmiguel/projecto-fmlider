@@ -428,28 +428,33 @@ onMounted(async () => {
 }
 .quick-action i { font-size: 1.5rem; }
 
-@media (max-width: 576px) {
-  .welcome-card { padding: 1rem; }
-  .welcome-card h2 { font-size: 1.1rem; }
-  .stat-tile { padding: 0.85rem; gap: 0.6rem; }
-  .stat-tile-icon { width: 40px; height: 40px; border-radius: 10px; font-size: 1.1rem; }
-  .stat-tile-label { font-size: 0.68rem; letter-spacing: 0.3px; }
-  .stat-tile-value { font-size: 1.3rem; }
-  .stat-tile-meta { font-size: 0.65rem; }
+@media (max-width: 768px) {
+  .cliente-dashboard { padding: 0.75rem; }
+  .welcome-card { padding: 0.85rem; }
+  .welcome-card h2 { font-size: 1.05rem; }
+  .stat-tile { padding: 0.85rem; gap: 0.55rem; }
+  .stat-tile-icon { width: 38px; height: 38px; border-radius: 10px; font-size: 1.05rem; }
+  .stat-tile-label { font-size: 0.65rem; letter-spacing: 0.3px; }
+  .stat-tile-value { font-size: 1.2rem; }
+  .stat-tile-meta { font-size: 0.6rem; }
   .card { border-radius: 10px; }
-  .quick-actions { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+  .card-header { padding: 0.75rem 1rem; }
+  .quick-actions { gap: 0.5rem; }
   .quick-action { padding: 0.85rem 0.6rem; font-size: 0.75rem; gap: 0.35rem; }
   .quick-action i { font-size: 1.15rem; }
-  .recent-list li { padding: 0.6rem 0; gap: 0.4rem; }
-  .tracking-code { font-size: 0.68rem; }
-  .route-mini { font-size: 0.78rem; }
-  .logo-box { width: 50px; height: 50px; }
+  .recent-list li { padding: 0.5rem 0; gap: 0.35rem; }
+  .logo-box { width: 44px; height: 44px; }
 }
 
-/* Medium phones & small tablets */
-@media (min-width: 577px) and (max-width: 768px) {
-  .stat-tile { padding: 1.1rem; gap: 0.85rem; }
-  .stat-tile-icon { width: 48px; height: 48px; font-size: 1.3rem; }
-  .stat-tile-value { font-size: 1.6rem; }
+@media (max-width: 480px) {
+  .cliente-dashboard { padding: 0.5rem; }
+  .welcome-card { padding: 0.7rem; }
+  .welcome-card h2 { font-size: 0.95rem; }
+  .stat-tile { padding: 0.7rem; gap: 0.45rem; }
+  .stat-tile-icon { width: 32px; height: 32px; border-radius: 8px; font-size: 0.9rem; }
+  .stat-tile-label { font-size: 0.58rem; }
+  .stat-tile-value { font-size: 1rem; }
+  .quick-actions { grid-template-columns: 1fr; gap: 0.4rem; }
+  .quick-action { padding: 0.7rem 0.5rem; font-size: 0.7rem; }
 }
 </style>

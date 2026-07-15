@@ -1381,7 +1381,13 @@ const copySQL = async () => {
 .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 @media (max-width: 768px) {
-  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  .admin-page { padding: 1rem !important; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.65rem; }
+  .stat-card { padding: 0.75rem; gap: 0.5rem; border-radius: 10px; }
+  .stat-icon { width: 36px; height: 36px; border-radius: 8px; font-size: 1rem; }
+  .stat-value { font-size: 1.15rem; }
+  .stat-label { font-size: 0.65rem; }
+  .page-header h2 { font-size: 1.1rem; }
   .modal-overlay { padding: 0.5rem; }
   .modal-content { border-radius: 12px; }
   .modal-header { padding: 0.85rem 1rem; }
@@ -1391,6 +1397,10 @@ const copySQL = async () => {
   .modal-footer .btn { flex: 1; min-width: 0; }
 }
 @media (max-width: 480px) {
-  .stats-grid { grid-template-columns: 1fr; }
+  .admin-page { padding: 0.75rem !important; }
+  .stats-grid { grid-template-columns: 1fr; gap: 6px; }
+  .stat-card { padding: 0.6rem; }
+  .stat-icon { width: 32px; height: 32px; }
+  .stat-value { font-size: 1rem; }
 }
 </style>

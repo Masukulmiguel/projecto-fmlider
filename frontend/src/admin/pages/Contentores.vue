@@ -495,8 +495,8 @@ onMounted(() => { fetchData(); fetchClients(); fetchChartData() })
 .page-btn { width: 34px; height: 34px; border: 1px solid #e2e8f0; border-radius: 8px; background: white; color: #475569; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
 .page-btn:hover:not(:disabled) { border-color: #0f766e; color: #0f766e; background: #f0fdfa; }
 .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-@media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; } .modal-overlay { padding: 0.5rem; } .modal-content { border-radius: 12px; } .modal-header { padding: 0.85rem 1rem; } .modal-header h5 { font-size: 0.95rem; } .modal-body { padding: 1rem; } .modal-footer { padding: 0.75rem 1rem; gap: 0.4rem; flex-wrap: wrap; } .modal-footer .btn { flex: 1; min-width: 0; } }
-@media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } }
+@media (max-width: 768px) { .admin-page { padding: 1rem !important; } .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.65rem; } .stat-card { padding: 0.75rem; gap: 0.5rem; border-radius: 10px; } .stat-icon { width: 36px; height: 36px; border-radius: 8px; font-size: 1rem; } .stat-value { font-size: 1.15rem; } .stat-label { font-size: 0.65rem; } .page-header h2 { font-size: 1.1rem; } .modal-overlay { padding: 0.5rem; } .modal-content { border-radius: 12px; } .modal-header { padding: 0.85rem 1rem; } .modal-header h5 { font-size: 0.95rem; } .modal-body { padding: 1rem; } .modal-footer { padding: 0.75rem 1rem; gap: 0.4rem; flex-wrap: wrap; } .modal-footer .btn { flex: 1; min-width: 0; } }
+@media (max-width: 480px) { .admin-page { padding: 0.75rem !important; } .stats-grid { grid-template-columns: 1fr; gap: 6px; } .stat-card { padding: 0.6rem; } .stat-icon { width: 32px; height: 32px; } .stat-value { font-size: 1rem; } }
 .chart-card { border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
 .chart-card .card-header { border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
 .bar-chart { display: flex; flex-direction: column; gap: 0.6rem; }

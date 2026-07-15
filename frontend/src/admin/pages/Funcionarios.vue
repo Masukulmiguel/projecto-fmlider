@@ -1210,4 +1210,16 @@ onMounted(() => {
     min-width: 0;
   }
 }
+
+@media (max-width: 480px) {
+  .admin-page { padding: 0.75rem !important; }
+  .employee-row { padding: 0.75rem 1rem !important; }
+  .employee-avatar { width: 36px !important; height: 36px !important; }
+  .page-title { font-size: 1rem !important; }
+  .modal-backdrop-custom { padding: 0.35rem; }
+  .modal-box-header { padding: 0.7rem 0.85rem; }
+  .modal-box-header h5 { font-size: 0.9rem; }
+  .modal-box-body { padding: 0.75rem; }
+  .modal-box-footer { padding: 0.6rem 0.85rem; }
+}
 </style>

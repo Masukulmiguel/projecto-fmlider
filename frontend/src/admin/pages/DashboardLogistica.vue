@@ -365,14 +365,23 @@ onMounted(async () => {
 .card-header { background: white; border-bottom: 1px solid #eef0f3; padding: 1rem 1.25rem; }
 .chart-card .card-header h6 { font-weight: 700; color: #0f172a; font-size: 0.9rem; }
 
-@media (max-width: 576px) {
+@media (max-width: 768px) {
   .logistica-dashboard { padding: 1rem; }
-  .welcome-card { padding: 1rem; }
-  .welcome-card h2 { font-size: 1.1rem; }
-  .stat-tile { padding: 1rem; gap: 0.65rem; }
-  .stat-tile-icon { width: 42px; height: 42px; border-radius: 10px; font-size: 1.15rem; }
-  .stat-tile-label { font-size: 0.7rem; }
-  .stat-tile-value { font-size: 1.3rem; }
+  .welcome-card { padding: 0.85rem; }
+  .welcome-card h2 { font-size: 1.05rem; }
+  .stat-tile { padding: 0.85rem; gap: 0.55rem; }
+  .stat-tile-icon { width: 38px; height: 38px; border-radius: 10px; font-size: 1.05rem; }
+  .stat-tile-label { font-size: 0.65rem; }
+  .stat-tile-value { font-size: 1.2rem; }
   .card { border-radius: 10px; }
+  .card-header { padding: 0.75rem 1rem; }
+}
+
+@media (max-width: 480px) {
+  .logistica-dashboard { padding: 0.75rem; }
+  .stat-tile { padding: 0.7rem; gap: 0.45rem; }
+  .stat-tile-icon { width: 32px; height: 32px; font-size: 0.9rem; }
+  .stat-tile-value { font-size: 1rem; }
+  .stat-tile-label { font-size: 0.6rem; }
 }
 </style>

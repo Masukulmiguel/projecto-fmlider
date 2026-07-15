@@ -1128,31 +1128,24 @@ onUnmounted(() => {
 }
 
 @media (max-width: 768px) {
-  .admin-dashboard {
-    padding: 16px;
-  }
-
-  .dashboard-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .welcome-title {
-    font-size: 1.25rem;
-  }
-
-  .header-right {
-    flex-wrap: wrap;
-  }
+  .admin-dashboard { padding: 12px; }
+  .dashboard-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .welcome-title { font-size: 1.1rem; }
+  .header-right { flex-wrap: wrap; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .stat-card { padding: 0.7rem; gap: 0.5rem; border-radius: 10px; }
+  .stat-icon { width: 36px; height: 36px; border-radius: 8px; font-size: 1rem; }
+  .stat-label { font-size: 0.62rem; }
+  .stat-value { font-size: 1.1rem; }
 }
 
-@media (max-width: 576px) {
-  .stat-card { padding: 0.85rem; gap: 0.65rem; }
-  .stat-icon { width: 40px; height: 40px; border-radius: 10px; font-size: 1.1rem; }
-  .stat-label { font-size: 0.68rem; }
-  .stat-value { font-size: 1.3rem; }
-  .admin-dashboard { padding: 12px; }
-  .welcome-title { font-size: 1.1rem; }
-  .stats-grid { gap: 10px; }
+@media (max-width: 480px) {
+  .admin-dashboard { padding: 0.75rem; }
+  .welcome-title { font-size: 1rem; }
+  .stats-grid { grid-template-columns: 1fr; gap: 6px; }
+  .stat-card { padding: 0.6rem; }
+  .stat-icon { width: 32px; height: 32px; font-size: 0.9rem; }
+  .stat-value { font-size: 1rem; }
+  .stat-label { font-size: 0.58rem; }
 }
 </style>
