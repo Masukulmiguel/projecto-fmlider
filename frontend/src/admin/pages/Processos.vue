@@ -791,13 +791,14 @@ onMounted(async () => {
 .page-btns { display: flex; gap: 4px; }
 .page-btn { width: 32px; height: 32px; border: 1px solid #e4e6eb; border-radius: 8px; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.modal-content { background: #fff; border-radius: 16px; width: 100%; max-width: 800px; max-height: 85vh; overflow-y: auto; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+.modal-content { background: #fff; border-radius: 16px; width: 100%; max-width: 800px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
 .modal-content.modal-sm { max-width: 400px; }
-.modal-header { padding: 20px 24px; border-bottom: 1px solid #e4e6eb; display: flex; justify-content: space-between; align-items: center; }
+.modal-content form { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+.modal-header { padding: 20px 24px; border-bottom: 1px solid #e4e6eb; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
 .modal-header h5 { margin: 0; font-size: 1.1rem; font-weight: 700; }
-.modal-body { padding: 24px; }
-.modal-footer { padding: 16px 24px; border-top: 1px solid #e4e6eb; display: flex; justify-content: flex-end; gap: 8px; }
+.modal-body { padding: 24px; overflow-y: auto; flex: 1; min-height: 0; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid #e4e6eb; display: flex; justify-content: flex-end; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
 .form-section { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #f0f2f5; }
 .form-section:last-child { border-bottom: none; margin-bottom: 0; }
 .form-section-title { font-size: 0.9rem; font-weight: 600; color: #050505; margin-bottom: 12px; }

@@ -1275,6 +1275,7 @@ onMounted(() => { fetchData(); fetchMotoristas(); fetchCamioes(); fetchClients()
 .modal-content.modal-sm { max-width: 400px; }
 .modal-content.modal-lg { max-width: 800px; }
 .modal-content.modal-xl { max-width: 960px; }
+.modal-content form { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
 .modal-header { padding: 1rem 1.25rem; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 0.75rem; }
 .modal-header h5 { margin: 0; font-weight: 600; font-size: 1.05rem; min-width: 0; word-break: break-word; flex: 1; }
 .modal-header .btn-close-modal { width: 32px; height: 32px; min-width: 32px; border: none; border-radius: 8px; background: #f1f5f9; color: #64748b; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }

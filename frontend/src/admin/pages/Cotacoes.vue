@@ -262,6 +262,7 @@ onMounted(fetchData)
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1050; padding: 1rem; overflow-y: auto; }
 .modal-content { background: white; border-radius: 12px; width: 100%; max-width: 520px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
 .modal-content.modal-sm { max-width: 400px; }
+.modal-content form { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
 .modal-header { padding: 1rem 1.25rem; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 0.75rem; }
 .modal-header h5 { margin: 0; font-weight: 600; font-size: 1.05rem; min-width: 0; word-break: break-word; flex: 1; }
 .modal-header .btn-close-modal { width: 32px; height: 32px; min-width: 32px; border: none; border-radius: 8px; background: #f1f5f9; color: #64748b; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }

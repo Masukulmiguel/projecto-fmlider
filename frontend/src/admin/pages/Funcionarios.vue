@@ -877,6 +877,8 @@ onMounted(() => {
   max-width: 640px;
   max-height: 90vh;
   margin: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-box {
@@ -888,6 +890,8 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  flex: 1;
+  min-height: 0;
 }
 
 .modal-box.modal-sm {
@@ -933,6 +937,14 @@ onMounted(() => {
 .btn-close-modal:hover {
   background: #e2e8f0;
   color: #0f172a;
+}
+
+.modal-box form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .modal-box-body {
