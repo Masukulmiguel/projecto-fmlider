@@ -220,6 +220,33 @@
         </div>
       </div>
     </div>
+
+    <!-- FAQ Page Background -->
+    <div class="card border-0 shadow-sm mt-4">
+      <div class="card-header bg-white d-flex align-items-center justify-content-between">
+        <h6 class="mb-0"><i class="bi bi-question-circle me-2"></i>Imagem de Fundo (FAQ)</h6>
+      </div>
+      <div class="card-body">
+        <p class="text-muted small mb-3">Imagem de fundo do hero da página de perguntas frequentes.</p>
+        <div class="row g-3">
+          <div v-for="item in faqImages" :key="item.key" class="col-6 col-md-4 col-lg-3">
+            <div class="auth-bg-card">
+              <div class="auth-bg-preview" :style="{ backgroundImage: `url(${item.url})` }">
+                <div class="auth-bg-label">{{ item.label }}</div>
+              </div>
+              <div class="auth-bg-actions">
+                <input :ref="el => { if (el) fileRefs[item.key] = el }" type="file" accept="image/*" class="d-none" @change="e => uploadBg(item.key, 'faq', e)">
+                <button class="btn btn-sm btn-outline-primary w-100" @click="fileRefs[item.key]?.click()" :disabled="uploadingKey === item.key">
+                  <span v-if="uploadingKey === item.key" class="spinner-border spinner-border-sm me-1"></span>
+                  <i v-else class="bi bi-camera-fill me-1"></i>
+                  {{ uploadingKey === item.key ? 'A enviar...' : 'Trocar Imagem' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -279,6 +306,10 @@ const partnersImages = ref([
   { key: 'hero_bg', label: 'Hero Parceiros', url: '/assets/img/construcao2020/image1.jpeg' },
 ])
 
+const faqImages = ref([
+  { key: 'hero_bg', label: 'Hero FAQ', url: '/assets/img/construcao2020/image3.jpeg' },
+])
+
 const loadImages = async () => {
   const { data, error } = await supabase.from('site_images').select('section, key, image_url')
   if (error) {
@@ -301,6 +332,10 @@ const loadImages = async () => {
     }
     if (row.section === 'partners') {
       const img = partnersImages.value.find(i => i.key === row.key)
+      if (img && row.image_url) img.url = row.image_url
+    }
+    if (row.section === 'faq') {
+      const img = faqImages.value.find(i => i.key === row.key)
       if (img && row.image_url) img.url = row.image_url
     }
   })
@@ -333,7 +368,7 @@ const uploadBg = async (key, section, e) => {
       status: 1,
     }, { onConflict: 'section,key' })
     if (upsertErr) throw upsertErr
-    const allImages = [...authImages.value, ...serviceImages.value, ...contactImages.value, ...partnersImages.value]
+    const allImages = [...authImages.value, ...serviceImages.value, ...contactImages.value, ...partnersImages.value, ...faqImages.value]
     const img = allImages.find(i => i.key === key)
     if (img) img.url = base64
     invalidate()
