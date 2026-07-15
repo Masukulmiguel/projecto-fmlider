@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS services (
     title varchar(255) NOT NULL,
     slug varchar(255) UNIQUE NOT NULL,
     description text,
-    image varchar(255),
+    image text,
     content text,
     status smallint DEFAULT 1,
     order_by int DEFAULT 0,

@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS services (
     title VARCHAR(255) NOT NULL,
     slug VARCHAR(255) NOT NULL UNIQUE,
     description LONGTEXT,
-    image VARCHAR(255),
+    image LONGTEXT,
     content LONGTEXT,
     status TINYINT DEFAULT 1,
     order_by INT DEFAULT 0,

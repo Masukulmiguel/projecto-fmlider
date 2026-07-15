@@ -297,7 +297,7 @@ async function fetchItems() {
     if (!error) items.value = data
   } catch (err) {
     console.error('Erro ao carregar serviços:', err)
-    toast.error(t('admin.error_loading_services'))
+    toast.error(t('admin.services_error_loading'))
   } finally {
     loading.value = false
   }
@@ -396,7 +396,7 @@ async function submitForm() {
     toast.success(editing.value ? t('admin.services_updated') : t('admin.services_created'))
   } catch (err) {
     console.error('Erro ao salvar serviço:', err)
-    toast.error(t('admin.error_saving_service'))
+    toast.error(t('admin.services_error_saving'))
   } finally {
     submitting.value = false
   }
@@ -418,7 +418,7 @@ async function deleteItem() {
     toast.success(t('admin.services_deleted'))
   } catch (err) {
     console.error('Erro ao deletar serviço:', err)
-    toast.error(t('admin.error_deleting_service'))
+    toast.error(t('admin.services_error_deleting'))
   } finally {
     deleting.value = false
   }
