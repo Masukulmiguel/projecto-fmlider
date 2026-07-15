@@ -78,7 +78,7 @@
           <p class="text-muted mx-auto" style="max-width: 600px;">{{ t('partners.network_description') }}</p>
         </div>
         <div class="row g-4">
-          <div class="col-md-6 col-lg-4" v-for="partner in partners" :key="partner.id" v-reveal="'fade'">
+          <div class="col-md-6 col-lg-4" v-for="partner in paginatedPartners" :key="partner.id" v-reveal="'fade'">
             <div class="partner-card">
               <div class="partner-logo-area">
                 <img :src="resolveLogo(partner.logo)" :alt="partner.name" class="partner-logo-img">
@@ -92,6 +92,19 @@
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="partners-pagination" v-if="totalPartnerPages > 1">
+          <button class="partners-page-btn" :disabled="partnerPage === 1" @click="partnerPage--">
+            <i class="bi bi-chevron-left"></i> {{ t('fleet.prev') || 'Anterior' }}
+          </button>
+          <div class="partners-page-dots">
+            <button v-for="page in totalPartnerPages" :key="page" class="partners-page-dot" :class="{ active: partnerPage === page }" @click="partnerPage = page"></button>
+          </div>
+          <button class="partners-page-btn" :disabled="partnerPage === totalPartnerPages" @click="partnerPage++">
+            {{ t('fleet.next') || 'Próximo' }} <i class="bi bi-chevron-right"></i>
+          </button>
         </div>
         <div v-if="partners.length === 0 && !loading" class="text-center py-5">
           <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
@@ -131,6 +144,8 @@ const { t } = useI18n()
 const { getImage, fetchAll } = useSiteImages()
 const partners = ref([])
 const loading = ref(true)
+const partnerPage = ref(1)
+const partnerPerPage = 6
 
 const benefits = computed(() => [
   { icon: 'bi bi-globe-americas', title: t('partners.benefit_1_title'), desc: t('partners.benefit_1_desc') },
@@ -145,6 +160,13 @@ const resolveLogo = (logo) => {
   if (logo.startsWith('/')) return logo
   return `/backend/storage/uploads/partners/${logo}`
 }
+
+const totalPartnerPages = computed(() => Math.ceil(partners.value.length / partnerPerPage))
+
+const paginatedPartners = computed(() => {
+  const start = (partnerPage.value - 1) * partnerPerPage
+  return partners.value.slice(start, start + partnerPerPage)
+})
 
 onMounted(async () => {
   await fetchAll()
@@ -309,5 +331,58 @@ onMounted(async () => {
 .btn-gold:hover {
   background: #c9a227;
   color: #0f172a;
+}
+
+/* PAGINATION */
+.partners-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+.partners-page-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.5rem;
+  border: 2px solid #e2e8f0;
+  background: #fff;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.partners-page-btn:hover:not(:disabled) {
+  border-color: var(--fml-gold, #f59e0b);
+  color: var(--fml-gold, #f59e0b);
+}
+.partners-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.partners-page-dots {
+  display: flex;
+  gap: 0.5rem;
+}
+.partners-page-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.partners-page-dot.active {
+  background: var(--fml-gold, #f59e0b);
+  transform: scale(1.3);
+}
+
+@media (max-width: 767.98px) {
+  .partners-pagination { gap: 1rem; }
+  .partners-page-btn { padding: 0.6rem 1.2rem; font-size: 0.85rem; }
 }
 </style>

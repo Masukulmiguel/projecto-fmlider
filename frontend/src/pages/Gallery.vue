@@ -60,7 +60,7 @@
         <div v-else class="gal-grid" ref="gridRef">
           <div
             class="gal-item"
-            v-for="(item, index) in filteredImages"
+            v-for="(item, index) in paginatedImages"
             :key="item.id"
             :class="item.size"
             @click="openLightbox(index)"
@@ -75,6 +75,19 @@
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="gal-pagination" v-if="totalGalleryPages > 1">
+          <button class="gal-page-btn" :disabled="galleryPage === 1" @click="galleryPage--">
+            <i class="bi bi-chevron-left"></i> {{ t('fleet.prev') || 'Anterior' }}
+          </button>
+          <div class="gal-page-dots">
+            <button v-for="page in totalGalleryPages" :key="page" class="gal-page-dot" :class="{ active: galleryPage === page }" @click="galleryPage = page"></button>
+          </div>
+          <button class="gal-page-btn" :disabled="galleryPage === totalGalleryPages" @click="galleryPage++">
+            {{ t('fleet.next') || 'Próximo' }} <i class="bi bi-chevron-right"></i>
+          </button>
         </div>
 
         <!-- Empty State (filtered) -->
@@ -105,7 +118,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useSiteImages } from '@/composables/useSiteImages'
 import { useI18n } from '@/composables/useI18n'
@@ -120,6 +133,8 @@ const lightboxIndex = ref(0)
 const gridRef = ref(null)
 const allImages = ref([])
 const loading = ref(true)
+const galleryPage = ref(1)
+const galleryPerPage = 6
 
 const categoryIcons = {
   'Construção': 'bi bi-building',
@@ -176,6 +191,17 @@ const fetchGallery = async () => {
 const filteredImages = computed(() => {
   if (activeFilter.value === 'all') return allImages.value
   return allImages.value.filter(img => img.category === activeFilter.value)
+})
+
+watch(activeFilter, () => {
+  galleryPage.value = 1
+})
+
+const totalGalleryPages = computed(() => Math.ceil(filteredImages.value.length / galleryPerPage))
+
+const paginatedImages = computed(() => {
+  const start = (galleryPage.value - 1) * galleryPerPage
+  return filteredImages.value.slice(start, start + galleryPerPage)
 })
 
 const openLightbox = (index) => {
@@ -509,6 +535,54 @@ onBeforeUnmount(() => {
   to { opacity: 1; transform: scale(1); }
 }
 
+/* PAGINATION */
+.gal-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+.gal-page-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.5rem;
+  border: 2px solid #e2e8f0;
+  background: #fff;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.gal-page-btn:hover:not(:disabled) {
+  border-color: var(--fml-gold, #f59e0b);
+  color: var(--fml-gold, #f59e0b);
+}
+.gal-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.gal-page-dots {
+  display: flex;
+  gap: 0.5rem;
+}
+.gal-page-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.gal-page-dot.active {
+  background: var(--fml-gold, #f59e0b);
+  transform: scale(1.3);
+}
+
 /* RESPONSIVE */
 @media (max-width: 991.98px) {
   .gal-grid { grid-template-columns: repeat(2, 1fr); }
@@ -522,5 +596,7 @@ onBeforeUnmount(() => {
   .gal-item.large { grid-column: span 1; aspect-ratio: 4/3; }
   .gal-stats-grid { grid-template-columns: repeat(2, 1fr); }
   .lb-prev, .lb-next { width: 40px; height: 40px; font-size: 1.2rem; }
+  .gal-pagination { gap: 1rem; }
+  .gal-page-btn { padding: 0.6rem 1.2rem; font-size: 0.85rem; }
 }
 </style>

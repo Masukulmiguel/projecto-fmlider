@@ -36,7 +36,7 @@
 
         <div v-else class="srv-cards">
           <router-link
-            v-for="service in services"
+            v-for="service in paginatedServices"
             :key="service.id"
             :to="`/servicos/${service.slug}`"
             class="srv-card"
@@ -60,6 +60,19 @@
               </span>
             </div>
           </router-link>
+        </div>
+
+        <!-- Pagination -->
+        <div class="srv-pagination" v-if="totalServicePages > 1">
+          <button class="srv-page-btn" :disabled="servicePage === 1" @click="servicePage--">
+            <i class="bi bi-chevron-left"></i> {{ t('fleet.prev') || 'Anterior' }}
+          </button>
+          <div class="srv-page-dots">
+            <button v-for="page in totalServicePages" :key="page" class="srv-page-dot" :class="{ active: servicePage === page }" @click="servicePage = page"></button>
+          </div>
+          <button class="srv-page-btn" :disabled="servicePage === totalServicePages" @click="servicePage++">
+            {{ t('fleet.next') || 'Próximo' }} <i class="bi bi-chevron-right"></i>
+          </button>
         </div>
       </div>
     </section>
@@ -147,6 +160,8 @@ const whyImage = ref('/assets/img/pessoal/partner1.webp')
 
 const services = ref([])
 const loading = ref(true)
+const servicePage = ref(1)
+const servicePerPage = 6
 
 const fetchServices = async () => {
   loading.value = true
@@ -165,6 +180,13 @@ const fetchServices = async () => {
 const onImageError = (e) => {
   e.target.src = '/assets/img/servico/default-service.jpg'
 }
+
+const totalServicePages = computed(() => Math.ceil(services.value.length / servicePerPage))
+
+const paginatedServices = computed(() => {
+  const start = (servicePage.value - 1) * servicePerPage
+  return services.value.slice(start, start + servicePerPage)
+})
 
 onMounted(async () => {
   await fetchAll()
@@ -422,6 +444,54 @@ const whyFeatures = computed(() => [
   padding: 4.5rem 0;
 }
 
+/* PAGINATION */
+.srv-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+.srv-page-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.5rem;
+  border: 2px solid #e2e8f0;
+  background: #fff;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.srv-page-btn:hover:not(:disabled) {
+  border-color: var(--fml-gold, #f59e0b);
+  color: var(--fml-gold, #f59e0b);
+}
+.srv-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.srv-page-dots {
+  display: flex;
+  gap: 0.5rem;
+}
+.srv-page-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.srv-page-dot.active {
+  background: var(--fml-gold, #f59e0b);
+  transform: scale(1.3);
+}
+
 /* RESPONSIVE */
 @media (max-width: 1199.98px) {
   .srv-cards { grid-template-columns: repeat(2, 1fr); }
@@ -437,5 +507,7 @@ const whyFeatures = computed(() => [
   .srv-hero-title { font-size: 2.2rem; }
   .srv-cards { grid-template-columns: 1fr; }
   .srv-card-image { height: 200px; }
+  .srv-pagination { gap: 1rem; }
+  .srv-page-btn { padding: 0.6rem 1.2rem; font-size: 0.85rem; }
 }
 </style>
