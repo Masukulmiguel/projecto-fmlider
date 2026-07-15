@@ -283,31 +283,31 @@ const fileRefs = ref({})
 const uploadingKey = ref(null)
 
 const authImages = ref([
-  { key: 'login_bg_1', label: 'Login 1', url: '/assets/img/auth/bg1.jpg' },
-  { key: 'login_bg_2', label: 'Login 2', url: '/assets/img/auth/bg2.jpg' },
-  { key: 'login_bg_3', label: 'Login 3', url: '/assets/img/auth/bg3.jpg' },
-  { key: 'reset_bg', label: 'Redefinir Senha', url: '/assets/img/auth/reset_bg.jpg' },
-  { key: 'forgot_bg', label: 'Esqueci Senha', url: '/assets/img/auth/bg3.jpg' },
+  { key: 'login_bg_1', label: 'Login 1', url: '/assets/img/auth/bg1.jpg', _section: 'auth' },
+  { key: 'login_bg_2', label: 'Login 2', url: '/assets/img/auth/bg2.jpg', _section: 'auth' },
+  { key: 'login_bg_3', label: 'Login 3', url: '/assets/img/auth/bg3.jpg', _section: 'auth' },
+  { key: 'reset_bg', label: 'Redefinir Senha', url: '/assets/img/auth/reset_bg.jpg', _section: 'auth' },
+  { key: 'forgot_bg', label: 'Esqueci Senha', url: '/assets/img/auth/bg3.jpg', _section: 'auth' },
 ])
 
 const serviceImages = ref([
-  { key: 'desembaraco-aduaneiro', label: 'Desembaraço Aduaneiro', url: '/assets/img/servico/Desembaraço Aduaneiro.jpeg' },
-  { key: 'transportes', label: 'Transportes', url: '/assets/img/servico/Transportes.jpg' },
-  { key: 'armazenagem', label: 'Armazenagem', url: '/assets/img/servico/service-storage.jpg' },
-  { key: 'door-to-door', label: 'Door To Door', url: '/assets/img/servico/service-door.jpg' },
-  { key: 'logistica-maritima', label: 'Logística Marítima', url: '/assets/img/servico/Logística Marítima-1.jpg' },
+  { key: 'desembaraco-aduaneiro', label: 'Desembaraço Aduaneiro', url: '/assets/img/servico/Desembaraço Aduaneiro.jpeg', _section: 'service_detail' },
+  { key: 'transportes', label: 'Transportes', url: '/assets/img/servico/Transportes.jpg', _section: 'service_detail' },
+  { key: 'armazenagem', label: 'Armazenagem', url: '/assets/img/servico/service-storage.jpg', _section: 'service_detail' },
+  { key: 'door-to-door', label: 'Door To Door', url: '/assets/img/servico/service-door.jpg', _section: 'service_detail' },
+  { key: 'logistica-maritima', label: 'Logística Marítima', url: '/assets/img/servico/Logística Marítima-1.jpg', _section: 'service_detail' },
 ])
 
 const contactImages = ref([
-  { key: 'hero_bg', label: 'Hero Contacto', url: '/assets/img/contact/hero_bg.jpg' },
+  { key: 'hero_bg', label: 'Hero Contacto', url: '/assets/img/contact/hero_bg.jpg', _section: 'contact' },
 ])
 
 const partnersImages = ref([
-  { key: 'hero_bg', label: 'Hero Parceiros', url: '/assets/img/construcao2020/image1.jpeg' },
+  { key: 'hero_bg', label: 'Hero Parceiros', url: '/assets/img/construcao2020/image1.jpeg', _section: 'partners' },
 ])
 
 const faqImages = ref([
-  { key: 'hero_bg', label: 'Hero FAQ', url: '/assets/img/construcao2020/image3.jpeg' },
+  { key: 'hero_bg', label: 'Hero FAQ', url: '/assets/img/construcao2020/image3.jpeg', _section: 'faq' },
 ])
 
 const loadImages = async () => {
@@ -369,7 +369,7 @@ const uploadBg = async (key, section, e) => {
     }, { onConflict: 'section,key' })
     if (upsertErr) throw upsertErr
     const allImages = [...authImages.value, ...serviceImages.value, ...contactImages.value, ...partnersImages.value, ...faqImages.value]
-    const img = allImages.find(i => i.key === key)
+    const img = allImages.find(i => i.key === key && i._section === section)
     if (img) img.url = base64
     invalidate()
     message.value = { type: 'success', text: `Imagem "${key}" atualizada com sucesso!` }
