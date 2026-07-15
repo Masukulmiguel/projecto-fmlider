@@ -1,77 +1,52 @@
 <template>
   <div class="contact-page">
     <!-- Hero -->
-    <section class="contact-hero">
+    <section class="contact-hero" :style="heroBg ? { backgroundImage: `url(${heroBg})` } : {}">
       <div class="container">
         <span class="hero-eyebrow">{{ t('contact.page_title') }}</span>
         <h1 class="hero-title">{{ t('contact.page_title') }}</h1>
-        <p class="hero-subtitle">{{ t('contact.hero_subtitle') || 'Estamos prontos para ajudar. Entre em contacto connosco.' }}</p>
+        <p class="hero-subtitle">{{ t('contact.hero_subtitle') }}</p>
       </div>
     </section>
 
-    <!-- Contact Cards + Map -->
-    <section class="contact-section">
+    <!-- Info Cards Row -->
+    <section class="info-section">
       <div class="container">
-        <div class="row g-4">
-          <!-- Info Cards -->
-          <div class="col-lg-4">
-            <div class="info-cards">
-              <div class="info-card">
-                <div class="info-icon">
-                  <i class="bi bi-telephone-fill"></i>
-                </div>
-                <div class="info-content">
-                  <h6>{{ t('contact.info_phone') }}</h6>
-                  <a href="tel:+244935141747">+244 935 141 747</a>
-                </div>
-              </div>
-              <div class="info-card">
-                <div class="info-icon icon-email">
-                  <i class="bi bi-envelope-fill"></i>
-                </div>
-                <div class="info-content">
-                  <h6>{{ t('contact.info_email') }}</h6>
-                  <a href="mailto:geral@fmlider.co.ao">geral@fmlider.co.ao</a>
-                </div>
-              </div>
-              <div class="info-card">
-                <div class="info-icon icon-location">
-                  <i class="bi bi-geo-alt-fill"></i>
-                </div>
-                <div class="info-content">
-                  <h6>{{ t('contact.info_address') }}</h6>
-                  <p>{{ t('contact.info_address_text') }}</p>
-                </div>
-              </div>
-              <div class="info-card">
-                <div class="info-icon icon-clock">
-                  <i class="bi bi-clock-fill"></i>
-                </div>
-                <div class="info-content">
-                  <h6>{{ t('contact.hours_title') || 'Horário' }}</h6>
-                  <p>{{ t('contact.hours_text') || 'Seg - Sex: 08:00 - 17:00' }}</p>
-                </div>
-              </div>
+        <div class="info-grid">
+          <div class="info-card">
+            <div class="info-icon">
+              <i class="bi bi-telephone-fill"></i>
+            </div>
+            <div class="info-content">
+              <h6>{{ t('contact.info_phone') }}</h6>
+              <a href="tel:+244935141747">+244 935 141 747</a>
             </div>
           </div>
-
-          <!-- Map -->
-          <div class="col-lg-8">
-            <div class="map-card">
-              <iframe
-                src="https://maps.google.com/maps?q=FMLider+Base+Cacuaco+Luanda+Angola&hl=pt&z=15&output=embed"
-                width="100%"
-                height="420"
-                style="border:0; border-radius: 16px;"
-                allowfullscreen=""
-                loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade"
-                :title="t('contact.map_title')"
-              ></iframe>
-              <a href="https://www.google.com/maps/place/FMLider+-+Base/@-8.7693538,13.3973228,359m/data=!3m1!1e3!4m6!3m5!1s0x1a51e5684ed42f1b:0x5630ab6f53efd403!8m2!3d-8.769266!4d13.3984122"
-                 target="_blank" rel="noopener" class="map-link">
-                <i class="bi bi-box-arrow-up-right"></i> {{ t('contact.map_cta') }}
-              </a>
+          <div class="info-card">
+            <div class="info-icon icon-email">
+              <i class="bi bi-envelope-fill"></i>
+            </div>
+            <div class="info-content">
+              <h6>{{ t('contact.info_email') }}</h6>
+              <a href="mailto:geral@fmlider.co.ao">geral@fmlider.co.ao</a>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-icon icon-location">
+              <i class="bi bi-geo-alt-fill"></i>
+            </div>
+            <div class="info-content">
+              <h6>{{ t('contact.info_address') }}</h6>
+              <p>{{ t('contact.info_address_text') }}</p>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-icon icon-clock">
+              <i class="bi bi-clock-fill"></i>
+            </div>
+            <div class="info-content">
+              <h6>{{ t('contact.hours_title') }}</h6>
+              <p>{{ t('contact.hours_text') }}</p>
             </div>
           </div>
         </div>
@@ -85,8 +60,8 @@
           <div class="col-lg-8">
             <div class="form-card">
               <div class="form-header">
-                <h3>{{ t('contact.form_title') || 'Envie-nos uma mensagem' }}</h3>
-                <p>{{ t('contact.form_subtitle') || 'Preencha o formulário e entraremos em contacto brevemente.' }}</p>
+                <h3>{{ t('contact.form_title') }}</h3>
+                <p>{{ t('contact.form_subtitle') }}</p>
               </div>
               <form @submit.prevent="submitForm" class="contact-form">
                 <div class="row g-3">
@@ -130,7 +105,7 @@
                     <button type="submit" class="btn btn-gold btn-lg w-100 submit-btn" :disabled="submitting">
                       <span v-if="submitting" class="spinner-border spinner-border-sm me-2"></span>
                       <i v-else class="bi bi-send me-2"></i>
-                      {{ submitting ? (t('contact.form_sending') || 'A enviar...') : t('contact.form_submit') }}
+                      {{ submitting ? t('contact.form_sending') : t('contact.form_submit') }}
                     </button>
                   </div>
                 </div>
@@ -140,16 +115,47 @@
         </div>
       </div>
     </section>
+
+    <!-- Map -->
+    <section class="map-section">
+      <div class="container">
+        <div class="map-card">
+          <iframe
+            src="https://maps.google.com/maps?q=FMLider+Base+Cacuaco+Luanda+Angola&hl=pt&z=15&output=embed"
+            width="100%"
+            height="420"
+            style="border:0; border-radius: 16px;"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            :title="t('contact.map_title')"
+          ></iframe>
+          <a href="https://www.google.com/maps/place/FMLider+-+Base/@-8.7693538,13.3973228,359m/data=!3m1!1e3!4m6!3m5!1s0x1a51e5684ed42f1b:0x5630ab6f53efd403!8m2!3d-8.769266!4d13.3984122"
+             target="_blank" rel="noopener" class="map-link">
+            <i class="bi bi-box-arrow-up-right"></i> {{ t('contact.map_cta') }}
+          </a>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from '@/composables/useI18n'
 import { useToast } from '@/composables/useToast'
+import { useSiteImages } from '@/composables/useSiteImages'
+import { supabase } from '@/lib/supabase'
 
 const { t } = useI18n()
 const toast = useToast()
+const { getImage, fetchAll } = useSiteImages()
+
+const heroBg = computed(() => getImage('contact', 'hero_bg', ''))
+
+onMounted(() => {
+  fetchAll()
+})
 
 const form = ref({ name: '', company: '', phone: '', email: '', subject: '', message: '' })
 const submitting = ref(false)
@@ -157,19 +163,20 @@ const submitting = ref(false)
 const submitForm = async () => {
   submitting.value = true
   try {
-    const apiBase = import.meta.env.VITE_API_URL || ''
-    const response = await fetch(`${apiBase}/api/contacts`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form.value)
+    const { error } = await supabase.from('contacts').insert({
+      name: form.value.name,
+      company: form.value.company || null,
+      phone: form.value.phone || null,
+      email: form.value.email,
+      subject: form.value.subject,
+      message: form.value.message,
+      is_read: false
     })
-    if (response.ok) {
-      toast.success(t('contact.form_success'))
-      form.value = { name: '', company: '', phone: '', email: '', subject: '', message: '' }
-    } else {
-      toast.error(t('contact.form_error'))
-    }
+    if (error) throw error
+    toast.success(t('contact.form_success'))
+    form.value = { name: '', company: '', phone: '', email: '', subject: '', message: '' }
   } catch (error) {
+    console.error('Contact form error:', error)
     toast.error(t('contact.form_error'))
   } finally {
     submitting.value = false
@@ -210,14 +217,14 @@ const submitForm = async () => {
   margin: 0 auto;
 }
 
-/* Contact Section */
-.contact-section {
-  padding: 4rem 0;
+/* Info Cards */
+.info-section {
+  padding: 3rem 0;
 }
 
-.info-cards {
-  display: flex;
-  flex-direction: column;
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
 }
 
@@ -272,35 +279,9 @@ const submitForm = async () => {
   color: var(--fml-blue-2, #2563eb);
 }
 
-/* Map */
-.map-card {
-  background: #fff;
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-}
-.map-card iframe {
-  display: block;
-}
-.map-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 1rem;
-  background: var(--fml-blue-2, #2563eb);
-  color: #fff;
-  font-weight: 600;
-  font-size: 0.95rem;
-  text-decoration: none;
-  transition: background 0.2s;
-}
-.map-link:hover { background: var(--fml-blue, #1e3a8a); color: #fff; }
-
 /* Form Section */
 .form-section {
-  padding: 0 0 5rem;
+  padding: 0 0 4rem;
 }
 
 .form-card {
@@ -355,13 +336,49 @@ const submitForm = async () => {
   transition: all 0.25s;
 }
 
+/* Map Section */
+.map-section {
+  padding: 0 0 5rem;
+}
+
+.map-card {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+.map-card iframe {
+  display: block;
+}
+.map-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--fml-blue-2, #2563eb);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.map-link:hover { background: var(--fml-blue, #1e3a8a); color: #fff; }
+
 /* Responsive */
+@media (max-width: 992px) {
+  .info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .contact-hero { padding: 6rem 0 2.5rem; }
   .hero-title { font-size: 1.8rem; }
   .hero-subtitle { font-size: 0.95rem; }
-  .contact-section { padding: 2rem 0; }
-  .info-cards { gap: 0.75rem; }
+  .info-section { padding: 2rem 0; }
+  .info-grid { gap: 0.75rem; }
   .info-card { padding: 1rem; }
   .info-icon { width: 42px; height: 42px; font-size: 1rem; }
   .map-card iframe { height: 280px; }
@@ -369,11 +386,15 @@ const submitForm = async () => {
   .form-header { padding: 1.5rem 1.25rem 0; }
   .contact-form { padding: 1.25rem; }
   .form-section { padding: 0 0 3rem; }
+  .map-section { padding: 0 0 3rem; }
 }
 
 @media (max-width: 576px) {
   .contact-hero { padding: 5rem 0 2rem; }
   .hero-title { font-size: 1.5rem; }
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
   .info-card { gap: 0.75rem; }
 }
 </style>
