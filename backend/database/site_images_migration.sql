@@ -20,6 +20,7 @@ CREATE INDEX IF NOT EXISTS idx_site_images_section ON site_images(section);
 CREATE INDEX IF NOT EXISTS idx_site_images_section_key ON site_images(section, key);
 
 -- Trigger for updated_at
+DROP TRIGGER IF EXISTS update_site_images_updated_at ON site_images;
 CREATE TRIGGER update_site_images_updated_at BEFORE UPDATE ON site_images FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ============================================================

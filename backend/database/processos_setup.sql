@@ -42,6 +42,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS processos_updated_at ON processos;
 CREATE TRIGGER processos_updated_at
   BEFORE UPDATE ON processos
   FOR EACH ROW
