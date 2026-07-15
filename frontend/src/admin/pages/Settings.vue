@@ -175,17 +175,17 @@
       <div class="card-body">
         <p class="text-muted small mb-3">Imagem de fundo do hero da página de contacto.</p>
         <div class="row g-3">
-          <div v-for="item in contactImages" :key="item.key" class="col-6 col-md-4 col-lg-3">
+          <div v-for="item in contactImages" :key="'contact_' + item.key" class="col-6 col-md-4 col-lg-3">
             <div class="auth-bg-card">
               <div class="auth-bg-preview" :style="{ backgroundImage: `url(${item.url})` }">
                 <div class="auth-bg-label">{{ item.label }}</div>
               </div>
               <div class="auth-bg-actions">
-                <input :ref="el => { if (el) fileRefs[item.key] = el }" type="file" accept="image/*" class="d-none" @change="e => uploadBg(item.key, 'contact', e)">
-                <button class="btn btn-sm btn-outline-primary w-100" @click="fileRefs[item.key]?.click()" :disabled="uploadingKey === item.key">
-                  <span v-if="uploadingKey === item.key" class="spinner-border spinner-border-sm me-1"></span>
+                <input :ref="el => { if (el) fileRefs['contact_' + item.key] = el }" type="file" accept="image/*" class="d-none" @change="e => uploadBg(item.key, 'contact', e)">
+                <button class="btn btn-sm btn-outline-primary w-100" @click="fileRefs['contact_' + item.key]?.click()" :disabled="uploadingKey === 'contact_' + item.key">
+                  <span v-if="uploadingKey === 'contact_' + item.key" class="spinner-border spinner-border-sm me-1"></span>
                   <i v-else class="bi bi-camera-fill me-1"></i>
-                  {{ uploadingKey === item.key ? 'A enviar...' : 'Trocar Imagem' }}
+                  {{ uploadingKey === 'contact_' + item.key ? 'A enviar...' : 'Trocar Imagem' }}
                 </button>
               </div>
             </div>
@@ -202,17 +202,17 @@
       <div class="card-body">
         <p class="text-muted small mb-3">Imagem de fundo do hero da página de parceiros.</p>
         <div class="row g-3">
-          <div v-for="item in partnersImages" :key="item.key" class="col-6 col-md-4 col-lg-3">
+          <div v-for="item in partnersImages" :key="'partners_' + item.key" class="col-6 col-md-4 col-lg-3">
             <div class="auth-bg-card">
               <div class="auth-bg-preview" :style="{ backgroundImage: `url(${item.url})` }">
                 <div class="auth-bg-label">{{ item.label }}</div>
               </div>
               <div class="auth-bg-actions">
-                <input :ref="el => { if (el) fileRefs[item.key] = el }" type="file" accept="image/*" class="d-none" @change="e => uploadBg(item.key, 'partners', e)">
-                <button class="btn btn-sm btn-outline-primary w-100" @click="fileRefs[item.key]?.click()" :disabled="uploadingKey === item.key">
-                  <span v-if="uploadingKey === item.key" class="spinner-border spinner-border-sm me-1"></span>
+                <input :ref="el => { if (el) fileRefs['partners_' + item.key] = el }" type="file" accept="image/*" class="d-none" @change="e => uploadBg(item.key, 'partners', e)">
+                <button class="btn btn-sm btn-outline-primary w-100" @click="fileRefs['partners_' + item.key]?.click()" :disabled="uploadingKey === 'partners_' + item.key">
+                  <span v-if="uploadingKey === 'partners_' + item.key" class="spinner-border spinner-border-sm me-1"></span>
                   <i v-else class="bi bi-camera-fill me-1"></i>
-                  {{ uploadingKey === item.key ? 'A enviar...' : 'Trocar Imagem' }}
+                  {{ uploadingKey === 'partners_' + item.key ? 'A enviar...' : 'Trocar Imagem' }}
                 </button>
               </div>
             </div>
@@ -229,17 +229,17 @@
       <div class="card-body">
         <p class="text-muted small mb-3">Imagem de fundo do hero da página de perguntas frequentes.</p>
         <div class="row g-3">
-          <div v-for="item in faqImages" :key="item.key" class="col-6 col-md-4 col-lg-3">
+          <div v-for="item in faqImages" :key="'faq_' + item.key" class="col-6 col-md-4 col-lg-3">
             <div class="auth-bg-card">
               <div class="auth-bg-preview" :style="{ backgroundImage: `url(${item.url})` }">
                 <div class="auth-bg-label">{{ item.label }}</div>
               </div>
               <div class="auth-bg-actions">
-                <input :ref="el => { if (el) fileRefs[item.key] = el }" type="file" accept="image/*" class="d-none" @change="e => uploadBg(item.key, 'faq', e)">
-                <button class="btn btn-sm btn-outline-primary w-100" @click="fileRefs[item.key]?.click()" :disabled="uploadingKey === item.key">
-                  <span v-if="uploadingKey === item.key" class="spinner-border spinner-border-sm me-1"></span>
+                <input :ref="el => { if (el) fileRefs['faq_' + item.key] = el }" type="file" accept="image/*" class="d-none" @change="e => uploadBg(item.key, 'faq', e)">
+                <button class="btn btn-sm btn-outline-primary w-100" @click="fileRefs['faq_' + item.key]?.click()" :disabled="uploadingKey === 'faq_' + item.key">
+                  <span v-if="uploadingKey === 'faq_' + item.key" class="spinner-border spinner-border-sm me-1"></span>
                   <i v-else class="bi bi-camera-fill me-1"></i>
-                  {{ uploadingKey === item.key ? 'A enviar...' : 'Trocar Imagem' }}
+                  {{ uploadingKey === 'faq_' + item.key ? 'A enviar...' : 'Trocar Imagem' }}
                 </button>
               </div>
             </div>
@@ -357,7 +357,8 @@ const uploadBg = async (key, section, e) => {
     message.value = { type: 'danger', text: 'Imagem muito grande. Máximo 2MB.' }
     return
   }
-  uploadingKey.value = key
+  const uploadId = `${section}_${key}`
+  uploadingKey.value = uploadId
   try {
     const base64 = await fileToBase64(file)
     const { error: upsertErr } = await supabase.from('site_images').upsert({
@@ -372,7 +373,7 @@ const uploadBg = async (key, section, e) => {
     const img = allImages.find(i => i.key === key && i._section === section)
     if (img) img.url = base64
     invalidate()
-    message.value = { type: 'success', text: `Imagem "${key}" atualizada com sucesso!` }
+    message.value = { type: 'success', text: `Imagem "${key}" (${section}) atualizada com sucesso!` }
   } catch (err) {
     console.error('uploadBg error:', err)
     message.value = { type: 'danger', text: err.message || 'Erro ao enviar imagem.' }
