@@ -869,12 +869,14 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   padding: 1rem;
+  overflow-y: auto;
 }
 
 .modal-dialog-centered-custom {
   width: 100%;
   max-width: 640px;
   max-height: 90vh;
+  margin: auto;
 }
 
 .modal-box {
@@ -896,21 +898,26 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.25rem 1.5rem;
+  padding: 1rem 1.25rem;
   border-bottom: 1px solid #e2e8f0;
   flex-shrink: 0;
+  gap: 0.75rem;
 }
 
 .modal-box-header h5 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: #0f172a;
+  min-width: 0;
+  word-break: break-word;
+  flex: 1;
 }
 
 .btn-close-modal {
   width: 32px;
   height: 32px;
+  min-width: 32px;
   border: none;
   border-radius: 8px;
   background: #f1f5f9;
@@ -920,6 +927,7 @@ onMounted(() => {
   justify-content: center;
   cursor: pointer;
   transition: all 0.15s;
+  flex-shrink: 0;
 }
 
 .btn-close-modal:hover {
@@ -928,7 +936,7 @@ onMounted(() => {
 }
 
 .modal-box-body {
-  padding: 1.5rem;
+  padding: 1.25rem;
   overflow-y: auto;
   flex: 1;
   min-height: 0;
@@ -938,9 +946,10 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
-  padding: 1rem 1.5rem;
+  padding: 0.75rem 1.25rem;
   border-top: 1px solid #e2e8f0;
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 .delete-modal-body {
@@ -1154,9 +1163,39 @@ onMounted(() => {
     grid-template-columns: 1fr;
   }
 
+  .modal-backdrop-custom {
+    padding: 0.5rem;
+  }
+
   .modal-dialog-centered-custom {
     max-width: 100%;
-    margin: 0.5rem;
+    margin: 0;
+  }
+
+  .modal-box {
+    border-radius: 12px;
+  }
+
+  .modal-box-header {
+    padding: 0.85rem 1rem;
+  }
+
+  .modal-box-header h5 {
+    font-size: 0.95rem;
+  }
+
+  .modal-box-body {
+    padding: 1rem;
+  }
+
+  .modal-box-footer {
+    padding: 0.75rem 1rem;
+    gap: 0.4rem;
+  }
+
+  .modal-box-footer .btn {
+    flex: 1;
+    min-width: 0;
   }
 }
 </style>
