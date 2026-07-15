@@ -1,7 +1,8 @@
 <template>
   <div class="partners-page">
     <section class="page-hero">
-      <div class="container">
+      <div class="page-hero-bg" :style="{ backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(${heroBg})` }"></div>
+      <div class="container position-relative">
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb justify-content-center">
             <li class="breadcrumb-item"><router-link to="/" class="text-white-50">{{ t('partners.breadcrumb_home') }}</router-link></li>
@@ -142,6 +143,7 @@ import { useI18n } from '@/composables/useI18n'
 
 const { t } = useI18n()
 const { getImage, fetchAll } = useSiteImages()
+const heroBg = ref('/assets/img/construcao2020/image1.jpeg')
 const partners = ref([])
 const loading = ref(true)
 const partnerPage = ref(1)
@@ -170,6 +172,7 @@ const paginatedPartners = computed(() => {
 
 onMounted(async () => {
   await fetchAll()
+  heroBg.value = getImage('partners', 'hero_bg', '/assets/img/construcao2020/image1.jpeg')
   try {
     const { data, error } = await supabase
       .from('partners')
@@ -186,9 +189,17 @@ onMounted(async () => {
 
 <style scoped>
 .page-hero {
-  background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+  position: relative;
   padding: 6rem 0 3rem;
   text-align: center;
+  overflow: hidden;
+}
+
+.page-hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
 }
 
 .about-image-area {
