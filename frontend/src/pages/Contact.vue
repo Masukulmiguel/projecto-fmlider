@@ -1,8 +1,9 @@
 <template>
   <div class="contact-page">
     <!-- Hero -->
-    <section class="contact-hero" :style="heroBg ? { backgroundImage: `url(${heroBg})` } : {}">
-      <div class="container">
+    <section class="contact-hero">
+      <div class="contact-hero-bg" :style="heroBg ? { backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.78) 50%, rgba(15,23,42,0.88) 100%), url(${heroBg})` } : {}"></div>
+      <div class="container position-relative">
         <span class="hero-eyebrow">{{ t('contact.page_title') }}</span>
         <h1 class="hero-title">{{ t('contact.page_title') }}</h1>
         <p class="hero-subtitle">{{ t('contact.hero_subtitle') }}</p>
@@ -191,9 +192,18 @@ const submitForm = async () => {
 
 /* Hero */
 .contact-hero {
-  background: linear-gradient(135deg, var(--fml-navy, #0f172a) 0%, var(--fml-blue, #1e3a8a) 100%);
+  position: relative;
+  background: var(--fml-navy, #0f172a);
   padding: 8rem 0 4rem;
   text-align: center;
+  overflow: hidden;
+}
+.contact-hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 .hero-eyebrow {
   display: inline-block;
