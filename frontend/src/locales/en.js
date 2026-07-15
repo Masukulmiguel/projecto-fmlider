@@ -488,6 +488,8 @@ export default {
     gallery_img_2: 'Container Handling',
     gallery_img_3: 'Loading Operation, 20" and 40" Containers',
     gallery_img_4: 'Reachstacker in Action, Port of Luanda',
+    prev: 'Previous',
+    next: 'Next',
   },
   faq: {
     hero_title: 'Frequently Asked Questions',

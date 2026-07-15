@@ -51,7 +51,7 @@
 
         <!-- Fleet Grid -->
         <div class="fleet-grid">
-          <div class="fleet-card" v-for="item in filteredItems" :key="item.id">
+          <div class="fleet-card" v-for="item in paginatedItems" :key="item.id">
             <div class="fleet-card-image">
               <img :src="item.image" :alt="item.title">
               <span class="fleet-card-badge">{{ item.categoryLabel }}</span>
@@ -67,6 +67,19 @@
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="fleet-pagination" v-if="totalPages > 1">
+          <button class="fleet-page-btn" :disabled="currentPage === 1" @click="currentPage--">
+            <i class="bi bi-chevron-left"></i> {{ t('fleet.prev') || 'Anterior' }}
+          </button>
+          <div class="fleet-page-dots">
+            <button v-for="page in totalPages" :key="page" class="fleet-page-dot" :class="{ active: currentPage === page }" @click="currentPage = page"></button>
+          </div>
+          <button class="fleet-page-btn" :disabled="currentPage === totalPages" @click="currentPage++">
+            {{ t('fleet.next') || 'Próximo' }} <i class="bi bi-chevron-right"></i>
+          </button>
         </div>
       </div>
     </section>
@@ -148,7 +161,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useSiteImages } from '@/composables/useSiteImages'
 import { useI18n } from '@/composables/useI18n'
@@ -162,6 +175,8 @@ const selectedCategory = ref('all')
 const lightboxOpen = ref(false)
 const lightboxIndex = ref(0)
 const dbItems = ref([])
+const currentPage = ref(1)
+const itemsPerPage = 6
 
 const categories = computed(() => [
   { key: 'all', label: t('fleet.category_all'), icon: 'bi bi-grid' },
@@ -269,6 +284,17 @@ const hardcodedFleetItems = [
 const filteredItems = computed(() => {
   if (selectedCategory.value === 'all') return fleetItems.value
   return fleetItems.value.filter(item => item.category === selectedCategory.value)
+})
+
+watch(selectedCategory, () => {
+  currentPage.value = 1
+})
+
+const totalPages = computed(() => Math.ceil(filteredItems.value.length / itemsPerPage))
+
+const paginatedItems = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  return filteredItems.value.slice(start, start + itemsPerPage)
 })
 
 const fleetStats = computed(() => [
@@ -486,6 +512,54 @@ onMounted(async () => {
   padding-top: 1rem;
   border-top: 1px solid #f1f5f9;
 }
+
+/* PAGINATION */
+.fleet-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+.fleet-page-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.5rem;
+  border: 2px solid #e2e8f0;
+  background: #fff;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.fleet-page-btn:hover:not(:disabled) {
+  border-color: var(--fml-gold, #f59e0b);
+  color: var(--fml-gold, #f59e0b);
+}
+.fleet-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.fleet-page-dots {
+  display: flex;
+  gap: 0.5rem;
+}
+.fleet-page-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.fleet-page-dot.active {
+  background: var(--fml-gold, #f59e0b);
+  transform: scale(1.3);
+}
 .spec {
   text-align: center;
 }
@@ -664,5 +738,7 @@ onMounted(async () => {
   .fleet-grid { grid-template-columns: 1fr; }
   .fleet-stats-grid { grid-template-columns: repeat(2, 1fr); }
   .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+  .fleet-pagination { gap: 1rem; }
+  .fleet-page-btn { padding: 0.6rem 1.2rem; font-size: 0.85rem; }
 }
 </style>
