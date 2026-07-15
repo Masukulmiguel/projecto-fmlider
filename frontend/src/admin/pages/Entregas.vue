@@ -653,8 +653,17 @@ const fetchCamioes = async () => {
 }
 
 const fetchClients = async () => {
-  const { data } = await supabase.from('users').select('id, name, email').eq('role', 'cliente')
-  clients.value = data || []
+  const [{ data: users }, { data: companies }] = await Promise.all([
+    supabase.from('users').select('id, name, email').eq('role', 'cliente'),
+    supabase.from('companies').select('user_id, company_name')
+  ])
+  const compMap = {}
+  ;(companies || []).forEach(c => { if (c.company_name) compMap[c.user_id] = c.company_name })
+  clients.value = (users || []).map(u => ({
+    id: u.id,
+    name: compMap[u.id] || u.name,
+    email: u.email
+  }))
 }
 
 const debounceSearch = () => {
