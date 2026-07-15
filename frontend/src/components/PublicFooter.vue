@@ -65,7 +65,7 @@
     <div class="footer-bottom">
       <div class="container">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-          <p class="mb-0">© {{ year }} {{ settings.company_name || 'FMLider' }} — {{ t('footer.copyright') }}</p>
+          <p class="mb-0">© {{ year }} {{ settings.company_name || 'FMLider' }}, {{ t('footer.copyright') }}</p>
           <ul class="legal-links">
             <li><router-link to="/termos">{{ t('footer.terms') }}</router-link></li>
             <li><router-link to="/politicas">{{ t('footer.privacy') }}</router-link></li>

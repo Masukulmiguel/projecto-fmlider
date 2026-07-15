@@ -238,7 +238,7 @@
                 <label class="form-label">Camião</label>
                 <select v-model="editForm.camiao_id" class="form-select" @change="onCamiaoChange">
                   <option value="">Selecione o camião</option>
-                  <option v-for="c in camioes" :key="c.id" :value="c.id">{{ c.codigo_interno }} — {{ c.matricula }}</option>
+                  <option v-for="c in camioes" :key="c.id" :value="c.id">{{ c.codigo_interno }}, {{ c.matricula }}</option>
                 </select>
               </div>
               <div class="col-md-4">
@@ -1039,7 +1039,7 @@ const submitImport = async () => {
           if (matchType !== 'exact') warnings.push(`Cliente "${clienteNome}" identificado como "${entry.name}" (${matchType})`)
         }
       } else {
-        errors.push('Cliente em branco — obrigatório')
+        errors.push('Cliente em branco, obrigatório')
       }
 
       let motoristaEntry = null

@@ -257,7 +257,7 @@
             <div v-if="funcFailedRecords.length > 0" class="alert-rejected mb-3">
               <div class="alert-rejected-header">
                 <i class="bi bi-shield-exclamation"></i>
-                <span>Registos Rejeitados — Corrija o ficheiro Excel e volte a importar</span>
+                <span>Registos Rejeitados, Corrija o ficheiro Excel e volte a importar</span>
               </div>
               <div class="alert-rejected-list">
                 <div v-for="r in funcFailedRecords" :key="r.idx" class="rejected-item">
@@ -321,8 +321,8 @@
             <div v-else>
               <p class="text-muted mb-3">Selecione um ficheiro Excel (.xlsx, .xls ou .csv). O sistema importa os dados com as seguintes regras:</p>
               <ul class="text-muted small mb-3">
-                <li><strong>Sheet Licenciamentos</strong> — valida o <strong>Cliente</strong> (deve existir como utilizador no sistema)</li>
-                <li><strong>Sheet Observações</strong> — valida o <strong>Funcionário</strong> (deve existir como utilizador no sistema)</li>
+                <li><strong>Sheet Licenciamentos</strong>, valida o <strong>Cliente</strong> (deve existir como utilizador no sistema)</li>
+                <li><strong>Sheet Observações</strong>, valida o <strong>Funcionário</strong> (deve existir como utilizador no sistema)</li>
                 <li>Os dados são importados automaticamente ao clicar em "Validar e Importar"</li>
               </ul>
               <div class="upload-area" @dragover.prevent @drop.prevent="handleDrop">
@@ -1081,9 +1081,9 @@ const processImport = async () => {
       const { entry: cliEntry, matchType: cliMatch } = findClientFunc(clienteNome, nifExcel, cliMap, cliNifMap)
 
       if (!clienteNome) {
-        errors.push('Nome do cliente em branco — obrigatório')
+        errors.push('Nome do cliente em branco, obrigatório')
       } else if (!cliEntry) {
-        warnings.push(`Cliente "${clienteNome}" não encontrado no sistema — será importado sem vinculação`)
+        warnings.push(`Cliente "${clienteNome}" não encontrado no sistema, será importado sem vinculação`)
       } else if (cliMatch !== 'exact') {
         warnings.push(`Cliente "${clienteNome}" identificado como "${cliEntry.name}" (${cliMatch})`)
       }
@@ -1113,7 +1113,7 @@ const processImport = async () => {
         if (!updateMode.value && numProc && existingProcMap[numProc]) {
           action = 'skip'
           skipCount++
-          warnings.push(`Registo já existe (Nº Processo: ${numProc}) — ignorado`)
+          warnings.push(`Registo já existe (Nº Processo: ${numProc}), ignorado`)
         }
       }
 
@@ -1266,7 +1266,7 @@ const processImport = async () => {
         showToast(`${obsImported} observação(ões) importada(s)!`)
       }
       if (obsSkipped > 0) {
-        showToast(`${obsSkipped} observação(ões) ignorada(s) — utilizador não encontrado ou processo não existe`, 'error')
+        showToast(`${obsSkipped} observação(ões) ignorada(s), utilizador não encontrado ou processo não existe`, 'error')
       }
     }
 

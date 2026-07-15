@@ -129,8 +129,8 @@
               <div class="mb-3" v-if="!editing && embarques.length">
                 <label class="form-label">{{ t('cliente.documentos_form_shipment') }}</label>
                 <select v-model="form.embarque_id" class="form-select">
-                  <option value="">— {{ t('cliente.documentos_form_no_shipment') }} —</option>
-                  <option v-for="e in embarques" :key="e.id" :value="e.id">{{ e.tracking_number }} — {{ e.origin }} → {{ e.destination }}</option>
+                  <option value="">{{ t('cliente.documentos_form_no_shipment') }}</option>
+                  <option v-for="e in embarques" :key="e.id" :value="e.id">{{ e.tracking_number }}, {{ e.origin }} → {{ e.destination }}</option>
                 </select>
               </div>
               <div class="mb-3">

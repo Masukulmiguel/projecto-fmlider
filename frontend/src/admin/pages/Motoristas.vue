@@ -162,7 +162,7 @@
               <label class="form-label">Validade BI</label>
               <input v-model="form.validade_bi" type="date" class="form-control" :class="{'is-invalid': form.validade_bi && isExpired(form.validade_bi)}">
               <div v-if="form.validade_bi && isExpired(form.validade_bi)" class="invalid-feedback">
-                <i class="bi bi-exclamation-triangle-fill me-1"></i>BI Expirado — Documento vencido!
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>BI Expirado, Documento vencido!
               </div>
               <div v-else-if="form.validade_bi && isExpiringSoon(form.validade_bi)" class="text-warning small mt-1">
                 <i class="bi bi-clock-fill me-1"></i>BI a expirar em breve
@@ -178,7 +178,7 @@
               <label class="form-label">Validade Carta</label>
               <input v-model="form.validade_carta" type="date" class="form-control" :class="{'is-invalid': form.validade_carta && isExpired(form.validade_carta)}">
               <div v-if="form.validade_carta && isExpired(form.validade_carta)" class="invalid-feedback">
-                <i class="bi bi-exclamation-triangle-fill me-1"></i>Carta Expirada — Documento vencido!
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>Carta Expirada, Documento vencido!
               </div>
               <div v-else-if="form.validade_carta && isExpiringSoon(form.validade_carta)" class="text-warning small mt-1">
                 <i class="bi bi-clock-fill me-1"></i>Carta a expirar em breve
