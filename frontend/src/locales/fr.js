@@ -798,6 +798,7 @@ export default {
     last_90_days: '90 derniers jours',
     users_title: 'Utilisateurs',
     users_description: 'Gestion des comptes clients',
+    users_new: 'Nouvel Utilisateur',
     users_all: 'Tous',
     users_pending: 'En attente',
     users_approved: 'Approuvés',

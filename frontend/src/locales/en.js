@@ -808,6 +808,7 @@ export default {
     last_90_days: 'Last 90 days',
     users_title: 'Users',
     users_description: 'Client account management',
+    users_new: 'New User',
     users_all: 'All',
     users_pending: 'Pending',
     users_approved: 'Approved',
