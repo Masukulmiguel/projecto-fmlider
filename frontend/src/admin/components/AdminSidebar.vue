@@ -92,7 +92,7 @@
               <span class="menu-text" v-show="!collapsed">Frota</span>
             </router-link>
             <router-link to="/admin/parceiros" class="menu-item" :class="{ active: $route.path === '/admin/parceiros' }" :title="collapsed ? t('admin_sidebar.partners') : ''">
-              <i class="bi bi-handshake-fill menu-icon"></i>
+              <i class="bi bi-building menu-icon"></i>
               <span class="menu-text" v-show="!collapsed">{{ t('admin_sidebar.partners') }}</span>
             </router-link>
             <router-link to="/admin/banners" class="menu-item" :class="{ active: $route.path === '/admin/banners' }" :title="collapsed ? t('admin_sidebar.banners') : ''">
