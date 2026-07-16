@@ -272,6 +272,19 @@ export const useAuthStore = defineStore('auth', () => {
 
   const changePassword = async (payload) => {
     try {
+      let { data: { session: currentSession } } = await supabase.auth.getSession()
+      if (!currentSession) {
+        const refreshToken = sessionStorage.getItem('supabase_refresh_token')
+        if (refreshToken) {
+          const { data: refreshed, error: refreshErr } = await supabase.auth.setSession({ refresh_token: refreshToken })
+          if (refreshErr) return { success: false, error: refreshErr.message }
+          currentSession = refreshed?.session
+        }
+      }
+      if (!currentSession) {
+        return { success: false, error: 'Sessão expirada. Faça login novamente.' }
+      }
+
       const { error } = await supabase.auth.updateUser({ password: payload.new_password })
       if (error) return { success: false, error: error.message }
       if (user.value) {
