@@ -914,6 +914,8 @@ export default {
     profile_username: "Nom d'utilisateur",
     profile_email: 'Email',
     profile_password: 'Mot de passe',
+    profile_current_password: 'Mot de passe actuel',
+    profile_new_password: 'Nouveau mot de passe',
     profile_save: 'Enregistrer',
     visitors_location: 'Localisation',
     error_loading_details: 'Erreur lors du chargement des détails',

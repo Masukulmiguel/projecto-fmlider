@@ -87,11 +87,11 @@
               <div v-if="passwordSuccess" class="alert alert-success">{{ passwordSuccess }}</div>
               <div class="row g-3">
                 <div class="col-md-4">
-                  <label class="form-label">{{ t('admin.profile_password') }}</label>
+                  <label class="form-label">{{ t('admin.profile_current_password') }}</label>
                    <input v-model="pwd.current" type="password" class="form-control" required>
                  </div>
                  <div class="col-md-4">
-                   <label class="form-label">{{ t('admin.profile_password') }}</label>
+                   <label class="form-label">{{ t('admin.profile_new_password') }}</label>
                    <input v-model="pwd.new" type="password" class="form-control" minlength="6" required>
                  </div>
                  <div class="col-md-4">
@@ -100,7 +100,7 @@
                 </div>
               </div>
               <div class="mt-3 d-flex justify-content-end">
-                <button class="btn btn-outline-primary" :disabled="changingPwd">{{ t('admin.profile_password') }}</button>
+                <button class="btn btn-outline-primary" :disabled="changingPwd">{{ t('admin.profile_save') }}</button>
               </div>
             </form>
           </div>

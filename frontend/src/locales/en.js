@@ -1070,6 +1070,8 @@ export default {
     profile_username: 'Username',
     profile_email: 'Email',
     profile_password: 'Password',
+    profile_current_password: 'Current password',
+    profile_new_password: 'New password',
     profile_save: 'Save',
     // FAQs
     faqs_title: 'FAQs',

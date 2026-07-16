@@ -925,6 +925,8 @@ export default {
     profile_username: 'Username',
     profile_email: 'Email',
     profile_password: 'Senha',
+    profile_current_password: 'Senha actual',
+    profile_new_password: 'Nova senha',
     profile_save: 'Guardar',
     profile_role_admin: 'Administrador',
     profile_current_suffix: '· Atual',
