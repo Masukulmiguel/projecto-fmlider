@@ -50,6 +50,7 @@
             <span :class="getApprovalBadge(user).class">{{ getApprovalBadge(user).text }}</span>
             <span class="status-dot" :class="user.status === 1 ? 'active' : 'inactive'"></span>
             <div class="action-btns">
+              <button class="action-btn reset-pwd" title="Repor Senha" @click="openResetPassword(user)"><i class="bi bi-key"></i></button>
               <button class="action-btn edit" :title="t('common.edit')" @click="openEdit(user)"><i class="bi bi-pencil"></i></button>
               <button class="action-btn delete" :title="t('common.delete')" @click="openDelete(user)"><i class="bi bi-trash3"></i></button>
             </div>
@@ -620,6 +621,8 @@ onBeforeUnmount(() => {
 .action-btn.edit:hover { background: #eff6ff; }
 .action-btn.delete { color: #ef4444; }
 .action-btn.delete:hover { background: #fef2f2; }
+.action-btn.reset-pwd { color: #f59e0b; }
+.action-btn.reset-pwd:hover { background: #fef3c7; }
 .delete-icon { width: 56px; height: 56px; border-radius: 50%; background: #fef2f2; color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto; }
 .empty-state { text-align: center; padding: 4rem 2rem; color: #94a3b8; }
 .empty-state i { font-size: 3rem; margin-bottom: 1rem; display: block; }

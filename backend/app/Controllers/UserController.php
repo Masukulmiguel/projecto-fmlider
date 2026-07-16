@@ -209,6 +209,8 @@ class UserController
         if ($newPassword && strlen($newPassword) >= 6) {
             $hash = password_hash($newPassword, PASSWORD_BCRYPT);
             $sets[] = 'password = ?'; $types .= 's'; $values[] = $hash;
+            $sets[] = 'password_must_change = 1';
+            $sets[] = 'password_changed_at = NULL';
         }
 
         $sql = 'UPDATE users SET ' . implode(', ', $sets) . ' WHERE id = ?';
@@ -404,9 +406,9 @@ class UserController
         if (!$user) Response::error('Utilizador não encontrado', 404);
         if ($user['role'] === 'admin') Response::error('Não é possível repor senha de um administrador', 403);
 
-        $chars = 'abcdefghijkmnpqrstuvwxyz23456789';
+        $chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
         $newPassword = '';
-        for ($i = 0; $i < 8; $i++) {
+        for ($i = 0; $i < 12; $i++) {
             $newPassword .= $chars[random_int(0, strlen($chars) - 1)];
         }
 
@@ -418,7 +420,7 @@ class UserController
 
         MailHelper::sendPasswordResetEmail($user['email'], $user['name'], $newPassword);
 
-        Response::success([], 'Senha reposta e email enviado');
+        Response::success(['password' => $newPassword], 'Senha reposta e email enviado');
     }
 
     private function requireAdmin()

@@ -52,6 +52,9 @@
         </div>
 
         <div class="employee-actions">
+          <button class="btn-icon btn-reset-pwd" @click="openResetPassword(f)" :title="'Repor Senha'">
+            <i class="bi bi-key"></i>
+          </button>
           <button class="btn-icon btn-edit" @click="openForm(f)" :title="t('admin.employees_action_edit')">
             <i class="bi bi-pencil-square"></i>
           </button>
@@ -219,6 +222,55 @@
               <span v-if="deleting" class="spinner-border spinner-border-sm me-2"></span>
               <i class="bi bi-trash3 me-1"></i> Eliminar
             </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div v-if="showResetPwdModal" class="modal-backdrop-custom" @click.self="closeResetPasswordModal">
+      <div class="modal-dialog-centered-custom">
+        <div class="modal-box modal-sm">
+          <div class="modal-box-header">
+            <h5>
+              <i class="bi bi-key-fill me-2"></i>Repor Senha
+            </h5>
+            <button type="button" class="btn-close-modal" @click="closeResetPasswordModal">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+          <div class="modal-box-body">
+            <p v-if="!resetPwdResult" class="text-muted mb-3">
+              Vai gerar uma nova senha para <strong>{{ resetPwdTarget?.name }}</strong>.
+            </p>
+
+            <div v-if="!resetPwdResult && !resetPwdLoading" class="text-center py-3">
+              <button class="btn btn-warning btn-lg" @click="confirmResetPassword">
+                <i class="bi bi-key-fill me-2"></i>Gerar Nova Senha
+              </button>
+            </div>
+
+            <div v-if="resetPwdLoading" class="text-center py-4">
+              <div class="spinner-border text-primary" role="status"></div>
+              <p class="mt-2 text-muted">A gerar nova senha...</p>
+            </div>
+
+            <div v-if="resetPwdResult" class="alert alert-success mb-0">
+              <h6 class="alert-heading mb-2"><i class="bi bi-check-circle-fill me-1"></i>Senha gerada com sucesso!</h6>
+              <p class="mb-2">Nova senha para <strong>{{ resetPwdTarget?.name }}</strong>:</p>
+              <div class="d-flex align-items-center gap-2 p-2 bg-light rounded">
+                <code class="fs-5 flex-grow-1 text-center" style="letter-spacing:2px;font-family:monospace;">{{ resetPwdResult }}</code>
+                <button class="btn btn-sm btn-outline-primary" @click="copyResetPassword" title="Copiar">
+                  <i class="bi bi-clipboard"></i>
+                </button>
+              </div>
+              <small class="text-muted d-block mt-2">O funcionário deverá alterar a senha após iniciar sessão.</small>
+            </div>
+
+            <div v-if="resetPwdError" class="alert alert-danger py-2 mb-0">{{ resetPwdError }}</div>
+          </div>
+          <div class="modal-box-footer">
+            <button type="button" class="btn btn-outline-secondary" @click="closeResetPasswordModal">{{ resetPwdResult ? 'Fechar' : t('common.cancel') }}</button>
           </div>
         </div>
       </div>
@@ -613,6 +665,12 @@ const handleSubmit = async () => {
 const showDeleteModal = ref(false)
 const deleteTarget = ref(null)
 
+const showResetPwdModal = ref(false)
+const resetPwdTarget = ref(null)
+const resetPwdLoading = ref(false)
+const resetPwdResult = ref(null)
+const resetPwdError = ref('')
+
 const openDeleteModal = (f) => {
   deleteTarget.value = f
   showDeleteModal.value = true
@@ -639,6 +697,70 @@ const handleDelete = async () => {
   } finally {
     deleting.value = false
   }
+}
+
+const openResetPassword = (f) => {
+  resetPwdTarget.value = f
+  resetPwdResult.value = null
+  resetPwdError.value = ''
+  showResetPwdModal.value = true
+  document.body.style.overflow = 'hidden'
+}
+
+const closeResetPasswordModal = () => {
+  showResetPwdModal.value = false
+  resetPwdTarget.value = null
+  resetPwdResult.value = null
+  resetPwdError.value = ''
+  document.body.style.overflow = ''
+}
+
+const generatePassword = () => {
+  const chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  let pwd = ''
+  for (let i = 0; i < 12; i++) {
+    pwd += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return pwd
+}
+
+const confirmResetPassword = async () => {
+  if (!resetPwdTarget.value) return
+  resetPwdLoading.value = true
+  resetPwdError.value = ''
+  resetPwdResult.value = null
+
+  const newPassword = generatePassword()
+
+  try {
+    if (resetPwdTarget.value.auth_id) {
+      const { error: authError } = await supabase.auth.admin.updateUserById(
+        resetPwdTarget.value.auth_id,
+        { password: newPassword }
+      )
+      if (authError) throw new Error('Erro ao atualizar senha no Auth: ' + authError.message)
+    }
+
+    const hash = 'supabase_auth_managed'
+    const { error: dbError } = await supabase.from('users').update({
+      password: hash,
+      password_must_change: true,
+      password_changed_at: null
+    }).eq('id', resetPwdTarget.value.id)
+    if (dbError) throw dbError
+
+    resetPwdResult.value = newPassword
+    toast.success('Senha reposta com sucesso!')
+    await fetchList()
+  } catch (e) {
+    resetPwdError.value = e.message || 'Erro ao repor senha'
+  } finally {
+    resetPwdLoading.value = false
+  }
+}
+
+const copyResetPassword = () => {
+  if (resetPwdResult.value) navigator.clipboard.writeText(resetPwdResult.value)
 }
 
 onMounted(() => {
@@ -857,6 +979,16 @@ onMounted(() => {
 .btn-delete:hover {
   background: #fee2e2;
   color: #dc2626;
+}
+
+.btn-reset-pwd {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.btn-reset-pwd:hover {
+  background: #fde68a;
+  color: #b45309;
 }
 
 /* Modals */
