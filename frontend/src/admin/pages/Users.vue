@@ -274,6 +274,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { Modal } from 'bootstrap'
 import { useI18n } from '@/composables/useI18n'
 import { useAuthStore } from '@/stores/authStore'
@@ -536,24 +537,32 @@ async function confirmResetPassword() {
   resetPwdLoading.value = true
   resetPwdError.value = ''
   resetPwdResult.value = null
+
+  const chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  let newPassword = ''
+  for (let i = 0; i < 12; i++) {
+    newPassword += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+
   try {
-    const resetUrl = API_URL ? `${API_URL}/admin/users/${resetPwdUser.value.id}/reset-password` : `/api/admin/users/${resetPwdUser.value.id}/reset-password`
-    const res = await fetch(resetUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authStore.token}`
-      }
-    })
-    const data = await res.json()
-    if (res.ok && data.success) {
-      resetPwdResult.value = data.data.password
-      await loadUsers()
-    } else {
-      resetPwdError.value = data.message || 'Erro ao repor senha'
+    if (resetPwdUser.value.auth_id) {
+      const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(
+        resetPwdUser.value.auth_id,
+        { password: newPassword }
+      )
+      if (authError) throw new Error('Auth: ' + authError.message)
     }
-  } catch {
-    resetPwdError.value = 'Erro de conexão'
+
+    const { error: dbError } = await supabase.from('users').update({
+      password_must_change: true,
+      password_changed_at: null
+    }).eq('id', resetPwdUser.value.id)
+    if (dbError) throw dbError
+
+    resetPwdResult.value = newPassword
+    await loadUsers()
+  } catch (err) {
+    resetPwdError.value = err.message || 'Erro ao repor senha'
   } finally {
     resetPwdLoading.value = false
   }

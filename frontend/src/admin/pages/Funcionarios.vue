@@ -282,14 +282,12 @@
 import { ref, reactive, onMounted } from 'vue'
 import { Modal } from 'bootstrap'
 import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { useI18n } from '@/composables/useI18n'
 import { useToast } from '@/composables/useToast'
-import { useAuthStore } from '@/stores/authStore'
 
 const { t } = useI18n()
 const toast = useToast()
-const authStore = useAuthStore()
-const API_URL = import.meta.env.VITE_API_URL || ''
 
 const items = ref([])
 const loading = ref(false)
@@ -724,24 +722,32 @@ const confirmResetPassword = async () => {
   resetPwdError.value = ''
   resetPwdResult.value = null
 
+  const chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  let newPassword = ''
+  for (let i = 0; i < 12; i++) {
+    newPassword += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+
   try {
-    const resetUrl = API_URL ? `${API_URL}/admin/users/${resetPwdTarget.value.id}/reset-password` : `/api/admin/users/${resetPwdTarget.value.id}/reset-password`
-    const res = await fetch(resetUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authStore.token}`
-      }
-    })
-    const data = await res.json()
-    if (res.ok && data.success) {
-      resetPwdResult.value = data.data.password
-      await fetchList()
-    } else {
-      resetPwdError.value = data.message || 'Erro ao repor senha'
+    if (resetPwdTarget.value.auth_id) {
+      const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(
+        resetPwdTarget.value.auth_id,
+        { password: newPassword }
+      )
+      if (authError) throw new Error('Auth: ' + authError.message)
     }
+
+    const { error: dbError } = await supabase.from('users').update({
+      password_must_change: true,
+      password_changed_at: null
+    }).eq('id', resetPwdTarget.value.id)
+    if (dbError) throw dbError
+
+    resetPwdResult.value = newPassword
+    toast.success('Senha reposta com sucesso!')
+    await fetchList()
   } catch (e) {
-    resetPwdError.value = e.message || 'Erro de conexão'
+    resetPwdError.value = e.message || 'Erro ao repor senha'
   } finally {
     resetPwdLoading.value = false
   }
