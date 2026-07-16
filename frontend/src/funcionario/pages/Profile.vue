@@ -77,33 +77,6 @@
             </form>
           </div>
         </div>
-
-        <div class="card mt-3">
-          <div class="card-header"><h6 class="mb-0">{{ t('funcionario.profile_change_password') }}</h6></div>
-          <div class="card-body">
-            <form @submit.prevent="changePassword">
-              <div v-if="passwordError" class="alert alert-danger">{{ passwordError }}</div>
-              <div v-if="passwordSuccess" class="alert alert-success">{{ passwordSuccess }}</div>
-              <div class="row g-3">
-                <div class="col-md-4">
-                  <label class="form-label">{{ t('funcionario.profile_current_password') }}</label>
-                  <input v-model="pwd.current" type="password" class="form-control" required>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label">{{ t('funcionario.profile_new_password') }}</label>
-                  <input v-model="pwd.new" type="password" class="form-control" minlength="6" required>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label">{{ t('funcionario.profile_confirm_password') }}</label>
-                  <input v-model="pwd.confirm" type="password" class="form-control" minlength="6" required>
-                </div>
-              </div>
-              <div class="mt-3 d-flex justify-content-end">
-                <button class="btn btn-outline-primary" :disabled="changingPwd">{{ t('funcionario.profile_change_password') }}</button>
-              </div>
-            </form>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -120,14 +93,10 @@ const { t } = useI18n()
 const { confirm } = useConfirm()
 const authStore = useAuthStore()
 const form = reactive({ name: '', phone: '' })
-const pwd = reactive({ current: '', new: '', confirm: '' })
 const saving = ref(false)
-const changingPwd = ref(false)
 const uploadingPhoto = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
-const passwordError = ref('')
-const passwordSuccess = ref('')
 const photoMessage = ref('')
 const photoError = ref(false)
 
@@ -145,23 +114,6 @@ const save = async () => {
     errorMessage.value = e.message || t('funcionario.profile_error_saving')
   } finally {
     saving.value = false
-  }
-}
-
-const changePassword = async () => {
-  passwordError.value = ''
-  passwordSuccess.value = ''
-  if (pwd.new !== pwd.confirm) { passwordError.value = t('funcionario.profile_passwords_mismatch'); return }
-  changingPwd.value = true
-  try {
-    const result = await authStore.changePassword({ new_password: pwd.new })
-    if (!result.success) throw new Error(result.error)
-    passwordSuccess.value = t('funcionario.profile_password_changed')
-    pwd.current = ''; pwd.new = ''; pwd.confirm = ''
-  } catch (e) {
-    passwordError.value = e.message || t('funcionario.profile_error_changing_password')
-  } finally {
-    changingPwd.value = false
   }
 }
 
