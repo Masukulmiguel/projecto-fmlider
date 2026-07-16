@@ -1,5 +1,9 @@
 <?php
 
+ob_start();
+error_reporting(E_ERROR | E_PARSE);
+ini_set('display_errors', '0');
+
 $allowedOrigins = ['https://fmlider.co.ao', 'https://fmlider-66.vercel.app', 'https://frontend-d79z59ydf-fmlider-projects.vercel.app', 'https://projecto-fmlider.vercel.app'];
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($origin, $allowedOrigins)) {

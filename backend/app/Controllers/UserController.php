@@ -418,13 +418,18 @@ class UserController
         $stmt->execute();
         $stmt->close();
 
-        if (!empty($user['auth_id'])) {
-            $this->updateSupabasePassword($user['auth_id'], $newPassword);
+        $emailSent = false;
+        try {
+            if (!empty($user['auth_id'])) {
+                $this->updateSupabasePassword($user['auth_id'], $newPassword);
+            }
+            $emailSent = MailHelper::sendPasswordResetEmail($user['email'], $user['name'], $newPassword);
+        } catch (\Throwable $e) {
+            error_log('resetPassword warning: ' . $e->getMessage());
         }
 
-        MailHelper::sendPasswordResetEmail($user['email'], $user['name'], $newPassword);
-
-        Response::success(['password' => $newPassword], 'Senha reposta e email enviado');
+        $msg = $emailSent ? 'Senha reposta e email enviado' : 'Senha reposta (email não enviado)';
+        Response::success(['password' => $newPassword], $msg);
     }
 
     private function updateSupabasePassword($authId, $password)
