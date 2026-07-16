@@ -21,14 +21,14 @@ const ipLookup = async () => {
     const r = await fetch('https://ipapi.co/json/')
     const data = await r.json()
     if (data && !data.error) {
-      return { country: data.country_name, city: data.city, region: data.region }
+      return { ip: data.ip, country: data.country_name, city: data.city, region: data.region }
     }
   } catch (e) { /* silent */ }
   try {
     const r = await fetch('https://ipwho.is/')
     const data = await r.json()
     if (data && data.success !== false) {
-      return { country: data.country, city: data.city, region: data.region }
+      return { ip: data.ip, country: data.country, city: data.city, region: data.region }
     }
   } catch (e) { /* silent */ }
   return null
@@ -103,7 +103,7 @@ export const trackVisitor = async () => {
 
     await supabase.from('visitors').insert({
       session_id: sessionId,
-      ip_address: null,
+      ip_address: geoInfo?.ip || null,
       country: geoInfo?.country || null,
       city: geoInfo?.city || null,
       region: geoInfo?.region || null,
