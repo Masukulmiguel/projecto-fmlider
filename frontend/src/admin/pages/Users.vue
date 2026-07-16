@@ -42,7 +42,7 @@
           <div class="list-row-center">
             <div class="list-meta">
               <span class="meta-item"><i class="bi bi-telephone me-1 text-muted"></i>{{ user.phone || '—' }}</span>
-              <span class="meta-item"><i class="bi bi-clock me-1 text-muted"></i>{{ formatDate(user.last_login) || '—' }}</span>
+              <span class="meta-item"><i class="bi bi-clock me-1 text-muted"></i>{{ formatDate(user.created_at) }}</span>
             </div>
           </div>
 
