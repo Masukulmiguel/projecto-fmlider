@@ -725,7 +725,8 @@ const confirmResetPassword = async () => {
   resetPwdResult.value = null
 
   try {
-    const res = await fetch(`${API_URL}/admin/users/${resetPwdTarget.value.id}/reset-password`, {
+    const resetUrl = API_URL ? `${API_URL}/admin/users/${resetPwdTarget.value.id}/reset-password` : `/api/admin/users/${resetPwdTarget.value.id}/reset-password`
+    const res = await fetch(resetUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
