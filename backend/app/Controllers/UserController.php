@@ -397,7 +397,7 @@ class UserController
         $this->requireAdmin();
         $db = Database::connection();
 
-        $stmt = $db->prepare('SELECT name, email, role FROM users WHERE id = ? LIMIT 1');
+        $stmt = $db->prepare('SELECT name, email, role, auth_id FROM users WHERE id = ? LIMIT 1');
         $stmt->bind_param('i', $id);
         $stmt->execute();
         $user = $stmt->get_result()->fetch_assoc();
@@ -418,9 +418,45 @@ class UserController
         $stmt->execute();
         $stmt->close();
 
+        if (!empty($user['auth_id'])) {
+            $this->updateSupabasePassword($user['auth_id'], $newPassword);
+        }
+
         MailHelper::sendPasswordResetEmail($user['email'], $user['name'], $newPassword);
 
         Response::success(['password' => $newPassword], 'Senha reposta e email enviado');
+    }
+
+    private function updateSupabasePassword($authId, $password)
+    {
+        $supabaseUrl = getenv('SUPABASE_URL');
+        $serviceKey = getenv('SUPABASE_SERVICE_ROLE_KEY');
+        if (!$supabaseUrl || !$serviceKey || !$authId) return false;
+
+        $url = rtrim($supabaseUrl, '/') . '/auth/v1/admin/users/' . $authId;
+        $payload = json_encode(['password' => $password]);
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST => 'PUT',
+            CURLOPT_POSTFIELDS => $payload,
+            CURLOPT_HTTPHEADER => [
+                'Authorization: Bearer ' . $serviceKey,
+                'apikey: ' . $serviceKey,
+                'Content-Type: application/json',
+            ],
+            CURLOPT_TIMEOUT => 15,
+        ]);
+        $result = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200) {
+            error_log("Supabase password update failed for auth_id {$authId}: HTTP {$httpCode} - {$result}");
+            return false;
+        }
+        return true;
     }
 
     private function requireAdmin()
