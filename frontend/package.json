@@ -16,6 +16,7 @@
     "dompurify": "^3.4.11",
     "pdfmake": "^0.3.11",
     "pinia": "^2.1.0",
+    "pptxgenjs": "^4.0.1",
     "vue": "^3.4.0",
     "vue-chartjs": "^5.3.3",
     "vue-router": "^4.2.0",

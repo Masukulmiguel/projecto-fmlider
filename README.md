@@ -288,7 +288,7 @@ cd frontend && npm install
 
 © 2025 FMLider Transitário & Logística. Todos os direitos reservados.
 
-Desenvolvido com ❤️ por **Masukulu Miguel** para o projecto **seefast-project**.
+Desenvolvido por  **Masukulu Miguel** para o projecto **seefast-project**.
 
 ---
 
